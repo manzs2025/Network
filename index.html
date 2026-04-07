@@ -616,6 +616,122 @@
         </div>
 
         <!-- ==========================================
+             الصفحة 3: التغليف (Encapsulation)
+        =========================================== -->
+        <div id="encap-page" class="page-section hidden">
+            <section class="py-16 bg-white">
+                <div class="container mx-auto px-6 max-w-6xl">
+                    <div class="mb-12">
+                        <h2 class="text-3xl font-bold text-primary mb-4 border-r-4 border-secondary pr-3">عملية التغليف وفك التغليف</h2>
+                        <p class="text-slate-600 mb-8 text-lg">يشرح هذا القسم العمليتين المتعاكستين اللتين تحدثان للبيانات. عند الإرسال، يتم "تغليف" البيانات بإضافة ترويسات (Headers) في كل طبقة. وعند الاستقبال، يتم إزالة هذه الترويسات تدريجياً.</p>
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-12 items-start">
+                        <!-- المُرسل -->
+                        <div class="bg-slate-50 rounded-3xl p-6 md:p-8 shadow-lg border border-slate-200 relative">
+                            <div class="absolute -top-6 right-8 bg-emerald-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
+                                <i class="fas fa-arrow-down"></i> التغليف (المرسل)
+                            </div>
+                            <div class="mt-4 space-y-4">
+                                <div class="flex flex-col items-center">
+                                    <span class="text-sm font-bold text-slate-400 mb-2">الطبقات 5, 6, 7</span>
+                                    <div class="w-full bg-white border-2 border-slate-300 border-dashed rounded-xl p-4 flex justify-center shadow-sm">
+                                        <span class="font-bold text-slate-700">البيانات الأصلية (DATA)</span>
+                                    </div>
+                                    <i class="fas fa-arrow-down text-emerald-400 mt-2 text-xl"></i>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <span class="text-sm font-bold text-slate-400 mb-2">الطبقة 4 (Segment)</span>
+                                    <div class="w-full flex shadow-sm rounded-xl overflow-hidden">
+                                        <div class="bg-layer4 text-white px-4 py-3 text-sm font-bold flex items-center justify-center">L4 Header</div>
+                                        <div class="bg-white border-y border-l border-slate-200 px-4 py-3 text-sm font-bold flex-1 text-center">DATA</div>
+                                    </div>
+                                    <i class="fas fa-arrow-down text-emerald-400 mt-2 text-xl"></i>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <span class="text-sm font-bold text-slate-400 mb-2">الطبقة 3 (Packet)</span>
+                                    <div class="w-full flex shadow-sm rounded-xl overflow-hidden">
+                                        <div class="bg-layer3 text-white px-4 py-3 text-sm font-bold flex items-center justify-center">L3 IP</div>
+                                        <div class="bg-layer4 text-white px-2 py-3 text-xs font-bold flex items-center justify-center opacity-90">L4</div>
+                                        <div class="bg-white border-y border-l border-slate-200 px-4 py-3 text-sm font-bold flex-1 text-center">DATA</div>
+                                    </div>
+                                    <i class="fas fa-arrow-down text-emerald-400 mt-2 text-xl"></i>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <span class="text-sm font-bold text-slate-400 mb-2">الطبقة 2 (Frame)</span>
+                                    <div class="w-full flex shadow-sm rounded-xl overflow-hidden">
+                                        <div class="bg-layer2 text-white px-3 py-3 text-xs font-bold flex items-center justify-center">L2 MAC</div>
+                                        <div class="bg-layer3 text-white px-2 py-3 text-xs font-bold flex items-center justify-center opacity-90">L3</div>
+                                        <div class="bg-layer4 text-white px-2 py-3 text-xs font-bold flex items-center justify-center opacity-80">L4</div>
+                                        <div class="bg-white border-y border-slate-200 px-2 py-3 text-xs font-bold flex-1 text-center">DATA</div>
+                                        <div class="bg-indigo-900 text-white px-3 py-3 text-xs font-bold flex items-center justify-center">Trailer</div>
+                                    </div>
+                                    <i class="fas fa-arrow-down text-emerald-400 mt-2 text-xl"></i>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <span class="text-sm font-bold text-slate-400 mb-2">الطبقة 1 (Bits)</span>
+                                    <div class="w-full bg-layer1 text-white p-4 rounded-xl text-center shadow-md font-mono tracking-widest text-lg">
+                                        01101001 01100010
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- المُستقبل -->
+                        <div class="bg-slate-50 rounded-3xl p-6 md:p-8 shadow-lg border border-slate-200 relative mt-12 lg:mt-0">
+                            <div class="absolute -top-6 left-8 bg-blue-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
+                                <i class="fas fa-arrow-up"></i> فك التغليف (المستقبل)
+                            </div>
+                            <div class="mt-4 space-y-4 flex flex-col-reverse">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-arrow-up text-blue-400 mb-2 text-xl"></i>
+                                    <span class="text-sm font-bold text-slate-400 mb-2">قراءة البيانات</span>
+                                    <div class="w-full bg-emerald-50 border-2 border-emerald-400 rounded-xl p-4 flex justify-center shadow-sm">
+                                        <span class="font-bold text-emerald-700">البيانات (DATA) وصلت بنجاح</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-arrow-up text-blue-400 mb-2 text-xl"></i>
+                                    <span class="text-sm font-bold text-slate-400 mb-2">إزالة L4 Header</span>
+                                    <div class="w-full flex shadow-sm rounded-xl overflow-hidden opacity-60">
+                                        <div class="bg-slate-300 text-slate-500 px-4 py-3 text-sm font-bold line-through flex items-center justify-center">L4 Head</div>
+                                        <div class="bg-white border-y border-l border-slate-200 px-4 py-3 text-sm font-bold flex-1 text-center">DATA</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-arrow-up text-blue-400 mb-2 text-xl"></i>
+                                    <span class="text-sm font-bold text-slate-400 mb-2">إزالة L3 IP</span>
+                                    <div class="w-full flex shadow-sm rounded-xl overflow-hidden opacity-60">
+                                        <div class="bg-slate-300 text-slate-500 px-4 py-3 text-sm font-bold line-through flex items-center justify-center">L3 IP</div>
+                                        <div class="bg-layer4 text-white px-2 py-3 text-xs font-bold flex items-center justify-center opacity-90">L4</div>
+                                        <div class="bg-white border-y border-l border-slate-200 px-4 py-3 text-sm font-bold flex-1 text-center">DATA</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-arrow-up text-blue-400 mb-2 text-xl"></i>
+                                    <span class="text-sm font-bold text-slate-400 mb-2">إزالة L2 MAC & Trailer</span>
+                                    <div class="w-full flex shadow-sm rounded-xl overflow-hidden opacity-60">
+                                        <div class="bg-slate-300 text-slate-500 px-3 py-3 text-xs font-bold line-through flex items-center justify-center">L2 MAC</div>
+                                        <div class="bg-layer3 text-white px-2 py-3 text-xs font-bold flex items-center justify-center opacity-90">L3</div>
+                                        <div class="bg-layer4 text-white px-2 py-3 text-xs font-bold flex items-center justify-center opacity-80">L4</div>
+                                        <div class="bg-white border-y border-slate-200 px-2 py-3 text-xs font-bold flex-1 text-center">DATA</div>
+                                        <div class="bg-slate-300 text-slate-500 px-3 py-3 text-xs font-bold line-through flex items-center justify-center">Trailer</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <span class="text-sm font-bold text-slate-400 mb-2">استقبال الإشارات</span>
+                                    <div class="w-full bg-slate-800 text-blue-300 p-4 rounded-xl text-center shadow-md font-mono tracking-widest text-lg">
+                                        01101001 01100010
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==========================================
              الصفحة 4: المقارنات الهامة
         =========================================== -->
         <div id="comp-page" class="page-section hidden">
