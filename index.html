@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أكاديمية الشبكات الشاملة</title>
     
+    <!-- الخطوط -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- مكتبة Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- مكتبة الأيقونات FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- إعدادات الألوان المخصصة -->
     <script>
         tailwind.config = {
             theme: {
@@ -27,9 +32,10 @@
         }
     </script>
 
+    <!-- التأثيرات الحركية (CSS) -->
     <style>
         .layer-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease; }
-        .layer-card.active .layer-content { max-height: 1000px; padding-top: 1.5rem; padding-bottom: 1.5rem; border-top: 1px solid #e2e8f0; }
+        .layer-card.active .layer-content { max-height: 1200px; padding-top: 1.5rem; padding-bottom: 1.5rem; border-top: 1px solid #e2e8f0; }
         .layer-card { transition: transform 0.2s, box-shadow 0.2s; }
         .layer-card:hover { transform: translateX(-5px); }
         .gradient-text { background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -56,16 +62,7 @@
             </div>
             
             <!-- قوائم الديسكتوب -->
-            <!-- 1. قوائم قسم OSI -->
-            <div id="osi-nav-links" class="hidden gap-6 font-semibold items-center nav-group-desktop">
-                <button onclick="goHome()" class="text-slate-300 hover:text-white transition ml-4 border-l border-slate-600 pl-4"><i class="fas fa-home"></i> الرئيسية</button>
-                <button onclick="showPage('osi-intro-page', this)" class="nav-link osi-nav text-secondary border-b-2 border-secondary pb-1 transition outline-none">مقدمة</button>
-                <button onclick="showPage('osi-layers-page', this)" class="nav-link osi-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">طبقات OSI</button>
-                <button onclick="showPage('osi-encap-page', this)" class="nav-link osi-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">التغليف</button>
-                <button onclick="showPage('osi-comp-page', this)" class="nav-link osi-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">مقارنات</button>
-            </div>
-
-            <!-- 2. قوائم قسم أساسيات الشبكات -->
+            <!-- 1. قوائم قسم مبادئ الشبكات -->
             <div id="networks-nav-links" class="hidden gap-6 font-semibold items-center nav-group-desktop">
                 <button onclick="goHome()" class="text-slate-300 hover:text-white transition ml-4 border-l border-slate-600 pl-4"><i class="fas fa-home"></i> الرئيسية</button>
                 <button onclick="showPage('net-intro-page', this)" class="nav-link net-nav text-secondary border-b-2 border-secondary pb-1 transition outline-none">مفهوم الشبكة</button>
@@ -73,12 +70,21 @@
                 <button onclick="showPage('net-types-page', this)" class="nav-link net-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">أنواع الشبكات</button>
             </div>
 
-            <!-- 3. قوائم قسم الأمان في الشبكات -->
+            <!-- 2. قوائم قسم الأمان في الشبكات -->
             <div id="security-nav-links" class="hidden gap-6 font-semibold items-center nav-group-desktop">
                 <button onclick="goHome()" class="text-slate-300 hover:text-white transition ml-4 border-l border-slate-600 pl-4"><i class="fas fa-home"></i> الرئيسية</button>
                 <button onclick="showPage('sec-intro-page', this)" class="nav-link sec-nav text-secondary border-b-2 border-secondary pb-1 transition outline-none">مفهوم الأمان</button>
                 <button onclick="showPage('sec-threats-page', this)" class="nav-link sec-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">التهديدات</button>
                 <button onclick="showPage('sec-solutions-page', this)" class="nav-link sec-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">الحلول الأمنية</button>
+            </div>
+
+            <!-- 3. قوائم قسم OSI -->
+            <div id="osi-nav-links" class="hidden gap-6 font-semibold items-center nav-group-desktop">
+                <button onclick="goHome()" class="text-slate-300 hover:text-white transition ml-4 border-l border-slate-600 pl-4"><i class="fas fa-home"></i> الرئيسية</button>
+                <button onclick="showPage('osi-intro-page', this)" class="nav-link osi-nav text-secondary border-b-2 border-secondary pb-1 transition outline-none">مقدمة</button>
+                <button onclick="showPage('osi-layers-page', this)" class="nav-link osi-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">طبقات OSI</button>
+                <button onclick="showPage('osi-encap-page', this)" class="nav-link osi-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">التغليف</button>
+                <button onclick="showPage('osi-comp-page', this)" class="nav-link osi-nav hover:text-secondary pb-1 transition outline-none border-b-2 border-transparent">مقارنات</button>
             </div>
 
             <!-- 4. زر العودة للأقسام غير المكتملة -->
@@ -89,11 +95,10 @@
             <!-- قوائم الجوال -->
             <div id="mobile-nav-container" class="md:hidden hidden flex gap-2 items-center">
                 <button onclick="goHome()" class="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 outline-none"><i class="fas fa-home"></i></button>
-                <select id="mobile-select" onchange="showPage(this.value, null)" class="bg-slate-800 text-white border border-slate-700 rounded p-2 outline-none text-sm w-36">
-                    <!-- Options injected via JS -->
-                </select>
+                <select id="mobile-select" onchange="showPage(this.value, null)" class="bg-slate-800 text-white border border-slate-700 rounded p-2 outline-none text-sm w-36"></select>
             </div>
             
+            <!-- زر الرئيسية للموبايل للأقسام الفارغة -->
             <div id="general-mobile-nav" class="hidden md:hidden">
                 <button onclick="goHome()" class="bg-slate-800 text-white border border-slate-700 rounded px-4 py-2 outline-none text-sm"><i class="fas fa-home ml-1"></i> الرئيسية</button>
             </div>
@@ -142,14 +147,14 @@
                         <p class="text-slate-500 text-sm leading-relaxed">الطبقات السبع، التغليف، مقارنات بروتوكولات النقل والأجهزة.</p>
                     </div>
 
-                    <!-- البطاقة 4 -->
+                    <!-- البطاقة 4: كيابل الشبكات -->
                     <div onclick="openSection('section-cables')" class="bg-white rounded-2xl shadow-md hover:shadow-xl p-8 border-t-4 border-purple-500 cursor-pointer transform hover:-translate-y-2 transition duration-300 group">
                         <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition"><i class="fas fa-ethernet"></i></div>
                         <h2 class="text-2xl font-bold text-slate-800 mb-3">كيابل الشبكات</h2>
                         <p class="text-slate-500 text-sm leading-relaxed">الألياف الضوئية، النحاسية، وطرق التأريج القياسية.</p>
                     </div>
 
-                    <!-- البطاقة 5 -->
+                    <!-- البطاقة 5: بروتوكول IP -->
                     <div onclick="openSection('section-ip')" class="bg-white rounded-2xl shadow-md hover:shadow-xl p-8 border-t-4 border-orange-500 cursor-pointer transform hover:-translate-y-2 transition duration-300 group md:col-span-2 lg:col-span-1">
                         <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition"><i class="fas fa-map-location-dot"></i></div>
                         <h2 class="text-2xl font-bold text-slate-800 mb-3">بروتوكول IP (v4, v6)</h2>
@@ -161,7 +166,7 @@
         </div>
 
         <!-- ==========================================
-             القسم الأول: مبادئ شبكات الحاسب
+             القسم الأول: مبادئ شبكات الحاسب (مكتمل)
         =========================================== -->
         <div id="section-networks" class="main-section hidden">
             <!-- صفحة 1: المفهوم والفوائد -->
@@ -171,6 +176,10 @@
                         <span class="bg-white/20 text-blue-100 py-1 px-3 rounded-full text-sm font-bold mb-4 inline-block">القسم الأول</span>
                         <h1 class="text-3xl md:text-5xl font-bold mb-4">مبادئ شبكات الحاسب</h1>
                         <p class="text-lg text-blue-100 max-w-2xl mx-auto mb-8">تعرف على عالم الشبكات، مم يتكون، وما هي الفوائد التي جعلته العصب الرئيسي للتقنية الحديثة.</p>
+                        <button onclick="showPage('net-comp-page', document.querySelectorAll('.net-nav')[1])" class="bg-white text-blue-700 hover:bg-blue-50 font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 inline-flex items-center gap-2">
+                            <span>مكونات الشبكة</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
                     </div>
                 </header>
 
@@ -232,7 +241,6 @@
                         </div>
 
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <!-- المكون الأول -->
                             <div class="bg-white rounded-3xl shadow-md border-t-8 border-blue-500 overflow-hidden hover-scale relative">
                                 <div class="absolute top-4 right-4 bg-blue-100 text-blue-600 font-black w-8 h-8 rounded-full flex items-center justify-center">1</div>
                                 <div class="p-8 pt-12 text-center border-b border-slate-100">
@@ -250,7 +258,6 @@
                                 </div>
                             </div>
 
-                            <!-- المكون الثاني -->
                             <div class="bg-white rounded-3xl shadow-md border-t-8 border-indigo-500 overflow-hidden hover-scale relative">
                                 <div class="absolute top-4 right-4 bg-indigo-100 text-indigo-600 font-black w-8 h-8 rounded-full flex items-center justify-center">2</div>
                                 <div class="p-8 pt-12 text-center border-b border-slate-100">
@@ -269,7 +276,6 @@
                                 </div>
                             </div>
 
-                            <!-- المكون الثالث -->
                             <div class="bg-white rounded-3xl shadow-md border-t-8 border-emerald-500 overflow-hidden hover-scale relative">
                                 <div class="absolute top-4 right-4 bg-emerald-100 text-emerald-600 font-black w-8 h-8 rounded-full flex items-center justify-center">3</div>
                                 <div class="p-8 pt-12 text-center border-b border-slate-100">
@@ -303,8 +309,6 @@
                             </div>
 
                             <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-blue-200 before:via-blue-400 before:to-blue-600 max-w-5xl mx-auto">
-                                
-                                <!-- PAN -->
                                 <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                                     <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-blue-200 text-blue-700 font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10"><i class="fas fa-user"></i></div>
                                     <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover-scale">
@@ -316,7 +320,6 @@
                                     </div>
                                 </div>
 
-                                <!-- LAN -->
                                 <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                                     <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-blue-300 text-blue-800 font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10"><i class="fas fa-building"></i></div>
                                     <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover-scale">
@@ -328,7 +331,6 @@
                                     </div>
                                 </div>
 
-                                <!-- WLAN -->
                                 <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                                     <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-blue-400 text-white font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10"><i class="fas fa-wifi"></i></div>
                                     <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover-scale">
@@ -340,7 +342,6 @@
                                     </div>
                                 </div>
 
-                                <!-- MAN -->
                                 <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                                     <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-blue-500 text-white font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10"><i class="fas fa-city"></i></div>
                                     <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover-scale">
@@ -352,7 +353,6 @@
                                     </div>
                                 </div>
 
-                                <!-- WAN -->
                                 <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                                     <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-blue-700 text-white font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10"><i class="fas fa-globe-americas"></i></div>
                                     <div class="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] bg-white p-6 rounded-2xl shadow-md border border-slate-100 hover-scale">
@@ -407,13 +407,12 @@
 
                         <hr class="my-16 border-slate-200">
 
-                        <!-- 3. من حيث التصميم الهندسي (Topology) -->
+                        <!-- 3. من حيث التصميم الهندسي -->
                         <div>
                             <div class="mb-12 text-center">
                                 <h2 class="text-3xl font-bold text-slate-800 mb-4 border-b-2 border-blue-500 pb-4 inline-block">ثالثاً: الشبكات حسب التصميم الهندسي (Topology)</h2>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                
                                 <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 hover-scale text-center group">
                                     <div class="w-16 h-16 mx-auto bg-white text-slate-600 rounded-full flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:bg-blue-500 group-hover:text-white transition"><i class="fas fa-grip-lines"></i></div>
                                     <h3 class="font-bold text-lg mb-1">الشبكة الخطية (Bus)</h3>
@@ -441,20 +440,17 @@
                                     <p class="text-xs text-slate-500 mb-3 bg-white py-1 rounded border border-slate-100">Mesh Topology</p>
                                     <p class="text-sm text-slate-600 leading-relaxed text-justify">شبكة ترتبط فيها الأجهزة بروابط متعددة ومتقاطعة، بحيث يمتلك كل جهاز أكثر من مسار للوصول إلى الأجهزة الأخرى (موثوقية عالية).</p>
                                 </div>
-
                             </div>
                         </div>
-
                     </div>
                 </section>
             </div>
         </div>
 
         <!-- ==========================================
-             القسم الثاني: الأمان في الشبكات
+             القسم الثاني: الأمان في الشبكات (مكتمل)
         =========================================== -->
         <div id="section-security" class="main-section hidden">
-            
             <!-- صفحة 1: المفهوم والأهمية -->
             <div id="sec-intro-page" class="page-section block page-enter">
                 <header class="bg-gradient-to-br from-red-900 to-red-700 text-white py-16 relative text-center">
@@ -522,8 +518,6 @@
                         </div>
 
                         <div class="grid md:grid-cols-2 gap-8">
-                            
-                            <!-- التهديدات الداخلية -->
                             <div class="bg-white rounded-3xl shadow-md border-t-8 border-orange-500 overflow-hidden hover-scale">
                                 <div class="bg-orange-50 p-6 border-b border-orange-100 flex items-center gap-4">
                                     <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-3xl shrink-0"><i class="fas fa-user-tie"></i></div>
@@ -547,7 +541,6 @@
                                 </div>
                             </div>
 
-                            <!-- التهديدات الخارجية -->
                             <div class="bg-white rounded-3xl shadow-md border-t-8 border-red-600 overflow-hidden hover-scale">
                                 <div class="bg-red-50 p-6 border-b border-red-100 flex items-center gap-4">
                                     <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-3xl shrink-0"><i class="fas fa-user-ninja"></i></div>
@@ -571,7 +564,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </section>
@@ -587,8 +579,6 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            
-                            <!-- الجدار الناري -->
                             <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 hover-scale group">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="bg-red-100 text-red-600 w-12 h-12 rounded-lg flex items-center justify-center text-2xl"><i class="fas fa-fire"></i></div>
@@ -597,7 +587,6 @@
                                 <p class="text-sm text-slate-600 leading-relaxed">تعمل كحارس بين الشبكة الداخلية والعالم الخارجي، وتسمح فقط بالاتصالات المصرح بها بناءً على قواعد محددة.</p>
                             </div>
 
-                            <!-- IDS/IPS -->
                             <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 hover-scale group">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-lg flex items-center justify-center text-2xl"><i class="fas fa-binoculars"></i></div>
@@ -606,7 +595,6 @@
                                 <p class="text-sm text-slate-600 leading-relaxed">نظام (IDS) يكتشف الهجمات فقط ويحذر منها، بينما نظام (IPS) يكتشف الهجمات ويقوم بمنعها وإيقافها تلقائياً.</p>
                             </div>
 
-                            <!-- التشفير -->
                             <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 hover-scale group">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="bg-emerald-100 text-emerald-600 w-12 h-12 rounded-lg flex items-center justify-center text-2xl"><i class="fas fa-lock"></i></div>
@@ -615,7 +603,6 @@
                                 <p class="text-sm text-slate-600 leading-relaxed">تحويل البيانات المقروءة إلى صيغة معقدة وغير مفهومة، ولا يمكن إعادتها لأصلها إلا لمن يملك مفتاح فك التشفير الخاص بها.</p>
                             </div>
 
-                            <!-- إدارة الصلاحيات -->
                             <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 hover-scale group">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="bg-purple-100 text-purple-600 w-12 h-12 rounded-lg flex items-center justify-center text-2xl"><i class="fas fa-id-card"></i></div>
@@ -624,7 +611,6 @@
                                 <p class="text-sm text-slate-600 leading-relaxed">نظام التحكم بالوصول (Access Control)، لتحديد من يمكنه الدخول للشبكة وما هي الملفات التي يسمح له بالوصول إليها.</p>
                             </div>
 
-                            <!-- التحديثات -->
                             <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 hover-scale group">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="bg-orange-100 text-orange-600 w-12 h-12 rounded-lg flex items-center justify-center text-2xl"><i class="fas fa-sync"></i></div>
@@ -633,7 +619,6 @@
                                 <p class="text-sm text-slate-600 leading-relaxed">إجراء ضروري ومستمر لسد الثغرات الأمنية (Patches) التي يكتشفها المطورون قبل أن يستغلها المخترقون.</p>
                             </div>
 
-                            <!-- النسخ الاحتياطي -->
                             <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 hover-scale group">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="bg-indigo-100 text-indigo-600 w-12 h-12 rounded-lg flex items-center justify-center text-2xl"><i class="fas fa-database"></i></div>
@@ -642,7 +627,6 @@
                                 <p class="text-sm text-slate-600 leading-relaxed">حفظ نسخ إضافية من البيانات خارج الشبكة لحمايتها من الفقدان أو التشفير (مثل هجمات برامج الفدية).</p>
                             </div>
 
-                            <!-- التوعية الأمنية -->
                             <div class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 hover-scale group md:col-span-2 lg:col-span-3">
                                 <div class="flex items-center gap-4 mb-4">
                                     <div class="bg-yellow-100 text-yellow-600 w-12 h-12 rounded-lg flex items-center justify-center text-2xl"><i class="fas fa-brain"></i></div>
@@ -655,18 +639,17 @@
                                     <span class="bg-white px-3 py-1 rounded-full text-xs font-bold text-slate-700 border border-slate-200"><i class="fas fa-bullhorn text-blue-500"></i> الإبلاغ فوراً عن أي نشاط غير طبيعي.</span>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </section>
             </div>
-
         </div>
 
         <!-- ==========================================
-             القسم الثالث: نموذج OSI
+             القسم الثالث: نموذج OSI (مكتمل ومُستعاد بالكامل)
         =========================================== -->
         <div id="section-osi" class="main-section hidden">
+            
             <!-- صفحة 1: المقدمة -->
             <div id="osi-intro-page" class="page-section block page-enter">
                 <header class="bg-gradient-to-br from-slate-900 to-primary text-white py-16 relative overflow-hidden text-center">
@@ -718,7 +701,7 @@
                 </section>
             </div>
 
-            <!-- صفحة 2: الطبقات السبع -->
+            <!-- صفحة 2: الطبقات السبع كاملة -->
             <div id="osi-layers-page" class="page-section hidden">
                 <section class="py-16 bg-slate-50">
                     <div class="container mx-auto px-6 max-w-4xl">
@@ -869,7 +852,7 @@
                 </section>
             </div>
 
-            <!-- صفحة 3: التغليف -->
+            <!-- صفحة 3: التغليف كاملة -->
             <div id="osi-encap-page" class="page-section hidden">
                 <section class="py-16 bg-white">
                     <div class="container mx-auto px-6 max-w-6xl">
@@ -879,13 +862,13 @@
                         </div>
                         <div class="grid lg:grid-cols-2 gap-12 items-start">
                             <!-- التغليف -->
-                            <div class="bg-slate-50 rounded-3xl p-6 md:p-8 shadow-lg border border-slate-200 relative">
+                            <div class="bg-slate-50 rounded-3xl p-6 md:p-8 shadow-lg border border-slate-200 relative hover-scale">
                                 <div class="absolute -top-6 right-8 bg-emerald-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                                     <i class="fas fa-arrow-down"></i> التغليف (المرسل)
                                 </div>
                                 <div class="mt-4 space-y-4">
                                     <div class="flex flex-col items-center">
-                                        <span class="text-sm font-bold text-slate-400 mb-2">الطبقات العليا</span>
+                                        <span class="text-sm font-bold text-slate-400 mb-2">الطبقات العليا (Data)</span>
                                         <div class="w-full bg-white border-2 border-slate-300 border-dashed rounded-xl p-4 text-center font-bold text-slate-700">DATA (البيانات)</div>
                                         <i class="fas fa-arrow-down text-emerald-400 mt-2 text-xl"></i>
                                     </div>
@@ -911,7 +894,7 @@
                                 </div>
                             </div>
                             <!-- فك التغليف -->
-                            <div class="bg-slate-50 rounded-3xl p-6 md:p-8 shadow-lg border border-slate-200 relative mt-12 lg:mt-0">
+                            <div class="bg-slate-50 rounded-3xl p-6 md:p-8 shadow-lg border border-slate-200 relative hover-scale mt-12 lg:mt-0">
                                 <div class="absolute -top-6 left-8 bg-blue-500 text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
                                     <i class="fas fa-arrow-up"></i> فك التغليف (المستقبل)
                                 </div>
@@ -942,7 +925,7 @@
                 </section>
             </div>
 
-            <!-- صفحة 4: المقارنات -->
+            <!-- صفحة 4: المقارنات كاملة -->
             <div id="osi-comp-page" class="page-section hidden">
                 <section class="py-16 bg-slate-50">
                     <div class="container mx-auto px-6 max-w-5xl">
@@ -953,9 +936,9 @@
                                 <div class="bg-slate-800 text-white p-5 text-center font-bold text-xl"><i class="fas fa-exchange-alt mr-2 text-secondary"></i> النقل: TCP مقابل UDP</div>
                                 <div class="p-6 md:p-8 bg-slate-50">
                                     <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 mb-8">
-                                        <div class="bg-blue-600 text-white rounded-2xl p-4 text-center"><i class="fas fa-shield-alt text-4xl mb-3"></i><h3 class="font-bold">TCP</h3></div>
-                                        <div class="hidden md:flex items-center px-2 text-slate-500 font-black text-xl">VS</div>
-                                        <div class="bg-emerald-600 text-white rounded-2xl p-4 text-center"><i class="fas fa-rocket text-4xl mb-3"></i><h3 class="font-bold">UDP</h3></div>
+                                        <div class="bg-blue-600 text-white rounded-2xl p-4 text-center hover-scale"><i class="fas fa-shield-alt text-4xl mb-3"></i><h3 class="font-bold">TCP</h3></div>
+                                        <div class="hidden md:flex items-center px-2 text-slate-500 font-black text-xl justify-center">VS</div>
+                                        <div class="bg-emerald-600 text-white rounded-2xl p-4 text-center hover-scale"><i class="fas fa-rocket text-4xl mb-3"></i><h3 class="font-bold">UDP</h3></div>
                                     </div>
                                     <div class="space-y-4">
                                         <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 text-center text-sm md:text-base"><span class="w-1/3 font-bold text-blue-700">20 Bytes (ثقيل)</span><span class="w-1/3 bg-slate-800 text-white py-1 rounded-full text-xs">حجم الترويسة</span><span class="w-1/3 font-bold text-emerald-700">8 Bytes (خفيف)</span></div>
@@ -970,9 +953,9 @@
                                 <div class="bg-primary text-white p-5 text-center font-bold text-xl"><i class="fas fa-server mr-2 text-secondary"></i> الأجهزة: السويتش مقابل الراوتر</div>
                                 <div class="p-6 md:p-8 bg-slate-50">
                                     <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 mb-8">
-                                        <div class="bg-indigo-600 text-white rounded-2xl p-4 text-center flex flex-col items-center justify-center"><i class="fas fa-network-wired text-4xl mb-3"></i><h3 class="font-bold">Switch (السويتش)</h3></div>
-                                        <div class="hidden md:flex items-center px-2 text-slate-500 font-black text-xl">VS</div>
-                                        <div class="bg-blue-600 text-white rounded-2xl p-4 text-center flex flex-col items-center justify-center"><img src="image_8e10e4.jpg" alt="Router" class="h-12 object-contain bg-white rounded p-1 mb-3" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"><i class="fas fa-route text-4xl mb-3 hidden"></i><h3 class="font-bold">Router (الراوتر)</h3></div>
+                                        <div class="bg-indigo-600 text-white rounded-2xl p-4 text-center flex flex-col items-center justify-center hover-scale"><i class="fas fa-network-wired text-4xl mb-3"></i><h3 class="font-bold">Switch (السويتش)</h3></div>
+                                        <div class="hidden md:flex items-center px-2 text-slate-500 font-black text-xl justify-center">VS</div>
+                                        <div class="bg-blue-600 text-white rounded-2xl p-4 text-center flex flex-col items-center justify-center hover-scale"><img src="image_8e10e4.jpg" alt="Router" class="h-12 object-contain bg-white rounded p-1 mb-3" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"><i class="fas fa-route text-4xl mb-3 hidden"></i><h3 class="font-bold">Router (الراوتر)</h3></div>
                                     </div>
                                     <div class="space-y-4">
                                         <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 text-center text-sm md:text-base"><span class="w-1/3 font-bold text-indigo-700">الطبقة الثانية (L2)</span><span class="w-1/3 bg-slate-800 text-white py-1 rounded-full text-xs">الطبقة</span><span class="w-1/3 font-bold text-blue-700">الطبقة الثالثة (L3)</span></div>
