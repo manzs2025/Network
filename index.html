@@ -24,227 +24,273 @@
 
     <style type="text/tailwindcss">
         @layer utilities {
-            .tech-bg { background-color: #f8fafc; background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px); background-size: 40px 40px; }
-            .glass-card { @apply bg-white border border-slate-200 shadow-lg rounded-[2rem] overflow-hidden; }
-            .hover-scale { @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-300; }
+            /* إعدادات الخلفية الشاملة */
+            .site-bg { 
+                background-image: url('bakground.jpg'); 
+                background-size: cover; 
+                background-position: center; 
+                background-attachment: fixed; 
+                background-color: #f8fafc; /* لون احتياطي */
+            }
+            
+            /* البطاقات الزجاجية الموحدة */
+            .glass-card { @apply bg-white/90 backdrop-blur-md border border-slate-200/80 shadow-lg rounded-[2rem] overflow-hidden; }
+            .hover-scale { @apply transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-blue-300 hover:bg-white; }
             
             /* تصميم القائمة الجانبية (Sidebar) */
-            .sidebar-item { @apply flex items-center gap-3 px-5 py-4 w-full text-right font-bold text-slate-600 rounded-xl transition cursor-pointer border-r-4 border-transparent hover:bg-slate-100 hover:text-blue-600; }
-            .sidebar-item.active { @apply bg-blue-50 border-blue-600 text-blue-700 shadow-sm; }
-            .sub-tab { @apply block w-full text-right px-10 py-2.5 text-sm font-bold text-slate-500 hover:text-blue-600 transition cursor-pointer; }
-            .sub-tab.active { @apply text-blue-700 border-r-4 border-blue-500 bg-blue-50/50; }
+            /* جعلها أغمق قليلاً من باقي الموقع كما طلبت */
+            .sidebar-bg { @apply bg-slate-100/95 backdrop-blur-xl border-l border-slate-300 shadow-[4px_0_20px_rgba(0,0,0,0.08)]; }
+            .sidebar-item { @apply flex items-center gap-3 px-5 py-3.5 w-full text-right font-black text-slate-600 rounded-xl transition cursor-pointer border-r-4 border-transparent hover:bg-white hover:text-blue-600 shadow-sm; }
+            .sidebar-item.active { @apply bg-blue-600 text-white border-blue-800 shadow-md; }
+            .sidebar-item.active i { @apply text-white; }
+            .sub-tab { @apply block w-full text-right px-10 py-2.5 text-sm font-bold text-slate-500 hover:text-blue-600 transition cursor-pointer hover:bg-white/50 rounded-lg; }
+            .sub-tab.active { @apply text-blue-700 border-r-4 border-blue-500 bg-blue-50/80; }
             
-            .content-text { @apply text-lg leading-loose text-slate-700 font-medium text-justify; }
             .btn-primary { @apply w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl transition shadow-lg shadow-blue-600/30; }
             
-            /* تنسيقات محرر النصوص (Rich Text Editor) */
-            .editor-toolbar { @apply bg-slate-50 p-2 rounded-t-xl flex flex-wrap gap-2 items-center border border-slate-300 border-b-0; }
-            .editor-toolbar button, .editor-toolbar select { @apply bg-white hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded cursor-pointer transition text-sm border border-slate-200 outline-none shadow-sm; }
-            .editor-toolbar input[type="color"] { @apply bg-transparent border-none cursor-pointer w-7 h-7 p-0; }
-            .rich-editor, .rich-display { @apply w-full p-6 bg-white border border-slate-300 rounded-b-xl text-slate-800 outline-none overflow-y-auto leading-loose text-lg font-medium shadow-inner; }
+            /* تنسيقات محرر النصوص (Rich Text Editor) والمحتوى المعروض لتوحيد التصميم */
+            .editor-toolbar { @apply bg-slate-100/90 backdrop-blur p-3 rounded-t-2xl flex flex-wrap gap-2 items-center border border-slate-300 border-b-0 shadow-inner; }
+            .editor-toolbar button, .editor-toolbar select { @apply bg-white hover:bg-blue-50 text-slate-700 px-3 py-1.5 rounded-lg cursor-pointer transition text-sm font-bold border border-slate-200 outline-none shadow-sm flex items-center gap-1; }
+            .editor-toolbar input[type="color"] { @apply bg-white border border-slate-200 cursor-pointer w-8 h-8 p-0.5 rounded-lg shadow-sm; }
             
-            /* التنسيقات الداخلية للمحتوى */
-            .rich-editor h1, .rich-display h1 { @apply text-4xl font-black mb-6 text-blue-700 mt-4; }
-            .rich-editor h2, .rich-display h2 { @apply text-3xl font-black mb-4 text-emerald-600 mt-4; }
-            .rich-editor h3, .rich-display h3 { @apply text-2xl font-black mb-3 text-orange-600 mt-3; }
-            .rich-editor ul, .rich-display ul { @apply list-disc list-inside mb-4 mr-4 text-slate-700 space-y-2; }
-            .rich-editor table, .rich-display table { @apply w-full text-center border-collapse border border-slate-300 mb-6 rounded-xl overflow-hidden shadow-sm; }
-            .rich-editor th, .rich-display th { @apply bg-blue-50 p-4 border border-slate-300 font-black text-blue-900; }
-            .rich-editor td, .rich-display td { @apply p-4 border border-slate-300 font-bold text-slate-600; }
+            .rich-editor, .rich-display { @apply w-full p-8 bg-white/95 backdrop-blur border border-slate-300 rounded-b-2xl text-slate-700 outline-none overflow-y-auto leading-loose text-lg font-medium shadow-sm; }
+            
+            /* التنسيقات الداخلية للمحتوى (لكي يتطابق مع الصور التي أرفقتها) */
+            .rich-editor h1, .rich-display h1 { @apply text-4xl font-black mb-6 text-blue-800 mt-4 border-b-2 border-slate-100 pb-2; }
+            .rich-editor h2, .rich-display h2 { @apply text-3xl font-black mb-4 text-blue-700 mt-4; }
+            .rich-editor h3, .rich-display h3 { @apply text-2xl font-black mb-3 text-indigo-600 mt-3; }
+            .rich-editor p, .rich-display p { @apply mb-4 text-justify; }
+            .rich-editor ul, .rich-display ul { @apply list-disc list-inside mb-6 mr-4 text-slate-700 space-y-2 font-bold; }
+            
+            /* تصميم الجداول والمربعات (مطابق للصورة) */
+            .rich-editor table, .rich-display table { @apply w-full text-center border-collapse bg-white mb-8 rounded-2xl overflow-hidden shadow-sm border border-slate-200; }
+            .rich-editor th, .rich-display th { @apply bg-slate-50 p-4 border-b border-slate-200 font-black text-purple-800 text-lg; }
+            .rich-editor td, .rich-display td { @apply p-4 border-b border-slate-100 font-bold text-slate-600; }
             .rich-editor img, .rich-display img { @apply max-w-full h-auto rounded-xl shadow-md my-4 object-cover inline-block; }
-            .rich-editor font[size="3"], .rich-display font[size="3"] { font-size: 1rem; }
-            .rich-editor font[size="5"], .rich-display font[size="5"] { font-size: 1.5rem; font-weight: bold; }
-            .rich-editor font[size="6"], .rich-display font[size="6"] { font-size: 2rem; font-weight: 900; }
-            .rich-editor font[size="7"], .rich-display font[size="7"] { font-size: 2.5rem; font-weight: 900; }
+            
+            /* تنسيق الكروت الشبكية المخصصة */
+            .custom-grid-container { @apply grid grid-cols-1 md:grid-cols-3 gap-6 my-8 text-center; }
+            .custom-grid-card { @apply bg-white border border-slate-200 p-6 rounded-[2rem] shadow-sm transition hover:-translate-y-1 hover:shadow-md; }
+            .custom-grid-icon { @apply text-5xl mb-4 block mx-auto; }
+            .custom-grid-title { @apply text-xl font-black mb-2; }
+            .custom-grid-desc { @apply text-sm font-bold text-slate-500 leading-relaxed; }
         }
         .page-enter { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .toast { @apply fixed bottom-5 left-5 z-[9999] opacity-0 translate-y-10 transition-all duration-300 bg-white border border-slate-200 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-2xl text-slate-800; }
         .toast.show { @apply opacity-100 translate-y-0; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.5); }
     </style>
 </head>
-<body class="text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900 flex h-screen tech-bg overflow-hidden">
+<body class="text-slate-800 font-sans selection:bg-blue-200 selection:text-blue-900 flex h-screen site-bg overflow-hidden">
 
-    <!-- القائمة الجانبية (Sidebar) الثابتة على اليمين -->
-    <aside id="main-sidebar" class="w-72 bg-white shadow-[2px_0_15px_rgba(0,0,0,0.05)] z-50 flex-col hidden lg:flex border-l border-slate-200 h-full flex-shrink-0">
-        <div class="p-6 border-b border-slate-100 bg-slate-50 flex items-center gap-3 cursor-pointer" onclick="goHome()">
-            <div class="bg-blue-600 p-2.5 rounded-xl shadow-md"><i class="fas fa-network-wired text-white"></i></div>
-            <span class="font-black text-blue-800 text-xl tracking-tight">أكاديمية الشبكات</span>
+    <!-- القائمة الجانبية (Sidebar) الثابتة على اليمين (لون أغمق قليلاً) -->
+    <aside id="main-sidebar" class="w-[300px] sidebar-bg z-50 flex-col hidden lg:flex h-full flex-shrink-0">
+        <div class="p-6 border-b border-slate-200/60 flex items-center gap-4 cursor-pointer hover:bg-white/50 transition" onclick="goHome()">
+            <div class="bg-blue-600 p-3 rounded-2xl shadow-md"><i class="fas fa-network-wired text-white text-xl"></i></div>
+            <h1 class="font-black text-slate-800 text-2xl tracking-tight">أكاديمية الشبكات</h1>
         </div>
-        <nav class="flex-1 overflow-y-auto custom-scrollbar py-4" id="sidebar-nav">
+        <nav class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2" id="sidebar-nav">
             <!-- سيتم توليد الروابط هنا برمجياً -->
         </nav>
-        <div class="p-5 border-t border-slate-100 bg-slate-50 text-center">
-            <p class="text-xs font-bold text-slate-500 leading-relaxed">إعداد وتصميم:<br><span class="text-blue-600 text-sm">منصور مستور الزهراني</span></p>
+        <div class="p-6 border-t border-slate-200/60 bg-slate-200/30 text-center">
+            <p class="text-xs font-black text-slate-500 leading-relaxed uppercase tracking-widest mb-1">إعداد وتصميم</p>
+            <p class="text-blue-700 font-black">منصور مستور الزهراني</p>
         </div>
     </aside>
 
     <!-- المساحة الرئيسية للعمل -->
-    <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+    <div class="flex-1 flex flex-col h-full overflow-hidden relative bg-white/40 backdrop-blur-sm">
         
-        <!-- الشريط العلوي للتنقل في الجوال والخيارات السريعة -->
-        <nav class="bg-white/90 backdrop-blur-md p-4 sticky top-0 z-40 border-b border-slate-200 shadow-sm flex justify-between items-center">
-            <!-- زر القائمة في الجوال -->
-            <button onclick="document.getElementById('main-sidebar').classList.toggle('hidden')" class="lg:hidden text-slate-600 text-xl p-2"><i class="fas fa-bars"></i></button>
-            <div class="lg:hidden font-black text-blue-800 text-lg flex items-center gap-2"><i class="fas fa-network-wired text-blue-600"></i> الشبكات</div>
-            
-            <div class="hidden lg:block text-slate-500 font-bold text-sm">مرحباً بك في لوحة التحكم التفاعلية لشبكات الحاسب</div>
-            
-            <div class="flex items-center gap-3">
-                <button onclick="goHome()" class="bg-slate-100 w-10 h-10 rounded-xl hover:bg-blue-100 hover:text-blue-600 transition flex items-center justify-center font-bold text-slate-600 shadow-sm"><i class="fas fa-home"></i></button>
-                <button onclick="toggleFS()" class="bg-slate-100 w-10 h-10 rounded-xl hover:bg-slate-200 transition text-slate-600 flex items-center justify-center shadow-sm"><i class="fas fa-expand" id="fs-icon"></i></button>
-            </div>
+        <!-- الشريط العلوي للتنقل في الجوال -->
+        <nav class="lg:hidden bg-white/90 backdrop-blur-md p-4 sticky top-0 z-40 border-b border-slate-200 shadow-sm flex justify-between items-center">
+            <button onclick="document.getElementById('main-sidebar').classList.toggle('hidden')" class="text-slate-600 text-2xl p-2"><i class="fas fa-bars"></i></button>
+            <div class="font-black text-blue-800 text-xl flex items-center gap-2 cursor-pointer" onclick="goHome()"><i class="fas fa-network-wired text-blue-600"></i> أكاديمية الشبكات</div>
+            <button onclick="toggleFS()" class="text-slate-600 text-xl p-2"><i class="fas fa-expand" id="fs-icon"></i></button>
         </nav>
 
         <!-- منطقة التمرير للمحتوى -->
-        <main id="main-scroll-area" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar bg-transparent">
+        <main id="main-scroll-area" class="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar">
             
-            <!-- الواجهة الرئيسية (لوحة التحكم) -->
-            <div id="portal-dashboard" class="block page-enter">
-                <header class="bg-white rounded-[3rem] p-10 md:p-16 text-center border border-slate-200 shadow-xl mb-12 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-blue-50/50"></div>
+            <!-- الواجهة الرئيسية -->
+            <div id="portal-dashboard" class="block page-enter max-w-7xl mx-auto">
+                <header class="bg-white/95 backdrop-blur rounded-[3rem] p-10 md:p-20 text-center border border-slate-200 shadow-xl mb-12 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-blue-50 to-transparent opacity-70"></div>
                     <div class="relative z-10">
-                        <span class="bg-blue-100 text-blue-700 py-2 px-6 rounded-full text-xs font-black mb-6 inline-block shadow-sm border border-blue-200">المؤسسة العامة للتدريب التقني والمهني</span>
-                        <h1 class="text-5xl md:text-6xl font-black mb-6 text-slate-800 tracking-tight">شبكات <span class="text-blue-600">الحاسب الآلي</span></h1>
-                        <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto font-bold leading-relaxed">المرجع الأكاديمي الشامل لمهندسي الشبكات، يغطي المبادئ، الأمان، بروتوكولات التوجيه، والمعايير الفيزيائية.</p>
+                        <span class="bg-blue-100 text-blue-700 py-2.5 px-8 rounded-full text-sm font-black mb-8 inline-block shadow-sm border border-blue-200">المؤسسة العامة للتدريب التقني والمهني</span>
+                        <h1 class="text-5xl md:text-7xl font-black mb-6 text-slate-800 tracking-tight drop-shadow-sm">شبكات <span class="text-blue-600">الحاسب الآلي</span></h1>
+                        <p class="text-lg md:text-2xl text-slate-600 max-w-3xl mx-auto font-bold leading-relaxed">المرجع الأكاديمي الشامل لمهندسي الشبكات، يغطي المبادئ، الأمان، بروتوكولات التوجيه، والمعايير الفيزيائية.</p>
                     </div>
                 </header>
                 
-                <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- سيتم تعبئة البطاقات هنا برمجياً -->
                 </div>
             </div>
 
-            <!-- حاوية الأقسام التعليمية -->
+            <!-- حاوية الأقسام التعليمية الديناميكية (تعرض الـ PDF أو تعديلات الـ CMS) -->
             <div id="section-container" class="hidden page-enter max-w-6xl mx-auto pb-20">
-                <header class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 mb-8 text-center">
+                <header class="bg-white/95 backdrop-blur p-10 rounded-[3rem] shadow-sm border border-slate-200 mb-8 text-center">
                     <h1 id="section-title" class="text-4xl md:text-5xl font-black text-blue-800 tracking-tight">العنوان</h1>
                 </header>
 
-                <!-- التبويبات العلوية في الجوال فقط -->
+                <!-- للتبويبات العلوية في الجوال فقط -->
                 <div id="mobile-tabs" class="lg:hidden flex gap-2 overflow-x-auto custom-scrollbar mb-8 pb-2"></div>
                 
-                <!-- مساحة العرض للمحتوى -->
                 <div id="content-area" class="w-full page-enter">
-                    <!-- سيتم حقن المحتوى التعليمي هنا -->
+                    <!-- المحتوى سيحقن هنا -->
                 </div>
             </div>
 
-            <!-- قسم التحديثات السحابية (للمتدربين) -->
-            <div id="dynamic-lessons-container" class="hidden page-enter max-w-6xl mx-auto pb-20">
-                <header class="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 mb-8 text-center">
-                    <h1 class="text-4xl font-black text-cyan-700 mb-2">الدروس والمقالات الإضافية</h1>
-                    <p class="text-slate-500 font-bold">محتوى متجدد يضاف من قبل المدرب عبر السحابة</p>
-                </header>
-                <div id="dynamic-articles-list" class="grid md:grid-cols-2 gap-8 page-enter">
-                    <div class="col-span-full text-center py-12 text-slate-500 font-bold bg-white rounded-2xl border border-slate-200"><i class="fas fa-spinner fa-spin text-4xl mb-4"></i><br>جاري جلب الدروس...</div>
-                </div>
-            </div>
-
-            <!-- قسم الاختبارات والـ LMS -->
+            <!-- قسم الاختبارات (LMS Views) -->
             <div id="section-exams" class="hidden page-enter max-w-6xl mx-auto pb-20">
-                <header class="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 mb-8 text-center">
-                    <h1 class="text-4xl font-black text-yellow-600">قسم الاختبارات والتقييمات</h1>
+                <header class="bg-white/95 backdrop-blur p-10 rounded-[3rem] shadow-sm border border-slate-200 mb-8 text-center">
+                    <h1 class="text-4xl md:text-5xl font-black text-yellow-600 tracking-tight">قسم الاختبارات والتقييمات</h1>
                 </header>
                 <div id="lms-area"></div>
             </div>
 
-            <footer class="bg-transparent text-slate-500 py-10 text-center mt-10 border-t border-slate-200">
-                <p class="font-black text-slate-800 text-xl mb-1">شبكات الحاسب الآلي</p>
-                <p class="text-blue-600 font-bold text-sm mb-2">إعداد وتصميم: منصور مستور الزهراني</p>
-                <p class="text-[10px] font-mono opacity-50 uppercase tracking-widest">All Rights Reserved &copy; 2024</p>
-            </footer>
-
         </main>
     </div>
 
-    <!-- رسائل الإشعار -->
     <div id="tst" class="toast"><i id="tsti" class="fas"></i><span id="tstt"></span></div>
 
-    <!-- بيانات المحتوى الأساسية (من ملفات الـ PDF بالكامل دون اختصار) -->
+    <!-- بيانات المحتوى الأساسية (مفرغة 100% من ملفات الـ PDF مع تنسيق موحد CSS) -->
     <script>
         const CORE_DATA = {
             'networks': {
-                title: 'مبادئ شبكات الحاسب', icon: 'fa-globe', color: 'blue', desc: 'مفهوم الشبكة، المكونات، الفوائد، التصاميم الهندسية والمعماريات بالكامل.',
+                title: 'مبادئ شبكات الحاسب', icon: 'fa-globe', color: 'blue', desc: 'مفهوم الشبكة، المكونات، الفوائد، والتصاميم الهندسية بالكامل.',
                 tabs: ['مفهوم الشبكة والفوائد', 'المكونات والوسائط', 'التصاميم الجغرافية والمعمارية'],
                 content: [
-                    `<div class="space-y-8">
-                        <div class="glass-card p-10 border-r-[10px] border-blue-500 bg-blue-50/30">
-                            <h2 class="text-3xl font-black text-blue-800 mb-4"><i class="fas fa-info-circle"></i> ماهي شبكة الحاسب؟</h2>
-                            <p class="content-text">شبكة الحاسب (Computer Network) عبارة عن مجموعة من الحاسبات والأجهزة الأخرى المتصلة مع بعضها البعض حيث يكون لها القدرة على مشاركة عدد كبير من المستخدمين للبيانات (Data) والأجهزة (Hardware) كما تعتبر الشبكة وسيلة اتصال الكتروني بين الأفراد.</p>
-                        </div>
-                        <h3 class="text-2xl font-black text-slate-800 border-b-2 border-slate-200 pb-3">فوائد شبكات الحاسب</h3>
-                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div class="glass-card p-6 border-t-4 border-blue-500 hover-scale"><i class="fas fa-database text-4xl text-blue-600 mb-4 block"></i><h4 class="font-black text-xl text-slate-800 mb-2">مشاركة البيانات</h4><p class="text-sm text-slate-600 font-bold leading-relaxed">نقل المعلومات والملفات بسرعة فائقة بين المستخدمين دون وسائط تخزين خارجية.</p></div>
-                            <div class="glass-card p-6 border-t-4 border-emerald-500 hover-scale"><i class="fas fa-print text-4xl text-emerald-600 mb-4 block"></i><h4 class="font-black text-xl text-slate-800 mb-2">مشاركة الموارد</h4><p class="text-sm text-slate-600 font-bold leading-relaxed">تتيح للجميع استخدام أجهزة صلبة (Hardware) مثل الطابعات والماسحات الضوئية.</p></div>
-                            <div class="glass-card p-6 border-t-4 border-purple-500 hover-scale"><i class="fas fa-laptop-code text-4xl text-purple-600 mb-4 block"></i><h4 class="font-black text-xl text-slate-800 mb-2">مشاركة البرمجيات</h4><p class="text-sm text-slate-600 font-bold leading-relaxed">العمل على برامج موحدة (Software) بتثبيت نسخة واحدة على الخادم للجميع.</p></div>
-                            <div class="glass-card p-6 border-t-4 border-orange-500 hover-scale"><i class="fas fa-folder-open text-4xl text-orange-600 mb-4 block"></i><h4 class="font-black text-xl text-slate-800 mb-2">مشاركة الملفات مباشرة</h4><p class="text-sm text-slate-600 font-bold leading-relaxed">نقل مباشر بين الأجهزة بدلاً من إرسالها عبر البريد الإلكتروني.</p></div>
-                            <div class="glass-card p-6 border-t-4 border-red-500 hover-scale lg:col-span-2 bg-red-50/20"><i class="fas fa-gamepad text-4xl text-red-600 mb-4 block"></i><h4 class="font-black text-xl text-slate-800 mb-2">ألعاب الكمبيوتر الجماعية</h4><p class="text-sm text-slate-600 font-bold leading-relaxed">التفاعل بين أكثر من مستخدم (Multiplayer) للعب في نفس البيئة الافتراضية.</p></div>
+                    `<div class="rich-display glass-card p-10">
+                        <h1><i class="fas fa-info-circle ml-2"></i> ماهي شبكة الحاسب؟</h1>
+                        <p>شبكة الحاسب (Computer Network) عبارة عن مجموعة من الحاسبات والأجهزة الأخرى المتصلة مع بعضها البعض حيث يكون لها القدرة على مشاركة عدد كبير من المستخدمين للبيانات (Data) والأجهزة (Hardware) كما تعتبر الشبكة وسيلة اتصال الكتروني بين الأفراد.</p>
+                        
+                        <h2 class="text-center mt-10 mb-6">فوائد شبكات الحاسب</h2>
+                        <div class="custom-grid-container">
+                            <div class="custom-grid-card border-t-4 border-t-blue-500">
+                                <i class="fas fa-database custom-grid-icon text-blue-500"></i>
+                                <div class="custom-grid-title">مشاركة البيانات</div>
+                                <p class="custom-grid-desc">نقل المعلومات والملفات بسرعة فائقة بين المستخدمين دون وسائط تخزين خارجية.</p>
+                            </div>
+                            <div class="custom-grid-card border-t-4 border-t-emerald-500">
+                                <i class="fas fa-print custom-grid-icon text-emerald-500"></i>
+                                <div class="custom-grid-title">مشاركة الموارد</div>
+                                <p class="custom-grid-desc">تتيح للجميع استخدام أجهزة صلبة (Hardware) مثل الطابعات والماسحات الضوئية.</p>
+                            </div>
+                            <div class="custom-grid-card border-t-4 border-t-purple-500">
+                                <i class="fas fa-laptop-code custom-grid-icon text-purple-500"></i>
+                                <div class="custom-grid-title">مشاركة البرمجيات</div>
+                                <p class="custom-grid-desc">العمل على برامج موحدة (Software) بتثبيت نسخة واحدة على الخادم للجميع.</p>
+                            </div>
+                            <div class="custom-grid-card border-t-4 border-t-orange-500 md:col-span-1 lg:col-span-1">
+                                <i class="fas fa-folder-open custom-grid-icon text-orange-500"></i>
+                                <div class="custom-grid-title">مشاركة الملفات مباشرة</div>
+                                <p class="custom-grid-desc">نقل مباشر بين الأجهزة بدلاً من إرسالها عبر البريد الإلكتروني.</p>
+                            </div>
+                            <div class="custom-grid-card border-t-4 border-t-red-500 md:col-span-2 lg:col-span-2 bg-red-50/30">
+                                <i class="fas fa-gamepad custom-grid-icon text-red-500"></i>
+                                <div class="custom-grid-title">ألعاب الكمبيوتر الجماعية</div>
+                                <p class="custom-grid-desc">التفاعل بين أكثر من مستخدم (Multiplayer) للعب في نفس البيئة الافتراضية.</p>
+                            </div>
                         </div>
                     </div>`,
-                    `<div class="space-y-8">
-                        <h3 class="text-3xl font-black text-slate-800 mb-6 text-center">مكونات شبكة الحاسب</h3>
-                        <div class="grid lg:grid-cols-3 gap-6">
-                            <div class="glass-card p-0 hover-scale flex flex-col">
-                                <div class="bg-blue-50 p-6 border-b border-blue-100 text-center"><i class="fas fa-desktop text-5xl text-blue-600 mb-2"></i><h3 class="text-2xl font-black text-blue-900">الأجهزة الطرفية</h3><span class="text-xs font-bold text-blue-500 uppercase">End Devices</span></div>
-                                <div class="p-6 flex-grow"><p class="text-slate-700 font-bold leading-relaxed text-justify">الجهاز الطرفي: هو المكان الذي تنشأ منه الرسالة أو المكان الذي يتم استلامها فيه. تنشأ البيانات باستخدام جهاز طرفي وتتدفق خلال الشبكة وتصل إلى جهاز طرفي آخر. (مثل أجهزة الكمبيوتر، الطابعات الشبكية، الكاميرات، الجوالات).</p></div>
+                    `<div class="rich-display glass-card p-10">
+                        <h1 class="text-center mb-8">مكونات شبكة الحاسب</h1>
+                        <div class="custom-grid-container">
+                            <div class="custom-grid-card bg-blue-50/50">
+                                <i class="fas fa-desktop custom-grid-icon text-blue-600"></i>
+                                <div class="custom-grid-title text-blue-800">الأجهزة الطرفية</div>
+                                <div class="text-blue-500 font-bold mb-4 uppercase text-xs tracking-widest">End Devices</div>
+                                <p class="custom-grid-desc text-justify">الجهاز الطرفي: هو المكان الذي تنشأ منه الرسالة أو المكان الذي يتم استلامها فيه. تنشأ البيانات باستخدام جهاز طرفي وتتدفق خلال الشبكة وتصل إلى جهاز طرفي آخر. (مثل أجهزة الكمبيوتر، الطابعات الشبكية، الكاميرات، الجوالات).</p>
                             </div>
-                            <div class="glass-card p-0 hover-scale flex flex-col">
-                                <div class="bg-indigo-50 p-6 border-b border-indigo-100 text-center"><div class="flex justify-center gap-4 h-12 mb-2"><img src="img289.jpg" class="h-full mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-random text-5xl text-indigo-600\'></i>'"><img src="img287.jpg" class="h-full mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-route text-5xl text-indigo-600\'></i>'"></div><h3 class="text-2xl font-black text-indigo-900">الأجهزة الوسيطة</h3><span class="text-xs font-bold text-indigo-500 uppercase">Intermediary</span></div>
-                                <div class="p-6 flex-grow"><p class="text-slate-700 font-bold leading-relaxed text-justify">تقوم بالاتصال البيني بين الأجهزة الطرفية وتوجيه الحزم واختيار المسار وحماية الشبكة. من الأمثلة عليها: أجهزة التبديل (Switch)، أجهزة التوجيه (Router)، نقاط الوصول اللاسلكية (Access Point)، وجدران الحماية (Firewalls).</p></div>
+                            <div class="custom-grid-card bg-indigo-50/50">
+                                <div class="flex justify-center gap-4 mb-4 h-12">
+                                    <i class="fas fa-random text-5xl text-indigo-600"></i>
+                                    <i class="fas fa-route text-5xl text-indigo-600"></i>
+                                </div>
+                                <div class="custom-grid-title text-indigo-800">الأجهزة الوسيطة</div>
+                                <div class="text-indigo-500 font-bold mb-4 uppercase text-xs tracking-widest">Intermediary</div>
+                                <p class="custom-grid-desc text-justify">تقوم بالاتصال البيني بين الأجهزة الطرفية وتوجيه الحزم واختيار المسار وحماية الشبكة. من الأمثلة عليها: أجهزة التبديل (Switch)، أجهزة التوجيه (Router)، نقاط الوصول اللاسلكية (Access Point)، وجدران الحماية (Firewalls).</p>
                             </div>
-                            <div class="glass-card p-0 hover-scale flex flex-col">
-                                <div class="bg-emerald-50 p-6 border-b border-emerald-100 text-center"><i class="fas fa-wifi text-5xl text-emerald-600 mb-2"></i><h3 class="text-2xl font-black text-emerald-900">وسائط الشبكة</h3><span class="text-xs font-bold text-emerald-500 uppercase">Media</span></div>
-                                <div class="p-6 flex-grow"><p class="text-slate-700 font-bold leading-relaxed text-justify">يتم نقل الاتصالات عبر الشبكة من خلال وسيط يسمح للرسالة بالانتقال من المصدر إلى الوجهة. وتشمل: الكابلات النحاسية، كابلات الألياف الضوئية، والموجات اللاسلكية.</p></div>
+                            <div class="custom-grid-card bg-emerald-50/50">
+                                <i class="fas fa-wifi custom-grid-icon text-emerald-600"></i>
+                                <div class="custom-grid-title text-emerald-800">وسائط الشبكة</div>
+                                <div class="text-emerald-500 font-bold mb-4 uppercase text-xs tracking-widest">Media</div>
+                                <p class="custom-grid-desc text-justify">يتم نقل الاتصالات عبر الشبكة من خلال وسيط يسمح للرسالة بالانتقال من المصدر إلى الوجهة. وتشمل: الكابلات النحاسية، كابلات الألياف الضوئية، والموجات اللاسلكية.</p>
                             </div>
                         </div>
                     </div>`,
-                    `<div class="space-y-8">
-                        <div class="glass-card p-10 bg-slate-50 border-none">
-                            <h3 class="text-2xl font-black text-slate-800 mb-6 border-b border-slate-200 pb-3">الشبكات من حيث المدى الجغرافي</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm hover-scale">
-                                    <img src="img652.jpg" class="h-16 mx-auto mb-4 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fab fa-bluetooth text-4xl text-blue-600 mb-4\'></i>'">
-                                    <h4 class="font-black text-xl text-blue-700 mb-2">PAN</h4><p class="text-xs text-slate-600 font-bold leading-relaxed">الشبكة الشخصية لتوصيل الأجهزة في نطاق أمتار كالبلوتوث.</p>
-                                </div>
-                                <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm hover-scale">
-                                    <img src="img596.jpg" class="h-16 mx-auto mb-4 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-building text-4xl text-emerald-600 mb-4\'></i>'">
-                                    <h4 class="font-black text-xl text-emerald-700 mb-2">LAN</h4><p class="text-xs text-slate-600 font-bold leading-relaxed">الشبكة المحلية داخل منطقة جغرافية محدودة كالمباني.</p>
-                                </div>
-                                <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm hover-scale">
-                                    <img src="img679.jpg" class="h-16 mx-auto mb-4 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-city text-4xl text-purple-600 mb-4\'></i>'">
-                                    <h4 class="font-black text-xl text-purple-700 mb-2">MAN</h4><p class="text-xs text-slate-600 font-bold leading-relaxed">الشبكة المتوسطة الإقليمية التي تربط LANs ضمن مدينة.</p>
-                                </div>
-                                <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center shadow-sm hover-scale">
-                                    <img src="img706.jpg" class="h-16 mx-auto mb-4 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-globe-africa text-4xl text-orange-600 mb-4\'></i>'">
-                                    <h4 class="font-black text-xl text-orange-700 mb-2">WAN</h4><p class="text-xs text-slate-600 font-bold leading-relaxed">الشبكة الواسعة للربط بين مدن ودول وتغطي مسافات شاسعة.</p>
-                                </div>
+                    `<div class="rich-display glass-card p-10">
+                        <h2>الشبكات من حيث المدى الجغرافي</h2>
+                        <div class="custom-grid-container" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                            <div class="custom-grid-card">
+                                <i class="fab fa-bluetooth custom-grid-icon text-blue-500"></i>
+                                <div class="custom-grid-title">PAN</div>
+                                <p class="custom-grid-desc">الشبكة الشخصية لتوصيل الأجهزة في نطاق أمتار كالبلوتوث.</p>
+                            </div>
+                            <div class="custom-grid-card">
+                                <i class="fas fa-building custom-grid-icon text-emerald-500"></i>
+                                <div class="custom-grid-title">LAN</div>
+                                <p class="custom-grid-desc">الشبكة المحلية داخل منطقة جغرافية محدودة كالمباني والمكاتب.</p>
+                            </div>
+                            <div class="custom-grid-card">
+                                <i class="fas fa-city custom-grid-icon text-purple-500"></i>
+                                <div class="custom-grid-title">MAN</div>
+                                <p class="custom-grid-desc">الشبكة المتوسطة الإقليمية التي تربط LANs ضمن مدينة واحدة.</p>
+                            </div>
+                            <div class="custom-grid-card">
+                                <i class="fas fa-globe-africa custom-grid-icon text-orange-500"></i>
+                                <div class="custom-grid-title">WAN</div>
+                                <p class="custom-grid-desc">الشبكة الواسعة للربط بين مدن ودول وتغطي مسافات شاسعة.</p>
                             </div>
                         </div>
-                        <div class="grid md:grid-cols-2 gap-8">
-                            <div class="glass-card p-8 border-r-[8px] border-indigo-500">
-                                <h3 class="text-2xl font-black text-indigo-800 mb-6 border-b border-slate-100 pb-3">المعمارية (Architecture)</h3>
-                                <div class="space-y-6">
-                                    <div class="flex items-start gap-4 bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100">
-                                        <img src="img745.jpg" class="h-16 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-users text-4xl text-indigo-600\'></i>'">
-                                        <div><h4 class="font-black text-lg text-indigo-900 mb-1">نظير إلى نظير (P2P)</h4><p class="text-slate-600 text-xs font-bold leading-relaxed">بنية شبكية موزعة تتصل فيها الأجهزة مباشرة دون خادم مركزي، كل جهاز يسمى "نظير" ويعمل كعميل وخادم.</p></div>
+
+                        <hr class="my-10 border-slate-200">
+
+                        <div class="grid md:grid-cols-2 gap-10">
+                            <div>
+                                <h2>المعمارية التقنية (Architecture)</h2>
+                                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-4 flex items-center gap-4">
+                                    <i class="fas fa-users text-4xl text-indigo-500"></i>
+                                    <div>
+                                        <h3 class="!text-lg !mb-1 text-indigo-800">نظير إلى نظير (P2P)</h3>
+                                        <p class="!text-sm text-slate-500 !mb-0 font-bold leading-relaxed">بنية شبكية موزعة تتصل فيها الأجهزة مباشرة دون خادم مركزي، كل جهاز يسمى "نظير" ويعمل كعميل وخادم.</p>
                                     </div>
-                                    <div class="flex items-start gap-4 bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
-                                        <img src="img782.jpg" class="h-16 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-server text-4xl text-blue-600\'></i>'">
-                                        <div><h4 class="font-black text-lg text-blue-900 mb-1">العميل والخادم (Client/Server)</h4><p class="text-slate-600 text-xs font-bold leading-relaxed">بنية تعتمد على وجود خادم مركزي يقدم خدمات وموارد، وعملاء يطلبون هذه الخدمات وتتم معالجتها بالخادم.</p></div>
+                                </div>
+                                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex items-center gap-4">
+                                    <i class="fas fa-server text-4xl text-blue-500"></i>
+                                    <div>
+                                        <h3 class="!text-lg !mb-1 text-blue-800">العميل والخادم (Client/Server)</h3>
+                                        <p class="!text-sm text-slate-500 !mb-0 font-bold leading-relaxed">بنية تعتمد على وجود خادم مركزي يقدم خدمات وموارد، وعملاء يطلبون هذه الخدمات وتتم معالجتها بالخادم.</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="glass-card p-8 border-r-[8px] border-emerald-500">
-                                <h3 class="text-2xl font-black text-emerald-800 mb-6 border-b border-slate-100 pb-3">التصميم الهندسي (Topologies)</h3>
-                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm font-black uppercase text-center">
-                                    <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 hover-scale"><img src="img819.jpg" class="h-12 mx-auto mb-3 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-grip-lines text-3xl text-emerald-600\'></i>'"><br>الخطية (Bus)<p class="text-[10px] text-slate-500 mt-1">كابل رئيسي واحد.</p></div>
-                                    <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 hover-scale"><img src="img848.jpg" class="h-12 mx-auto mb-3 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-project-diagram text-3xl text-emerald-600\'></i>'"><br>النجمية (Star)<p class="text-[10px] text-slate-500 mt-1">الأكثر شيوعاً (نقطة مركزية).</p></div>
-                                    <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 hover-scale"><img src="image_0483a8.png" class="h-12 mx-auto mb-3 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-sync text-3xl text-emerald-600\'></i>'"><br>الحلقية (Ring)<p class="text-[10px] text-slate-500 mt-1">دائرة مغلقة.</p></div>
-                                    <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 hover-scale"><img src="img911.jpg" class="h-12 mx-auto mb-3 mix-blend-multiply" onerror="this.outerHTML='<i class=\'fas fa-network-wired text-3xl text-emerald-600\'></i>'"><br>المعقدة (Mesh)<p class="text-[10px] text-slate-500 mt-1">روابط متعددة لمقاومة الأعطال.</p></div>
+                            <div>
+                                <h2>التصميم الهندسي (Topologies)</h2>
+                                <div class="grid grid-cols-2 gap-4 text-center">
+                                    <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
+                                        <i class="fas fa-grip-lines text-3xl text-emerald-600 mb-2 block"></i>
+                                        <span class="font-black text-emerald-900">الخطية (Bus)</span>
+                                        <p class="text-[10px] text-slate-500 mt-1 font-bold">كابل رئيسي واحد.</p>
+                                    </div>
+                                    <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
+                                        <i class="fas fa-project-diagram text-3xl text-emerald-600 mb-2 block"></i>
+                                        <span class="font-black text-emerald-900">النجمية (Star)</span>
+                                        <p class="text-[10px] text-slate-500 mt-1 font-bold">الأكثر شيوعاً (نقطة مركزية).</p>
+                                    </div>
+                                    <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
+                                        <i class="fas fa-sync text-3xl text-emerald-600 mb-2 block"></i>
+                                        <span class="font-black text-emerald-900">الحلقية (Ring)</span>
+                                        <p class="text-[10px] text-slate-500 mt-1 font-bold">دائرة مغلقة للبيانات.</p>
+                                    </div>
+                                    <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
+                                        <i class="fas fa-network-wired text-3xl text-emerald-600 mb-2 block"></i>
+                                        <span class="font-black text-emerald-900">المعقدة (Mesh)</span>
+                                        <p class="text-[10px] text-slate-500 mt-1 font-bold">روابط متعددة لمقاومة الأعطال.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -252,172 +298,155 @@
                 ]
             },
             'security': {
-                title: 'الأمان في الشبكات', icon: 'fa-shield-alt', color: 'red', desc: 'مفهوم الأمان، مثلث CIA، التهديدات، والحلول التقنية.',
-                tabs: ['مفهوم الأمان والـ CIA', 'التهديدات للشبكة', 'حلول الأمان التقنية'],
+                title: 'الأمان في الشبكات', icon: 'fa-shield-alt', color: 'red', desc: 'التهديدات الداخلية والخارجية والحلول الأمنية.',
+                tabs: ['التهديدات الداخلية والخارجية', 'حلول الأمان في الشبكات'],
                 content: [
-                    `<div class="space-y-8">
-                        <div class="glass-card p-10 border-r-[10px] border-red-500 bg-red-50/30">
-                            <h2 class="text-3xl font-black text-red-700 mb-4">مفهوم أمان الشبكات</h2>
-                            <p class="content-text text-lg">أمان الشبكات هو مجموعة من السياسات والتقنيات التي تهدف إلى حماية البيانات والأجهزة والموارد المتصلة بالشبكة من الوصول غير المصرح به، أو التخريب، أو سوء الاستخدام.</p>
-                        </div>
-                        <h3 class="text-2xl font-black text-slate-800 text-center mb-6">أهداف الحماية ومثلث (CIA)</h3>
-                        <div class="grid md:grid-cols-3 gap-6 text-center">
-                            <div class="glass-card p-8 border-t-4 border-red-500 hover-scale"><div class="bg-red-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-user-secret text-2xl text-red-600"></i></div><h4 class="font-black text-xl text-slate-800 mb-2">السرية (Confidentiality)</h4><p class="text-sm text-slate-600 font-bold">ضمان حماية البيانات الحساسة وعدم إطلاع غير المصرح لهم عليها.</p></div>
-                            <div class="glass-card p-8 border-t-4 border-blue-500 hover-scale"><div class="bg-blue-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-check-double text-2xl text-blue-600"></i></div><h4 class="font-black text-xl text-slate-800 mb-2">السلامة (Integrity)</h4><p class="text-sm text-slate-600 font-bold">ضمان عدم تعديل البيانات أثناء النقل وبقائها كما هي.</p></div>
-                            <div class="glass-card p-8 border-t-4 border-emerald-500 hover-scale"><div class="bg-emerald-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-server text-2xl text-emerald-600"></i></div><h4 class="font-black text-xl text-slate-800 mb-2">التوافر (Availability)</h4><p class="text-sm text-slate-600 font-bold">ضمان الوصول للخدمات والموارد من قبل المصرح لهم في أي وقت.</p></div>
-                        </div>
-                        <div class="glass-card p-6 bg-slate-50 border-none text-center">
-                            <p class="font-bold text-slate-700">كما يهدف الأمان إلى: <span class="text-blue-600">ضمان استمرارية العمل</span>، <span class="text-emerald-600">منع الخسائر المالية</span>، و <span class="text-purple-600">تعزيز ثقة المستخدمين</span>.</p>
-                        </div>
-                    </div>`,
-                    `<div class="grid md:grid-cols-2 gap-8">
-                        <div class="glass-card p-8 border-t-[8px] border-orange-500">
-                            <h3 class="text-2xl font-black text-orange-700 mb-4 flex items-center gap-3"><i class="fas fa-user-tie"></i> التهديدات الداخلية</h3>
-                            <p class="text-slate-600 mb-6 font-bold leading-relaxed text-sm">تأتي من داخل المؤسسة نفسها سواء بقصد أو بغير قصد. خطورتها تكمن في أن أصحابها غالباً يمتلكون صلاحيات وصول واسعة للأنظمة.</p>
-                            <div class="bg-orange-50 p-5 rounded-2xl border border-orange-100 space-y-3">
-                                <h4 class="font-black text-orange-800 mb-2 text-sm">أمثلة:</h4>
-                                <p class="flex gap-2 text-slate-700 font-bold text-xs"><i class="fas fa-times-circle text-orange-600 mt-0.5"></i> موظف يشارك كلمة المرور مع الآخرين.</p>
-                                <p class="flex gap-2 text-slate-700 font-bold text-xs"><i class="fas fa-times-circle text-orange-600 mt-0.5"></i> حذف ملفات مهمة وقواعد بيانات عن طريق الخطأ.</p>
-                                <p class="flex gap-2 text-slate-700 font-bold text-xs"><i class="fas fa-times-circle text-orange-600 mt-0.5"></i> استخدام أجهزة شخصية غير آمنة (USB) داخل الشبكة.</p>
-                                <p class="flex gap-2 text-slate-700 font-bold text-xs"><i class="fas fa-times-circle text-orange-600 mt-0.5"></i> التخريب المتعمد من قبل موظف غاضب.</p>
+                    `<div class="rich-display glass-card p-10">
+                        <h1><i class="fas fa-shield-alt ml-2 text-red-500"></i> التهديدات الأمنية للشبكة</h1>
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div class="bg-orange-50 p-8 rounded-3xl border border-orange-200">
+                                <h2 class="!text-orange-700 flex items-center gap-2"><i class="fas fa-user-tie"></i> التهديدات الداخلية</h2>
+                                <p class="!text-sm">تأتي من داخل المؤسسة نفسها سواء بقصد أو بدون قصد. خطورتها تكمن في أن أصحابها غالباً يمتلكون صلاحيات وصول واسعة.</p>
+                                <h3 class="!text-lg !text-orange-800 mt-4">أمثلة:</h3>
+                                <ul class="!text-sm !text-orange-900/80">
+                                    <li>مشاركة كلمة المرور مع الآخرين.</li>
+                                    <li>حذف ملفات وقواعد بيانات مهمة عن طريق الخطأ.</li>
+                                    <li>استخدام أجهزة شخصية غير آمنة (USB) داخل الشبكة.</li>
+                                    <li>التخريب المتعمد من قبل موظف غاضب.</li>
+                                </ul>
                             </div>
-                        </div>
-                        <div class="glass-card p-8 border-t-[8px] border-red-600">
-                            <h3 class="text-2xl font-black text-red-700 mb-4 flex items-center gap-3"><i class="fas fa-user-ninja"></i> التهديدات الخارجية</h3>
-                            <p class="text-slate-600 mb-6 font-bold leading-relaxed text-sm">تأتي من خارج حدود الشبكة عبر الإنترنت. قد تؤدي لسرقة بيانات حساسة، تعطيل خدمات الشركة، أو الابتزاز المالي.</p>
-                            <div class="bg-red-50 p-5 rounded-2xl border border-red-100 space-y-3">
-                                <h4 class="font-black text-red-800 mb-2 text-sm">أمثلة:</h4>
-                                <p class="flex gap-2 text-slate-700 font-bold text-xs"><i class="fas fa-skull text-red-600 mt-0.5"></i> هجمات الاختراق المباشر (Hacking) واستغلال الثغرات.</p>
-                                <p class="flex gap-2 text-slate-700 font-bold text-xs"><i class="fas fa-virus text-red-600 mt-0.5"></i> البرمجيات الخبيثة (Malware) والفيروسات.</p>
-                                <p class="flex gap-2 text-slate-700 font-bold text-xs"><i class="fas fa-bomb text-red-600 mt-0.5"></i> هجمات حجب الخدمة (DDoS) لإسقاط الخوادم.</p>
-                                <p class="flex gap-2 text-slate-700 font-bold text-xs"><i class="fas fa-fish text-red-600 mt-0.5"></i> التصيد الإلكتروني (Phishing) لسرقة الحسابات والهويات.</p>
+                            <div class="bg-red-50 p-8 rounded-3xl border border-red-200">
+                                <h2 class="!text-red-700 flex items-center gap-2"><i class="fas fa-user-ninja"></i> التهديدات الخارجية</h2>
+                                <p class="!text-sm">تأتي من خارج حدود الشبكة (الإنترنت). قد تؤدي لسرقة بيانات، تعطيل خدمات، أو ابتزاز مالي.</p>
+                                <h3 class="!text-lg !text-red-800 mt-4">أمثلة:</h3>
+                                <ul class="!text-sm !text-red-900/80">
+                                    <li>هجمات الاختراق المباشر (Hacking) واستغلال الثغرات.</li>
+                                    <li>البرمجيات الخبيثة (Malware) والفيروسات.</li>
+                                    <li>هجمات حجب الخدمة (DDoS) لإسقاط الخوادم.</li>
+                                    <li>التصيد الإلكتروني (Phishing) لسرقة الحسابات والهويات.</li>
+                                </ul>
                             </div>
                         </div>
                     </div>`,
-                    `<div class="space-y-8">
-                        <div class="text-center"><h2 class="text-2xl font-black text-slate-800 mb-6 border-b-2 border-slate-200 pb-2 inline-block">حلول الأمان والترسانة التقنية</h2></div>
-                        <div class="grid lg:grid-cols-2 gap-6">
-                            <div class="glass-card p-6 flex items-start gap-5 hover-scale border-r-4 border-rose-500 bg-slate-50">
-                                <div class="bg-rose-100 p-3 rounded-lg text-rose-600"><i class="fas fa-fire-alt text-3xl"></i></div>
-                                <div><h4 class="text-lg font-black text-slate-800 mb-1">الجدران النارية (Firewalls)</h4><p class="text-slate-600 font-bold text-xs leading-relaxed">تعمل كحارس صارم بين الشبكة الداخلية والعالم الخارجي، وتسمح فقط بالاتصالات المصرح بها وتغلق البقية.</p></div>
+                    `<div class="rich-display glass-card p-10">
+                        <h1 class="text-center">حلول الأمان والترسانة التقنية</h1>
+                        <div class="custom-grid-container">
+                            <div class="custom-grid-card border-b-4 border-b-rose-500 bg-slate-50">
+                                <div class="bg-rose-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-fire-alt text-3xl text-rose-600"></i></div>
+                                <div class="custom-grid-title text-slate-800">الجدران النارية (Firewalls)</div>
+                                <p class="custom-grid-desc">تعمل كحارس صارم بين الشبكة الداخلية والعالم الخارجي، وتسمح فقط بالاتصالات المصرح بها.</p>
                             </div>
-                            <div class="glass-card p-6 flex items-start gap-5 hover-scale border-r-4 border-blue-500 bg-slate-50">
-                                <div class="bg-blue-100 p-3 rounded-lg text-blue-600"><i class="fas fa-eye text-3xl"></i></div>
-                                <div><h4 class="text-lg font-black text-slate-800 mb-1">كشف ومنع التسلل (IDS/IPS)</h4><p class="text-slate-600 font-bold text-xs leading-relaxed">الـ IDS يكتشف الهجمات وينذر، بينما الـ IPS أذكى حيث يكتشف ويمنع الهجمات ويقطع الاتصال تلقائياً.</p></div>
+                            <div class="custom-grid-card border-b-4 border-b-blue-500 bg-slate-50">
+                                <div class="bg-blue-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-eye text-3xl text-blue-600"></i></div>
+                                <div class="custom-grid-title text-slate-800">كشف ومنع التسلل (IDS/IPS)</div>
+                                <p class="custom-grid-desc">الـ IDS يكتشف الهجمات وينذر، بينما الـ IPS أذكى حيث يكتشف ويمنع الهجمات ويقطع الاتصال تلقائياً.</p>
                             </div>
-                            <div class="glass-card p-6 flex items-start gap-5 hover-scale border-r-4 border-purple-500 bg-slate-50">
-                                <div class="bg-purple-100 p-3 rounded-lg text-purple-600"><i class="fas fa-key text-3xl"></i></div>
-                                <div><h4 class="text-lg font-black text-slate-800 mb-1">التشفير (Encryption)</h4><p class="text-slate-600 font-bold text-xs leading-relaxed">تحويل البيانات إلى طلاسم وصيغ غير مفهومة لحمايتها أثناء النقل عبر الشبكة ولا تقرأ إلا بمفتاح فك تشفير.</p></div>
+                            <div class="custom-grid-card border-b-4 border-b-purple-500 bg-slate-50">
+                                <div class="bg-purple-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-key text-3xl text-purple-600"></i></div>
+                                <div class="custom-grid-title text-slate-800">التشفير (Encryption)</div>
+                                <p class="custom-grid-desc">تحويل البيانات إلى طلاسم وصيغ غير مفهومة لحمايتها أثناء النقل عبر الشبكة ولا تقرأ إلا بمفتاح فك تشفير.</p>
                             </div>
-                            <div class="glass-card p-6 flex items-start gap-5 hover-scale border-r-4 border-emerald-500 bg-slate-50">
-                                <div class="bg-emerald-100 p-3 rounded-lg text-emerald-600"><i class="fas fa-id-card-clip text-3xl"></i></div>
-                                <div><h4 class="text-lg font-black text-slate-800 mb-1">إدارة الصلاحيات (Access Control)</h4><p class="text-slate-600 font-bold text-xs leading-relaxed">تحديد هويات المستخدمين ومن يمكنه الوصول إلى المجلدات والأنظمة داخل الشبكة لإيقاف الفضوليين.</p></div>
+                            <div class="custom-grid-card border-b-4 border-b-emerald-500 bg-slate-50">
+                                <div class="bg-emerald-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-id-card-clip text-3xl text-emerald-600"></i></div>
+                                <div class="custom-grid-title text-slate-800">إدارة الصلاحيات</div>
+                                <p class="custom-grid-desc">تحديد هويات المستخدمين ومن يمكنه الوصول إلى المجلدات والأنظمة داخل الشبكة لإيقاف الفضوليين.</p>
                             </div>
-                            <div class="glass-card p-6 flex items-start gap-5 hover-scale border-r-4 border-orange-500 bg-slate-50">
-                                <div class="bg-orange-100 p-3 rounded-lg text-orange-600"><i class="fas fa-hdd text-3xl"></i></div>
-                                <div><h4 class="text-lg font-black text-slate-800 mb-1">النسخ الاحتياطي (Backup)</h4><p class="text-slate-600 font-bold text-xs leading-relaxed">تخزين البيانات في مكان آمن لاسترجاعها عند الفقدان أو التشفير (مثل هجمات برامج الفدية Ransomware).</p></div>
+                            <div class="custom-grid-card border-b-4 border-b-orange-500 bg-slate-50 md:col-span-1 lg:col-span-1">
+                                <div class="bg-orange-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-hdd text-3xl text-orange-600"></i></div>
+                                <div class="custom-grid-title text-slate-800">النسخ الاحتياطي (Backup)</div>
+                                <p class="custom-grid-desc">تخزين البيانات في مكان آمن لاسترجاعها عند الفقدان أو التشفير (مثل هجمات برامج الفدية Ransomware).</p>
                             </div>
-                            <div class="glass-card p-6 flex items-start gap-5 hover-scale border-r-4 border-yellow-500 bg-slate-50">
-                                <div class="bg-yellow-100 p-3 rounded-lg text-yellow-600"><i class="fas fa-user-graduate text-3xl"></i></div>
-                                <div><h4 class="text-lg font-black text-slate-800 mb-1">التوعية الأمنية</h4><p class="text-slate-600 font-bold text-xs leading-relaxed">تدريب المستخدمين البشريين (الحلقة الأضعف) على عدم فتح الروابط المشبوهة واستخدام كلمات مرور قوية.</p></div>
+                            <div class="custom-grid-card border-b-4 border-b-yellow-500 bg-slate-50">
+                                <div class="bg-yellow-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"><i class="fas fa-user-graduate text-3xl text-yellow-600"></i></div>
+                                <div class="custom-grid-title text-slate-800">التوعية الأمنية</div>
+                                <p class="custom-grid-desc">تدريب المستخدمين البشريين (الحلقة الأضعف) على عدم فتح الروابط المشبوهة واستخدام كلمات مرور قوية.</p>
                             </div>
                         </div>
                     </div>`
                 ]
             },
             'osi': {
-                title: 'نموذج OSI المرجعي', icon: 'fa-layer-group', color: 'emerald', desc: 'الطبقات السبع، عمليات التغليف، والمقارنات.',
-                tabs: ['المرجع والطبقات السبع', 'عملية التغليف ونوع الاتصال', 'مقارنات بروتوكولات وأجهزة'],
+                title: 'نموذج OSI المرجعي', icon: 'fa-layer-group', color: 'emerald', desc: 'تحليل معماري للطبقات السبع، عمليات التغليف، والمقارنات.',
+                tabs: ['مقدمة والطبقات السبع', 'التغليف وأنواع الاتصال', 'مقارنات بروتوكولات وأجهزة'],
                 content: [
-                    `<div class="space-y-8">
-                        <div class="glass-card p-8 bg-emerald-50/50 border-emerald-200">
-                            <h2 class="text-2xl font-black text-emerald-800 mb-4">مرجع OSI المفتوح (Open Systems Interconnection)</h2>
-                            <p class="content-text text-sm mb-4">هو مراحل تكون البيانات ونقلها من الجهاز المرسل (Source device) إلى الجهاز المستقبل (Destination device). وضعته المنظمة الدولية للمعايير (ISO) سنة 1983 برقم 7498 ليكون نموذج نظري موثوق للاتصالات مقسم لـ 7 طبقات.</p>
-                            <h4 class="font-black text-slate-800 mb-2">فائدة فهم طبقات OSI:</h4>
-                            <ul class="text-slate-600 font-bold space-y-1.5 text-sm"><li>1. تستطيع فهم وحل المشاكل (Troubleshooting) للشبكات.</li><li>2. معرفة كيفية تكوين البيانات وما هو شكلها في كل مرحلة.</li><li>3. تفيد بمعرفة النقاط الحساسة وكيفية تشفير وفك البيانات.</li><li>4. معرفة كل جهاز في أية طبقة يعمل (مثل HUB والراوتر والسويتش).</li></ul>
-                        </div>
-                        <h3 class="text-2xl font-black text-center text-slate-800 mb-4">الطبقات السبع (OSI Layers)</h3>
-                        <div class="space-y-2 font-sans">
-                            <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-4 shadow-sm border-r-8 border-r-red-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-red-200 w-12 text-center">7</span><div><h4 class="text-lg font-black text-slate-800">Application (طبقة التطبيقات)</h4><p class="font-bold text-xs text-slate-600">التطبيقات التي نستخدمها لإرسال الرسائل وتعتبر واجهة المستخدم للشبكة. بروتوكولات: HTTP (ويب), FTP (ملفات), SMTP (بريد).</p></div></div>
-                            <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-4 shadow-sm border-r-8 border-r-orange-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-orange-200 w-12 text-center">6</span><div><h4 class="text-lg font-black text-slate-800">Presentation (طبقة التقديم)</h4><p class="font-bold text-xs text-slate-600">تهيئة البيانات وتحديد امتدادها (نصوص، صور)، وعمل التشفير وفك التشفير والضغط. بروتوكولات: JPEG, HTML.</p></div></div>
-                            <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-4 shadow-sm border-r-8 border-r-yellow-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-yellow-400 w-12 text-center">5</span><div><h4 class="text-lg font-black text-slate-800">Session (طبقة الجلسة)</h4><p class="font-bold text-xs text-slate-600">إدارة وفتح وإغلاق الاتصال وتحديد نوعه إرسال واستقبال (Simplex, Half Duplex, Full Duplex). بروتوكولات: NFS, SQL.</p></div></div>
-                            <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-4 shadow-sm border-r-8 border-r-emerald-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-emerald-200 w-12 text-center">4</span><div><h4 class="text-lg font-black text-slate-800">Transport (طبقة النقل)</h4><p class="font-bold text-xs text-slate-600">تحديد البروتوكول المناسب لنقل البيانات وتقطيعها (Segment) وضمانها. بروتوكولات: TCP (للملفات), UDP (للصوت والفيديو).</p></div></div>
-                            <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-4 shadow-sm border-r-8 border-r-blue-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-blue-200 w-12 text-center">3</span><div><h4 class="text-lg font-black text-slate-800">Network (طبقة الشبكة)</h4><p class="font-bold text-xs text-slate-600">إضافة عنوان IP للمرسل والمستقبل، واختيار مسار التوجيه (Routing). الجهاز: الراوتر. شكل البيانات: Packet.</p></div></div>
-                            <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-4 shadow-sm border-r-8 border-r-indigo-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-indigo-200 w-12 text-center">2</span><div><h4 class="text-lg font-black text-slate-800">Data Link (طبقة ربط البيانات)</h4><p class="font-bold text-xs text-slate-600">إضافة معلومات التحكم لاكتشاف الأخطاء واستخدام العنوان الفيزيائي (MAC Address). الجهاز: السويتش. شكل البيانات: Frame.</p></div></div>
-                            <div class="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-4 shadow-sm border-r-8 border-r-purple-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-purple-200 w-12 text-center">1</span><div><h4 class="text-lg font-black text-slate-800">Physical (الطبقة الفيزيائية)</h4><p class="font-bold text-xs text-slate-600">تحويل البيانات إلى إشارات (Bits) كهربائية/ضوئية لتسليمها للكابل عبر كرت الشبكة. الجهاز: Hub, Cables.</p></div></div>
-                        </div>
-                    </div>`,
-                    `<div class="space-y-8">
-                        <div class="glass-card p-8 border-r-[8px] border-emerald-500 bg-emerald-50/20">
-                            <h3 class="text-2xl font-black text-emerald-800 mb-3">ما هو البروتوكول Protocol؟</h3>
-                            <p class="content-text text-sm">مجموعة من الأكواد البرمجية والقواعد التي تحدد كيف يمكن لأجهزة الكمبيوتر أن تتفاهم مع بعضها عبر الشبكة التي تتواجد عليها، لتسهيل عملية التخاطب.</p>
-                        </div>
-                        <div class="glass-card p-8 border-r-[8px] border-blue-500 bg-blue-50/20">
-                            <h3 class="text-2xl font-black text-blue-800 mb-3">تغليف البيانات (Encapsulation)</h3>
-                            <p class="content-text text-sm mb-2">تسمى العملية التي تضيف فيها البروتوكولات الترويسات (Header) والتذييل (Trailer) على البيانات بعملية تغليف البيانات، وهذا ما يحدث في عملية الإرسال نزولاً للطبقة الأولى.</p>
-                            <p class="content-text text-sm font-black text-emerald-700">في عملية الاستقبال تسمى عملية فك التغليف (De-Encapsulation) وتحدث صعوداً للطبقة السابعة.</p>
-                        </div>
-                        <h3 class="text-2xl font-black text-center border-b-2 border-indigo-200 pb-2 inline-block mx-auto mt-6">أنواع الاتصالات في طبقة الجلسة</h3>
-                        <div class="grid md:grid-cols-3 gap-6 text-center">
-                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-scale"><i class="fas fa-arrow-right text-3xl text-rose-500 mb-3"></i><h4 class="font-black text-lg mb-1">Simplex</h4><p class="text-xs font-bold text-slate-500">إرسال في اتجاه واحد فقط يرسل مرة واحدة مثل الراديو والتلفزيون.</p></div>
-                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-scale"><i class="fas fa-exchange-alt text-3xl text-yellow-500 mb-3"></i><h4 class="font-black text-lg mb-1">Half Duplex</h4><p class="text-xs font-bold text-slate-500">إرسال واستقبال ولكن ليس في نفس الوقت مثل أجهزة الشرطة.</p></div>
-                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-scale"><i class="fas fa-arrows-alt-h text-3xl text-emerald-500 mb-3"></i><h4 class="font-black text-lg mb-1">Full Duplex</h4><p class="text-xs font-bold text-slate-500">استقبال وإرسال بخط واحد في نفس الوقت مثل الاتصال بالجوال.</p></div>
-                        </div>
-                    </div>`,
-                    `<div class="space-y-8">
-                        <div class="glass-card p-0 rounded-3xl overflow-hidden shadow-md">
-                            <div class="bg-blue-50 p-6 text-center border-b border-blue-100"><h3 class="text-2xl font-black text-blue-900">الفروق بين TCP و UDP (في طبقة النقل)</h3></div>
-                            <div class="p-6 grid md:grid-cols-2 gap-6">
-                                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <h4 class="text-xl font-black text-blue-700 mb-4 border-b border-slate-100 pb-2">بروتوكول TCP</h4>
-                                    <ul class="space-y-3 font-bold text-slate-600 text-sm">
-                                        <li class="flex justify-between border-b border-slate-50 pb-1.5"><span>حجم الـ Header:</span> <span class="text-slate-800">20 bytes</span></li>
-                                        <li class="flex justify-between border-b border-slate-50 pb-1.5"><span>السرعة:</span> <span class="text-slate-800">أبطأ من UDP</span></li>
-                                        <li class="flex justify-between border-b border-slate-50 pb-1.5"><span>التحقق من الأخطاء:</span> <span class="text-emerald-600">نعم</span></li>
-                                        <li class="flex justify-between border-b border-slate-50 pb-1.5"><span>ترتيب أجزاء الرسالة:</span> <span class="text-emerald-600">نعم</span></li>
-                                        <li class="flex justify-between pt-1.5"><span>الاستخدام:</span> <span class="text-blue-600">تحميل الملفات، التصفح</span></li>
-                                    </ul>
-                                </div>
-                                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <h4 class="text-xl font-black text-orange-600 mb-4 border-b border-slate-100 pb-2">بروتوكول UDP</h4>
-                                    <ul class="space-y-3 font-bold text-slate-600 text-sm">
-                                        <li class="flex justify-between border-b border-slate-50 pb-1.5"><span>حجم الـ Header:</span> <span class="text-slate-800">8 bytes</span></li>
-                                        <li class="flex justify-between border-b border-slate-50 pb-1.5"><span>السرعة:</span> <span class="text-slate-800">أسرع من TCP</span></li>
-                                        <li class="flex justify-between border-b border-slate-50 pb-1.5"><span>التحقق من الأخطاء:</span> <span class="text-red-500">لا</span></li>
-                                        <li class="flex justify-between border-b border-slate-50 pb-1.5"><span>ترتيب أجزاء الرسالة:</span> <span class="text-red-500">لا</span></li>
-                                        <li class="flex justify-between pt-1.5"><span>الاستخدام:</span> <span class="text-orange-600">بث مرئي، ألعاب أونلاين</span></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                    `<div class="rich-display glass-card p-10">
+                        <h1>مرجع OSI (Open Systems Interconnection)</h1>
+                        <p>هو مراحل تكون البيانات ونقلها من الجهاز المرسل (Source device) إلى الجهاز المستقبل (Destination device). وضعته المنظمة الدولية للمعايير (ISO) سنة 1983 برقم 7498 ليكون نموذج نظري موثوق للاتصالات مقسم لـ 7 طبقات.</p>
+                        
+                        <h2>فائدة فهم طبقات OSI:</h2>
+                        <ul>
+                            <li>تستطيع فهم وحل المشاكل (Troubleshooting) للشبكات.</li>
+                            <li>معرفة كيفية تكوين البيانات وما هو شكلها في كل مرحلة.</li>
+                            <li>تفيد بمعرفة النقاط الحساسة وكيفية تشفير وفك البيانات.</li>
+                            <li>معرفة كل جهاز في أية طبقة يعمل (مثل HUB والراوتر والسويتش).</li>
+                        </ul>
 
-                        <div class="glass-card p-0 rounded-3xl overflow-hidden shadow-md mt-8">
-                            <div class="bg-emerald-50 p-6 text-center border-b border-emerald-100"><h3 class="text-2xl font-black text-emerald-900">الراوتر (ROUTER) VS السويتش (SWITCH)</h3></div>
-                            <div class="p-6 grid md:grid-cols-2 gap-6">
-                                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <h4 class="text-lg font-black text-indigo-700 mb-4 flex items-center gap-2"><i class="fas fa-random"></i> السويتش (SWITCH)</h4>
-                                    <ul class="space-y-3 font-bold text-slate-600 text-sm">
-                                        <li>- جهاز وسيط يقوم بربط أجهزة الحاسب مع بعضها.</li>
-                                        <li>- يعمل على الطبقة الثانية (Data Link Layer).</li>
-                                        <li>- تسمى الرسالة المحولة من قبله بـ (Frame).</li>
-                                        <li>- يستخدم في الشبكات المحلية (LAN).</li>
-                                        <li>- يوجد به منافذ إيثرنت 24 أو 48، ولا يوجد سيريال.</li>
-                                        <li>- يعتمد كلياً على جدول العناوين (MAC Address).</li>
-                                    </ul>
-                                </div>
-                                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <h4 class="text-lg font-black text-emerald-700 mb-4 flex items-center gap-2"><i class="fas fa-route"></i> الراوتر (ROUTER)</h4>
-                                    <ul class="space-y-3 font-bold text-slate-600 text-sm">
-                                        <li>- جهاز وسيط يقوم بتوجيه الرسائل بين الأجهزة والشبكات.</li>
-                                        <li>- يعمل على الطبقة الثالثة (Network Layer).</li>
-                                        <li>- تسمى الرسالة الموجهة من قبله بـ (Packet).</li>
-                                        <li>- يستخدم في الشبكات الواسعة (WAN).</li>
-                                        <li>- به منافذ إيثرنت تصل لـ 4، ومنافذ سيريال للـ WAN.</li>
-                                        <li>- يعتمد كلياً على بروتوكول العنونة (IP Address).</li>
-                                    </ul>
-                                </div>
-                            </div>
+                        <h2 class="text-center mt-10">الطبقات السبع (OSI Layers)</h2>
+                        <div class="space-y-4 font-sans mt-6">
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-center gap-6 shadow-sm border-r-8 border-r-red-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-red-300 w-12 text-center">7</span><div><h4 class="text-xl font-black text-slate-800">Application (طبقة التطبيقات)</h4><p class="font-bold text-sm text-slate-600 mt-1">التطبيقات التي نستخدمها لإرسال الرسائل وتعتبر واجهة المستخدم للشبكة. بروتوكولات: HTTP (ويب), FTP (ملفات), SMTP (بريد).</p></div></div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-center gap-6 shadow-sm border-r-8 border-r-orange-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-orange-300 w-12 text-center">6</span><div><h4 class="text-xl font-black text-slate-800">Presentation (طبقة التقديم)</h4><p class="font-bold text-sm text-slate-600 mt-1">تهيئة البيانات وتحديد امتدادها (نصوص، صور)، وعمل التشفير وفك التشفير والضغط. بروتوكولات: JPEG, HTML.</p></div></div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-center gap-6 shadow-sm border-r-8 border-r-yellow-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-yellow-400 w-12 text-center">5</span><div><h4 class="text-xl font-black text-slate-800">Session (طبقة الجلسة)</h4><p class="font-bold text-sm text-slate-600 mt-1">إدارة وفتح وإغلاق الاتصال وتحديد نوعه إرسال واستقبال (Simplex, Half Duplex, Full Duplex). بروتوكولات: NFS, SQL.</p></div></div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-center gap-6 shadow-sm border-r-8 border-r-emerald-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-emerald-400 w-12 text-center">4</span><div><h4 class="text-xl font-black text-slate-800">Transport (طبقة النقل)</h4><p class="font-bold text-sm text-slate-600 mt-1">تحديد البروتوكول المناسب لنقل البيانات وتقطيعها (Segment) وضمانها. بروتوكولات: TCP (للملفات), UDP (للصوت والفيديو).</p></div></div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-center gap-6 shadow-sm border-r-8 border-r-blue-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-blue-400 w-12 text-center">3</span><div><h4 class="text-xl font-black text-slate-800">Network (طبقة الشبكة)</h4><p class="font-bold text-sm text-slate-600 mt-1">إضافة عنوان IP للمرسل والمستقبل، واختيار مسار التوجيه (Routing). الجهاز: الراوتر. شكل البيانات: Packet.</p></div></div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-center gap-6 shadow-sm border-r-8 border-r-indigo-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-indigo-400 w-12 text-center">2</span><div><h4 class="text-xl font-black text-slate-800">Data Link (طبقة ربط البيانات)</h4><p class="font-bold text-sm text-slate-600 mt-1">إضافة معلومات التحكم لاكتشاف الأخطاء واستخدام العنوان الفيزيائي (MAC Address). الجهاز: السويتش. شكل البيانات: Frame.</p></div></div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-center gap-6 shadow-sm border-r-8 border-r-purple-500 hover:bg-slate-50 transition"><span class="text-4xl font-black text-purple-400 w-12 text-center">1</span><div><h4 class="text-xl font-black text-slate-800">Physical (الطبقة الفيزيائية)</h4><p class="font-bold text-sm text-slate-600 mt-1">تحويل البيانات إلى إشارات (Bits) كهربائية/ضوئية لتسليمها للكابل عبر كرت الشبكة. الجهاز: Hub, Cables.</p></div></div>
                         </div>
+                    </div>`,
+                    `<div class="rich-display glass-card p-10">
+                        <div class="bg-emerald-50 p-8 rounded-2xl border border-emerald-100 mb-8">
+                            <h2>ما هو البروتوكول Protocol؟</h2>
+                            <p class="!text-sm">مجموعة من الأكواد البرمجية والقواعد التي تحدد كيف يمكن لأجهزة الكمبيوتر أن تتفاهم مع بعضها عبر الشبكة التي تتواجد عليها، لتسهيل عملية التخاطب.</p>
+                        </div>
+                        <div class="bg-blue-50 p-8 rounded-2xl border border-blue-100 mb-10">
+                            <h2 class="!text-blue-700">تغليف البيانات (Encapsulation)</h2>
+                            <p class="!text-sm mb-2">تسمى العملية التي تضيف فيها البروتوكولات الترويسات (Header) والتذييل (Trailer) على البيانات بعملية تغليف البيانات، وهذا ما يحدث في عملية الإرسال نزولاً للطبقة الأولى.</p>
+                            <p class="!text-sm font-black text-blue-900">في عملية الاستقبال تسمى عملية فك التغليف (De-Encapsulation) وتحدث صعوداً للطبقة السابعة.</p>
+                        </div>
+                        
+                        <h2 class="text-center border-b-2 border-slate-100 pb-4">أنواع الاتصالات في طبقة الجلسة</h2>
+                        <div class="grid md:grid-cols-3 gap-6 text-center mt-6">
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-scale"><i class="fas fa-arrow-right text-4xl text-rose-500 mb-4 block"></i><h4 class="font-black text-xl mb-2 text-slate-800">Simplex</h4><p class="text-xs font-bold text-slate-500">إرسال في اتجاه واحد فقط يرسل مرة واحدة مثل الراديو والتلفزيون.</p></div>
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-scale"><i class="fas fa-exchange-alt text-4xl text-yellow-500 mb-4 block"></i><h4 class="font-black text-xl mb-2 text-slate-800">Half Duplex</h4><p class="text-xs font-bold text-slate-500">إرسال واستقبال ولكن ليس في نفس الوقت مثل أجهزة الشرطة (اللاسلكي).</p></div>
+                            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover-scale"><i class="fas fa-arrows-alt-h text-4xl text-emerald-500 mb-4 block"></i><h4 class="font-black text-xl mb-2 text-slate-800">Full Duplex</h4><p class="text-xs font-bold text-slate-500">استقبال وإرسال بخط واحد في نفس الوقت مثل الاتصال بالجوال.</p></div>
+                        </div>
+                    </div>`,
+                    `<div class="rich-display glass-card p-10">
+                        <h1 class="text-center mb-8">مقارنات هامة في الشبكات</h1>
+                        
+                        <h2>الفروق بين TCP و UDP (في طبقة النقل)</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>وجه المقارنة</th>
+                                    <th>بروتوكول TCP</th>
+                                    <th style="color: #ea580c;">بروتوكول UDP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>حجم الـ Header</td><td>20 bytes</td><td>8 bytes</td></tr>
+                                <tr><td>السرعة</td><td>أبطأ</td><td>أسرع</td></tr>
+                                <tr><td>التحقق من الأخطاء وترتيب الأجزاء</td><td style="color: #059669;">نعم</td><td style="color: #ef4444;">لا</td></tr>
+                                <tr><td>الاستخدام الشائع</td><td>تحميل الملفات، التصفح، الإيميل</td><td>البث المرئي، ألعاب الأونلاين المباشرة</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h2 class="mt-12">الراوتر (ROUTER) VS السويتش (SWITCH)</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>وجه المقارنة</th>
+                                    <th style="color: #4338ca;"><i class="fas fa-random"></i> السويتش (SWITCH)</th>
+                                    <th style="color: #059669;"><i class="fas fa-route"></i> الراوتر (ROUTER)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>الطبقة التي يعمل بها</td><td>الطبقة الثانية (Data Link Layer)</td><td>الطبقة الثالثة (Network Layer)</td></tr>
+                                <tr><td>اسم الرسالة</td><td>الإطار (Frame)</td><td>الحزمة (Packet)</td></tr>
+                                <tr><td>نطاق الاستخدام</td><td>الشبكات المحلية (LAN)</td><td>الشبكات الواسعة (WAN)</td></tr>
+                                <tr><td>المنافذ</td><td>منافذ إيثرنت 24 أو 48، لا يوجد سيريال</td><td>منافذ إيثرنت تصل لـ 4، ومنافذ سيريال للـ WAN</td></tr>
+                                <tr><td>الاعتماد الأساسي</td><td>جدول العناوين الفيزيائية (MAC Address)</td><td>بروتوكول العنونة (IP Address)</td></tr>
+                            </tbody>
+                        </table>
                     </div>`
                 ]
             },
@@ -425,114 +454,117 @@
                 title: 'كيابل شبكات الحاسب', icon: 'fa-ethernet', color: 'purple', desc: 'وسائط النقل، الأنواع، معايير التأريج وأدوات الفني.',
                 tabs: ['أنواع الكابلات وفئاتها', 'الترتيب والأدوات', 'الألياف الضوئية (Fiber)'],
                 content: [
-                    `<div class="space-y-8">
-                        <div class="glass-card p-8 text-center bg-purple-50/30">
-                            <h2 class="text-2xl font-black text-purple-800 mb-3">ما هو الكابل؟</h2>
-                            <p class="content-text text-sm">الكابل هو الوسيط الذي تنتقل من خلاله البيانات والمعلومات من حاسب إلى آخر في الشبكة أو من شبكة إلى شبكة أخرى.</p>
+                    `<div class="rich-display glass-card p-10">
+                        <h1>ما هو الكابل؟</h1>
+                        <p>الكابل هو الوسيط الذي تنتقل من خلاله البيانات والمعلومات من حاسب إلى آخر في الشبكة أو من شبكة إلى شبكة أخرى.</p>
+                        
+                        <h2 class="text-center mt-10">أنواع كبلات الشبكات الأساسية</h2>
+                        <div class="custom-grid-container">
+                            <div class="custom-grid-card border-t-4 border-t-slate-400">
+                                <i class="fas fa-dot-circle custom-grid-icon text-slate-400"></i>
+                                <div class="custom-grid-title text-slate-800">المحوري (Coaxial)</div>
+                                <p class="custom-grid-desc">يتكون من موصل نحاسي مركزي وعازل بلاستيكي ووقاء نحاسي مجدول. يستخدم غالباً لتوصيل أنظمة التلفاز وموصلات BNC و F و N للكاميرات القديمة.</p>
+                            </div>
+                            <div class="custom-grid-card border-t-4 border-t-purple-500">
+                                <i class="fas fa-bezier-curve custom-grid-icon text-purple-600"></i>
+                                <div class="custom-grid-title text-purple-800">المزدوج المجدول (Twisted Pair)</div>
+                                <p class="custom-grid-desc">يتكون من 8 أزواج ملفوفة لتقليل التشويش. ينقسم لمحمي (STP) بقصدير، وغير محمي (UTP). وهو المعيار الأشهر للشبكات المحلية.</p>
+                            </div>
+                            <div class="custom-grid-card border-t-4 border-t-blue-500">
+                                <i class="fas fa-bolt custom-grid-icon text-blue-600"></i>
+                                <div class="custom-grid-title text-blue-800">الضوئي (Fiber Optic)</div>
+                                <p class="custom-grid-desc">ينقل البيانات على شكل نبضات ضوء داخل زجاج، يوفر سرعات هائلة ومسافات بعيدة بدون تأثر بالتشويش الكهرومغناطيسي.</p>
+                            </div>
                         </div>
-                        <h3 class="text-2xl font-black text-slate-800 text-center mb-6 mt-8">أنواع كبلات الشبكات الأساسية</h3>
-                        <div class="grid md:grid-cols-3 gap-6 text-center">
-                            <div class="glass-card p-6 hover-scale border-t-4 border-slate-400">
-                                <i class="fas fa-dot-circle text-5xl text-slate-400 mb-4"></i>
-                                <h4 class="text-lg font-black text-slate-800 mb-2">المحوري (Coaxial)</h4>
-                                <p class="text-slate-600 text-xs font-bold leading-relaxed">يتكون من موصل نحاسي مركزي وعازل بلاستيكي ووقاء نحاسي مجدول. يستخدم غالباً لتوصيل أنظمة التلفاز وموصلات BNC و F و N للكاميرات القديمة.</p>
+
+                        <h2 class="mt-10">فئات كابل المزدوج المجدول (UTP Categories)</h2>
+                        <table>
+                            <thead>
+                                <tr><th>الفئة (Category)</th><th>سرعة نقل البيانات</th><th>الاستخدام الشهير</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td style="color: #9333ea; font-weight: 900;">CAT1</td><td>Up to 1Mbps</td><td>شبكات الهاتف القديمة</td></tr>
+                                <tr><td style="color: #9333ea; font-weight: 900;">CAT3</td><td>Up to 10Mbps</td><td>10BASE-T Ethernet</td></tr>
+                                <tr><td style="color: #9333ea; font-weight: 900;">CAT5e</td><td>Up to 1 Gbps</td><td>Gigabit Ethernet</td></tr>
+                                <tr><td style="color: #9333ea; font-weight: 900;">CAT6</td><td>Up to 10Gbps</td><td>10G Ethernet (لمسافة 55م)</td></tr>
+                                <tr><td style="color: #9333ea; font-weight: 900;">CAT7</td><td>Up to 10Gbps</td><td>10G Ethernet (لمسافة 100م)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>`,
+                    `<div class="rich-display glass-card p-10">
+                        <h1 class="text-center">أنواع التوصيل في الكابل (T568A / T568B)</h1>
+                        <p class="text-center mb-8">هناك نظامان مختلفان لترتيب أسلاك المزدوجة المجدولة (8 ألوان) داخل المشبك البلاستيكي RJ-45.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-12">
+                            <div class="bg-blue-50 p-8 rounded-3xl border border-blue-100">
+                                <h2 class="!text-blue-800">التوصيل المتناظر (Straight-through)</h2>
+                                <p class="!text-sm mb-4">يستخدم نفس ترتيب الألوان تماماً في الطرفين.</p>
+                                <h3 class="!text-base !text-blue-900">لربط أجهزة (مختلفة) في طبيعة عملها:</h3>
+                                <ul class="!text-sm"><li>كمبيوتر مع سويتش</li><li>راوتر مع سويتش</li></ul>
                             </div>
-                            <div class="glass-card p-6 hover-scale border-t-4 border-purple-500">
-                                <i class="fas fa-bezier-curve text-5xl text-purple-600 mb-4"></i>
-                                <h4 class="text-lg font-black text-slate-800 mb-2">المزدوج المجدول (Twisted Pair)</h4>
-                                <p class="text-slate-600 text-xs font-bold leading-relaxed">يتكون من 8 أزواج ملفوفة لتقليل التشويش. ينقسم لمحمي (STP) بقصدير، وغير محمي (UTP). وهو المعيار الأشهر للشبكات المحلية.</p>
-                            </div>
-                            <div class="glass-card p-6 hover-scale border-t-4 border-blue-500">
-                                <i class="fas fa-bolt text-5xl text-blue-600 mb-4"></i>
-                                <h4 class="text-lg font-black text-slate-800 mb-2">الضوئي (Fiber Optic)</h4>
-                                <p class="text-slate-600 text-xs font-bold leading-relaxed">ينقل البيانات على شكل نبضات ضوء داخل زجاج، يوفر سرعات هائلة ومسافات بعيدة بدون تأثر بالتشويش الكهرومغناطيسي.</p>
+                            <div class="bg-orange-50 p-8 rounded-3xl border border-orange-100">
+                                <h2 class="!text-orange-800">التوصيل العكسي (Crossover)</h2>
+                                <p class="!text-sm mb-4">يتم عكس أزواج الإرسال والاستقبال بين طرفي الكابل (1 بـ 3، و 2 بـ 6).</p>
+                                <h3 class="!text-base !text-orange-900">لربط أجهزة (متشابهة) في طبيعة عملها:</h3>
+                                <ul class="!text-sm"><li>سويتش مع سويتش</li><li>كمبيوتر مع كمبيوتر</li><li>راوتر مع راوتر</li></ul>
                             </div>
                         </div>
-                        <div class="glass-card p-8 mt-8">
-                            <h3 class="text-xl font-black text-purple-800 mb-4 border-b border-slate-100 pb-2">فئات كابل المزدوج المجدول (UTP Categories)</h3>
-                            <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                                <table class="w-full text-center font-bold text-sm">
-                                    <thead class="bg-purple-50 text-purple-900"><tr><th class="p-3 border-b border-purple-100">الفئة (Category)</th><th class="p-3 border-b border-purple-100">سرعة نقل البيانات</th><th class="p-3 border-b border-purple-100">الاستخدام الشهير</th></tr></thead>
-                                    <tbody class="divide-y divide-slate-100 bg-white text-slate-700">
-                                        <tr class="hover:bg-slate-50"><td class="p-3 text-purple-600 font-black">CAT1</td><td class="p-3">Up to 1Mbps</td><td class="p-3">شبكات الهاتف القديمة</td></tr>
-                                        <tr class="hover:bg-slate-50"><td class="p-3 text-purple-600 font-black">CAT3</td><td class="p-3">Up to 10Mbps</td><td class="p-3">10BASE-T Ethernet</td></tr>
-                                        <tr class="hover:bg-slate-50"><td class="p-3 text-purple-600 font-black">CAT5e</td><td class="p-3">Up to 1 Gbps</td><td class="p-3">Gigabit Ethernet</td></tr>
-                                        <tr class="hover:bg-slate-50"><td class="p-3 text-purple-600 font-black">CAT6</td><td class="p-3">Up to 10Gbps</td><td class="p-3">10G Ethernet (لمسافة 55م)</td></tr>
-                                        <tr class="hover:bg-slate-50"><td class="p-3 text-purple-600 font-black">CAT7</td><td class="p-3">Up to 10Gbps</td><td class="p-3">10G Ethernet (لمسافة 100م)</td></tr>
-                                    </tbody>
-                                </table>
+
+                        <h2 class="text-center">أدوات فني الشبكات (Network Tools)</h2>
+                        <div class="custom-grid-container">
+                            <div class="custom-grid-card bg-slate-50 border-none">
+                                <i class="fas fa-hammer custom-grid-icon text-yellow-500"></i>
+                                <div class="custom-grid-title text-slate-800">Stripper</div>
+                                <p class="custom-grid-desc">أداة تعرية لإزالة الغلاف البلاستيكي الخارجي للأسلاك.</p>
+                            </div>
+                            <div class="custom-grid-card bg-slate-50 border-none">
+                                <i class="fas fa-cut custom-grid-icon text-purple-600"></i>
+                                <div class="custom-grid-title text-slate-800">Crimping Tool</div>
+                                <p class="custom-grid-desc">أداة كبس تستخدم لتثبيت قطعة RJ-45 على الكيبل النحاسي.</p>
+                            </div>
+                            <div class="custom-grid-card bg-slate-50 border-none">
+                                <i class="fas fa-check-double custom-grid-icon text-emerald-600"></i>
+                                <div class="custom-grid-title text-slate-800">Cable Tester</div>
+                                <p class="custom-grid-desc">جهاز اختبار إلكتروني للتأكد من سلامة توصيل الأطراف الثمانية.</p>
                             </div>
                         </div>
                     </div>`,
-                    `<div class="space-y-8">
-                        <div class="glass-card p-8 bg-slate-50 border-none text-center">
-                            <h3 class="text-2xl font-black text-slate-800 mb-3">أنواع التوصيل في الكابل (T568A / T568B) بمشبك RJ-45</h3>
-                            <p class="content-text text-sm font-bold">هناك نظامان مختلفان لترتيب أسلاك المزدوجة المجدولة (8 ألوان) داخل المشبك البلاستيكي.</p>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-8">
-                            <div class="glass-card p-8 border-r-8 border-blue-500 hover-scale">
-                                <h4 class="text-xl font-black text-blue-700 mb-4">التوصيل المتناظر (Straight-through)</h4>
-                                <p class="text-sm font-bold text-slate-600 mb-4 leading-relaxed">يستخدم نفس ترتيب الألوان تماماً في الطرفين.</p>
-                                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                                    <h5 class="font-black text-blue-900 mb-2 text-sm">لربط أجهزة (مختلفة) في طبيعة عملها:</h5>
-                                    <ul class="text-blue-800 font-bold text-xs space-y-1.5"><li>- كمبيوتر مع سويتش</li><li>- راوتر مع سويتش</li></ul>
-                                </div>
-                            </div>
-                            <div class="glass-card p-8 border-r-8 border-orange-500 hover-scale">
-                                <h4 class="text-xl font-black text-orange-700 mb-4">التوصيل العكسي (Crossover)</h4>
-                                <p class="text-sm font-bold text-slate-600 mb-4 leading-relaxed">يتم عكس أزواج الإرسال والاستقبال بين طرفي الكابل (1 بـ 3، و 2 بـ 6).</p>
-                                <div class="bg-orange-50 p-4 rounded-xl border border-orange-100">
-                                    <h5 class="font-black text-orange-900 mb-2 text-sm">لربط أجهزة (متشابهة) في طبيعة عملها:</h5>
-                                    <ul class="text-orange-800 font-bold text-xs space-y-1.5"><li>- سويتش مع سويتش</li><li>- كمبيوتر مع كمبيوتر</li><li>- راوتر مع راوتر</li></ul>
-                                </div>
-                            </div>
-                        </div>
-                        <h3 class="text-2xl font-black text-center mt-10 mb-6 text-slate-800 border-t border-slate-200 pt-6">أدوات فني الشبكات (Network Tools)</h3>
-                        <div class="grid md:grid-cols-3 gap-6 text-center">
-                            <div class="glass-card p-6 hover-scale border border-slate-200"><i class="fas fa-hammer text-4xl text-yellow-500 mb-3 block"></i><h4 class="font-black text-slate-800 mb-1">Stripper</h4><p class="text-xs font-bold text-slate-500 leading-relaxed">أداة تعرية لإزالة الغلاف البلاستيكي الخارجي للأسلاك.</p></div>
-                            <div class="glass-card p-6 hover-scale border border-slate-200"><i class="fas fa-cut text-4xl text-purple-500 mb-3 block"></i><h4 class="font-black text-slate-800 mb-1">Crimping Tool</h4><p class="text-xs font-bold text-slate-500 leading-relaxed">أداة كبس تستخدم لتثبيت قطعة RJ-45 على الكيبل النحاسي.</p></div>
-                            <div class="glass-card p-6 hover-scale border border-slate-200"><i class="fas fa-check-double text-4xl text-emerald-500 mb-3 block"></i><h4 class="font-black text-slate-800 mb-1">Cable Tester</h4><p class="text-xs font-bold text-slate-500 leading-relaxed">جهاز اختبار إلكتروني للتأكد من سلامة توصيل الأطراف الثمانية.</p></div>
-                        </div>
-                    </div>`,
-                    `<div class="space-y-8">
-                        <div class="glass-card p-8 text-center border-b-[6px] border-blue-500 bg-blue-50/20">
-                            <h3 class="text-2xl font-black text-slate-800 mb-3">الألياف الضوئية (Fiber Optic)</h3>
-                            <p class="content-text text-sm">تنقسم الألياف الضوئية بصفة عامة إلى نوعين أساسيين بناءً على مصدر الضوء ومساره بداخل الزجاج.</p>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-8">
-                            <div class="glass-card p-8 border border-blue-200 hover-scale shadow-sm">
-                                <h4 class="text-xl font-black text-blue-700 mb-4 border-b border-slate-100 pb-2"><i class="fas fa-long-arrow-alt-right"></i> أحادية الوضع (Single-mode)</h4>
-                                <ul class="space-y-3 font-bold text-slate-600 text-sm">
-                                    <li class="flex gap-2 items-start"><i class="fas fa-check text-blue-500 mt-0.5"></i> تستخدم تقنية الليزر كمصدر للضوء (أشعة أحادية).</li>
-                                    <li class="flex gap-2 items-start"><i class="fas fa-check text-blue-500 mt-0.5"></i> مسار الضوء (Core Glass) مستقيم ورقيق جداً.</li>
-                                    <li class="flex gap-2 items-start"><i class="fas fa-check text-blue-500 mt-0.5"></i> يصل مداها إلى مئات الكيلومترات (بين المدن والدول).</li>
+                    `<div class="rich-display glass-card p-10">
+                        <h1>الألياف الضوئية (Fiber Optic)</h1>
+                        <p>تنقسم الألياف الضوئية بصفة عامة إلى نوعين أساسيين بناءً على مصدر الضوء ومساره بداخل الزجاج.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 my-8">
+                            <div class="bg-white p-8 rounded-3xl border border-blue-200 shadow-sm">
+                                <h2 class="!text-blue-700 border-b border-slate-100 pb-3"><i class="fas fa-long-arrow-alt-right"></i> أحادية الوضع (Single-mode)</h2>
+                                <ul class="!text-sm !mt-4">
+                                    <li>تستخدم تقنية الليزر كمصدر للضوء (أشعة أحادية).</li>
+                                    <li>مسار الضوء (Core Glass) مستقيم ورقيق جداً.</li>
+                                    <li>يصل مداها إلى مئات الكيلومترات (بين المدن والدول).</li>
                                 </ul>
                             </div>
-                            <div class="glass-card p-8 border border-purple-200 hover-scale shadow-sm">
-                                <h4 class="text-xl font-black text-purple-700 mb-4 border-b border-slate-100 pb-2"><i class="fas fa-random"></i> متعددة الأوضاع (Multi-mode)</h4>
-                                <ul class="space-y-3 font-bold text-slate-600 text-sm">
-                                    <li class="flex gap-2 items-start"><i class="fas fa-check text-purple-500 mt-0.5"></i> تستخدم مؤشرات (LED) لإرسال إشارات ضوء متعددة.</li>
-                                    <li class="flex gap-2 items-start"><i class="fas fa-check text-purple-500 mt-0.5"></i> مسار الضوء أوسع وتنعكس الأشعة بداخله عدة مرات.</li>
-                                    <li class="flex gap-2 items-start"><i class="fas fa-check text-purple-500 mt-0.5"></i> مداها قصير نسبياً يصل إلى 550 متراً (داخل المباني).</li>
+                            <div class="bg-white p-8 rounded-3xl border border-purple-200 shadow-sm">
+                                <h2 class="!text-purple-700 border-b border-slate-100 pb-3"><i class="fas fa-random"></i> متعددة الأوضاع (Multi-mode)</h2>
+                                <ul class="!text-sm !mt-4">
+                                    <li>تستخدم مؤشرات (LED) لإرسال إشارات ضوء متعددة.</li>
+                                    <li>مسار الضوء أوسع وتنعكس الأشعة بداخله عدة مرات.</li>
+                                    <li>مداها قصير نسبياً يصل إلى 550 متراً (داخل المباني).</li>
                                 </ul>
                             </div>
                         </div>
-                        <div class="glass-card p-8 mt-10 bg-slate-50 border-none">
-                            <h3 class="text-xl font-black text-emerald-800 mb-6">مميزات وعيوب الألياف البصرية</h3>
-                            <div class="grid md:grid-cols-2 gap-8 items-center">
-                                <ul class="space-y-3 font-bold text-slate-700 text-sm bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                                    <li class="text-emerald-600 font-black mb-1 text-base">المميزات:</li>
-                                    <li>1. سريعة جداً في نقل البيانات بصيغة الضوء.</li>
-                                    <li>2. معدل انخفاض الإشارات منخفض بشكل كبير مهما كان طول السلك.</li>
-                                    <li>3. منيعة تماماً ضد التداخل الكهرومغناطيسي لأسلاك الكهرباء.</li>
-                                    <li>4. يمكن تمديد عدة ألياف بداخل كابل واحد مما يسهل التركيب.</li>
-                                    <li>5. لا تتأثر بالماء، لذلك تستخدم لتوصيل الإنترنت بين المحيطات.</li>
-                                </ul>
-                                <div class="bg-red-50 border border-red-100 p-8 rounded-2xl text-center shadow-sm">
-                                    <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-4"></i>
-                                    <h4 class="font-black text-lg text-red-800 mb-2">العيب الوحيد</h4>
-                                    <p class="text-slate-700 font-bold text-xs leading-relaxed">صعبة التركيب والصيانة لأنها تعتمد على الزجاج الدقيق، وتحتاج معدات خاصة للتلحيم وفنيين متخصصين جداً تكلفتهم عالية.</p>
-                                </div>
+
+                        <h2>مميزات وعيوب الألياف البصرية</h2>
+                        <div class="grid md:grid-cols-2 gap-8 items-center mt-6">
+                            <ul class="!text-sm bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
+                                <li>سريعة جداً في نقل البيانات بصيغة الضوء.</li>
+                                <li>معدل انخفاض الإشارات منخفض بشكل كبير مهما كان طول السلك.</li>
+                                <li>منيعة تماماً ضد التداخل الكهرومغناطيسي لأسلاك الكهرباء.</li>
+                                <li>يمكن تمديد عدة ألياف بداخل كابل واحد مما يسهل التركيب.</li>
+                                <li>لا تتأثر بالماء، لذلك تستخدم لتوصيل الإنترنت بين المحيطات.</li>
+                            </ul>
+                            <div class="bg-red-50 border border-red-100 p-8 rounded-2xl text-center shadow-sm">
+                                <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-4 block mx-auto"></i>
+                                <h3 class="!text-red-800 !mb-2 !text-xl">العيب الوحيد</h3>
+                                <p class="!text-xs !leading-relaxed">صعبة التركيب والصيانة لأنها تعتمد على الزجاج الدقيق، وتحتاج معدات خاصة للتلحيم وفنيين متخصصين جداً تكلفتهم عالية.</p>
                             </div>
                         </div>
                     </div>`
@@ -542,95 +574,94 @@
                 title: 'بروتوكول الإنترنت IP Address', icon: 'fa-map-location-dot', color: 'orange', desc: 'نظام العنونة المنطقي، فئات IPv4، وحسابات الـ Subnet.',
                 tabs: ['مقدمة وفئات IPv4', 'قاعدة الـ Subnet والتمارين', 'الجيل الجديد IPv6'],
                 content: [
-                    `<div class="space-y-8">
-                        <div class="glass-card p-8 border-r-[8px] border-orange-500 bg-orange-50/30">
-                            <h2 class="text-2xl font-black text-orange-700 mb-4">ما هو الـ IP Address؟</h2>
-                            <p class="content-text text-sm mb-3">عنوان IP هو اختصار لعنوان بروتوكول الإنترنت، وهو المعرف الرقمي لأي جهاز (حاسوب، هاتف، طابعة، موجه) مرتبط بشبكة لكي يتم توجيه البيانات إليه، يقابل عنوان IP في شبكات الهاتف "رقم الهاتف" لتحديد مكانك.</p>
-                            <p class="content-text text-sm font-bold text-slate-800"><span class="text-orange-600 font-black">عنوان الإصدار الرابع IPv4:</span> طوله 32 بت، مقسم إلى 4 خانات (Octets) كل خانة 8 بت، ومدى الأرقام من 0 لـ 255. يحتوي على قرابة 4.3 مليار عنوان.</p>
-                            <p class="text-xs font-bold text-slate-500 mt-4"><span class="text-blue-600">العناوين الخاصة (Private):</span> للشبكات المحلية. | <span class="text-emerald-600">العناوين العامة (Public):</span> للإنترنت (NAT يحول بينهما).</p>
-                        </div>
-                        <h3 class="text-2xl font-black text-center text-slate-800 mb-6 border-t border-slate-200 pt-6">فئات العناوين (Classful Networking)</h3>
-                        <div class="grid md:grid-cols-3 gap-6">
-                            <div class="glass-card border-t-[6px] border-rose-500 p-6 text-center shadow-md hover-scale bg-white">
-                                <h4 class="text-2xl font-black text-rose-600 mb-3">Class A</h4>
-                                <div class="bg-slate-50 p-3 rounded-lg text-slate-800 font-mono text-sm mb-3 border border-slate-200 shadow-inner">1.0.0.0 - 126.x.x.x</div>
-                                <p class="text-slate-600 font-bold text-xs mb-2">Mask: <span class="text-slate-900 font-black">255.0.0.0</span></p>
-                                <p class="text-[10px] text-rose-700 bg-rose-50 py-1.5 rounded border border-rose-100 font-black mt-3">N.H.H.H (للشبكات العملاقة)</p>
+                    `<div class="rich-display glass-card p-10">
+                        <h1>ما هو الـ IP Address؟</h1>
+                        <p>عنوان IP هو اختصار لعنوان بروتوكول الإنترنت، وهو المعرف الرقمي لأي جهاز (حاسوب، هاتف، طابعة، موجه) مرتبط بشبكة لكي يتم توجيه البيانات إليه، يقابل عنوان IP في شبكات الهاتف "رقم الهاتف" لتحديد مكانك.</p>
+                        <p><span style="color: #ea580c; font-weight: 900;">عنوان الإصدار الرابع IPv4:</span> طوله 32 بت، مقسم إلى 4 خانات (Octets) كل خانة 8 بت، ومدى الأرقام من 0 لـ 255. يحتوي على قرابة 4.3 مليار عنوان.</p>
+                        <p class="!text-sm !mt-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center"><span style="color: #2563eb; font-weight: 900;">العناوين الخاصة (Private):</span> للشبكات المحلية. | <span style="color: #059669; font-weight: 900;">العناوين العامة (Public):</span> للإنترنت (NAT يحول بينهما).</p>
+                        
+                        <h2 class="text-center mt-12 border-t border-slate-100 pt-8">فئات العناوين (Classful Networking)</h2>
+                        <div class="custom-grid-container">
+                            <div class="custom-grid-card border-t-8 border-t-rose-500 bg-white">
+                                <h3 class="!text-rose-600 !mb-2 !text-3xl">Class A</h3>
+                                <div class="bg-slate-100 p-3 rounded-lg text-slate-800 font-mono text-sm mb-3 border border-slate-200">1.0.0.0 - 126.x.x.x</div>
+                                <p class="!text-xs">Mask: <span style="font-weight: 900; font-family: monospace;">255.0.0.0</span></p>
+                                <p class="!text-[10px] text-rose-700 bg-rose-50 py-1.5 rounded font-black mt-3">N.H.H.H (للشبكات العملاقة)</p>
                             </div>
-                            <div class="glass-card border-t-[6px] border-blue-500 p-6 text-center shadow-md hover-scale bg-white transform md:-translate-y-4">
-                                <h4 class="text-2xl font-black text-blue-600 mb-3">Class B</h4>
-                                <div class="bg-slate-50 p-3 rounded-lg text-slate-800 font-mono text-sm mb-3 border border-slate-200 shadow-inner">128.0.0.0 - 191.x.x.x</div>
-                                <p class="text-slate-600 font-bold text-xs mb-2">Mask: <span class="text-slate-900 font-black">255.255.0.0</span></p>
-                                <p class="text-[10px] text-blue-700 bg-blue-50 py-1.5 rounded border border-blue-100 font-black mt-3">N.N.H.H (للشبكات المتوسطة)</p>
+                            <div class="custom-grid-card border-t-8 border-t-blue-500 bg-white transform md:-translate-y-4">
+                                <h3 class="!text-blue-600 !mb-2 !text-3xl">Class B</h3>
+                                <div class="bg-slate-100 p-3 rounded-lg text-slate-800 font-mono text-sm mb-3 border border-slate-200">128.0.0.0 - 191.x.x.x</div>
+                                <p class="!text-xs">Mask: <span style="font-weight: 900; font-family: monospace;">255.255.0.0</span></p>
+                                <p class="!text-[10px] text-blue-700 bg-blue-50 py-1.5 rounded font-black mt-3">N.N.H.H (للشبكات المتوسطة)</p>
                             </div>
-                            <div class="glass-card border-t-[6px] border-emerald-500 p-6 text-center shadow-md hover-scale bg-white">
-                                <h4 class="text-2xl font-black text-emerald-600 mb-3">Class C</h4>
-                                <div class="bg-slate-50 p-3 rounded-lg text-slate-800 font-mono text-sm mb-3 border border-slate-200 shadow-inner">192.0.0.0 - 223.x.x.x</div>
-                                <p class="text-slate-600 font-bold text-xs mb-2">Mask: <span class="text-slate-900 font-black">255.255.255.0</span></p>
-                                <p class="text-[10px] text-emerald-700 bg-emerald-50 py-1.5 rounded border border-emerald-100 font-black mt-3">N.N.N.H (للشبكات الصغيرة)</p>
+                            <div class="custom-grid-card border-t-8 border-t-emerald-500 bg-white">
+                                <h3 class="!text-emerald-600 !mb-2 !text-3xl">Class C</h3>
+                                <div class="bg-slate-100 p-3 rounded-lg text-slate-800 font-mono text-sm mb-3 border border-slate-200">192.0.0.0 - 223.x.x.x</div>
+                                <p class="!text-xs">Mask: <span style="font-weight: 900; font-family: monospace;">255.255.255.0</span></p>
+                                <p class="!text-[10px] text-emerald-700 bg-emerald-50 py-1.5 rounded font-black mt-3">N.N.N.H (للشبكات الصغيرة)</p>
                             </div>
                         </div>
-                        <div class="text-center mt-4 bg-slate-100 py-2 rounded-lg font-bold text-slate-600 text-xs border border-slate-200">
-                            ملاحظة: 127.x.x.x عنوان محجوز لاختبار كرت الشبكة (Loopback). و 0.0.0.0 وأرقام فوق 255 غير صالحة.
-                        </div>
+                        <p class="text-center !text-sm !mt-6 bg-slate-100 p-3 rounded-lg font-bold border border-slate-200">ملاحظة: 127.x.x.x عنوان محجوز لاختبار كرت الشبكة (Loopback). و 0.0.0.0 وأرقام فوق 255 غير صالحة.</p>
                     </div>`,
-                    `<div class="space-y-8">
-                        <div class="glass-card p-8 border-2 border-orange-200 bg-orange-50 text-center shadow-sm">
-                            <h3 class="text-xl font-black text-orange-800 mb-3"><i class="fas fa-key text-orange-500"></i> قاعدة الـ Subnetting الذهبية</h3>
-                            <p class="content-text text-base font-black text-slate-700 leading-relaxed">يرمز الحرف N لجزء <span class="text-orange-600">الشبكة</span> الذي يقابله الرقم <span class="bg-white border border-slate-300 px-2 py-0.5 rounded text-orange-600 mx-1 shadow-sm">255</span> في القناع (ثابت).<br>ويرمز الحرف H لجزء <span class="text-emerald-600">الأجهزة</span> الذي يقابله الرقم <span class="bg-white border border-slate-300 px-2 py-0.5 rounded text-emerald-600 mx-1 shadow-sm mt-2 inline-block">0</span> في القناع (متغير).</p>
+                    `<div class="rich-display glass-card p-10">
+                        <div class="bg-orange-50 p-8 rounded-3xl border border-orange-200 text-center mb-10">
+                            <h2 class="!text-orange-800 !mb-4">قاعدة الـ Subnetting الذهبية</h2>
+                            <p class="!text-base font-black text-slate-700">الرقم <span style="background: white; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 4px; color: #ea580c;">255</span> في قناع الشبكة يمثل الـ <span style="color: #ea580c;">Network</span> (ثابت).<br>الرقم <span style="background: white; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 4px; color: #059669;">0</span> في قناع الشبكة يمثل الـ <span style="color: #059669;">Host</span> (متغير).</p>
                         </div>
-                        <h3 class="text-2xl font-black text-center text-slate-800 mb-6">تمارين الاستخراج باستخدام قناع الشبكة</h3>
-                        <div class="grid md:grid-cols-2 gap-8">
-                            <div class="glass-card p-6 border border-slate-200 bg-white shadow-sm hover-scale">
+                        
+                        <h2 class="text-center">تمارين الاستخراج باستخدام قناع الشبكة</h2>
+                        <div class="grid md:grid-cols-2 gap-8 mt-8">
+                            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
                                 <div class="bg-emerald-50 text-emerald-800 text-center py-2 rounded-lg mb-5 font-black uppercase text-xs border border-emerald-100">تمرين فئة C</div>
                                 <div class="bg-slate-50 p-4 rounded-xl font-mono text-sm mb-5 text-center border border-slate-200 shadow-inner">
                                     <div class="text-slate-500 font-sans text-xs font-bold mb-1">الـ IP Address</div><div class="text-slate-800 text-lg mb-3 font-black">192.168.8.10/24</div>
                                     <div class="text-slate-500 font-sans text-xs font-bold mb-1">Subnet Mask</div><div class="text-emerald-600 font-black">255.255.255.0</div>
                                 </div>
-                                <ul class="space-y-2.5 font-bold text-slate-600 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <li class="flex justify-between border-b border-slate-200 pb-1.5"><span>عنوان الشبكة (Network ID):</span> <span class="font-mono text-emerald-600 font-black">192.168.8.0</span></li>
-                                    <li class="flex justify-between border-b border-slate-200 pb-1.5"><span>أول مضيف (First Host):</span> <span class="font-mono text-slate-800">192.168.8.1</span></li>
-                                    <li class="flex justify-between border-b border-slate-200 pb-1.5"><span>آخر مضيف (Last Host):</span> <span class="font-mono text-slate-800">192.168.8.254</span></li>
-                                    <li class="flex justify-between pt-1.5"><span>البث (Broadcast):</span> <span class="font-mono text-rose-500 font-black">192.168.8.255</span></li>
+                                <ul class="!text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>عنوان الشبكة (Network ID):</span> <span class="font-mono text-emerald-600 font-black">192.168.8.0</span></li>
+                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>أول مضيف (First Host):</span> <span class="font-mono text-slate-800">192.168.8.1</span></li>
+                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>آخر مضيف (Last Host):</span> <span class="font-mono text-slate-800">192.168.8.254</span></li>
+                                    <li class="flex justify-between pt-2"><span>البث (Broadcast):</span> <span class="font-mono text-rose-500 font-black">192.168.8.255</span></li>
                                 </ul>
                             </div>
-                            <div class="glass-card p-6 border border-slate-200 bg-white shadow-sm hover-scale">
-                                <div class="bg-blue-50 text-blue-800 text-center py-2 rounded-xl mb-5 font-black uppercase text-xs border border-blue-100">تمرين فئة B</div>
+                            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                                <div class="bg-blue-50 text-blue-800 text-center py-2 rounded-lg mb-5 font-black uppercase text-xs border border-blue-100">تمرين فئة B</div>
                                 <div class="bg-slate-50 p-4 rounded-xl font-mono text-sm mb-5 text-center border border-slate-200 shadow-inner">
                                     <div class="text-slate-500 font-sans text-xs font-bold mb-1">الـ IP Address</div><div class="text-slate-800 text-lg mb-3 font-black">130.168.5.15/16</div>
                                     <div class="text-slate-500 font-sans text-xs font-bold mb-1">Subnet Mask</div><div class="text-blue-600 font-black">255.255.0.0</div>
                                 </div>
-                                <ul class="space-y-2.5 font-bold text-slate-600 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <li class="flex justify-between border-b border-slate-200 pb-1.5"><span>عنوان الشبكة (Network ID):</span> <span class="font-mono text-blue-600 font-black">130.168.0.0</span></li>
-                                    <li class="flex justify-between border-b border-slate-200 pb-1.5"><span>أول مضيف (First Host):</span> <span class="font-mono text-slate-800">130.168.0.1</span></li>
-                                    <li class="flex justify-between border-b border-slate-200 pb-1.5"><span>آخر مضيف (Last Host):</span> <span class="font-mono text-slate-800">130.168.255.254</span></li>
-                                    <li class="flex justify-between pt-1.5"><span>البث (Broadcast):</span> <span class="font-mono text-rose-500 font-black">130.168.255.255</span></li>
+                                <ul class="!text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>عنوان الشبكة (Network ID):</span> <span class="font-mono text-blue-600 font-black">130.168.0.0</span></li>
+                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>أول مضيف (First Host):</span> <span class="font-mono text-slate-800">130.168.0.1</span></li>
+                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>آخر مضيف (Last Host):</span> <span class="font-mono text-slate-800">130.168.255.254</span></li>
+                                    <li class="flex justify-between pt-2"><span>البث (Broadcast):</span> <span class="font-mono text-rose-500 font-black">130.168.255.255</span></li>
                                 </ul>
                             </div>
                         </div>
                     </div>`,
-                    `<div class="space-y-8">
-                        <div class="glass-card p-8 bg-slate-50 border border-slate-200 flex flex-col md:flex-row items-center gap-8 shadow-sm">
-                            <div class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[2rem] flex items-center justify-center text-4xl shadow-md shrink-0"><i class="fas fa-globe text-white"></i></div>
+                    `<div class="rich-display glass-card p-10">
+                        <div class="bg-indigo-50 border border-indigo-100 p-8 rounded-3xl flex flex-col md:flex-row items-center gap-8 shadow-sm mb-10">
+                            <div class="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center shadow-md shrink-0"><i class="fas fa-globe text-indigo-500 text-5xl"></i></div>
                             <div class="flex-grow text-center md:text-right">
-                                <h4 class="text-2xl font-black text-indigo-700 mb-3">الإصدار السادس IPv6</h4>
-                                <p class="text-slate-600 text-sm mb-4 leading-relaxed font-bold">بسبب نفاذ عناوين IPv4، تم تصميم مساحة 128-bit توفر 340 تريليون تريليون تريليون عنوان. يكتب بالنظام السداسي عشر (Hexadecimal) من 0-9 و A-F.</p>
-                                <div class="bg-white p-4 rounded-xl font-mono text-emerald-700 text-sm tracking-widest break-all select-all text-center border border-slate-200 shadow-sm font-black">2005:0005:0100:0000:0000:0000:0000:0700</div>
+                                <h2 class="!text-indigo-800 !mt-0 !mb-2">الإصدار السادس IPv6</h2>
+                                <p class="!text-sm mb-4">بسبب نفاذ عناوين IPv4، تم تصميم مساحة 128-bit توفر 340 تريليون تريليون تريليون عنوان. يكتب بالنظام السداسي عشر (Hexadecimal) من 0-9 و A-F.</p>
+                                <div class="bg-white p-4 rounded-xl font-mono text-indigo-700 text-sm tracking-widest break-all select-all text-center border border-slate-200 shadow-sm font-black">2005:0005:0100:0000:0000:0000:0000:0700</div>
                             </div>
                         </div>
+                        
                         <div class="grid md:grid-cols-2 gap-8">
-                            <div class="glass-card p-8 border-t-4 border-emerald-500 shadow-sm">
-                                <h3 class="text-lg font-black text-emerald-800 mb-4">أنواع اتصال IPv6</h3>
-                                <ul class="space-y-4 font-bold text-slate-600 text-sm">
-                                    <li><span class="text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 font-black">Unicast</span> البث الأحادي: بين جهاز وآخر فقط.</li>
-                                    <li><span class="text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 font-black">Multicast</span> البث المتعدد: من مرسل لمجموعة.</li>
-                                    <li><span class="text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-100 font-black">Anycast</span> إرسال لعقدة واحدة الأقرب حسب التوجيه.</li>
+                            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                                <h3 class="!text-lg !text-emerald-700 !mt-0">أنواع اتصال IPv6</h3>
+                                <ul class="!text-sm !mt-4">
+                                    <li><span style="color: #047857; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; font-weight: 900; border: 1px solid #d1fae5;">Unicast</span> البث الأحادي: بين جهاز وآخر فقط.</li>
+                                    <li><span style="color: #047857; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; font-weight: 900; border: 1px solid #d1fae5;">Multicast</span> البث المتعدد: من مرسل لمجموعة.</li>
+                                    <li><span style="color: #047857; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; font-weight: 900; border: 1px solid #d1fae5;">Anycast</span> إرسال لعقدة واحدة الأقرب حسب التوجيه.</li>
                                 </ul>
                             </div>
-                            <div class="glass-card p-8 border-t-4 border-orange-500 shadow-sm">
-                                <h3 class="text-lg font-black text-orange-800 mb-4">قوانين الاختصار (Compression)</h3>
-                                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4 text-sm">
-                                    <div>
+                            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                                <h3 class="!text-lg !text-orange-700 !mt-0">قوانين الاختصار (Compression)</h3>
+                                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mt-4 text-sm">
+                                    <div class="mb-4">
                                         <p class="font-black text-slate-800 mb-1">1. إلغاء أصفار اليسار فقط:</p>
                                         <p class="font-mono text-slate-400 line-through inline-block ml-2">0100</p><i class="fas fa-arrow-left text-slate-300 mx-2"></i><p class="font-mono text-emerald-600 font-black inline-block">100</p>
                                     </div>
@@ -638,8 +669,8 @@
                                         <p class="font-black text-slate-800 mb-1">2. دمج الخانات الصفرية (مرة واحدة):</p>
                                         <p class="font-mono text-slate-400 line-through inline-block ml-2">0000:0000:0000</p><i class="fas fa-arrow-left text-slate-300 mx-2"></i><p class="font-mono text-emerald-600 font-black inline-block">::</p>
                                     </div>
-                                    <div class="font-bold text-slate-600 pt-3 border-t border-slate-200 text-center mt-2">
-                                        الناتج للمثال الأعلى: <span class="font-mono text-blue-700 text-sm block mt-1 dir-ltr font-black bg-blue-50 py-1 rounded border border-blue-100">2005:5:100::700</span>
+                                    <div class="font-bold text-slate-600 pt-3 border-t border-slate-200 text-center mt-3">
+                                        الناتج للمثال الأعلى: <br><span class="font-mono text-blue-700 text-sm block mt-2 dir-ltr font-black bg-blue-50 py-1.5 rounded border border-blue-100">2005:5:100::700</span>
                                     </div>
                                 </div>
                             </div>
@@ -649,11 +680,12 @@
             }
         };
 
-        // إدارة التبويبات والملاحة والتمرير
+        // إدارة التنقل والقائمة
         let activeSection = '';
 
         function renderSidebar() {
             const nav = document.getElementById('sidebar-nav');
+            if(!nav) return; // حماية برمجية
             let html = '';
             Object.keys(CORE_DATA).forEach(k => {
                 html += `<div onclick="openSection('${k}', this)" class="sidebar-item group" id="side-${k}">
@@ -665,9 +697,9 @@
                 <div class="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center text-cyan-600 group-hover:bg-cyan-100 transition"><i class="fas fa-book-open"></i></div> <span class="text-cyan-700">الدروس المتجددة</span>
             </div>`;
             html += `<div class="sidebar-item group" onclick="openSection('exams', this)" id="side-exams">
-                <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-yellow-100 transition"><i class="fas fa-vial"></i></div> <span class="text-yellow-700">الاختبارات والتقييمات</span>
+                <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600 group-hover:bg-yellow-100 transition"><i class="fas fa-vial"></i></div> <span class="text-yellow-700">الاختبارات (LMS)</span>
             </div>`;
-            if (nav) nav.innerHTML = html;
+            nav.innerHTML = html;
         }
 
         function initMainGrid() {
@@ -737,18 +769,15 @@
                 Object.values(window.allArticlesMap).forEach(a => { if(a.sectionId === key) allTabs.push(a.tabName); });
             }
 
-            // Tabs for Mobile
             const mobileTabs = document.getElementById('mobile-tabs');
             if(mobileTabs) mobileTabs.innerHTML = allTabs.map((t, i) => `<button onclick="loadTabContent(${i})" id="mtab-${i}" class="px-5 py-2 whitespace-nowrap border-b-4 font-bold text-sm transition bg-white rounded-t-lg shadow-sm ${i===0?'border-blue-600 text-blue-700':'border-transparent text-slate-500'}">${t}</button>`).join('');
 
-            // Tabs for Sidebar (Desktop)
             const subNav = document.getElementById(`subnav-${key}`);
             if(subNav) {
                 subNav.innerHTML = allTabs.map((t, i) => `<div onclick="loadTabContent(${i})" id="stab-${i}" class="sub-tab ${i===0?'active':''}"><i class="fas fa-chevron-left ml-2 text-[10px] opacity-40"></i> ${t}</div>`).join('');
                 subNav.classList.remove('hidden');
             }
 
-            // إخفاء القائمة الجانبية في الجوال بعد اختيار القسم
             if(window.innerWidth < 1024) document.getElementById('main-sidebar').classList.add('hidden');
 
             loadTabContent(0);
@@ -764,7 +793,6 @@
             const activeMTab = document.getElementById(`mtab-${index}`); if(activeMTab) activeMTab.classList.add('border-blue-600', 'text-blue-700');
             const activeSTab = document.getElementById(`stab-${index}`); if(activeSTab) activeSTab.classList.add('active');
 
-            // Force reflow for animation
             area.classList.remove('page-enter');
             void area.offsetWidth;
             area.classList.add('page-enter');
@@ -772,14 +800,13 @@
             if (index < s.content.length) {
                 area.innerHTML = s.content[index];
             } else {
-                // محتوى سحابي
                 const cloudIdx = index - s.content.length;
                 let cloudArticlesForThisSection = [];
                 Object.values(window.allArticlesMap).forEach(a => { if(a.sectionId === activeSection) cloudArticlesForThisSection.push(a); });
                 cloudArticlesForThisSection.sort((a,b) => (a.order || 0) - (b.order || 0));
                 
                 const article = cloudArticlesForThisSection[cloudIdx];
-                area.innerHTML = `<div class="max-w-5xl mx-auto glass-card p-10 border-t-4 border-cyan-500 rich-display h-auto text-justify">${article.htmlContent}</div>`;
+                area.innerHTML = `<div class="glass-card rich-display h-auto border-t-[6px] border-cyan-500">${article.htmlContent}</div>`;
             }
             smoothScrollTop();
         }
@@ -820,7 +847,7 @@
         window.onload = () => { renderSidebar(); initMainGrid(); goHome(); };
     </script>
 
-    <!-- النظام السحابي وإدارة المحتوى والاختبارات -->
+    <!-- النظام السحابي (LMS & CMS) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -904,40 +931,26 @@
                         </div>
                         <input type="text" id="cms-tab-name" class="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 mb-4 font-bold text-slate-800 focus:border-purple-500 outline-none text-sm shadow-inner" placeholder="عنوان الدرس..">
                         
-                        <!-- المحرر المتطور -->
-                        <div class="editor-toolbar items-center">
+                        <!-- المحرر المتطور للـ CMS -->
+                        <div class="editor-toolbar">
                             <button onclick="execCmd('cms-content', 'bold')" title="عريض"><i class="fas fa-bold"></i></button>
                             <button onclick="execCmd('cms-content', 'italic')" title="مائل"><i class="fas fa-italic"></i></button>
                             <button onclick="execCmd('cms-content', 'underline')" title="تسطير"><i class="fas fa-underline"></i></button>
                             <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            
                             <select onchange="execCmd('cms-content', 'fontSize', this.value)" class="text-xs p-1 font-bold text-slate-700" title="حجم الخط">
-                                <option value="3">حجم عادي</option>
-                                <option value="5">حجم كبير</option>
-                                <option value="6">حجم أكبر</option>
-                                <option value="7">عنوان ضخم</option>
+                                <option value="3">حجم عادي</option><option value="5">حجم كبير</option><option value="6">حجم أكبر</option><option value="7">عنوان ضخم</option>
                             </select>
-                            
-                            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded px-2 shadow-sm">
-                                <span class="text-[10px] font-bold text-slate-500">لون:</span>
-                                <input type="color" onchange="execCmd('cms-content', 'foreColor', this.value)" class="cursor-pointer" title="لون النص">
-                            </div>
-                            
+                            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded px-2 shadow-sm"><span class="text-[10px] font-bold text-slate-500">لون:</span><input type="color" onchange="execCmd('cms-content', 'foreColor', this.value)" class="cursor-pointer" title="لون النص"></div>
                             <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            <button onclick="execCmd('cms-content', 'justifyRight')" title="يمين"><i class="fas fa-align-right"></i></button>
-                            <button onclick="execCmd('cms-content', 'justifyCenter')" title="وسط"><i class="fas fa-align-center"></i></button>
-                            <button onclick="execCmd('cms-content', 'justifyLeft')" title="يسار"><i class="fas fa-align-left"></i></button>
+                            <button onclick="execCmd('cms-content', 'justifyRight')" title="يمين"><i class="fas fa-align-right"></i></button><button onclick="execCmd('cms-content', 'justifyCenter')" title="وسط"><i class="fas fa-align-center"></i></button><button onclick="execCmd('cms-content', 'justifyLeft')" title="يسار"><i class="fas fa-align-left"></i></button>
                             <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            
-                            <button onclick="insertImagePrompt('cms-content')" title="إدراج صورة برابط" class="text-blue-600 font-bold text-xs flex items-center gap-1"><i class="fas fa-link"></i> صورة رابط</button>
-                            <button onclick="document.getElementById('img-upload-cms').click()" title="رفع صورة من الجهاز" class="text-emerald-600 font-bold text-xs flex items-center gap-1"><i class="fas fa-upload"></i> رفع صورة</button>
-                            <input type="file" id="img-upload-cms" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'cms-content')">
-                            
+                            <button onclick="insertImagePrompt('cms-content')" title="إدراج صورة برابط" class="text-blue-600 font-bold text-xs flex items-center gap-1"><i class="fas fa-link"></i> رابط صورة</button>
+                            <button onclick="document.getElementById('img-upload-cms').click()" title="رفع صورة من الجهاز" class="text-emerald-600 font-bold text-xs flex items-center gap-1"><i class="fas fa-upload"></i> رفع صورة</button><input type="file" id="img-upload-cms" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'cms-content')">
                             <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            <button onclick="insertTemplate('cms-content', '3boxes')" title="إدراج 3 مربعات للعرض" class="text-purple-600 font-bold text-xs flex items-center gap-1"><i class="fas fa-columns"></i> 3 مواضيع</button>
-                            <button onclick="insertTemplate('cms-content', 'table')" title="إدراج جدول" class="text-orange-600 font-bold text-xs flex items-center gap-1"><i class="fas fa-table"></i> جدول</button>
+                            <button onclick="insertTemplate('cms-content', '3boxes')" title="إدراج 3 مربعات للعرض" class="text-purple-600 font-bold text-xs flex items-center gap-1"><i class="fas fa-columns"></i> إدراج كروت</button>
+                            <button onclick="insertTemplate('cms-content', 'table')" title="إدراج جدول" class="text-orange-600 font-bold text-xs flex items-center gap-1"><i class="fas fa-table"></i> إدراج جدول</button>
                         </div>
-                        <div id="cms-content" contenteditable="true" class="rich-editor mb-6 h-64 shadow-inner">اكتب المحتوى هنا...</div>
+                        <div id="cms-content" contenteditable="true" class="rich-editor mb-6 h-64 shadow-inner">اكتب المحتوى هنا... لتعديل العناوين ظلل النص واختر لونه وحجمه</div>
                         
                         <div class="flex gap-3"><button onclick="saveArticle()" class="flex-grow bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-xl font-black text-lg transition shadow-md">حفظ ونشر</button><button onclick="resetCMSForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-600 p-3 rounded-xl font-black transition text-sm">إلغاء</button></div>
                     </div>
@@ -951,7 +964,6 @@
                     <h3 class="text-xl font-black mb-6 flex items-center gap-2 text-emerald-700 border-b border-slate-100 pb-3"><i class="fas fa-file-circle-plus"></i> اختبار جديد</h3>
                     <input type="text" id="quiz-t" class="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 mb-6 font-bold text-slate-800 focus:border-emerald-500 outline-none shadow-inner" placeholder="عنوان الاختبار النهائي..">
                     
-                    <!-- محرر أسئلة الـ LMS -->
                     <div id="quiz-c" class="space-y-4 mb-6"></div>
                     
                     <button onclick="addQForm()" class="w-full bg-slate-50 text-slate-600 p-3 rounded-lg font-bold mb-3 border border-slate-200 hover:bg-slate-100 transition text-sm"><i class="fas fa-plus ml-1"></i> إضافة سؤال يدوياً</button>
@@ -980,7 +992,7 @@
         };
 
         window.execCmd = (editorId, cmd, val=null) => { document.execCommand(cmd, false, val); document.getElementById(editorId).focus(); };
-        window.insertImagePrompt = (editorId) => { const url = prompt("أدخل رابط الصورة:"); if(url) execCmd(editorId, 'insertImage', url); };
+        window.insertImagePrompt = (editorId) => { const url = prompt("أدخل رابط الصورة (URL):"); if(url) execCmd(editorId, 'insertImage', url); };
         
         window.handleImageUpload = async (event, editorId) => {
             const file = event.target.files[0]; if(!file) return;
@@ -991,40 +1003,43 @@
                 const url = await getDownloadURL(sRef);
                 execCmd(editorId, 'insertImage', url);
                 toast("تم رفع الصورة وإدراجها!");
-            } catch(e) { toast("تحذير: لا تملك صلاحية رفع صور لـ Firebase Storage حالياً. يرجى تفعيل القواعد.", "error"); }
+            } catch(e) { toast("تنبيه: يجب إعطاء صلاحية الرفع في Firebase Storage أو استخدم رابط صورة.", "error"); }
             event.target.value = '';
         };
 
         window.insertTemplate = (editorId, type) => {
             let html = '';
             if (type === '3boxes') {
-                html = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-6 text-center" style="display: flex; gap: 1.5rem; text-align: center;">
-                            <div style="flex: 1; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; background-color: #f8fafc;">
-                                <img src="https://via.placeholder.com/150" style="width: 100%; height: auto; border-radius: 0.5rem; margin-bottom: 0.5rem;" alt="صورة">
-                                <h3 style="color: #2563eb; margin-bottom: 0.5rem;">عنوان الموضوع</h3>
-                                <p style="color: #475569; font-size: 0.875rem;">اكتب الوصف هنا...</p>
+                html = `<div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; margin: 2rem 0;">
+                            <div style="flex: 1; min-width: 250px; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 1.5rem; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+                                <img src="https://via.placeholder.com/100" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem;" alt="أيقونة">
+                                <h3 style="color: #2563eb; font-size: 1.25rem; font-weight: 900; margin-bottom: 0.5rem;">العنوان الأول</h3>
+                                <p style="color: #64748b; font-size: 0.875rem; font-weight: bold;">اكتب الوصف هنا ليتناسب مع البطاقة...</p>
                             </div>
-                            <div style="flex: 1; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; background-color: #f8fafc;">
-                                <img src="https://via.placeholder.com/150" style="width: 100%; height: auto; border-radius: 0.5rem; margin-bottom: 0.5rem;" alt="صورة">
-                                <h3 style="color: #059669; margin-bottom: 0.5rem;">عنوان الموضوع</h3>
-                                <p style="color: #475569; font-size: 0.875rem;">اكتب الوصف هنا...</p>
+                            <div style="flex: 1; min-width: 250px; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 1.5rem; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+                                <img src="https://via.placeholder.com/100" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem;" alt="أيقونة">
+                                <h3 style="color: #9333ea; font-size: 1.25rem; font-weight: 900; margin-bottom: 0.5rem;">العنوان الثاني</h3>
+                                <p style="color: #64748b; font-size: 0.875rem; font-weight: bold;">اكتب الوصف هنا ليتناسب مع البطاقة...</p>
                             </div>
-                            <div style="flex: 1; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; background-color: #f8fafc;">
-                                <img src="https://via.placeholder.com/150" style="width: 100%; height: auto; border-radius: 0.5rem; margin-bottom: 0.5rem;" alt="صورة">
-                                <h3 style="color: #7c3aed; margin-bottom: 0.5rem;">عنوان الموضوع</h3>
-                                <p style="color: #475569; font-size: 0.875rem;">اكتب الوصف هنا...</p>
+                            <div style="flex: 1; min-width: 250px; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 1.5rem; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+                                <img src="https://via.placeholder.com/100" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1rem;" alt="أيقونة">
+                                <h3 style="color: #059669; font-size: 1.25rem; font-weight: 900; margin-bottom: 0.5rem;">العنوان الثالث</h3>
+                                <p style="color: #64748b; font-size: 0.875rem; font-weight: bold;">اكتب الوصف هنا ليتناسب مع البطاقة...</p>
                             </div>
                         </div><p><br></p>`;
             } else if (type === 'table') {
-                html = `<table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
-                            <thead style="background-color: #eff6ff; color: #1e3a8a;">
-                                <tr><th style="padding: 1rem; border: 1px solid #cbd5e1;">العمود الأول</th><th style="padding: 1rem; border: 1px solid #cbd5e1;">العمود الثاني</th></tr>
-                            </thead>
-                            <tbody style="color: #475569;">
-                                <tr><td style="padding: 1rem; border: 1px solid #cbd5e1;">بيانات</td><td style="padding: 1rem; border: 1px solid #cbd5e1;">بيانات</td></tr>
-                                <tr><td style="padding: 1rem; border: 1px solid #cbd5e1;">بيانات</td><td style="padding: 1rem; border: 1px solid #cbd5e1;">بيانات</td></tr>
-                            </tbody>
-                        </table><p><br></p>`;
+                html = `<div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 1.5rem; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <h3 style="color: #7e22ce; font-size: 1.5rem; font-weight: 900; margin-bottom: 1rem;">عنوان الجدول</h3>
+                            <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                                <thead style="background-color: #f8fafc; color: #1e293b;">
+                                    <tr><th style="padding: 1rem; border-bottom: 2px solid #e2e8f0; font-weight: 900;">العمود الأول</th><th style="padding: 1rem; border-bottom: 2px solid #e2e8f0; font-weight: 900;">العمود الثاني</th><th style="padding: 1rem; border-bottom: 2px solid #e2e8f0; font-weight: 900;">العمود الثالث</th></tr>
+                                </thead>
+                                <tbody style="color: #475569; font-weight: bold;">
+                                    <tr><td style="padding: 1rem; border-bottom: 1px solid #f1f5f9;">بيانات</td><td style="padding: 1rem; border-bottom: 1px solid #f1f5f9;">بيانات</td><td style="padding: 1rem; border-bottom: 1px solid #f1f5f9; color: #9333ea;">بيانات هامة</td></tr>
+                                    <tr><td style="padding: 1rem; border-bottom: 1px solid #f1f5f9;">بيانات</td><td style="padding: 1rem; border-bottom: 1px solid #f1f5f9;">بيانات</td><td style="padding: 1rem; border-bottom: 1px solid #f1f5f9; color: #9333ea;">بيانات هامة</td></tr>
+                                </tbody>
+                            </table>
+                        </div><p><br></p>`;
             }
             execCmd(editorId, 'insertHTML', html);
         };
@@ -1035,7 +1050,7 @@
             document.getElementById('cms-section').value = 'new';
             document.getElementById('cms-order').value = '1';
             document.getElementById('cms-tab-name').value = '';
-            document.getElementById('cms-content').innerHTML = 'اكتب المحتوى هنا...';
+            document.getElementById('cms-content').innerHTML = 'اكتب المحتوى هنا... لتعديل العناوين ظلل النص واختر لونه وحجمه';
         };
 
         window.saveArticle = async () => {
@@ -1071,15 +1086,14 @@
                             <p class="text-[10px] text-slate-500 font-bold">المكان: ${a.sectionId === 'new' ? 'مستقل' : a.sectionId} | الترتيب: ${a.order}</p>
                         </div>
                         <div class="flex gap-1">
-                            <button onclick="editArticleId('${a.id}')" class="w-7 h-7 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"><i class="fas fa-edit text-xs"></i></button>
-                            <button onclick="delArticle('${a.id}')" class="w-7 h-7 bg-red-100 text-red-600 rounded hover:bg-red-200"><i class="fas fa-trash text-xs"></i></button>
+                            <button onclick="editArticleId('${a.id}')" class="w-7 h-7 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition"><i class="fas fa-edit text-xs"></i></button>
+                            <button onclick="delArticle('${a.id}')" class="w-7 h-7 bg-red-100 text-red-600 rounded hover:bg-red-200 transition"><i class="fas fa-trash text-xs"></i></button>
                         </div>
                     </div>
                 `).join('');
             } catch(e) { list.innerHTML = '<p class="text-red-500 text-sm">خطأ</p>'; }
         };
 
-        // التعديل عبر الـ ID
         window.editArticleId = (id) => {
             const obj = window.allArticlesMap[id];
             if(!obj) return toast("خطأ في جلب الدرس", "error");
@@ -1107,22 +1121,22 @@
                 if(!arr.length) return list.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 font-bold text-sm bg-white rounded-2xl border border-slate-200 shadow-sm">لا توجد دروس مضافة حالياً.</div>';
                 
                 list.innerHTML = arr.map(a => `
-                    <div class="glass-card p-8 border-t-[6px] border-cyan-500">
-                        <h3 class="text-2xl font-black text-cyan-700 mb-4 border-b border-slate-100 pb-3">${a.tabName}</h3>
-                        <div class="rich-display p-0 bg-transparent border-none min-h-0 text-base leading-relaxed text-slate-700 h-auto">${a.htmlContent}</div>
+                    <div class="glass-card border-t-[6px] border-cyan-500">
+                        <h3 class="text-2xl font-black text-cyan-700 m-8 mb-0 border-b border-slate-100 pb-3">${a.tabName}</h3>
+                        <div class="rich-display bg-transparent border-none min-h-0 h-auto">${a.htmlContent}</div>
                     </div>
                 `).join('');
             } catch(e) { list.innerHTML = '<div class="col-span-full text-red-500 font-bold text-center">خطأ في الجلب.</div>'; }
         };
 
-        // -------- وظائف LMS (بمحرر نصوص غني للأسئلة) --------
+        // -------- وظائف LMS (بمحرر نصوص غني) --------
         let qCount = 0;
         window.addQForm = () => {
             qCount++;
             const editorId = 'q-editor-' + qCount;
-            const d = document.createElement('div'); d.className = 'p-5 bg-slate-50 border border-slate-200 rounded-2xl q-form-block relative shadow-sm mb-4';
+            const d = document.createElement('div'); d.className = 'p-5 bg-white border border-slate-200 rounded-2xl q-form-block relative shadow-sm mb-4';
             d.innerHTML = `
-                <select class="q-ty w-full p-2 bg-white border border-slate-200 rounded-lg mb-3 font-bold text-slate-700 outline-none text-sm shadow-sm" onchange="window.updTy(this)">
+                <select class="q-ty w-full p-2 bg-slate-50 border border-slate-200 rounded-lg mb-3 font-bold text-slate-700 outline-none text-sm" onchange="window.updTy(this)">
                     <option value="multiple-choice">اختيار من متعدد (إجابة واحدة)</option>
                     <option value="multiple-answers">إجابات متعددة (Checkboxes)</option>
                     <option value="true-false">صح أم خطأ</option>
@@ -1130,15 +1144,15 @@
                 </select>
                 
                 <!-- محرر نصوص للسؤال -->
-                <div class="editor-toolbar bg-white p-1 rounded-t-lg flex flex-wrap gap-1 border border-slate-200 border-b-0 text-xs items-center">
+                <div class="editor-toolbar bg-slate-50 p-1.5 rounded-t-lg flex flex-wrap gap-1 border border-slate-200 border-b-0 text-xs items-center">
                     <button onclick="execCmd('${editorId}', 'bold')" title="عريض"><i class="fas fa-bold"></i></button>
                     <button onclick="execCmd('${editorId}', 'italic')" title="مائل"><i class="fas fa-italic"></i></button>
                     <button onclick="execCmd('${editorId}', 'underline')" title="تسطير"><i class="fas fa-underline"></i></button>
                     <div class="w-px h-4 bg-slate-300 mx-1"></div>
-                    <select onchange="execCmd('${editorId}', 'fontSize', this.value)" class="text-[10px] p-1" title="حجم الخط">
+                    <select onchange="execCmd('${editorId}', 'fontSize', this.value)" class="text-[10px] p-1 font-bold text-slate-600" title="حجم الخط">
                         <option value="3">حجم عادي</option><option value="5">حجم كبير</option><option value="6">أكبر</option>
                     </select>
-                    <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded px-1">
+                    <div class="flex items-center gap-1 bg-white border border-slate-200 rounded px-1">
                         <span class="text-[9px] font-bold text-slate-500">لون:</span>
                         <input type="color" onchange="execCmd('${editorId}', 'foreColor', this.value)" class="w-5 h-5 p-0 border-none bg-transparent cursor-pointer">
                     </div>
@@ -1147,13 +1161,13 @@
                     <button onclick="document.getElementById('img-upload-q-${qCount}').click()" title="رفع صورة" class="text-emerald-600"><i class="fas fa-upload"></i> <i class="fas fa-image"></i></button>
                     <input type="file" id="img-upload-q-${qCount}" accept="image/*" class="hidden" onchange="handleImageUpload(event, '${editorId}')">
                 </div>
-                <div id="${editorId}" contenteditable="true" class="q-t w-full p-3 bg-white border border-slate-200 rounded-b-lg mb-4 text-slate-800 font-bold text-sm outline-none overflow-y-auto shadow-inner min-h-[80px]" placeholder="اكتب السؤال هنا.."></div>
+                <div id="${editorId}" contenteditable="true" class="q-t w-full p-4 bg-white border border-slate-200 rounded-b-lg mb-4 text-slate-800 font-bold text-base outline-none overflow-y-auto min-h-[80px]" placeholder="اكتب السؤال هنا.. ظلل النص لتغيير اللون أو الحجم"></div>
                 
                 <div class="q-opts grid grid-cols-2 gap-2 mb-3">
-                    <input class="o1 p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500" placeholder="الخيار 1">
-                    <input class="o2 p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500" placeholder="الخيار 2">
-                    <input class="o3 p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500" placeholder="الخيار 3">
-                    <input class="o4 p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500" placeholder="الخيار 4">
+                    <input class="o1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500" placeholder="الخيار 1">
+                    <input class="o2 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500" placeholder="الخيار 2">
+                    <input class="o3 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500" placeholder="الخيار 3">
+                    <input class="o4 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-blue-500" placeholder="الخيار 4">
                 </div>
                 <input type="text" class="q-c w-full p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-center text-emerald-700 font-bold text-sm outline-none placeholder:text-emerald-400" placeholder="رقم الإجابة الصحيحة (1-4)">
                 <button onclick="this.parentElement.remove()" class="absolute top-3 left-3 text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded"><i class="fas fa-trash text-xs"></i></button>`;
@@ -1188,7 +1202,7 @@
                 const s = await getDocs(collection(db, PATH, 'quizzes')); quizzesCache = []; s.forEach(d => quizzesCache.push({id:d.id, ...d.data()}));
                 const qg = document.getElementById('quizzes-grid');
                 if(!quizzesCache.length) qg.innerHTML = '<p class="col-span-full bg-white p-6 rounded-2xl border border-slate-200 text-sm">لا توجد اختبارات متاحة.</p>';
-                else qg.innerHTML = quizzesCache.map(q => `<div onclick="startQuiz('${q.id}')" class="glass-card p-8 border-r-[8px] border-blue-500 cursor-pointer hover-scale text-right"><h4 class="font-black text-xl mb-3 text-blue-700">${q.title}</h4><p class="text-xs font-bold text-slate-500 bg-slate-50 inline-block p-1.5 rounded"><i class="fas fa-list-check"></i> ${q.questions.length} أسئلة تقييمية</p></div>`).join('');
+                else qg.innerHTML = quizzesCache.map(q => `<div onclick="startQuiz('${q.id}')" class="glass-card p-8 border-r-[8px] border-blue-500 cursor-pointer hover-scale text-right"><h4 class="font-black text-xl mb-3 text-blue-700">${q.title}</h4><p class="text-xs font-bold text-slate-500 bg-slate-50 inline-block p-1.5 rounded border border-slate-200"><i class="fas fa-list-check text-blue-500"></i> ${q.questions.length} أسئلة تقييمية</p></div>`).join('');
             } catch(e) { document.getElementById('quizzes-grid').innerHTML = '<p class="col-span-full text-red-500 text-sm">خطأ في جلب الاختبارات.</p>'; }
         };
 
@@ -1229,7 +1243,7 @@
                     <i class="fas ${score===activeQuiz.questions.length?'fa-trophy text-yellow-500':'fa-star text-emerald-500'} text-7xl mb-6"></i>
                     <h2 class="text-3xl font-black mb-4 text-slate-800">النتيجة النهائية</h2>
                     <p class="font-bold text-slate-500 text-sm mb-6">أحسنت يا ${document.getElementById('student-n').value}</p>
-                    <div class="text-7xl font-black text-blue-600 mb-8 bg-blue-50 py-4 rounded-3xl">${score}<span class="text-3xl text-slate-400 mx-2">/</span><span class="text-4xl text-slate-500">${activeQuiz.questions.length}</span></div>
+                    <div class="text-7xl font-black text-blue-600 mb-8 bg-blue-50 py-4 rounded-3xl border border-blue-100">${score}<span class="text-3xl text-slate-400 mx-2">/</span><span class="text-4xl text-slate-500">${activeQuiz.questions.length}</span></div>
                     <button onclick="renderStudentPortal()" class="bg-slate-800 text-white w-full py-4 rounded-xl font-black text-lg transition hover:bg-slate-700">العودة لقائمة الاختبارات</button>
                 </div>`;
             } catch(e) { toast("حدث خطأ أثناء حفظ النتيجة", "error"); }
@@ -1240,9 +1254,9 @@
             try {
                 const s = await getDocs(collection(db, PATH, 'results')); let results = []; s.forEach(d => results.push(d.data()));
                 results.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-                if(!results.length) return list.innerHTML = '<p class="text-center text-slate-400 font-bold text-sm bg-slate-50 p-4 rounded-xl">لا توجد نتائج مسجلة.</p>';
+                if(!results.length) return list.innerHTML = '<p class="text-center text-slate-400 font-bold text-sm bg-slate-50 p-4 rounded-xl border border-slate-200">لا توجد نتائج مسجلة.</p>';
                 list.innerHTML = `<table class="w-full text-right"><tr class="border-b border-slate-200 text-xs font-black text-slate-500"><th class="pb-3">الاسم</th><th class="pb-3">الاختبار</th><th class="pb-3">الدرجة</th></tr>` + 
-                    results.map(r => `<tr class="border-b border-slate-100 hover:bg-slate-50 transition"><td class="py-3 font-black text-sm text-slate-800">${r.studentName}</td><td class="py-3 text-slate-500 font-bold text-xs">${r.quizTitle}</td><td class="py-3 font-mono text-blue-600 text-sm font-black"><span class="bg-blue-50 px-2 py-1 rounded">${r.score}/${r.total}</span></td></tr>`).join('') + `</table>`;
+                    results.map(r => `<tr class="border-b border-slate-100 hover:bg-slate-50 transition"><td class="py-3 font-black text-sm text-slate-800">${r.studentName}</td><td class="py-3 text-slate-500 font-bold text-xs">${r.quizTitle}</td><td class="py-3 font-mono text-blue-600 text-sm font-black"><span class="bg-blue-50 px-2 py-1 rounded border border-blue-100">${r.score}/${r.total}</span></td></tr>`).join('') + `</table>`;
             } catch(e) { list.innerHTML = '<p class="text-red-500 font-bold text-center text-sm">خطأ في الجلب.</p>'; }
         };
 
