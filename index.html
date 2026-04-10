@@ -1098,9 +1098,26 @@
 
         window.execCmd = (editorId, cmd, val=null) => { document.execCommand(cmd, false, val); document.getElementById(editorId).focus(); };
         
-        window.insertResizableImage = (editorId) => { 
-            const url = prompt("أدخل رابط الصورة (URL):"); 
+        window.insertImagePrompt = (editorId) => { 
+            let url = prompt("أدخل رابط الصورة (URL):"); 
             if(url) {
+                // تحويل رابط قوقل درايف إلى رابط مباشر تلقائياً
+                if (url.includes('drive.google.com/file/d/')) {
+                    const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) url = 'https://drive.google.com/uc?export=view&id=' + match[1];
+                }
+                window.execCmd(editorId, 'insertImage', url); 
+            }
+        };
+
+        window.insertResizableImage = (editorId) => { 
+            let url = prompt("أدخل رابط الصورة (URL):"); 
+            if(url) {
+                // تحويل رابط قوقل درايف إلى رابط مباشر تلقائياً
+                if (url.includes('drive.google.com/file/d/')) {
+                    const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) url = 'https://drive.google.com/uc?export=view&id=' + match[1];
+                }
                 const html = `<span style="display: inline-block; width: 300px; max-width: 100%; resize: both; overflow: hidden; border: 2px dashed #94a3b8; padding: 2px; margin: 0.5rem; border-radius: 0.5rem;"><img src="${url}" style="width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer;" alt="صورة مدرجة" /></span>&nbsp;`;
                 window.execCmd(editorId, 'insertHTML', html);
             }
