@@ -41,10 +41,10 @@
                 background-size: cover; 
                 background-position: center; 
                 background-attachment: fixed; 
+                background-repeat: no-repeat;
                 background-color: #e2e8f0; 
             }
             
-            /* تم تحسين هوامش البطاقات الزجاجية للجوال */
             .glass-card { @apply bg-white/60 backdrop-blur-lg border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.1)] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden; }
             .hover-scale { @apply transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-tvtcteal hover:bg-white/75; }
             
@@ -57,7 +57,6 @@
             
             .btn-primary { @apply w-full bg-tvtcteal hover:bg-tvtcmain text-white font-black py-3 md:py-4 rounded-xl transition shadow-lg shadow-tvtcteal/40 backdrop-blur-sm; }
             
-            /* تنسيقات محرر النصوص متجاوبة مع الجوال */
             .editor-toolbar { @apply bg-white/80 backdrop-blur-md p-2 md:p-3 rounded-t-2xl flex flex-wrap gap-1.5 items-center border border-white/50 border-b-0 shadow-inner w-full; }
             .editor-toolbar button, .editor-toolbar select { @apply bg-white hover:bg-tvtcmain hover:text-white text-slate-800 px-2 py-1.5 md:px-2.5 rounded-lg cursor-pointer transition text-xs md:text-sm font-bold border border-slate-200 outline-none shadow-sm flex items-center gap-1; }
             .editor-toolbar input[type="color"] { @apply bg-white border border-slate-200 cursor-pointer w-7 h-7 md:w-8 md:h-8 p-0.5 rounded-lg shadow-sm; }
@@ -75,7 +74,9 @@
             .rich-editor table, .rich-display table { @apply w-full text-center border-collapse bg-white/80 mb-8 rounded-xl md:rounded-2xl overflow-x-auto shadow-sm border border-slate-300 block md:table; }
             .rich-editor th, .rich-display th { @apply bg-tvtclight/20 p-3 md:p-4 border-b border-slate-300 font-black text-sm md:text-lg text-tvtcmain; }
             .rich-editor td, .rich-display td { @apply p-3 md:p-4 border-b border-slate-300 font-bold text-slate-800 text-xs md:text-base; }
-            .rich-editor img, .rich-display img { @apply max-w-full h-auto rounded-xl shadow-md my-4 object-contain inline-block border border-slate-200 cursor-move resize; }
+            
+            /* الصور المدرجة مسبقا */
+            .rich-display img:not([style*="resize"]) { @apply max-w-full h-auto rounded-xl shadow-md my-4 object-contain inline-block border border-slate-200 cursor-move; }
 
             .custom-grid-container { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 my-6 md:my-8 text-center items-stretch; }
             .custom-grid-card { @apply bg-white/70 backdrop-blur-md border-t-[6px] border-tvtcteal p-6 md:p-8 rounded-2xl md:rounded-[2rem] shadow-sm transition hover:-translate-y-1 hover:shadow-md flex flex-col h-full; }
@@ -91,15 +92,15 @@
         @media (min-width: 768px) { .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; } }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #29b5a8; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+
+        .mobile-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
     </style>
 </head>
 <body class="text-slate-800 font-sans selection:bg-tvtcteal selection:text-white flex flex-col h-screen site-bg overflow-hidden relative">
 
     <div class="absolute inset-0 bg-white/10 backdrop-blur-[2px] -z-10"></div>
 
-    <!-- الشريط العلوي الموحد -->
     <nav class="bg-gradient-to-r from-tvtcdark via-tvtcmain to-tvtcteal p-3 md:p-4 sticky top-0 z-50 shadow-md flex justify-between items-center shrink-0 w-full">
-        <!-- اليمين: الشعار واسم الموقع وزر القائمة للموبايل -->
         <div class="flex items-center gap-2 md:gap-4">
             <button onclick="document.getElementById('main-sidebar').classList.remove('hidden')" class="lg:hidden text-white hover:text-tvtcaccent text-xl md:text-2xl p-1 transition"><i class="fas fa-bars"></i></button>
             <div class="font-black text-white text-sm md:text-xl flex items-center gap-2 md:gap-3 cursor-pointer hover:opacity-80 transition" onclick="window.goHome()">
@@ -112,79 +113,71 @@
             </div>
         </div>
 
-        <!-- اليسار: أزرار التقييم وإدارة الموقع (في الركن العلوي الأيسر وتتجاوب مع الجوال) -->
         <div class="flex items-center gap-2 md:gap-4">
-            <button onclick="window.directLMS('admin')" class="text-white/90 hover:text-white font-bold transition text-[10px] md:text-sm flex items-center gap-1 md:gap-1.5 bg-white/10 hover:bg-white/20 px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg border border-white/20 shadow-sm whitespace-nowrap"><i class="fas fa-chalkboard-teacher"></i> <span>المدرب</span></button>
-            <button onclick="window.directLMS('student')" class="text-tvtcmain bg-white hover:bg-slate-100 font-black transition text-[10px] md:text-sm flex items-center gap-1 md:gap-1.5 px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg shadow-sm whitespace-nowrap"><i class="fas fa-user-graduate"></i> <span>المتدرب</span></button>
+            <button onclick="window.directLMS('admin')" class="text-white/90 hover:text-white font-bold transition text-[10px] md:text-sm flex items-center gap-1 md:gap-1.5 bg-white/10 hover:bg-white/20 px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg border border-white/20 shadow-sm whitespace-nowrap"><i class="fas fa-cog"></i> <span class="hidden md:inline">إدارة الموقع</span><span class="md:hidden">إدارة</span></button>
+            <button onclick="window.directLMS('student')" class="text-tvtcmain bg-white hover:bg-slate-100 font-black transition text-[10px] md:text-sm flex items-center gap-1 md:gap-1.5 px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg shadow-sm whitespace-nowrap"><i class="fas fa-user-graduate"></i> <span class="hidden md:inline">الواجبات والاختبارات</span><span class="md:hidden">الواجبات</span></button>
             <div class="w-px h-5 bg-white/30 hidden md:block mx-1"></div>
             <button onclick="window.toggleFS()" class="hidden md:flex text-white/90 hover:text-white text-lg transition p-1"><i class="fas fa-expand" id="fs-icon"></i></button>
         </div>
     </nav>
 
-    <!-- المساحة الوسطى (القائمة + العرض) -->
     <div class="flex-1 flex h-full overflow-hidden w-full relative">
-        
-        <!-- القائمة الجانبية (Sidebar) -->
-        <aside id="main-sidebar" class="w-72 md:w-80 sidebar-bg z-[100] flex-col hidden fixed inset-y-0 right-0 lg:static lg:flex h-full flex-shrink-0 transition-transform duration-300">
-            <div class="p-4 flex justify-end lg:hidden">
+        <aside id="main-sidebar" class="w-72 md:w-80 sidebar-bg z-[100] flex-col hidden fixed inset-y-0 right-0 lg:static lg:flex h-[100dvh] lg:h-full flex-shrink-0 transition-transform duration-300">
+            <div class="p-4 flex justify-end lg:hidden shrink-0">
                 <button onclick="document.getElementById('main-sidebar').classList.add('hidden')" class="text-slate-500 hover:text-red-500 text-2xl bg-white/70 w-10 h-10 rounded-xl shadow-sm"><i class="fas fa-times"></i></button>
             </div>
-            
-            <nav class="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-1.5 mt-2" id="sidebar-nav">
-                <!-- سيتم توليد الروابط هنا برمجياً -->
-            </nav>
-            
+            <nav class="flex-1 mobile-scroll p-4 space-y-2 mt-2 pb-24 lg:pb-4" id="sidebar-nav"></nav>
             <div class="p-4 md:p-6 border-t border-white/40 bg-white/50 text-center shrink-0">
                 <p class="text-[10px] md:text-xs font-black text-tvtcmain leading-relaxed uppercase tracking-widest mb-1">إعداد وتصميم</p>
                 <p class="text-tvtcdark font-black drop-shadow-sm text-sm md:text-lg">منصور مستور الزهراني</p>
             </div>
         </aside>
 
-        <!-- منطقة التمرير للمحتوى الرئيسي -->
-        <main id="main-scroll-area" class="flex-1 overflow-y-auto p-3 md:p-8 custom-scrollbar">
+        <main id="main-scroll-area" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
             
-            <!-- الواجهة الرئيسية -->
             <div id="portal-dashboard" class="block page-enter max-w-7xl mx-auto">
                 <header class="glass-card p-6 md:p-16 text-center border-t-[8px] border-tvtcmain mb-8 md:mb-12 relative overflow-hidden bg-white/70">
                     <div class="relative z-10 w-full">
                         <div id="home-rich-content" class="w-full mx-auto rich-display bg-transparent border-none shadow-none text-center h-auto min-h-0 p-0">
-                            <!-- المحتوى الافتراضي للرئيسية -->
                             <img src="tvtc.png" alt="TVTC Logo" style="height: 100px; margin: 0 auto 20px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); object-fit: contain;">
                             <h1 class="text-3xl md:text-7xl font-black mb-4 md:mb-8 text-tvtcdark tracking-tight drop-shadow-md">شبكات <span class="text-tvtcteal">الحاسب الآلي</span></h1>
                             <p class="text-sm md:text-2xl text-tvtcmain max-w-4xl mx-auto font-bold leading-relaxed drop-shadow-sm">المرجع الأكاديمي الشامل لمهندسي الشبكات، يغطي المبادئ، الأمان، بروتوكولات التوجيه، والمعايير الفيزيائية.</p>
                         </div>
                     </div>
                 </header>
-                
-                <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
-                    <!-- سيتم تعبئة البطاقات هنا برمجياً -->
-                </div>
+                <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8"></div>
             </div>
 
-            <!-- حاوية الأقسام التعليمية -->
             <div id="section-container" class="hidden page-enter max-w-6xl mx-auto pb-10 md:pb-20">
                 <header class="glass-card p-6 md:p-10 mb-6 md:mb-8 text-center border-t-[8px] border-tvtcmain bg-white/70">
                     <h1 id="section-title" class="text-3xl md:text-5xl font-black text-tvtcdark tracking-tight drop-shadow-sm">العنوان</h1>
                 </header>
-
                 <div id="mobile-tabs" class="lg:hidden flex gap-2 overflow-x-auto custom-scrollbar mb-6 pb-2"></div>
-                
-                <div id="content-area" class="w-full page-enter">
-                    <!-- المحتوى سيحقن هنا -->
-                </div>
+                <div id="content-area" class="w-full page-enter"></div>
             </div>
 
-            <!-- قسم الاختبارات (LMS/CMS Views) مدمج بالكامل -->
             <div id="section-exams" class="hidden page-enter max-w-7xl mx-auto pb-10 md:pb-20">
                 <div id="lms-area"></div>
             </div>
-
         </main>
+    </div>
+
+    <!-- نافذة منبثقة (Modal) لمكتبة الأيقونات والرموز التعبيرية -->
+    <div id="emoji-picker-modal" class="hidden fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="font-black text-tvtcdark text-xl"><i class="fas fa-icons text-tvtcteal ml-2"></i> مكتبة أيقونات الشبكات والحاسب</h3>
+                <button onclick="document.getElementById('emoji-picker-modal').classList.add('hidden')" class="text-slate-400 hover:text-red-500 text-2xl transition bg-white w-10 h-10 rounded-xl shadow-sm border border-slate-200"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white" id="emoji-grid-container">
+                <!-- سيتم حقن الأيقونات هنا برمجياً -->
+            </div>
+        </div>
     </div>
 
     <div id="tst" class="toast"><i id="tsti" class="fas"></i><span id="tstt"></span></div>
 
-    <!-- بيانات المحتوى الأساسية (منسقة بألوان TVTC ومكتملة من ملفات الـ PDF) -->
+    <!-- بيانات المحتوى الأساسية -->
     <script>
         const CORE_DATA = {
             'networks': {
@@ -198,27 +191,27 @@
                         <h2 style="text-align: center; margin-top: 2rem;">💡 فوائد شبكات الحاسب</h2>
                         <div class="custom-grid-container">
                             <div class="custom-grid-card border-t-tvtcmain">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">💾</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">💾</div>
                                 <div class="custom-grid-title text-tvtcdark">مشاركة البيانات</div>
                                 <p class="custom-grid-desc text-center">نقل المعلومات والملفات بسرعة فائقة بين المستخدمين دون وسائط تخزين خارجية.</p>
                             </div>
                             <div class="custom-grid-card border-t-tvtcteal">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🖨️</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🖨️</div>
                                 <div class="custom-grid-title text-tvtcdark">مشاركة الموارد</div>
                                 <p class="custom-grid-desc text-center">تتيح للجميع استخدام أجهزة صلبة (Hardware) مثل الطابعات والماسحات الضوئية.</p>
                             </div>
                             <div class="custom-grid-card border-t-purple-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">💻</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">💻</div>
                                 <div class="custom-grid-title text-tvtcdark">مشاركة البرمجيات</div>
                                 <p class="custom-grid-desc text-center">العمل على برامج موحدة (Software) بتثبيت نسخة واحدة على الخادم للجميع.</p>
                             </div>
                             <div class="custom-grid-card md:col-span-1 lg:col-span-1 border-t-orange-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">📂</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">📂</div>
                                 <div class="custom-grid-title text-tvtcdark">مشاركة الملفات مباشرة</div>
                                 <p class="custom-grid-desc text-center">نقل مباشر بين الأجهزة بدلاً من إرسالها عبر البريد الإلكتروني.</p>
                             </div>
                             <div class="custom-grid-card md:col-span-2 lg:col-span-2 border-t-rose-500 bg-white/80">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🎮</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🎮</div>
                                 <div class="custom-grid-title !text-rose-700">ألعاب الكمبيوتر الجماعية</div>
                                 <p class="custom-grid-desc text-center">التفاعل بين أكثر من مستخدم (Multiplayer) للعب في نفس البيئة الافتراضية.</p>
                             </div>
@@ -228,19 +221,19 @@
                         <h1 style="text-align: center;">🖥️ مكونات شبكة الحاسب</h1>
                         <div class="custom-grid-container">
                             <div class="custom-grid-card border-t-tvtcmain">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">💻</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">💻</div>
                                 <div class="custom-grid-title">الأجهزة الطرفية</div>
                                 <div style="font-weight: 900; color: #00627a; margin-bottom: 1rem; background: rgba(255,255,255,0.8); padding: 0.5rem; border-radius: 0.5rem; text-align: center; border: 1px solid #29b5a8; font-size: 0.75rem;">End Devices</div>
                                 <p class="custom-grid-desc text-justify">الجهاز الطرفي: هو المكان الذي تنشأ منه الرسالة أو المكان الذي يتم استلامها فيه. تنشأ البيانات باستخدام جهاز طرفي وتتدفق خلال الشبكة وتصل إلى جهاز طرفي آخر. (مثل أجهزة الكمبيوتر، الطابعات الشبكية، الكاميرات).</p>
                             </div>
                             <div class="custom-grid-card border-t-tvtcdark">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🔀</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🔀</div>
                                 <div class="custom-grid-title">الأجهزة الوسيطة</div>
                                 <div style="font-weight: 900; color: #00627a; margin-bottom: 1rem; background: rgba(255,255,255,0.8); padding: 0.5rem; border-radius: 0.5rem; text-align: center; border: 1px solid #29b5a8; font-size: 0.75rem;">Intermediary</div>
                                 <p class="custom-grid-desc text-justify">تقوم بالاتصال البيني بين الأجهزة الطرفية وتوجيه الحزم واختيار المسار وحماية الشبكة. من الأمثلة عليها: أجهزة التبديل (Switch)، أجهزة التوجيه (Router)، الجدران النارية (Firewalls).</p>
                             </div>
                             <div class="custom-grid-card border-t-tvtcteal">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">📡</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">📡</div>
                                 <div class="custom-grid-title">وسائط الشبكة</div>
                                 <div style="font-weight: 900; color: #00627a; margin-bottom: 1rem; background: rgba(255,255,255,0.8); padding: 0.5rem; border-radius: 0.5rem; text-align: center; border: 1px solid #29b5a8; font-size: 0.75rem;">Media</div>
                                 <p class="custom-grid-desc text-justify">يتم نقل الاتصالات عبر الشبكة من خلال وسيط يسمح للرسالة بالانتقال من المصدر إلى الوجهة. وتشمل: الكابلات النحاسية، كابلات الألياف الضوئية، والموجات اللاسلكية.</p>
@@ -251,63 +244,63 @@
                         <h2 style="text-align: center;">🌍 الشبكات من حيث المدى الجغرافي</h2>
                         <div class="custom-grid-container" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                             <div class="custom-grid-card border-t-blue-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">📱</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">📱</div>
                                 <div class="custom-grid-title text-center text-blue-800">PAN</div>
                                 <p class="custom-grid-desc text-center">الشبكة الشخصية لتوصيل الأجهزة في نطاق أمتار كالبلوتوث.</p>
                             </div>
                             <div class="custom-grid-card border-t-emerald-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🏢</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🏢</div>
                                 <div class="custom-grid-title text-center text-emerald-800">LAN</div>
                                 <p class="custom-grid-desc text-center">الشبكة المحلية داخل منطقة جغرافية محدودة كالمباني والمكاتب.</p>
                             </div>
                             <div class="custom-grid-card border-t-purple-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🏙️</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🏙️</div>
                                 <div class="custom-grid-title text-center text-purple-800">MAN</div>
                                 <p class="custom-grid-desc text-center">الشبكة المتوسطة الإقليمية التي تربط LANs ضمن مدينة واحدة.</p>
                             </div>
                             <div class="custom-grid-card border-t-orange-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🌍</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🌍</div>
                                 <div class="custom-grid-title text-center text-orange-800">WAN</div>
                                 <p class="custom-grid-desc text-center">الشبكة الواسعة للربط بين مدن ودول وتغطي مسافات شاسعة.</p>
                             </div>
                         </div>
 
-                        <hr style="margin: 2.5rem 0; border: 1px solid rgba(0,98,122,0.1);">
+                        <hr style="margin: 3rem 0; border: 1px solid rgba(0,98,122,0.2);">
 
                         <div style="display: flex; flex-wrap: wrap; gap: 2rem;">
-                            <div style="flex: 1; min-width: 250px;">
+                            <div style="flex: 1; min-width: 300px;">
                                 <h2>🏗️ المعمارية التقنية (Architecture)</h2>
-                                <div style="background: rgba(255,255,255,0.6); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1rem; border: 1px solid rgba(0,98,122,0.15);">
-                                    <h3 style="font-size: 1.25rem; margin-top: 0; color: #004d60;">👥 نظير إلى نظير (P2P)</h3>
-                                    <p style="font-size: 0.875rem; font-weight: bold; color: #334155; line-height: 1.8; text-align: justify; margin-bottom: 0;">بنية شبكية موزعة تتصل فيها الأجهزة مباشرة دون خادم مركزي، كل جهاز يسمى "نظير" ويعمل كعميل وخادم.</p>
+                                <div style="background: rgba(255,255,255,0.6); padding: 2rem; border-radius: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(0,98,122,0.2);">
+                                    <h3 style="font-size: 1.5rem; margin-top: 0;">👥 نظير إلى نظير (P2P)</h3>
+                                    <p style="font-size: 1rem; font-weight: bold; color: #334155; line-height: 1.8; text-align: justify;">بنية شبكية موزعة تتصل فيها الأجهزة مباشرة دون خادم مركزي، كل جهاز يسمى "نظير" ويعمل كعميل وخادم.</p>
                                 </div>
-                                <div style="background: rgba(255,255,255,0.6); padding: 1.5rem; border-radius: 1rem; border: 1px solid rgba(0,98,122,0.15);">
-                                    <h3 style="font-size: 1.25rem; margin-top: 0; color: #00627a;">🗄️ العميل والخادم (Client/Server)</h3>
-                                    <p style="font-size: 0.875rem; font-weight: bold; color: #334155; line-height: 1.8; text-align: justify; margin-bottom: 0;">بنية تعتمد على وجود خادم مركزي يقدم خدمات وموارد، وعملاء يطلبون هذه الخدمات وتتم معالجتها بالخادم.</p>
+                                <div style="background: rgba(255,255,255,0.6); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2);">
+                                    <h3 style="font-size: 1.5rem; margin-top: 0;">🗄️ العميل والخادم (Client/Server)</h3>
+                                    <p style="font-size: 1rem; font-weight: bold; color: #334155; line-height: 1.8; text-align: justify;">بنية تعتمد على وجود خادم مركزي يقدم خدمات وموارد، وعملاء يطلبون هذه الخدمات وتتم معالجتها بالخادم.</p>
                                 </div>
                             </div>
-                            <div style="flex: 1; min-width: 250px;">
+                            <div style="flex: 1; min-width: 300px;">
                                 <h2>📐 التصميم الهندسي (Topologies)</h2>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
-                                    <div style="background: rgba(255,255,255,0.6); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(0,98,122,0.15);">
-                                        <div style="font-size: 2.5rem; margin-bottom: 0.25rem;">➖</div>
-                                        <span style="font-weight: 900; font-size: 1rem; color: #29b5a8;">الخطية (Bus)</span>
-                                        <p style="font-size: 0.75rem; font-weight: bold; color: #475569; margin-top: 0.25rem; margin-bottom: 0;">كابل رئيسي واحد.</p>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; text-align: center;">
+                                    <div style="background: rgba(255,255,255,0.6); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2);">
+                                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">➖</div>
+                                        <span style="font-weight: 900; font-size: 1.2rem;">الخطية (Bus)</span>
+                                        <p style="font-size: 0.875rem; font-weight: bold; color: #475569; margin-top: 0.5rem;">كابل رئيسي واحد.</p>
                                     </div>
-                                    <div style="background: rgba(255,255,255,0.6); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(0,98,122,0.15);">
-                                        <div style="font-size: 2.5rem; margin-bottom: 0.25rem;">⭐</div>
-                                        <span style="font-weight: 900; font-size: 1rem; color: #29b5a8;">النجمية (Star)</span>
-                                        <p style="font-size: 0.75rem; font-weight: bold; color: #475569; margin-top: 0.25rem; margin-bottom: 0;">الأكثر شيوعاً (مركزية).</p>
+                                    <div style="background: rgba(255,255,255,0.6); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2);">
+                                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">⭐</div>
+                                        <span style="font-weight: 900; font-size: 1.2rem;">النجمية (Star)</span>
+                                        <p style="font-size: 0.875rem; font-weight: bold; color: #475569; margin-top: 0.5rem;">الأكثر شيوعاً (مركزية).</p>
                                     </div>
-                                    <div style="background: rgba(255,255,255,0.6); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(0,98,122,0.15);">
-                                        <div style="font-size: 2.5rem; margin-bottom: 0.25rem;">⭕</div>
-                                        <span style="font-weight: 900; font-size: 1rem; color: #29b5a8;">الحلقية (Ring)</span>
-                                        <p style="font-size: 0.75rem; font-weight: bold; color: #475569; margin-top: 0.25rem; margin-bottom: 0;">دائرة مغلقة للبيانات.</p>
+                                    <div style="background: rgba(255,255,255,0.6); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2);">
+                                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">⭕</div>
+                                        <span style="font-weight: 900; font-size: 1.2rem;">الحلقية (Ring)</span>
+                                        <p style="font-size: 0.875rem; font-weight: bold; color: #475569; margin-top: 0.5rem;">دائرة مغلقة للبيانات.</p>
                                     </div>
-                                    <div style="background: rgba(255,255,255,0.6); padding: 1rem; border-radius: 1rem; border: 1px solid rgba(0,98,122,0.15);">
-                                        <div style="font-size: 2.5rem; margin-bottom: 0.25rem;">🕸️</div>
-                                        <span style="font-weight: 900; font-size: 1rem; color: #29b5a8;">المعقدة (Mesh)</span>
-                                        <p style="font-size: 0.75rem; font-weight: bold; color: #475569; margin-top: 0.25rem; margin-bottom: 0;">لمقاومة الأعطال.</p>
+                                    <div style="background: rgba(255,255,255,0.6); padding: 1.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2);">
+                                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🕸️</div>
+                                        <span style="font-weight: 900; font-size: 1.2rem;">المعقدة (Mesh)</span>
+                                        <p style="font-size: 0.875rem; font-weight: bold; color: #475569; margin-top: 0.5rem;">لمقاومة الأعطال.</p>
                                     </div>
                                 </div>
                             </div>
@@ -323,23 +316,23 @@
                         <h1 style="color: #dc2626;">🛡️ التهديدات الأمنية للشبكة</h1>
                         <p style="text-align: justify;">أمان الشبكات هو مجموعة من السياسات والتقنيات التي تهدف إلى حماية البيانات والأجهزة والموارد المتصلة بالشبكة من الوصول غير المصرح به، أو التخريب، أو سوء الاستخدام.</p>
                         
-                        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2.5rem;">
-                            <div style="flex: 1; min-width: 250px; background: rgba(255,255,255,0.6); padding: 2rem; border-radius: 1.25rem; border: 1px solid rgba(0,98,122,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                                <h2 style="color: #c2410c; margin-top: 0; font-size: 1.5rem; text-align: center;">👔 التهديدات الداخلية</h2>
-                                <p style="font-size: 0.95rem; font-weight: bold; color: #1e293b; line-height: 1.8; text-align: justify;">تأتي من داخل المؤسسة نفسها سواء بقصد أو بدون قصد. خطورتها تكمن في أن أصحابها غالباً يمتلكون صلاحيات وصول واسعة.</p>
-                                <h3 style="color: #9a3412; font-size: 1.25rem; margin-top: 1.5rem;">أمثلة:</h3>
-                                <ul style="font-size: 0.9rem; color: #431407; line-height: 1.8;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 3rem;">
+                            <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.6); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                <h2 style="margin-top: 0; font-size: 2rem; text-align: center;">👔 التهديدات الداخلية</h2>
+                                <p style="font-size: 1.1rem; font-weight: bold; color: #1e293b; line-height: 1.8; text-align: justify;">تأتي من داخل المؤسسة نفسها سواء بقصد أو بدون قصد. خطورتها تكمن في أن أصحابها غالباً يمتلكون صلاحيات وصول واسعة.</p>
+                                <h3 style="font-size: 1.5rem; margin-top: 1.5rem;">أمثلة:</h3>
+                                <ul style="font-size: 1rem; color: #004d60; line-height: 2;">
                                     <li>مشاركة كلمة المرور مع الآخرين.</li>
                                     <li>حذف ملفات وقواعد بيانات مهمة عن طريق الخطأ.</li>
                                     <li>استخدام أجهزة شخصية غير آمنة (USB) داخل الشبكة.</li>
                                     <li>التخريب المتعمد من قبل موظف غاضب.</li>
                                 </ul>
                             </div>
-                            <div style="flex: 1; min-width: 250px; background: rgba(255,255,255,0.6); padding: 2rem; border-radius: 1.25rem; border: 1px solid rgba(0,98,122,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                                <h2 style="color: #b91c1c; margin-top: 0; font-size: 1.5rem; text-align: center;">🥷 التهديدات الخارجية</h2>
-                                <p style="font-size: 0.95rem; font-weight: bold; color: #1e293b; line-height: 1.8; text-align: justify;">تأتي من خارج حدود الشبكة (الإنترنت). قد تؤدي لسرقة بيانات، تعطيل خدمات، أو ابتزاز مالي.</p>
-                                <h3 style="color: #991b1b; font-size: 1.25rem; margin-top: 1.5rem;">أمثلة:</h3>
-                                <ul style="font-size: 0.9rem; color: #450a0a; line-height: 1.8;">
+                            <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.6); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                <h2 style="margin-top: 0; font-size: 2rem; text-align: center;">🥷 التهديدات الخارجية</h2>
+                                <p style="font-size: 1.1rem; font-weight: bold; color: #1e293b; line-height: 1.8; text-align: justify;">تأتي من خارج حدود الشبكة (الإنترنت). قد تؤدي لسرقة بيانات، تعطيل خدمات، أو ابتزاز مالي.</p>
+                                <h3 style="font-size: 1.5rem; margin-top: 1.5rem;">أمثلة:</h3>
+                                <ul style="font-size: 1rem; color: #004d60; line-height: 2;">
                                     <li>هجمات الاختراق المباشر (Hacking) واستغلال الثغرات.</li>
                                     <li>البرمجيات الخبيثة (Malware) والفيروسات.</li>
                                     <li>هجمات حجب الخدمة (DDoS) لإسقاط الخوادم.</li>
@@ -348,36 +341,36 @@
                             </div>
                         </div>
                     </div>`,
-                    `<div class="rich-display glass-card border-t-[6px] border-emerald-500">
-                        <h1 style="text-align: center; color: #004d60;">✅ حلول الأمان والترسانة التقنية</h1>
+                    `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
+                        <h1 style="text-align: center;">✅ حلول الأمان والترسانة التقنية</h1>
                         <div class="custom-grid-container">
                             <div class="custom-grid-card border-t-rose-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🔥</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🔥</div>
                                 <div class="custom-grid-title text-center text-rose-800">الجدران النارية (Firewalls)</div>
                                 <p class="custom-grid-desc text-justify">تعمل كحارس صارم بين الشبكة الداخلية والعالم الخارجي، وتسمح فقط بالاتصالات المصرح بها وتمنع الاختراقات.</p>
                             </div>
                             <div class="custom-grid-card border-t-blue-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">👁️</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">👁️</div>
                                 <div class="custom-grid-title text-center text-blue-800">كشف ومنع التسلل (IDS/IPS)</div>
                                 <p class="custom-grid-desc text-justify">الـ IDS يكتشف الهجمات وينذر، بينما الـ IPS أذكى حيث يكتشف ويمنع الهجمات ويقطع الاتصال تلقائياً.</p>
                             </div>
                             <div class="custom-grid-card border-t-purple-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🔑</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🔑</div>
                                 <div class="custom-grid-title text-center text-purple-800">التشفير (Encryption)</div>
                                 <p class="custom-grid-desc text-justify">تحويل البيانات إلى طلاسم وصيغ غير مفهومة لحمايتها أثناء النقل عبر الشبكة ولا تقرأ إلا بمفتاح فك تشفير.</p>
                             </div>
                             <div class="custom-grid-card border-t-emerald-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🪪</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🪪</div>
                                 <div class="custom-grid-title text-center text-emerald-800">إدارة الصلاحيات</div>
                                 <p class="custom-grid-desc text-justify">تحديد هويات المستخدمين ومن يمكنه الوصول إلى المجلدات والأنظمة داخل الشبكة لإيقاف الفضوليين (Access Control).</p>
                             </div>
                             <div class="custom-grid-card border-t-orange-500 md:col-span-1 lg:col-span-1">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">💾</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">💾</div>
                                 <div class="custom-grid-title text-center text-orange-800">النسخ الاحتياطي (Backup)</div>
                                 <p class="custom-grid-desc text-justify">تخزين البيانات في مكان آمن لاسترجاعها عند الفقدان أو التشفير (مثل هجمات برامج الفدية Ransomware).</p>
                             </div>
                             <div class="custom-grid-card border-t-yellow-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🎓</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🎓</div>
                                 <div class="custom-grid-title text-center text-yellow-800">التوعية الأمنية</div>
                                 <p class="custom-grid-desc text-justify">تدريب المستخدمين البشريين (الحلقة الأضعف) على عدم فتح الروابط المشبوهة واستخدام كلمات مرور قوية.</p>
                             </div>
@@ -401,141 +394,141 @@
                             <li>معرفة كل جهاز في أية طبقة يعمل (مثل HUB والراوتر والسويتش).</li>
                         </ul>
 
-                        <h2 style="text-align: center; margin-top: 3rem; border-top: 1px solid rgba(0,98,122,0.1); padding-top: 2rem; color: #004d60;">الطبقات السبع (OSI Layers)</h2>
-                        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
-                            <div style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; border-right: 8px solid #f87171; display: flex; align-items: center; gap: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                                <span style="font-size: 2.5rem; font-weight: 900; color: #ef4444; min-width: 50px; text-align: center;">7</span>
-                                <div><h4 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin: 0;">Application (طبقة التطبيقات)</h4><p style="font-weight: bold; font-size: 0.85rem; color: #334155; margin: 0.25rem 0 0 0;">التطبيقات التي نستخدمها لإرسال الرسائل وتعتبر واجهة المستخدم للشبكة. بروتوكولات: HTTP (ويب), FTP (ملفات), SMTP (بريد).</p></div>
+                        <h2 style="text-align: center; margin-top: 3rem; border-top: 1px solid rgba(0,98,122,0.2); padding-top: 2rem; color: #004d60;">الطبقات السبع (OSI Layers)</h2>
+                        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1.5rem; border-right: 10px solid #f87171; display: flex; align-items: center; gap: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <span style="font-size: 3rem; font-weight: 900; color: #ef4444; min-width: 60px; text-align: center;">7</span>
+                                <div><h4 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0;">Application (طبقة التطبيقات)</h4><p style="font-weight: bold; font-size: 1rem; color: #334155; margin: 0.5rem 0 0 0;">التطبيقات التي نستخدمها لإرسال الرسائل وتعتبر واجهة المستخدم للشبكة. بروتوكولات: HTTP (ويب), FTP (ملفات), SMTP (بريد).</p></div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; border-right: 8px solid #fb923c; display: flex; align-items: center; gap: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                                <span style="font-size: 2.5rem; font-weight: 900; color: #f97316; min-width: 50px; text-align: center;">6</span>
-                                <div><h4 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin: 0;">Presentation (طبقة التقديم)</h4><p style="font-weight: bold; font-size: 0.85rem; color: #334155; margin: 0.25rem 0 0 0;">تهيئة البيانات وتحديد امتدادها (نصوص، صور)، وعمل التشفير وفك التشفير والضغط. بروتوكولات: JPEG, HTML.</p></div>
+                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1.5rem; border-right: 10px solid #fb923c; display: flex; align-items: center; gap: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <span style="font-size: 3rem; font-weight: 900; color: #f97316; min-width: 60px; text-align: center;">6</span>
+                                <div><h4 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0;">Presentation (طبقة التقديم)</h4><p style="font-weight: bold; font-size: 1rem; color: #334155; margin: 0.5rem 0 0 0;">تهيئة البيانات وتحديد امتدادها (نصوص، صور)، وعمل التشفير وفك التشفير والضغط. بروتوكولات: JPEG, HTML.</p></div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; border-right: 8px solid #eab308; display: flex; align-items: center; gap: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                                <span style="font-size: 2.5rem; font-weight: 900; color: #eab308; min-width: 50px; text-align: center;">5</span>
-                                <div><h4 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin: 0;">Session (طبقة الجلسة)</h4><p style="font-weight: bold; font-size: 0.85rem; color: #334155; margin: 0.25rem 0 0 0;">إدارة وفتح وإغلاق الاتصال وتحديد نوعه إرسال واستقبال (Simplex, Half Duplex, Full Duplex). بروتوكولات: NFS, SQL.</p></div>
+                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1.5rem; border-right: 10px solid #eab308; display: flex; align-items: center; gap: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <span style="font-size: 3rem; font-weight: 900; color: #eab308; min-width: 60px; text-align: center;">5</span>
+                                <div><h4 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0;">Session (طبقة الجلسة)</h4><p style="font-weight: bold; font-size: 1rem; color: #334155; margin: 0.5rem 0 0 0;">إدارة وفتح وإغلاق الاتصال وتحديد نوعه إرسال واستقبال (Simplex, Half Duplex, Full Duplex). بروتوكولات: NFS, SQL.</p></div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; border-right: 8px solid #10b981; display: flex; align-items: center; gap: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                                <span style="font-size: 2.5rem; font-weight: 900; color: #10b981; min-width: 50px; text-align: center;">4</span>
-                                <div><h4 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin: 0;">Transport (طبقة النقل)</h4><p style="font-weight: bold; font-size: 0.85rem; color: #334155; margin: 0.25rem 0 0 0;">تحديد البروتوكول المناسب لنقل البيانات وتقطيعها (Segment) وضمانها. بروتوكولات: TCP (للملفات), UDP (للصوت والفيديو).</p></div>
+                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem; border-right: 10px solid #10b981; display: flex; align-items: center; gap: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <span style="font-size: 3rem; font-weight: 900; color: #10b981; min-width: 60px; text-align: center;">4</span>
+                                <div><h4 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0;">Transport (طبقة النقل)</h4><p style="font-weight: bold; font-size: 1rem; color: #334155; margin: 0.5rem 0 0 0;">تحديد البروتوكول المناسب لنقل البيانات وتقطيعها (Segment) وضمانها. بروتوكولات: TCP (للملفات), UDP (للصوت والفيديو).</p></div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; border-right: 8px solid #3b82f6; display: flex; align-items: center; gap: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                                <span style="font-size: 2.5rem; font-weight: 900; color: #3b82f6; min-width: 50px; text-align: center;">3</span>
-                                <div><h4 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin: 0;">Network (طبقة الشبكة)</h4><p style="font-weight: bold; font-size: 0.85rem; color: #334155; margin: 0.25rem 0 0 0;">إضافة عنوان IP للمرسل والمستقبل، واختيار مسار التوجيه (Routing). الجهاز: الراوتر. شكل البيانات: Packet.</p></div>
+                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1.5rem; border-right: 10px solid #3b82f6; display: flex; align-items: center; gap: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <span style="font-size: 3rem; font-weight: 900; color: #3b82f6; min-width: 60px; text-align: center;">3</span>
+                                <div><h4 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0;">Network (طبقة الشبكة)</h4><p style="font-weight: bold; font-size: 1rem; color: #334155; margin: 0.5rem 0 0 0;">إضافة عنوان IP للمرسل والمستقبل، واختيار مسار التوجيه (Routing). الجهاز: الراوتر. شكل البيانات: Packet.</p></div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; border-right: 8px solid #6366f1; display: flex; align-items: center; gap: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                                <span style="font-size: 2.5rem; font-weight: 900; color: #6366f1; min-width: 50px; text-align: center;">2</span>
-                                <div><h4 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin: 0;">Data Link (طبقة ربط البيانات)</h4><p style="font-weight: bold; font-size: 0.85rem; color: #334155; margin: 0.25rem 0 0 0;">إضافة معلومات التحكم لاكتشاف الأخطاء واستخدام العنوان الفيزيائي (MAC Address). الجهاز: السويتش. شكل البيانات: Frame.</p></div>
+                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1.5rem; border-right: 10px solid #6366f1; display: flex; align-items: center; gap: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <span style="font-size: 3rem; font-weight: 900; color: #6366f1; min-width: 60px; text-align: center;">2</span>
+                                <div><h4 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0;">Data Link (طبقة ربط البيانات)</h4><p style="font-weight: bold; font-size: 1rem; color: #334155; margin: 0.5rem 0 0 0;">إضافة معلومات التحكم لاكتشاف الأخطاء واستخدام العنوان الفيزيائي (MAC Address). الجهاز: السويتش. شكل البيانات: Frame.</p></div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; padding: 1rem; border-radius: 1rem; border-right: 8px solid #a855f7; display: flex; align-items: center; gap: 1.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                                <span style="font-size: 2.5rem; font-weight: 900; color: #a855f7; min-width: 50px; text-align: center;">1</span>
-                                <div><h4 style="font-size: 1.2rem; font-weight: 900; color: #0f172a; margin: 0;">Physical (الطبقة الفيزيائية)</h4><p style="font-weight: bold; font-size: 0.85rem; color: #334155; margin: 0.25rem 0 0 0;">تحويل البيانات إلى إشارات (Bits) كهربائية/ضوئية لتسليمها للكابل عبر كرت الشبكة. الجهاز: Hub, Cables.</p></div>
+                            <div style="background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1.5rem; border-right: 10px solid #a855f7; display: flex; align-items: center; gap: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <span style="font-size: 3rem; font-weight: 900; color: #a855f7; min-width: 60px; text-align: center;">1</span>
+                                <div><h4 style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0;">Physical (الطبقة الفيزيائية)</h4><p style="font-weight: bold; font-size: 1rem; color: #334155; margin: 0.5rem 0 0 0;">تحويل البيانات إلى إشارات (Bits) كهربائية/ضوئية لتسليمها للكابل عبر كرت الشبكة. الجهاز: Hub, Cables.</p></div>
                             </div>
                         </div>
                     </div>`,
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
-                        <div style="background: rgba(255,255,255,0.6); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.15); margin-bottom: 1.5rem;">
-                            <h2 style="color: #004d60; margin-top: 0; font-size: 1.5rem;">📜 ما هو البروتوكول Protocol؟</h2>
-                            <p class="!text-sm text-slate-900 font-bold text-justify mb-0">مجموعة من الأكواد البرمجية والقواعد التي تحدد كيف يمكن لأجهزة الكمبيوتر أن تتفاهم مع بعضها عبر الشبكة التي تتواجد عليها، لتسهيل عملية التخاطب.</p>
+                        <div style="background: rgba(255,255,255,0.7); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); margin-bottom: 2rem;">
+                            <h2 style="margin-top: 0; font-size: 2rem;">📜 ما هو البروتوكول Protocol؟</h2>
+                            <p class="!text-lg text-slate-900 font-bold text-justify mb-0">مجموعة من الأكواد البرمجية والقواعد التي تحدد كيف يمكن لأجهزة الكمبيوتر أن تتفاهم مع بعضها عبر الشبكة التي تتواجد عليها، لتسهيل عملية التخاطب.</p>
                         </div>
-                        <div style="background: rgba(255,255,255,0.6); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.15); margin-bottom: 2rem;">
-                            <h2 style="color: #00627a; margin-top: 0; font-size: 1.5rem;">📦 تغليف البيانات (Encapsulation)</h2>
-                            <p class="!text-sm mb-3 text-slate-900 font-bold text-justify">تسمى العملية التي تضيف فيها البروتوكولات الترويسات (Header) والتذييل (Trailer) على البيانات بعملية تغليف البيانات، وهذا ما يحدث في عملية الإرسال نزولاً للطبقة الأولى.</p>
-                            <p class="!text-sm font-black text-white bg-tvtcmain p-3 rounded-lg border border-tvtcdark mt-3 text-center shadow-sm mb-0">في عملية الاستقبال تسمى عملية فك التغليف (De-Encapsulation) وتحدث صعوداً للطبقة السابعة.</p>
+                        <div style="background: rgba(255,255,255,0.7); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); margin-bottom: 2rem;">
+                            <h2 style="margin-top: 0; font-size: 2rem;">📦 تغليف البيانات (Encapsulation)</h2>
+                            <p class="!text-lg mb-4 text-slate-900 font-bold text-justify">تسمى العملية التي تضيف فيها البروتوكولات الترويسات (Header) والتذييل (Trailer) على البيانات بعملية تغليف البيانات، وهذا ما يحدث في عملية الإرسال نزولاً للطبقة الأولى.</p>
+                            <p class="!text-lg font-black text-white bg-tvtcmain p-4 rounded-xl border border-tvtcdark mt-4 text-center shadow-md">في عملية الاستقبال تسمى عملية فك التغليف (De-Encapsulation) وتحدث صعوداً للطبقة السابعة.</p>
                         </div>
                         
-                        <h2 style="text-align: center; border-top: 1px solid rgba(0,98,122,0.15); padding-top: 1.5rem; margin-top: 2rem; color: #004d60; font-size: 2rem;">أنواع الاتصالات في طبقة الجلسة</h2>
+                        <h2 style="text-align: center; border-top: 2px solid rgba(0,98,122,0.2); padding-top: 2rem; margin-top: 3rem; font-size: 2.5rem;">أنواع الاتصالات في طبقة الجلسة</h2>
                         <div class="custom-grid-container">
                             <div class="custom-grid-card">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">➡️</div>
-                                <h3 class="custom-grid-title text-xl text-center">Simplex</h3>
-                                <p class="custom-grid-desc text-sm text-center">إرسال في اتجاه واحد فقط يرسل مرة واحدة مثل الراديو والتلفزيون.</p>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">➡️</div>
+                                <h3 class="custom-grid-title text-2xl text-center">Simplex</h3>
+                                <p class="custom-grid-desc text-base text-center">إرسال في اتجاه واحد فقط يرسل مرة واحدة مثل الراديو والتلفزيون.</p>
                             </div>
                             <div class="custom-grid-card">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🔀</div>
-                                <h3 class="custom-grid-title text-xl text-center">Half Duplex</h3>
-                                <p class="custom-grid-desc text-sm text-center">إرسال واستقبال ولكن ليس في نفس الوقت مثل أجهزة الشرطة (اللاسلكي).</p>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🔀</div>
+                                <h3 class="custom-grid-title text-2xl text-center">Half Duplex</h3>
+                                <p class="custom-grid-desc text-base text-center">إرسال واستقبال ولكن ليس في نفس الوقت مثل أجهزة الشرطة (اللاسلكي).</p>
                             </div>
                             <div class="custom-grid-card">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">↔️</div>
-                                <h3 class="custom-grid-title text-xl text-center">Full Duplex</h3>
-                                <p class="custom-grid-desc text-sm text-center">استقبال وإرسال بخط واحد في نفس الوقت مثل الاتصال بالجوال.</p>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">↔️</div>
+                                <h3 class="custom-grid-title text-2xl text-center">Full Duplex</h3>
+                                <p class="custom-grid-desc text-base text-center">استقبال وإرسال بخط واحد في نفس الوقت مثل الاتصال بالجوال.</p>
                             </div>
                         </div>
                     </div>`,
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
-                        <h1 style="text-align: center; color: #004d60;">مقارنات هامة في الشبكات</h1>
+                        <h1 style="text-align: center;">مقارنات هامة في الشبكات</h1>
                         
-                        <h2 style="color: #00627a; margin-top: 2rem;">الفروق بين TCP و UDP (في طبقة النقل)</h2>
-                        <table style="font-size: 1rem;">
+                        <h2 style="margin-top: 3rem;">الفروق بين TCP و UDP (في طبقة النقل)</h2>
+                        <table style="font-size: 1.1rem;">
                             <thead style="background: rgba(255,255,255,0.8);">
                                 <tr>
-                                    <th style="padding: 1rem;">وجه المقارنة</th>
-                                    <th style="padding: 1rem;">بروتوكول TCP</th>
-                                    <th style="padding: 1rem;">بروتوكول UDP</th>
+                                    <th style="padding: 1.5rem;">وجه المقارنة</th>
+                                    <th style="padding: 1.5rem;">بروتوكول TCP</th>
+                                    <th style="padding: 1.5rem;">بروتوكول UDP</th>
                                 </tr>
                             </thead>
                             <tbody style="background: rgba(255,255,255,0.5);">
-                                <tr><td style="padding: 0.75rem;">حجم الـ Header</td><td style="padding: 0.75rem;">20 bytes</td><td style="padding: 0.75rem;">8 bytes</td></tr>
-                                <tr><td style="padding: 0.75rem;">السرعة</td><td style="padding: 0.75rem;">أبطأ</td><td style="padding: 0.75rem;">أسرع</td></tr>
-                                <tr><td style="padding: 0.75rem;">التحقق من الأخطاء وترتيب الأجزاء</td><td style="color: #059669; padding: 0.75rem; font-weight: 900;">نعم</td><td style="color: #ef4444; padding: 0.75rem; font-weight: 900;">لا</td></tr>
-                                <tr><td style="padding: 0.75rem;">الاستخدام الشائع</td><td style="padding: 0.75rem;">تحميل الملفات، التصفح، الإيميل</td><td style="padding: 0.75rem;">البث المرئي، ألعاب الأونلاين المباشرة</td></tr>
+                                <tr><td style="padding: 1rem;">حجم الـ Header</td><td style="padding: 1rem;">20 bytes</td><td style="padding: 1rem;">8 bytes</td></tr>
+                                <tr><td style="padding: 1rem;">السرعة</td><td style="padding: 1rem;">أبطأ</td><td style="padding: 1rem;">أسرع</td></tr>
+                                <tr><td style="padding: 1rem;">التحقق من الأخطاء وترتيب الأجزاء</td><td style="color: #059669; padding: 1rem; font-weight: 900;">نعم</td><td style="color: #ef4444; padding: 1rem; font-weight: 900;">لا</td></tr>
+                                <tr><td style="padding: 1rem;">الاستخدام الشائع</td><td style="padding: 1rem;">تحميل الملفات، التصفح، الإيميل</td><td style="padding: 1rem;">البث المرئي، ألعاب الأونلاين المباشرة</td></tr>
                             </tbody>
                         </table>
 
-                        <h2 style="margin-top: 3rem; color: #00627a;">الراوتر (ROUTER) VS السويتش (SWITCH)</h2>
-                        <table style="font-size: 1rem;">
+                        <h2 style="margin-top: 4rem;">الراوتر (ROUTER) VS السويتش (SWITCH)</h2>
+                        <table style="font-size: 1.1rem;">
                             <thead style="background: rgba(255,255,255,0.8);">
                                 <tr>
-                                    <th style="padding: 1rem;">وجه المقارنة</th>
-                                    <th style="padding: 1rem;">السويتش (SWITCH)</th>
-                                    <th style="padding: 1rem;">الراوتر (ROUTER)</th>
+                                    <th style="padding: 1.5rem;">وجه المقارنة</th>
+                                    <th style="padding: 1.5rem;">السويتش (SWITCH)</th>
+                                    <th style="padding: 1.5rem;">الراوتر (ROUTER)</th>
                                 </tr>
                             </thead>
                             <tbody style="background: rgba(255,255,255,0.5);">
-                                <tr><td style="padding: 0.75rem;">الطبقة التي يعمل بها</td><td style="padding: 0.75rem;">الطبقة الثانية (Data Link Layer)</td><td style="padding: 0.75rem;">الطبقة الثالثة (Network Layer)</td></tr>
-                                <tr><td style="padding: 0.75rem;">اسم الرسالة</td><td style="padding: 0.75rem;">الإطار (Frame)</td><td style="padding: 0.75rem;">الحزمة (Packet)</td></tr>
-                                <tr><td style="padding: 0.75rem;">نطاق الاستخدام</td><td style="padding: 0.75rem;">الشبكات المحلية (LAN)</td><td style="padding: 0.75rem;">الشبكات الواسعة (WAN)</td></tr>
-                                <tr><td style="padding: 0.75rem;">المنافذ</td><td style="padding: 0.75rem;">منافذ إيثرنت 24 أو 48، لا يوجد سيريال</td><td style="padding: 0.75rem;">منافذ إيثرنت تصل لـ 4، ومنافذ سيريال للـ WAN</td></tr>
-                                <tr><td style="padding: 0.75rem;">الاعتماد الأساسي</td><td style="padding: 0.75rem;">جدول العناوين الفيزيائية (MAC Address)</td><td style="padding: 0.75rem;">بروتوكول العنونة (IP Address)</td></tr>
+                                <tr><td style="padding: 1rem;">الطبقة التي يعمل بها</td><td style="padding: 1rem;">الطبقة الثانية (Data Link Layer)</td><td style="padding: 1rem;">الطبقة الثالثة (Network Layer)</td></tr>
+                                <tr><td style="padding: 1rem;">اسم الرسالة</td><td style="padding: 1rem;">الإطار (Frame)</td><td style="padding: 1rem;">الحزمة (Packet)</td></tr>
+                                <tr><td style="padding: 1rem;">نطاق الاستخدام</td><td style="padding: 1rem;">الشبكات المحلية (LAN)</td><td style="padding: 1rem;">الشبكات الواسعة (WAN)</td></tr>
+                                <tr><td style="padding: 1rem;">المنافذ</td><td style="padding: 1rem;">منافذ إيثرنت 24 أو 48، لا يوجد سيريال</td><td style="padding: 1rem;">منافذ إيثرنت تصل لـ 4، ومنافذ سيريال للـ WAN</td></tr>
+                                <tr><td style="padding: 1rem;">الاعتماد الأساسي</td><td style="padding: 1rem;">جدول العناوين الفيزيائية (MAC Address)</td><td style="padding: 1rem;">بروتوكول العنونة (IP Address)</td></tr>
                             </tbody>
                         </table>
                     </div>`
                 ]
             },
             'cables': {
-                title: 'كيابل شبكات الحاسب', icon: 'fa-ethernet', color: 'tvtcmain', desc: 'وسائط النقل، الأنواع، معايير التأريج وأدوات الفني.',
+                title: 'كيابل الشبكات', icon: 'fa-ethernet', color: 'tvtcmain', desc: 'وسائط النقل، الأنواع، معايير التأريج وأدوات الفني.',
                 tabs: ['أنواع الكابلات وفئاتها', 'الترتيب والأدوات', 'الألياف الضوئية (Fiber)'],
                 content: [
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
                         <h1 style="color: #004d60;">ما هو الكابل؟</h1>
                         <p>الكابل هو الوسيط الذي تنتقل من خلاله البيانات والمعلومات من حاسب إلى آخر في الشبكة أو من شبكة إلى شبكة أخرى.</p>
                         
-                        <h2 style="text-align: center; margin-top: 2rem; color: #00627a;">أنواع كبلات الشبكات الأساسية</h2>
+                        <h2 style="text-align: center; margin-top: 2.5rem; color: #00627a;">أنواع كبلات الشبكات الأساسية</h2>
                         <div class="custom-grid-container">
                             <div class="custom-grid-card border-t-slate-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🔘</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🔘</div>
                                 <div class="custom-grid-title text-slate-800">المحوري (Coaxial)</div>
                                 <p class="custom-grid-desc text-justify">يتكون من موصل نحاسي مركزي وعازل بلاستيكي ووقاء نحاسي مجدول. يستخدم غالباً لتوصيل أنظمة التلفاز وموصلات BNC و F و N للكاميرات القديمة.</p>
                             </div>
                             <div class="custom-grid-card border-t-purple-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">➰</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">➰</div>
                                 <div class="custom-grid-title text-purple-900">المزدوج المجدول (Twisted Pair)</div>
                                 <p class="custom-grid-desc text-justify">يتكون من 8 أزواج ملفوفة لتقليل التشويش. ينقسم لمحمي (STP) بقصدير، وغير محمي (UTP). وهو المعيار الأشهر للشبكات المحلية.</p>
                             </div>
                             <div class="custom-grid-card border-t-blue-500">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">⚡</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">⚡</div>
                                 <div class="custom-grid-title text-blue-900">الضوئي (Fiber Optic)</div>
                                 <p class="custom-grid-desc text-justify">ينقل البيانات على شكل نبضات ضوء داخل زجاج، يوفر سرعات هائلة ومسافات بعيدة بدون تأثر بالتشويش الكهرومغناطيسي.</p>
                             </div>
                         </div>
 
-                        <h2 style="margin-top: 2rem; color: #004d60;">فئات كابل المزدوج المجدول (UTP Categories)</h2>
+                        <h2 style="margin-top: 2.5rem; color: #004d60;">فئات كابل المزدوج المجدول (UTP Categories)</h2>
                         <table>
-                            <thead style="background: rgba(255,255,255,0.8);">
+                            <thead style="background: rgba(255,255,255,0.9);">
                                 <tr><th>الفئة (Category)</th><th>سرعة نقل البيانات</th><th>الاستخدام الشهير</th></tr>
                             </thead>
-                            <tbody style="background: rgba(255,255,255,0.5);">
+                            <tbody style="background: rgba(255,255,255,0.7);">
                                 <tr><td style="color: #00627a; font-weight: 900;">CAT1</td><td>Up to 1Mbps</td><td>شبكات الهاتف القديمة</td></tr>
                                 <tr><td style="color: #00627a; font-weight: 900;">CAT3</td><td>Up to 10Mbps</td><td>10BASE-T Ethernet</td></tr>
                                 <tr><td style="color: #00627a; font-weight: 900;">CAT5e</td><td>Up to 1 Gbps</td><td>Gigabit Ethernet</td></tr>
@@ -546,37 +539,37 @@
                     </div>`,
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
                         <h1 style="text-align: center; color: #004d60;">أنواع التوصيل في الكابل (T568A / T568B)</h1>
-                        <p style="text-align: center; margin-bottom: 2rem; font-size: 1.1rem;">هناك نظامان مختلفان لترتيب أسلاك المزدوجة المجدولة (8 ألوان) داخل المشبك البلاستيكي RJ-45.</p>
+                        <p style="text-align: center; margin-bottom: 2rem; font-size: 1.25rem;">هناك نظامان مختلفان لترتيب أسلاك المزدوجة المجدولة (8 ألوان) داخل المشبك البلاستيكي RJ-45.</p>
                         
-                        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 3rem;">
-                            <div style="flex: 1; min-width: 280px; background: rgba(255,255,255,0.7); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                                <h2 style="color: #1e40af; margin-top: 0; font-size: 1.5rem;">التوصيل المتناظر (Straight-through)</h2>
-                                <p class="!text-sm mb-4 font-bold text-slate-800 leading-relaxed">يستخدم نفس ترتيب الألوان تماماً في الطرفين.</p>
-                                <h3 style="font-size: 1.1rem; background: rgba(255,255,255,0.9); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid #bfdbfe; color: #1e3a8a;">لربط أجهزة (مختلفة) في طبيعة عملها:</h3>
-                                <ul class="!text-sm !mt-3 !mb-0 font-bold text-blue-900"><li>كمبيوتر مع سويتش</li><li>راوتر مع سويتش</li></ul>
+                        <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-bottom: 4rem;">
+                            <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.8); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                <h2 style="color: #1e40af; margin-top: 0; font-size: 2rem;">التوصيل المتناظر (Straight-through)</h2>
+                                <p class="!text-lg mb-6 font-bold text-slate-800 leading-relaxed">يستخدم نفس ترتيب الألوان تماماً في الطرفين.</p>
+                                <h3 style="font-size: 1.25rem; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 0.75rem; border: 1px solid #bfdbfe; color: #1e3a8a;">لربط أجهزة (مختلفة) في طبيعة عملها:</h3>
+                                <ul class="!text-base !mt-5 !mb-0 font-bold text-blue-900"><li>كمبيوتر مع سويتش</li><li>راوتر مع سويتش</li></ul>
                             </div>
-                            <div style="flex: 1; min-width: 280px; background: rgba(255,255,255,0.7); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                                <h2 style="color: #9a3412; margin-top: 0; font-size: 1.5rem;">التوصيل العكسي (Crossover)</h2>
-                                <p class="!text-sm mb-4 font-bold text-slate-800 leading-relaxed">يتم عكس أزواج الإرسال والاستقبال بين طرفي الكابل (1 بـ 3، و 2 بـ 6).</p>
-                                <h3 style="font-size: 1.1rem; background: rgba(255,255,255,0.9); padding: 0.75rem; border-radius: 0.75rem; border: 1px solid #fed7aa; color: #7c2d12;">لربط أجهزة (متشابهة) في طبيعة عملها:</h3>
-                                <ul class="!text-sm !mt-3 !mb-0 font-bold text-orange-900"><li>سويتش مع سويتش</li><li>كمبيوتر مع كمبيوتر</li><li>راوتر مع راوتر</li></ul>
+                            <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.8); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                <h2 style="color: #9a3412; margin-top: 0; font-size: 2rem;">التوصيل العكسي (Crossover)</h2>
+                                <p class="!text-lg mb-6 font-bold text-slate-800 leading-relaxed">يتم عكس أزواج الإرسال والاستقبال بين طرفي الكابل (1 بـ 3، و 2 بـ 6).</p>
+                                <h3 style="font-size: 1.25rem; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 0.75rem; border: 1px solid #fed7aa; color: #7c2d12;">لربط أجهزة (متشابهة) في طبيعة عملها:</h3>
+                                <ul class="!text-base !mt-5 !mb-0 font-bold text-orange-900"><li>سويتش مع سويتش</li><li>كمبيوتر مع كمبيوتر</li><li>راوتر مع راوتر</li></ul>
                             </div>
                         </div>
 
-                        <h2 style="text-align: center; color: #004d60; border-top: 1px solid rgba(0,98,122,0.15); padding-top: 2rem;">أدوات فني الشبكات (Network Tools)</h2>
+                        <h2 style="text-align: center; color: #004d60; border-top: 1px solid rgba(0,98,122,0.2); padding-top: 2rem;">أدوات فني الشبكات (Network Tools)</h2>
                         <div class="custom-grid-container">
                             <div class="custom-grid-card">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">🔨</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🔨</div>
                                 <div class="custom-grid-title text-center text-xl">Stripper</div>
                                 <p class="custom-grid-desc text-center text-sm">أداة تعرية لإزالة الغلاف البلاستيكي الخارجي للأسلاك.</p>
                             </div>
                             <div class="custom-grid-card">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">✂️</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">✂️</div>
                                 <div class="custom-grid-title text-center text-xl">Crimping Tool</div>
                                 <p class="custom-grid-desc text-center text-sm">أداة كبس تستخدم لتثبيت قطعة RJ-45 على الكيبل النحاسي.</p>
                             </div>
                             <div class="custom-grid-card">
-                                <div style="font-size: 3.5rem; margin-bottom: 0.5rem; text-align: center;">📶</div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">📶</div>
                                 <div class="custom-grid-title text-center text-xl">Cable Tester</div>
                                 <p class="custom-grid-desc text-center text-sm">جهاز اختبار إلكتروني للتأكد من سلامة توصيل الأطراف الثمانية.</p>
                             </div>
@@ -586,18 +579,18 @@
                         <h1 style="color: #004d60;">الألياف الضوئية (Fiber Optic)</h1>
                         <p>تنقسم الألياف الضوئية بصفة عامة إلى نوعين أساسيين بناءً على مصدر الضوء ومساره بداخل الزجاج.</p>
                         
-                        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin: 2rem 0;">
-                            <div style="flex: 1; min-width: 280px; background: rgba(255,255,255,0.7); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                                <h2 style="color: #1d4ed8; border-bottom: 1px solid rgba(0,98,122,0.1); padding-bottom: 0.75rem; margin-top: 0; font-size: 1.5rem;">➡️ أحادية الوضع (Single-mode)</h2>
-                                <ul class="!text-sm !mt-4 space-y-3 text-slate-900 font-bold mb-0">
+                        <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin: 3rem 0;">
+                            <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.8); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                <h2 style="color: #1d4ed8; border-bottom: 2px solid rgba(0,98,122,0.1); padding-bottom: 1rem; margin-top: 0; font-size: 2rem;">➡️ أحادية الوضع (Single-mode)</h2>
+                                <ul class="!text-base !mt-6 space-y-5 text-slate-900 font-bold">
                                     <li>تستخدم تقنية الليزر كمصدر للضوء (أشعة أحادية).</li>
                                     <li>مسار الضوء (Core Glass) مستقيم ورقيق جداً.</li>
                                     <li>يصل مداها إلى مئات الكيلومترات (بين المدن والدول).</li>
                                 </ul>
                             </div>
-                            <div style="flex: 1; min-width: 280px; background: rgba(255,255,255,0.7); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                                <h2 style="color: #7e22ce; border-bottom: 1px solid rgba(0,98,122,0.1); padding-bottom: 0.75rem; margin-top: 0; font-size: 1.5rem;">🔀 متعددة الأوضاع (Multi-mode)</h2>
-                                <ul class="!text-sm !mt-4 space-y-3 text-slate-900 font-bold mb-0">
+                            <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.8); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                                <h2 style="color: #7e22ce; border-bottom: 2px solid rgba(0,98,122,0.1); padding-bottom: 1rem; margin-top: 0; font-size: 2rem;">🔀 متعددة الأوضاع (Multi-mode)</h2>
+                                <ul class="!text-base !mt-6 space-y-5 text-slate-900 font-bold">
                                     <li>تستخدم مؤشرات (LED) لإرسال إشارات ضوء متعددة.</li>
                                     <li>مسار الضوء أوسع وتنعكس الأشعة بداخله عدة مرات.</li>
                                     <li>مداها قصير نسبياً يصل إلى 550 متراً (داخل المباني).</li>
@@ -605,19 +598,19 @@
                             </div>
                         </div>
 
-                        <h2 style="text-align: center; border-top: 1px solid rgba(0,98,122,0.15); padding-top: 2rem; margin-top: 2rem; color: #059669; font-size: 2rem;">مميزات وعيوب الألياف البصرية</h2>
-                        <div class="grid md:grid-cols-2 gap-8 items-center mt-6">
-                            <ul class="!text-sm bg-white/70 p-6 rounded-[1.5rem] border border-emerald-200 shadow-sm leading-loose text-slate-900 font-bold mb-0">
+                        <h2 style="text-align: center; border-top: 2px solid rgba(0,98,122,0.2); padding-top: 3rem; margin-top: 3rem; color: #059669; font-size: 2.5rem;">مميزات وعيوب الألياف البصرية</h2>
+                        <div class="grid md:grid-cols-2 gap-10 items-center mt-8">
+                            <ul class="!text-lg bg-white/80 p-10 rounded-[2rem] border border-emerald-200 shadow-md leading-loose text-slate-900 font-bold">
                                 <li>⚡ سريعة جداً في نقل البيانات بصيغة الضوء.</li>
                                 <li>📉 معدل انخفاض الإشارات منخفض بشكل كبير مهما كان طول السلك.</li>
                                 <li>🛡️ منيعة تماماً ضد التداخل الكهرومغناطيسي لأسلاك الكهرباء.</li>
                                 <li>🗜️ يمكن تمديد عدة ألياف بداخل كابل واحد مما يسهل التركيب.</li>
                                 <li>💧 لا تتأثر بالماء، لذلك تستخدم لتوصيل الإنترنت بين المحيطات.</li>
                             </ul>
-                            <div class="bg-white/70 border border-red-200 p-8 rounded-[1.5rem] text-center shadow-sm">
-                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">⚠️</div>
-                                <h3 style="color: #991b1b; margin-bottom: 1rem; font-size: 1.5rem; margin-top: 0;">العيب الوحيد</h3>
-                                <p class="!text-sm !leading-relaxed font-bold text-slate-900 bg-white/90 p-4 rounded-xl border border-red-100 shadow-inner mb-0">صعبة التركيب والصيانة لأنها تعتمد على الزجاج الدقيق، وتحتاج معدات خاصة للتلحيم وفنيين متخصصين جداً تكلفتهم عالية.</p>
+                            <div class="bg-white/90 border border-red-200 p-12 rounded-[2rem] text-center shadow-md">
+                                <div style="font-size: 6rem; margin-bottom: 1.5rem; text-align: center;">⚠️</div>
+                                <h3 style="color: #991b1b; margin-bottom: 1.5rem; font-size: 2rem;">العيب الوحيد</h3>
+                                <p class="!text-base !leading-relaxed font-black text-slate-900 bg-white p-6 rounded-2xl border border-red-100 shadow-inner">صعبة التركيب والصيانة لأنها تعتمد على الزجاج الدقيق، وتحتاج معدات خاصة للتلحيم وفنيين متخصصين جداً تكلفتهم عالية.</p>
                             </div>
                         </div>
                     </div>`
@@ -630,112 +623,112 @@
                     `<div class="rich-display glass-card border-t-[8px] border-orange-500">
                         <h1 style="color: #ea580c;">ما هو الـ IP Address؟</h1>
                         <p style="text-align: justify;">عنوان IP هو اختصار لعنوان بروتوكول الإنترنت، وهو المعرف الرقمي لأي جهاز (حاسوب، هاتف، طابعة، موجه) مرتبط بشبكة لكي يتم توجيه البيانات إليه، يقابل عنوان IP في شبكات الهاتف "رقم الهاتف" لتحديد مكانك.</p>
-                        <div style="background: rgba(255,255,255,0.7); padding: 1.5rem; border-radius: 1rem; border: 1px solid rgba(234,88,12,0.2); margin: 1.5rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                            <p class="!mb-0 !text-base text-center"><span style="color: #c2410c; font-weight: 900; font-size: 1.25rem;">عنوان الإصدار الرابع IPv4:</span> طوله 32 بت، مقسم إلى 4 خانات (Octets) كل خانة 8 بت، ومدى الأرقام من 0 لـ 255. يحتوي على قرابة 4.3 مليار عنوان.</p>
+                        <div style="background: rgba(255,255,255,0.8); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(234,88,12,0.2); margin: 2rem 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                            <p class="!mb-0 !text-lg text-center"><span style="color: #c2410c; font-weight: 900; font-size: 1.5rem;">عنوان الإصدار الرابع IPv4:</span> طوله 32 بت، مقسم إلى 4 خانات (Octets) كل خانة 8 بت، ومدى الأرقام من 0 لـ 255. يحتوي على قرابة 4.3 مليار عنوان.</p>
                         </div>
-                        <p class="!text-sm !mt-4 bg-white/60 p-4 rounded-2xl border border-white/50 text-center font-bold shadow-sm flex flex-col md:flex-row items-center justify-center gap-3">
-                            <span class="bg-white/90 text-blue-900 px-4 py-2 rounded-lg border border-blue-200 shadow-sm">🏠 العناوين الخاصة (Private): للشبكات المحلية.</span>
-                            <span class="text-xs text-slate-700 font-black px-3 py-1.5 bg-white/60 rounded-md">(الـ NAT يحول بينهما)</span>
-                            <span class="bg-white/90 text-emerald-900 px-4 py-2 rounded-lg border border-emerald-200 shadow-sm">🌍 العناوين العامة (Public): للإنترنت.</span>
+                        <p class="!text-sm !mt-4 bg-white/80 p-5 rounded-2xl border border-white/50 text-center font-bold shadow-sm flex flex-col md:flex-row items-center justify-center gap-4">
+                            <span class="bg-white/90 text-blue-900 px-6 py-3 rounded-xl border border-blue-200 shadow-sm text-lg">🏠 العناوين الخاصة (Private): للشبكات المحلية.</span>
+                            <span class="text-sm text-slate-700 font-black px-4 py-2 bg-white/80 rounded-lg">(الـ NAT يحول بينهما)</span>
+                            <span class="bg-white/90 text-emerald-900 px-6 py-3 rounded-xl border border-emerald-200 shadow-sm text-lg">🌍 العناوين العامة (Public): للإنترنت.</span>
                         </p>
                         
-                        <h2 style="text-align: center; border-top: 1px solid rgba(0,98,122,0.15); padding-top: 2rem; margin-top: 3rem; color: #004d60; font-size: 2rem;">فئات العناوين (Classful Networking)</h2>
+                        <h2 style="text-align: center; border-top: 1px solid rgba(0,98,122,0.2); padding-top: 3rem; margin-top: 4rem; color: #004d60; font-size: 2.5rem;">فئات العناوين (Classful Networking)</h2>
                         <div class="custom-grid-container">
-                            <div class="custom-grid-card border-t-rose-500 bg-white/70">
-                                <h3 class="!text-rose-600 !mb-3 !text-3xl text-center mt-0">Class A</h3>
-                                <div class="bg-white/90 p-3 rounded-lg text-slate-900 font-mono text-sm mb-3 border border-slate-200 mt-4 shadow-inner font-black text-center">1.0.0.0 - 126.x.x.x</div>
-                                <p class="!text-xs font-bold text-slate-800 mt-3 text-center">Mask: <span style="font-weight: 900; font-family: monospace; color: #0f172a; background: #ffffff; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">255.0.0.0</span></p>
-                                <p class="!text-[10px] text-rose-900 bg-rose-100 py-1.5 rounded font-black mt-3 border border-rose-200 shadow-sm text-center mb-0">N.H.H.H (للشبكات العملاقة)</p>
+                            <div class="custom-grid-card border-t-rose-500 bg-white/90">
+                                <h3 class="!text-rose-600 !mb-4 !text-5xl drop-shadow-sm text-center mt-0">Class A</h3>
+                                <div class="bg-white/90 p-4 rounded-xl text-slate-900 font-mono text-base mb-4 border border-slate-200 mt-6 shadow-inner font-black text-center">1.0.0.0 - 126.x.x.x</div>
+                                <p class="!text-sm font-bold text-slate-800 mt-4 text-center">Mask: <span style="font-weight: 900; font-family: monospace; color: #0f172a; background: #ffffff; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">255.0.0.0</span></p>
+                                <p class="!text-xs text-rose-900 bg-rose-100 py-2 rounded-lg font-black mt-4 border border-rose-200 shadow-sm text-center mb-0">N.H.H.H (للشبكات العملاقة)</p>
                             </div>
-                            <div class="custom-grid-card border-t-blue-500 bg-white/70 transform md:-translate-y-3">
-                                <h3 class="!text-blue-600 !mb-3 !text-3xl text-center mt-0">Class B</h3>
-                                <div class="bg-white/90 p-3 rounded-lg text-slate-900 font-mono text-sm mb-3 border border-slate-200 mt-4 shadow-inner font-black text-center">128.0.0.0 - 191.x.x.x</div>
-                                <p class="!text-xs font-bold text-slate-800 mt-3 text-center">Mask: <span style="font-weight: 900; font-family: monospace; color: #0f172a; background: #ffffff; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">255.255.0.0</span></p>
-                                <p class="!text-[10px] text-blue-900 bg-blue-100 py-1.5 rounded font-black mt-3 border border-blue-200 shadow-sm text-center mb-0">N.N.H.H (للشبكات المتوسطة)</p>
+                            <div class="custom-grid-card border-t-blue-500 bg-white/90 transform md:-translate-y-4">
+                                <h3 class="!text-blue-600 !mb-4 !text-5xl drop-shadow-sm text-center mt-0">Class B</h3>
+                                <div class="bg-white/90 p-4 rounded-xl text-slate-900 font-mono text-base mb-4 border border-slate-200 mt-6 shadow-inner font-black text-center">128.0.0.0 - 191.x.x.x</div>
+                                <p class="!text-sm font-bold text-slate-800 mt-4 text-center">Mask: <span style="font-weight: 900; font-family: monospace; color: #0f172a; background: #ffffff; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">255.255.0.0</span></p>
+                                <p class="!text-xs text-blue-900 bg-blue-100 py-2 rounded-lg font-black mt-4 border border-blue-200 shadow-sm text-center mb-0">N.N.H.H (للشبكات المتوسطة)</p>
                             </div>
-                            <div class="custom-grid-card border-t-emerald-500 bg-white/70">
-                                <h3 class="!text-emerald-600 !mb-3 !text-3xl text-center mt-0">Class C</h3>
-                                <div class="bg-white/90 p-3 rounded-lg text-slate-900 font-mono text-sm mb-3 border border-slate-200 mt-4 shadow-inner font-black text-center">192.0.0.0 - 223.x.x.x</div>
-                                <p class="!text-xs font-bold text-slate-800 mt-3 text-center">Mask: <span style="font-weight: 900; font-family: monospace; color: #0f172a; background: #ffffff; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">255.255.255.0</span></p>
-                                <p class="!text-[10px] text-emerald-900 bg-emerald-100 py-1.5 rounded font-black mt-3 border border-emerald-200 shadow-sm text-center mb-0">N.N.N.H (للشبكات الصغيرة)</p>
+                            <div class="custom-grid-card border-t-emerald-500 bg-white/90">
+                                <h3 class="!text-emerald-600 !mb-4 !text-5xl drop-shadow-sm text-center mt-0">Class C</h3>
+                                <div class="bg-white/90 p-4 rounded-xl text-slate-900 font-mono text-base mb-4 border border-slate-200 mt-6 shadow-inner font-black text-center">192.0.0.0 - 223.x.x.x</div>
+                                <p class="!text-sm font-bold text-slate-800 mt-4 text-center">Mask: <span style="font-weight: 900; font-family: monospace; color: #0f172a; background: #ffffff; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">255.255.255.0</span></p>
+                                <p class="!text-xs text-emerald-900 bg-emerald-100 py-2 rounded-lg font-black mt-4 border border-emerald-200 shadow-sm text-center mb-0">N.N.N.H (للشبكات الصغيرة)</p>
                             </div>
                         </div>
-                        <p class="text-center !text-sm !mt-6 bg-white/70 p-3 rounded-lg font-bold border border-white/50 text-slate-900 shadow-sm mb-0">ملاحظة: 127.x.x.x عنوان محجوز لاختبار كرت الشبكة (Loopback). و 0.0.0.0 وأرقام فوق 255 غير صالحة.</p>
+                        <p class="text-center !text-sm !mt-6 bg-white/80 p-3 rounded-lg font-bold border border-white/50 text-slate-900 shadow-sm mb-0">ملاحظة: 127.x.x.x عنوان محجوز لاختبار كرت الشبكة (Loopback). و 0.0.0.0 وأرقام فوق 255 غير صالحة.</p>
                     </div>`,
                     `<div class="rich-display glass-card border-t-[8px] border-orange-500">
-                        <div style="background: rgba(255,255,255,0.7); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(234,88,12,0.2); text-align: center; margin-bottom: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                            <h2 class="!text-orange-800 !mb-4 !mt-0 text-2xl">🔑 قاعدة الـ Subnetting الذهبية</h2>
-                            <p class="!text-lg font-black text-slate-900 leading-loose mb-0">الرقم <span style="background: white; border: 1px solid #fdba74; padding: 2px 8px; border-radius: 6px; color: #ea580c; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">255</span> في قناع الشبكة يمثل الـ <span style="color: #ea580c;">Network</span> (ثابت للشبكة).<br>الرقم <span style="background: white; border: 1px solid #6ee7b7; padding: 2px 8px; border-radius: 6px; color: #059669;">0</span> في قناع الشبكة يمثل الـ <span style="color: #059669;">Host</span> (متغير للأجهزة).</p>
+                        <div style="background: rgba(255,255,255,0.8); padding: 3rem; border-radius: 2rem; border: 1px solid rgba(234,88,12,0.2); text-align: center; margin-bottom: 3rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                            <h2 class="!text-orange-800 !mb-8 !mt-0 text-4xl">🔑 قاعدة الـ Subnetting الذهبية</h2>
+                            <p class="!text-2xl font-black text-slate-900 leading-loose mb-0">الرقم <span style="background: white; border: 2px solid #fdba74; padding: 4px 16px; border-radius: 10px; color: #ea580c; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">255</span> في قناع الشبكة يمثل الـ <span style="color: #ea580c;">Network</span> (ثابت للشبكة).<br><br>الرقم <span style="background: white; border: 2px solid #6ee7b7; padding: 4px 16px; border-radius: 10px; color: #059669;">0</span> في قناع الشبكة يمثل الـ <span style="color: #059669;">Host</span> (متغير للأجهزة).</p>
                         </div>
                         
-                        <h2 class="text-center border-t border-slate-300 pt-6 mt-8 text-2xl color: #004d60;">تمارين الاستخراج باستخدام قناع الشبكة</h2>
-                        <div class="grid md:grid-cols-2 gap-8 mt-6">
-                            <div class="bg-white/80 p-6 rounded-[1.5rem] border border-slate-200 shadow-sm hover-scale transition">
-                                <div class="bg-white text-emerald-800 text-center py-2 rounded-lg mb-5 font-black uppercase text-sm border border-emerald-200 shadow-sm">تمرين فئة C</div>
-                                <div class="bg-white/90 p-5 rounded-xl font-mono text-sm mb-5 text-center border border-slate-200 shadow-sm">
-                                    <div class="text-slate-600 font-sans text-sm font-bold mb-1">الـ IP Address</div><div class="text-slate-900 text-xl mb-3 font-black">192.168.8.10/24</div>
-                                    <div class="text-slate-600 font-sans text-sm font-bold mb-1">Subnet Mask</div><div class="text-emerald-700 font-black text-lg bg-emerald-50 py-1.5 rounded-lg border border-emerald-200">255.255.255.0</div>
+                        <h2 class="text-center border-t border-slate-300 pt-10 mt-10 text-3xl color: #004d60;">تمارين الاستخراج باستخدام قناع الشبكة</h2>
+                        <div class="grid md:grid-cols-2 gap-10 mt-10">
+                            <div class="bg-white/80 p-10 rounded-[2.5rem] border border-slate-200 shadow-md hover-scale transition">
+                                <div class="bg-white text-emerald-800 text-center py-3 rounded-xl mb-8 font-black uppercase text-base border border-emerald-200 shadow-sm">تمرين فئة C</div>
+                                <div class="bg-white/90 p-8 rounded-2xl font-mono text-sm mb-8 text-center border border-slate-200 shadow-sm">
+                                    <div class="text-slate-600 font-sans text-base font-bold mb-2">الـ IP Address</div><div class="text-slate-900 text-3xl mb-5 font-black">192.168.8.10/24</div>
+                                    <div class="text-slate-600 font-sans text-base font-bold mb-2">Subnet Mask</div><div class="text-emerald-700 font-black text-2xl bg-emerald-50 py-2 rounded-xl border border-emerald-200">255.255.255.0</div>
                                 </div>
-                                <ul class="!text-sm bg-white/90 p-5 rounded-xl border border-slate-200 text-slate-900 shadow-sm space-y-3 mb-0">
-                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>عنوان الشبكة (Network ID):</span> <span class="font-mono text-emerald-700 font-black text-base">192.168.8.0</span></li>
-                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>أول مضيف (First Host):</span> <span class="font-mono text-slate-900 font-bold text-base">192.168.8.1</span></li>
-                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>آخر مضيف (Last Host):</span> <span class="font-mono text-slate-900 font-bold text-base">192.168.8.254</span></li>
-                                    <li class="flex justify-between pt-2"><span>البث (Broadcast):</span> <span class="font-mono text-rose-600 font-black text-base">192.168.8.255</span></li>
+                                <ul class="!text-base bg-white/90 p-8 rounded-2xl border border-slate-200 text-slate-900 shadow-sm space-y-4 mb-0">
+                                    <li class="flex justify-between border-b border-slate-200 pb-4"><span>عنوان الشبكة (Network ID):</span> <span class="font-mono text-emerald-700 font-black text-lg">192.168.8.0</span></li>
+                                    <li class="flex justify-between border-b border-slate-200 pb-4"><span>أول مضيف (First Host):</span> <span class="font-mono text-slate-900 font-bold text-lg">192.168.8.1</span></li>
+                                    <li class="flex justify-between border-b border-slate-200 pb-4"><span>آخر مضيف (Last Host):</span> <span class="font-mono text-slate-900 font-bold text-lg">192.168.8.254</span></li>
+                                    <li class="flex justify-between pt-4"><span>البث (Broadcast):</span> <span class="font-mono text-rose-600 font-black text-lg">192.168.8.255</span></li>
                                 </ul>
                             </div>
-                            <div class="bg-white/80 p-6 rounded-[1.5rem] border border-slate-200 shadow-sm hover-scale transition">
-                                <div class="bg-white text-blue-800 text-center py-2 rounded-lg mb-5 font-black uppercase text-sm border border-blue-200 shadow-sm">تمرين فئة B</div>
-                                <div class="bg-white/90 p-5 rounded-xl font-mono text-sm mb-5 text-center border border-slate-200 shadow-sm">
-                                    <div class="text-slate-600 font-sans text-sm font-bold mb-1">الـ IP Address</div><div class="text-slate-900 text-xl mb-3 font-black">130.168.5.15/16</div>
-                                    <div class="text-slate-600 font-sans text-sm font-bold mb-1">Subnet Mask</div><div class="text-blue-700 font-black text-lg bg-blue-50 py-1.5 rounded-lg border border-blue-200">255.255.0.0</div>
+                            <div class="bg-white/80 p-10 rounded-[2.5rem] border border-slate-200 shadow-md hover-scale transition">
+                                <div class="bg-white text-blue-800 text-center py-3 rounded-xl mb-8 font-black uppercase text-base border border-blue-200 shadow-sm">تمرين فئة B</div>
+                                <div class="bg-white/90 p-8 rounded-2xl font-mono text-sm mb-8 text-center border border-slate-200 shadow-sm">
+                                    <div class="text-slate-600 font-sans text-base font-bold mb-2">الـ IP Address</div><div class="text-slate-900 text-3xl mb-5 font-black">130.168.5.15/16</div>
+                                    <div class="text-slate-600 font-sans text-base font-bold mb-2">Subnet Mask</div><div class="text-blue-700 font-black text-2xl bg-blue-50 py-2 rounded-xl border border-blue-200">255.255.0.0</div>
                                 </div>
-                                <ul class="!text-sm bg-white/90 p-5 rounded-xl border border-slate-200 text-slate-900 shadow-sm space-y-3 mb-0">
-                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>عنوان الشبكة (Network ID):</span> <span class="font-mono text-blue-700 font-black text-base">130.168.0.0</span></li>
-                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>أول مضيف (First Host):</span> <span class="font-mono text-slate-900 font-bold text-base">130.168.0.1</span></li>
-                                    <li class="flex justify-between border-b border-slate-200 pb-2"><span>آخر مضيف (Last Host):</span> <span class="font-mono text-slate-900 font-bold text-base">130.168.255.254</span></li>
-                                    <li class="flex justify-between pt-2"><span>البث (Broadcast):</span> <span class="font-mono text-rose-600 font-black text-base">130.168.255.255</span></li>
+                                <ul class="!text-base bg-white/90 p-8 rounded-2xl border border-slate-200 text-slate-900 shadow-sm space-y-4 mb-0">
+                                    <li class="flex justify-between border-b border-slate-200 pb-4"><span>عنوان الشبكة (Network ID):</span> <span class="font-mono text-blue-700 font-black text-lg">130.168.0.0</span></li>
+                                    <li class="flex justify-between border-b border-slate-200 pb-4"><span>أول مضيف (First Host):</span> <span class="font-mono text-slate-900 font-bold text-lg">130.168.0.1</span></li>
+                                    <li class="flex justify-between border-b border-slate-200 pb-4"><span>آخر مضيف (Last Host):</span> <span class="font-mono text-slate-900 font-bold text-lg">130.168.255.254</span></li>
+                                    <li class="flex justify-between pt-4"><span>البث (Broadcast):</span> <span class="font-mono text-rose-600 font-black text-lg">130.168.255.255</span></li>
                                 </ul>
                             </div>
                         </div>
                     </div>`,
-                    `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
-                        <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(0,98,122,0.2); padding: 2rem; border-radius: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 2.5rem;">
+                    `<div class="rich-display glass-card border-t-[8px] border-orange-500">
+                        <div style="background: rgba(255,255,255,0.8); border: 1px solid #c7d2fe; padding: 3rem; border-radius: 2rem; display: flex; flex-direction: column; align-items: center; gap: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 4rem;">
                             <div style="text-align: center;">
-                                <div style="font-size: 4rem; margin-bottom: 1rem;">🌍</div>
-                                <h2 class="!text-indigo-900 !mt-0 !mb-4 text-2xl">الإصدار السادس IPv6</h2>
-                                <p class="!text-base mb-5 font-bold leading-relaxed text-slate-800 text-justify">بسبب نفاذ عناوين IPv4 المحدودة بـ 32 بت، تم ابتكار الإصدار السادس بطول <span class="bg-white text-indigo-900 px-2 py-0.5 rounded-md font-black border border-indigo-200 shadow-sm mx-1">128-bit</span> ليوفر 340 تريليون تريليون تريليون عنوان. يكتب بالنظام السداسي عشر (Hexadecimal) من 0-9 و A-F.</p>
-                                <div class="bg-white p-4 rounded-xl font-mono text-indigo-800 text-lg tracking-widest break-all select-all text-center border border-slate-300 shadow-sm font-black">2005:0005:0100:0000:0000:0000:0000:0700</div>
+                                <div style="font-size: 5rem; margin-bottom: 1rem;">🌍</div>
+                                <h2 class="!text-indigo-900 !mt-0 !mb-6 text-4xl">الإصدار السادس IPv6</h2>
+                                <p class="!text-lg mb-8 font-bold leading-relaxed text-slate-800 text-justify">بسبب نفاذ عناوين IPv4 المحدودة بـ 32 بت، تم ابتكار الإصدار السادس بطول <span class="bg-white text-indigo-900 px-3 py-1 rounded-lg font-black border border-indigo-200 shadow-sm mx-1">128-bit</span> ليوفر 340 تريليون تريليون تريليون عنوان. يكتب بالنظام السداسي عشر (Hexadecimal) من 0-9 و A-F.</p>
+                                <div class="bg-white p-6 rounded-2xl font-mono text-indigo-800 text-xl md:text-2xl tracking-widest break-all select-all text-center border border-slate-300 shadow-sm font-black">2005:0005:0100:0000:0000:0000:0000:0700</div>
                             </div>
                         </div>
                         
-                        <div class="grid md:grid-cols-2 gap-8">
-                            <div class="bg-white/80 p-8 rounded-2xl border border-slate-200 shadow-sm hover-scale transition">
-                                <h3 class="!text-lg !text-emerald-800 !mt-0 border-b-2 border-slate-200 pb-3 text-center">أنواع اتصال IPv6</h3>
-                                <ul class="!text-sm !mt-5 space-y-4 text-slate-900 font-bold mb-0">
-                                    <li class="flex items-center gap-3"><span style="color: #047857; background: #ecfdf5; padding: 4px 8px; border-radius: 6px; font-weight: 900; border: 1px solid #a7f3d0; font-size: 11px; min-width: 80px; text-align: center;">Unicast</span> <span>البث الأحادي: بين جهاز وآخر فقط.</span></li>
-                                    <li class="flex items-center gap-3"><span style="color: #047857; background: #ecfdf5; padding: 4px 8px; border-radius: 6px; font-weight: 900; border: 1px solid #a7f3d0; font-size: 11px; min-width: 80px; text-align: center;">Multicast</span> <span>البث المتعدد: من مرسل لمجموعة.</span></li>
-                                    <li class="flex items-center gap-3"><span style="color: #047857; background: #ecfdf5; padding: 4px 8px; border-radius: 6px; font-weight: 900; border: 1px solid #a7f3d0; font-size: 11px; min-width: 80px; text-align: center;">Anycast</span> <span>إرسال لعقدة واحدة الأقرب.</span></li>
+                        <div class="grid md:grid-cols-2 gap-10">
+                            <div class="bg-white/80 p-10 rounded-[3rem] border border-slate-200 shadow-sm hover-scale transition">
+                                <h3 class="!text-2xl !text-emerald-800 !mt-0 border-b-2 border-slate-200 pb-4 text-center">أنواع اتصال IPv6</h3>
+                                <ul class="!text-lg !mt-8 space-y-6 text-slate-900 font-bold mb-0">
+                                    <li class="flex items-center gap-4"><span style="color: #047857; background: #ecfdf5; padding: 6px 12px; border-radius: 8px; font-weight: 900; border: 1px solid #a7f3d0; font-size: 15px; min-width: 100px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">Unicast</span> <span>البث الأحادي: بين جهاز وآخر فقط.</span></li>
+                                    <li class="flex items-center gap-4"><span style="color: #047857; background: #ecfdf5; padding: 6px 12px; border-radius: 8px; font-weight: 900; border: 1px solid #a7f3d0; font-size: 15px; min-width: 100px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">Multicast</span> <span>البث المتعدد: من مرسل لمجموعة.</span></li>
+                                    <li class="flex items-center gap-4"><span style="color: #047857; background: #ecfdf5; padding: 6px 12px; border-radius: 8px; font-weight: 900; border: 1px solid #a7f3d0; font-size: 15px; min-width: 100px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">Anycast</span> <span>إرسال لعقدة واحدة الأقرب حسب التوجيه.</span></li>
                                 </ul>
                             </div>
-                            <div class="bg-white/80 p-8 rounded-2xl border border-slate-200 shadow-sm hover-scale transition">
-                                <h3 class="!text-lg !text-orange-800 !mt-0 border-b-2 border-slate-200 pb-3 text-center">قوانين الاختصار (Compression)</h3>
-                                <div class="bg-white p-5 rounded-xl border border-slate-200 mt-5 text-sm shadow-sm mb-0">
-                                    <div class="mb-4">
-                                        <p class="font-black text-slate-900 mb-2 text-xs">1. إلغاء أصفار اليسار فقط:</p>
-                                        <div class="flex items-center justify-center gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner">
-                                            <p class="font-mono text-slate-500 line-through text-sm mb-0">0100</p>
-                                            <p class="font-mono text-emerald-700 font-black text-lg mb-0">100</p>
+                            <div class="bg-white/80 p-10 rounded-[3rem] border border-slate-200 shadow-sm hover-scale transition">
+                                <h3 class="!text-2xl !text-orange-800 !mt-0 border-b-2 border-slate-200 pb-4 text-center">قوانين الاختصار (Compression)</h3>
+                                <div class="bg-white p-8 rounded-2xl border border-slate-200 mt-8 text-base shadow-sm mb-0">
+                                    <div class="mb-6">
+                                        <p class="font-black text-slate-900 mb-3">1. إلغاء أصفار اليسار فقط:</p>
+                                        <div class="flex items-center justify-center gap-5 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                                            <p class="font-mono text-slate-500 line-through text-lg mb-0">0100</p>
+                                            <p class="font-mono text-emerald-700 font-black text-2xl mb-0">100</p>
                                         </div>
                                     </div>
                                     <div>
-                                        <p class="font-black text-slate-900 mb-2 text-xs">2. دمج الخانات الصفرية (مرة واحدة):</p>
-                                        <div class="flex items-center justify-center gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-inner">
-                                            <p class="font-mono text-slate-500 line-through text-sm mb-0">0000:0000:0000</p>
-                                            <p class="font-mono text-emerald-700 font-black text-xl mb-0">::</p>
+                                        <p class="font-black text-slate-900 mb-3">2. دمج الخانات الصفرية (مرة واحدة):</p>
+                                        <div class="flex items-center justify-center gap-5 bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                                            <p class="font-mono text-slate-500 line-through text-lg mb-0">0000:0000:0000</p>
+                                            <p class="font-mono text-emerald-700 font-black text-3xl mb-0">::</p>
                                         </div>
                                     </div>
-                                    <div class="font-bold text-slate-800 pt-4 border-t-2 border-slate-200 text-center mt-4">
-                                        الناتج للمثال: <br><span class="font-mono text-blue-800 text-base block mt-2 dir-ltr font-black bg-blue-50 py-1.5 rounded-lg border border-blue-200 shadow-inner">2005:5:100::700</span>
+                                    <div class="font-bold text-slate-800 pt-6 border-t-2 border-slate-200 text-center mt-8">
+                                        الناتج للمثال الأعلى: <br><span class="font-mono text-blue-800 text-2xl block mt-4 dir-ltr font-black bg-blue-50 py-3 rounded-xl border border-blue-200 shadow-inner">2005:5:100::700</span>
                                     </div>
                                 </div>
                             </div>
@@ -753,9 +746,9 @@
             let html = '';
             Object.keys(CORE_DATA).forEach(k => {
                 html += `<div onclick="window.openSection('${k}', this)" class="sidebar-item group" id="side-${k}">
-                    <div class="w-10 h-10 rounded-lg bg-white/70 flex items-center justify-center text-tvtcmain group-hover:bg-tvtcmain group-hover:text-white transition shadow-sm border border-slate-200"><i class="fas ${CORE_DATA[k].icon} text-lg"></i></div> <span class="text-sm">${CORE_DATA[k].title}</span>
+                    <div class="w-10 h-10 rounded-lg bg-white/70 flex items-center justify-center text-tvtcmain group-hover:bg-tvtcmain group-hover:text-white transition shadow-sm border border-slate-200"><i class="fas ${CORE_DATA[k].icon} text-lg"></i></div> <span class="text-sm md:text-base">${CORE_DATA[k].title}</span>
                 </div>
-                <div id="subnav-${k}" class="hidden flex-col bg-white/40 mb-3 py-2 space-y-1 pl-4 border-r-2 border-slate-300 mr-8 rounded-bl-xl shadow-inner"></div>`;
+                <div id="subnav-${k}" class="hidden flex-col bg-white/40 mb-3 py-2 space-y-1 pl-4 border-r-4 border-white/50 mr-8 rounded-bl-xl shadow-inner"></div>`;
             });
             nav.innerHTML = html;
         };
@@ -765,9 +758,9 @@
             if(!grid) return;
             grid.innerHTML = Object.keys(CORE_DATA).map(k => {
                 const s = CORE_DATA[k];
-                return `<div onclick="window.openSection('${k}')" class="glass-card p-6 md:p-8 hover-scale border-t-[6px] border-tvtcmain cursor-pointer group text-center flex flex-col items-center gap-4 bg-white/60">
-                    <div class="w-16 h-16 bg-white/90 text-tvtcmain rounded-2xl flex items-center justify-center text-3xl shrink-0 group-hover:bg-tvtcmain group-hover:text-white transition shadow-sm border border-slate-200"><i class="fas ${s.icon}"></i></div>
-                    <div><h2 class="text-xl font-black text-tvtcdark mb-2">${s.title}</h2><p class="text-slate-600 text-xs font-bold leading-relaxed line-clamp-2">${s.desc}</p></div>
+                return `<div onclick="window.openSection('${k}')" class="glass-card p-6 md:p-10 hover-scale border-t-[8px] border-tvtcmain cursor-pointer group text-center flex flex-col items-center gap-4 bg-white/70">
+                    <div class="w-20 h-20 bg-white/90 text-tvtcmain rounded-2xl flex items-center justify-center text-4xl shrink-0 group-hover:bg-tvtcmain group-hover:text-white transition shadow-sm border border-slate-200"><i class="fas ${s.icon}"></i></div>
+                    <div><h2 class="text-xl md:text-2xl font-black text-tvtcdark mb-2">${s.title}</h2><p class="text-slate-600 text-xs md:text-sm font-bold leading-relaxed line-clamp-2">${s.desc}</p></div>
                 </div>`;
             }).join('');
         };
@@ -809,14 +802,14 @@
 
             let allTabs = [...s.tabs];
             if(window.allArticlesMap) {
-                // جلب المقالات التابعة لهذا القسم سواء كانت أساسية معدلة أو إضافة جديدة له
+                // جلب المقالات التابعة لهذا القسم
                 Object.values(window.allArticlesMap).forEach(a => { 
                     if(a.sectionId === key && !a.id.startsWith('core_')) allTabs.push(a.tabName); 
                 });
             }
 
             const mobileTabs = document.getElementById('mobile-tabs');
-            if(mobileTabs) mobileTabs.innerHTML = allTabs.map((t, i) => `<button onclick="window.loadTabContent(${i})" id="mtab-${i}" class="px-5 py-2.5 whitespace-nowrap border-b-4 font-black text-xs md:text-sm transition bg-white/80 rounded-t-xl shadow-sm ${i===0?'border-tvtcmain text-tvtcdark':'border-transparent text-slate-600 hover:text-tvtcmain'}">${t}</button>`).join('');
+            if(mobileTabs) mobileTabs.innerHTML = allTabs.map((t, i) => `<button onclick="window.loadTabContent(${i})" id="mtab-${i}" class="px-5 py-2.5 whitespace-nowrap border-b-[6px] font-black text-xs md:text-sm transition bg-white/80 rounded-t-xl shadow-sm ${i===0?'border-tvtcmain text-tvtcdark':'border-transparent text-slate-600 hover:text-tvtcmain'}">${t}</button>`).join('');
 
             const subNav = document.getElementById(`subnav-${key}`);
             if(subNav) {
@@ -846,7 +839,7 @@
 
             if (index < s.content.length) {
                 let coreId = `core_${window.activeSection}_${index}`;
-                if(window.allArticlesMap && window.allArticlesMap[coreId]) area.innerHTML = `<div class="glass-card rich-display h-auto border-t-[8px] border-tvtcmain bg-white/60">${window.allArticlesMap[coreId].htmlContent}</div>`;
+                if(window.allArticlesMap && window.allArticlesMap[coreId]) area.innerHTML = `<div class="glass-card rich-display h-auto border-t-[8px] border-tvtcmain bg-white/70">${window.allArticlesMap[coreId].htmlContent}</div>`;
                 else area.innerHTML = s.content[index];
             } else {
                 const cloudIdx = index - s.content.length; let cloudArticlesForThisSection = [];
@@ -854,7 +847,7 @@
                 cloudArticlesForThisSection.sort((a,b) => (a.order || 0) - (b.order || 0));
                 
                 if(cloudArticlesForThisSection[cloudIdx]) {
-                    area.innerHTML = `<div class="glass-card rich-display h-auto border-t-[8px] border-tvtcteal bg-white/60">${cloudArticlesForThisSection[cloudIdx].htmlContent}</div>`;
+                    area.innerHTML = `<div class="glass-card rich-display h-auto border-t-[8px] border-tvtcteal bg-white/70">${cloudArticlesForThisSection[cloudIdx].htmlContent}</div>`;
                 }
             }
             window.smoothScrollTop();
@@ -875,6 +868,7 @@
             setTimeout(() => e.className='toast', 3500);
         };
 
+        // تفعيل دعم الأنماط المضمنة
         window.onload = () => { 
             setTimeout(() => {
                 document.execCommand('styleWithCSS', false, true);
@@ -900,11 +894,12 @@
 
         const config = { apiKey: "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww", authDomain: "networkacademy-795c8.firebaseapp.com", projectId: "networkacademy-795c8", storageBucket: "networkacademy-795c8.firebasestorage.app", messagingSenderId: "458132238000", appId: "1:458132238000:web:bffd7321407b094bb21575" };
         const app = initializeApp(config); const db = getFirestore(app); const auth = getAuth(app);
+        
         const PATH = `artifacts/networkacademy-795c8/public/data`;
         
         window.quizzesCache = []; window.activeQuiz = null; window.allArticlesMap = {}; window.loadedResults = [];
 
-        signInAnonymously(auth).then(() => { fetchCloudArticles(); }).catch(() => toast("النظام السحابي غير متصل (Anonymous Error)", "error"));
+        signInAnonymously(auth).then(() => { fetchCloudArticles(); }).catch(() => window.toast("النظام السحابي غير متصل", "error"));
 
         async function fetchCloudArticles() {
             try {
@@ -940,131 +935,127 @@
 
         window.renderAdminLogin = () => {
             const area = document.getElementById('lms-area'); if(!area) return;
-            area.innerHTML = `<div class="max-w-md mx-auto glass-card p-10 text-center bg-white/80 border-t-[8px] border-tvtcmain"><h3 class="text-2xl font-black mb-6 text-tvtcdark border-b border-white/50 pb-4">رمز المرور السري للمعلم</h3><input type="password" id="lpass" class="w-full p-4 rounded-xl bg-white border border-slate-300 mb-6 text-center text-2xl font-bold tracking-widest text-slate-800 focus:border-tvtcmain outline-none shadow-inner" placeholder="****"><button onclick="window.checkAdmin()" class="btn-primary shadow-md text-lg">دخول للوحة التحكم</button></div>`;
+            area.innerHTML = `<div class="max-w-xl mx-auto glass-card p-12 md:p-16 text-center bg-white/80 border-t-[8px] border-tvtcmain"><h3 class="text-3xl font-black mb-8 text-slate-900 border-b border-white/50 pb-4">رمز المرور السري للمعلم</h3><input type="password" id="lpass" class="w-full p-5 rounded-2xl bg-white border border-slate-300 mb-8 text-center text-3xl font-bold tracking-widest text-slate-800 focus:border-tvtcteal outline-none shadow-inner" placeholder="****"><button onclick="window.checkAdmin()" class="btn-primary shadow-md text-xl">دخول للوحة التحكم</button></div>`;
         };
 
-        window.checkAdmin = () => { const p = document.getElementById('lpass'); if(p && p.value==='1234') window.renderDash(); else toast("الرمز غير صحيح", "error"); };
+        window.checkAdmin = () => { const p = document.getElementById('lpass'); if(p && p.value==='1234') window.renderDash(); else window.toast("الرمز غير صحيح", "error"); };
 
         window.renderDash = () => {
             const area = document.getElementById('lms-area'); if(!area) return;
             area.innerHTML = `
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 w-full glass-card p-6 border-b-[6px] border-tvtcmain bg-white/70">
-                <h2 class="text-2xl md:text-3xl font-black text-tvtcdark"><i class="fas fa-cog text-tvtcmain ml-2"></i> لوحة الإدارة السحابية</h2>
-                <button onclick="window.goHome()" class="text-red-600 font-black text-sm bg-white hover:bg-red-50 px-5 py-2.5 rounded-xl transition border border-red-200 shadow-sm"><i class="fas fa-sign-out-alt"></i> خروج من الإدارة</button>
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-10 w-full glass-card p-6 md:p-8 border-b-[8px] border-tvtcmain bg-white/80"><h2 class="text-2xl md:text-4xl font-black text-slate-900"><i class="fas fa-cog text-tvtcmain ml-3"></i> لوحة الإدارة السحابية</h2><button onclick="window.goHome()" class="text-red-600 font-black text-sm md:text-base bg-white hover:bg-red-50 px-6 py-3 rounded-xl transition border border-red-200 shadow-sm"><i class="fas fa-sign-out-alt"></i> خروج من الإدارة</button></div>
+            <div class="w-full mb-10 flex gap-4 border-b border-white/50 pb-6 overflow-x-auto custom-scrollbar">
+                <button onclick="window.switchTab('cms')" id="tab-cms" class="bg-tvtcmain text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-black transition text-sm md:text-lg shadow-md whitespace-nowrap"><i class="fas fa-edit ml-2"></i> إدارة وتعديل المحتوى</button>
+                <button onclick="window.switchTab('lms')" id="tab-lms" class="bg-white/80 hover:bg-white text-slate-800 px-6 md:px-8 py-3 md:py-4 rounded-xl font-black transition text-sm md:text-lg border border-slate-300 shadow-sm whitespace-nowrap"><i class="fas fa-vial ml-2"></i> إدارة الاختبارات (LMS)</button>
             </div>
             
-            <div class="w-full mb-8 flex gap-3 border-b border-white/50 pb-4 overflow-x-auto custom-scrollbar">
-                <button onclick="window.switchTab('cms')" id="tab-cms" class="bg-tvtcmain text-white px-6 py-3 rounded-xl font-black transition text-sm shadow-md whitespace-nowrap"><i class="fas fa-edit ml-1"></i> إدارة المحتوى وتصميم الموقع</button>
-                <button onclick="window.switchTab('lms')" id="tab-lms" class="bg-white/80 hover:bg-white text-slate-700 px-6 py-3 rounded-xl font-black transition text-sm border border-slate-300 shadow-sm whitespace-nowrap"><i class="fas fa-vial ml-1"></i> إدارة وتصميم الاختبارات (LMS)</button>
-            </div>
-            
-            <!-- قسم إدارة المحتوى CMS -->
             <div id="view-cms" class="w-full page-enter">
-                <div class="grid lg:grid-cols-1 gap-8 items-start w-full">
-                    <div class="glass-card p-8 md:p-10 border-t-[8px] border-tvtcteal relative bg-white/80 w-full">
+                <div class="grid lg:grid-cols-1 gap-10 items-start w-full">
+                    <div class="glass-card p-6 md:p-10 border-t-[8px] border-tvtcteal relative bg-white/90 w-full">
                         
-                        <div class="bg-white/60 p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
-                            <h3 class="text-xl font-black mb-4 text-tvtcdark"><i class="fas fa-home text-tvtcmain"></i> تصميم واجهة الموقع الرئيسية</h3>
-                            <div class="editor-toolbar w-full mb-0 rounded-b-none border-b-0">
-                                <select onchange="window.execCmd('cms-home-content', 'fontName', this.value); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm" title="نوع الخط">
-                                    <option value="">نوع الخط</option><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option><option value="Tahoma">Tahoma</option><option value="Arial">Arial</option>
-                                </select>
-                                <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                                <button onclick="window.execCmd('cms-home-content', 'bold')" title="عريض"><i class="fas fa-bold"></i></button>
-                                <button onclick="window.execCmd('cms-home-content', 'italic')" title="مائل"><i class="fas fa-italic"></i></button>
-                                <button onclick="window.execCmd('cms-home-content', 'underline')" title="تسطير"><i class="fas fa-underline"></i></button>
-                                <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                                <select onchange="window.execCmd('cms-home-content', 'fontSize', this.value); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm" title="حجم النص">
-                                    <option value="">حجم</option><option value="3">عادي</option><option value="5">كبير</option><option value="6">أكبر</option><option value="7">ضخم</option>
-                                </select>
-                                <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 shadow-sm"><span class="text-[10px] font-bold text-slate-600">نص:</span><input type="color" onchange="window.execCmd('cms-home-content', 'foreColor', this.value)" class="cursor-pointer" title="لون النص"></div>
-                                <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                                <button onclick="window.execCmd('cms-home-content', 'justifyRight')" title="يمين"><i class="fas fa-align-right"></i></button><button onclick="window.execCmd('cms-home-content', 'justifyCenter')" title="وسط"><i class="fas fa-align-center"></i></button><button onclick="window.execCmd('cms-home-content', 'justifyLeft')" title="يسار"><i class="fas fa-align-left"></i></button>
-                                <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                                <button onclick="window.insertImagePrompt('cms-home-content')" title="إدراج صورة برابط" class="text-tvtcmain font-bold text-[10px] md:text-xs flex items-center gap-1"><i class="fas fa-link"></i> صورة برابط</button>
+                        <div class="bg-white/50 p-6 md:p-8 rounded-3xl border border-slate-200 shadow-inner mb-10">
+                            <h3 class="text-xl md:text-2xl font-black mb-6 text-slate-800"><i class="fas fa-home text-blue-500"></i> تعديل واجهة الموقع الرئيسية</h3>
+                            <div class="editor-toolbar w-full mb-0 rounded-b-none border-b-0 flex-col md:flex-row items-start md:items-center">
+                                <div class="flex flex-wrap gap-1.5 items-center w-full">
+                                    <select onchange="window.execCmd('cms-home-content', 'fontName', this.value); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm" title="نوع الخط">
+                                        <option value="">نوع الخط</option><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option><option value="Tahoma">Tahoma</option><option value="Arial">Arial</option>
+                                    </select>
+                                    <div class="w-px h-5 bg-slate-300 mx-1 hidden md:block"></div>
+                                    <button onclick="window.execCmd('cms-home-content', 'bold')" title="عريض"><i class="fas fa-bold"></i></button>
+                                    <button onclick="window.execCmd('cms-home-content', 'italic')" title="مائل"><i class="fas fa-italic"></i></button>
+                                    <button onclick="window.execCmd('cms-home-content', 'underline')" title="تسطير"><i class="fas fa-underline"></i></button>
+                                    <div class="w-px h-5 bg-slate-300 mx-1 hidden md:block"></div>
+                                    <select onchange="window.execCmd('cms-home-content', 'fontSize', this.value); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm" title="حجم النص">
+                                        <option value="">حجم</option><option value="3">عادي</option><option value="5">كبير</option><option value="6">أكبر</option><option value="7">ضخم</option>
+                                    </select>
+                                    <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 shadow-sm"><span class="text-[9px] font-bold text-slate-600">نص:</span><input type="color" onchange="window.execCmd('cms-home-content', 'foreColor', this.value)" class="cursor-pointer" title="لون النص"></div>
+                                    <button onclick="window.insertResizableImage('cms-home-content')" title="إدراج صورة برابط" class="text-tvtcmain font-bold text-[10px] md:text-xs flex items-center gap-1 ml-auto"><i class="fas fa-link"></i> صورة رابط</button>
+                                    <button onclick="window.showEmojiPicker('cms-home-content')" title="إدراج أيقونات وإيموجي" class="text-orange-600 font-bold text-[10px] md:text-xs flex items-center gap-1"><i class="fas fa-icons"></i> أيقونات</button>
+                                </div>
                             </div>
-                            <div id="cms-home-content" contenteditable="true" class="rich-editor w-full shadow-inner bg-white/70 min-h-[250px] rounded-t-none border-t-0 mb-4">اكتب الترحيب ووصف الموقع هنا...</div>
-                            <button onclick="window.saveHomepageSettings()" class="bg-tvtcmain hover:bg-tvtcdark text-white px-6 py-3 rounded-xl font-bold text-sm md:text-base shadow-sm transition">حفظ إعدادات الرئيسية</button>
+                            <div id="cms-home-content" contenteditable="true" class="rich-editor w-full shadow-inner bg-white/70 min-h-[250px] rounded-t-none border-t-0 mb-6">اكتب الترحيب ووصف الموقع هنا...</div>
+                            <button onclick="window.saveHomepageSettings()" class="bg-tvtcmain hover:bg-tvtcdark text-white px-6 py-3 rounded-xl font-bold text-sm md:text-base shadow-sm transition w-full md:w-auto">حفظ إعدادات الرئيسية</button>
                         </div>
 
-                        <h3 class="text-2xl font-black mb-6 text-tvtcdark border-b border-slate-300 pb-3" id="cms-editor-title"><i class="fas fa-plus-circle"></i> إضافة مقال أو تعديل درس</h3>
+                        <h3 class="text-2xl md:text-3xl font-black mb-8 text-tvtcdark border-b border-slate-300 pb-4" id="cms-editor-title"><i class="fas fa-plus-circle"></i> إضافة مقال أو تعديل درس</h3>
                         <input type="hidden" id="edit-doc-id" value="">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div><label class="text-xs text-slate-700 font-bold mb-1 block">مكان الدرس:</label><select id="cms-section" class="w-full p-3 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold outline-none focus:border-tvtcmain text-sm shadow-sm"><option value="networks">تابع لـ: مبادئ الشبكات</option><option value="security">تابع لـ: الأمان في الشبكات</option><option value="osi">تابع لـ: نموذج OSI</option><option value="cables">تابع لـ: كيابل الشبكات</option><option value="ip">تابع لـ: بروتوكول IP</option></select></div>
-                            <div><label class="text-xs text-slate-700 font-bold mb-1 block">الترتيب:</label><input type="number" id="cms-order" value="1" class="w-full p-3 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold outline-none focus:border-tvtcmain text-center text-sm shadow-sm"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
+                            <div><label class="text-xs md:text-sm text-slate-700 font-bold mb-2 block">مكان الدرس:</label><select id="cms-section" class="w-full p-3 md:p-4 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold outline-none focus:border-tvtcmain text-sm md:text-base shadow-sm"><option value="new">-- إضافة كقسم جديد مستقل --</option><option value="networks">تابع لـ: مبادئ الشبكات</option><option value="security">تابع لـ: الأمان في الشبكات</option><option value="osi">تابع لـ: نموذج OSI</option><option value="cables">تابع لـ: كيابل الشبكات</option><option value="ip">تابع لـ: بروتوكول IP</option></select></div>
+                            <div><label class="text-xs md:text-sm text-slate-700 font-bold mb-2 block">الترتيب:</label><input type="number" id="cms-order" value="1" class="w-full p-3 md:p-4 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold outline-none focus:border-tvtcmain text-center text-sm md:text-base shadow-sm"></div>
                         </div>
-                        <input type="text" id="cms-tab-name" class="w-full p-3 rounded-xl bg-white border border-slate-300 mb-4 font-black text-slate-900 focus:border-tvtcmain outline-none text-base shadow-sm" placeholder="عنوان التبويب (يظهر في القائمة).." >
+                        <input type="text" id="cms-tab-name" class="w-full p-3 md:p-4 rounded-xl bg-white border border-slate-300 mb-6 font-black text-slate-900 focus:border-tvtcmain outline-none text-base md:text-lg shadow-sm" placeholder="عنوان التبويب (يظهر في القائمة).." >
                         
-                        <label class="text-xs text-slate-700 font-bold mb-1 block border-t border-slate-300 pt-4 mt-2">المحتوى (تظليل أي عنوان أو نص ثم اختيار اللون/الحجم يطبقه عليه فوراً):</label>
+                        <label class="text-xs md:text-sm text-slate-700 font-bold mb-2 block border-t border-slate-300 pt-6 mt-4">المحتوى (تظليل أي عنوان أو نص ثم اختيار اللون/الحجم يطبقه عليه فوراً):</label>
                         
-                        <!-- المحرر المتطور للـ CMS -->
-                        <div class="editor-toolbar w-full">
-                            <button onclick="window.execCmd('cms-content', 'undo')" title="تراجع"><i class="fas fa-undo"></i></button>
-                            <button onclick="window.execCmd('cms-content', 'redo')" title="إعادة"><i class="fas fa-redo"></i></button>
-                            <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            <select onchange="window.execCmd('cms-content', 'fontName', this.value); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm" title="نوع الخط">
-                                <option value="">نوع الخط</option><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option><option value="Tahoma">Tahoma</option><option value="Arial">Arial</option>
-                            </select>
-                            <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            <button onclick="window.execCmd('cms-content', 'bold')" title="عريض"><i class="fas fa-bold"></i></button>
-                            <button onclick="window.execCmd('cms-content', 'italic')" title="مائل"><i class="fas fa-italic"></i></button>
-                            <button onclick="window.execCmd('cms-content', 'underline')" title="تسطير"><i class="fas fa-underline"></i></button>
-                            <button onclick="window.execCmd('cms-content', 'strikeThrough')" title="شطب"><i class="fas fa-strikethrough"></i></button>
-                            <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            <select onchange="window.execCmd('cms-content', 'fontSize', this.value); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm" title="حجم النص">
-                                <option value="">الحجم</option><option value="3">عادي</option><option value="5">كبير</option><option value="6">أكبر</option><option value="7">ضخم</option>
-                            </select>
-                            <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 shadow-sm"><span class="text-[10px] font-bold text-slate-600">نص:</span><input type="color" onchange="window.execCmd('cms-content', 'foreColor', this.value)" class="cursor-pointer" title="لون النص"></div>
-                            <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 shadow-sm"><span class="text-[10px] font-bold text-slate-600">تظليل:</span><input type="color" onchange="window.execCmd('cms-content', 'hiliteColor', this.value)" class="cursor-pointer" value="#ffffff" title="لون خلفية النص"></div>
-                            <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            <button onclick="window.execCmd('cms-content', 'justifyRight')" title="يمين"><i class="fas fa-align-right"></i></button><button onclick="window.execCmd('cms-content', 'justifyCenter')" title="وسط"><i class="fas fa-align-center"></i></button><button onclick="window.execCmd('cms-content', 'justifyLeft')" title="يسار"><i class="fas fa-align-left"></i></button><button onclick="window.execCmd('cms-content', 'justifyFull')" title="ضبط الجانبين"><i class="fas fa-align-justify"></i></button>
-                            <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            <button onclick="window.execCmd('cms-content', 'insertUnorderedList')" title="قائمة نقطية"><i class="fas fa-list-ul"></i></button>
-                            <button onclick="window.execCmd('cms-content', 'insertOrderedList')" title="قائمة رقمية"><i class="fas fa-list-ol"></i></button>
-                            <button onclick="window.execCmd('cms-content', 'removeFormat')" title="مسح التنسيقات"><i class="fas fa-eraser text-red-500"></i></button>
-                            <div class="w-px h-5 bg-slate-300 mx-1"></div>
-                            <button onclick="window.insertImagePrompt('cms-content')" title="إدراج صورة برابط" class="text-tvtcmain font-bold text-[10px] md:text-xs flex items-center gap-1"><i class="fas fa-link"></i> صورة رابط</button>
-                            <div class="w-full flex gap-2 mt-2 pt-2 border-t border-slate-200">
-                                <select onchange="window.insertShape(this.value, 'cms-content'); this.value='';" class="text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm">
-                                    <option value="">إدراج شكل</option><option value="square">مربع ⬛</option><option value="circle">دائرة 🟢</option><option value="rectangle">مستطيل ▬</option>
+                        <div class="editor-toolbar w-full flex-col md:flex-row items-start md:items-center">
+                            <div class="flex flex-wrap gap-1.5 items-center w-full">
+                                <button onclick="window.execCmd('cms-content', 'undo')" title="تراجع"><i class="fas fa-undo"></i></button>
+                                <button onclick="window.execCmd('cms-content', 'redo')" title="إعادة"><i class="fas fa-redo"></i></button>
+                                <div class="w-px h-5 bg-slate-300 mx-1 hidden md:block"></div>
+                                <select onchange="window.execCmd('cms-content', 'fontName', this.value); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm" title="نوع الخط">
+                                    <option value="">نوع الخط</option><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option><option value="Tahoma">Tahoma</option><option value="Arial">Arial</option>
                                 </select>
-                                <button onclick="window.insertTemplate('cms-content', '3boxes')" title="إدراج 3 مربعات احترافية للعرض" class="text-tvtcmain font-bold text-xs flex items-center gap-1 w-full justify-center bg-white border border-tvtclight hover:bg-tvtclight hover:text-white rounded-lg transition"><i class="fas fa-columns"></i> إدراج كروت</button>
-                                <button onclick="window.insertTemplate('cms-content', 'table')" title="إدراج جدول منسق" class="text-orange-700 font-bold text-xs flex items-center gap-1 w-full justify-center bg-orange-50 border border-orange-200 hover:bg-orange-100 rounded-lg transition"><i class="fas fa-table"></i> إدراج جدول</button>
+                                <div class="w-px h-5 bg-slate-300 mx-1 hidden md:block"></div>
+                                <button onclick="window.execCmd('cms-content', 'bold')" title="عريض"><i class="fas fa-bold"></i></button>
+                                <button onclick="window.execCmd('cms-content', 'italic')" title="مائل"><i class="fas fa-italic"></i></button>
+                                <button onclick="window.execCmd('cms-content', 'underline')" title="تسطير"><i class="fas fa-underline"></i></button>
+                                <button onclick="window.execCmd('cms-content', 'strikeThrough')" title="شطب"><i class="fas fa-strikethrough"></i></button>
+                                <div class="w-px h-5 bg-slate-300 mx-1 hidden md:block"></div>
+                                <select onchange="window.execCmd('cms-content', 'fontSize', this.value); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm" title="حجم النص">
+                                    <option value="">الحجم</option><option value="3">عادي</option><option value="5">كبير</option><option value="6">أكبر</option><option value="7">ضخم</option>
+                                </select>
+                                <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 shadow-sm"><span class="text-[9px] font-bold text-slate-600">نص:</span><input type="color" onchange="window.execCmd('cms-content', 'foreColor', this.value)" class="cursor-pointer" title="لون النص"></div>
+                                <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 shadow-sm"><span class="text-[9px] font-bold text-slate-600">تظليل:</span><input type="color" onchange="window.execCmd('cms-content', 'hiliteColor', this.value)" class="cursor-pointer" value="#ffffff" title="لون خلفية النص"></div>
+                                <div class="w-px h-5 bg-slate-300 mx-1 hidden md:block"></div>
+                                <button onclick="window.execCmd('cms-content', 'justifyRight')" title="يمين"><i class="fas fa-align-right"></i></button><button onclick="window.execCmd('cms-content', 'justifyCenter')" title="وسط"><i class="fas fa-align-center"></i></button><button onclick="window.execCmd('cms-content', 'justifyLeft')" title="يسار"><i class="fas fa-align-left"></i></button><button onclick="window.execCmd('cms-content', 'justifyFull')" title="ضبط الجانبين"><i class="fas fa-align-justify"></i></button>
+                                <div class="w-px h-5 bg-slate-300 mx-1 hidden md:block"></div>
+                                <button onclick="window.execCmd('cms-content', 'insertUnorderedList')" title="قائمة نقطية"><i class="fas fa-list-ul"></i></button>
+                                <button onclick="window.execCmd('cms-content', 'insertOrderedList')" title="قائمة رقمية"><i class="fas fa-list-ol"></i></button>
+                                <button onclick="window.execCmd('cms-content', 'removeFormat')" title="مسح التنسيقات"><i class="fas fa-eraser text-red-500"></i></button>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-slate-200 w-full justify-center md:justify-start">
+                                <button onclick="window.showEmojiPicker('cms-content')" title="مكتبة الأيقونات" class="text-orange-600 font-bold text-[10px] md:text-xs flex items-center gap-1"><i class="fas fa-icons"></i> أيقونات</button>
+                                <button onclick="window.insertResizableImage('cms-content')" title="إدراج صورة برابط (قابلة للتغيير والتحجيم)" class="text-tvtcmain font-bold text-[10px] md:text-xs flex items-center gap-1"><i class="fas fa-link"></i> صورة برابط</button>
+                                <select onchange="window.insertShape(this.value, 'cms-content'); this.value='';" class="text-[10px] md:text-xs p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm">
+                                    <option value="">إدراج شكل هندسي</option><option value="square">مربع ⬛</option><option value="circle">دائرة 🟢</option><option value="rectangle">مستطيل ▬</option>
+                                </select>
+                                <button onclick="window.insertTemplate('cms-content', '3boxes')" title="إدراج 3 مربعات احترافية للعرض" class="text-tvtcmain font-bold text-[10px] md:text-xs flex items-center gap-1 bg-white border border-tvtclight hover:bg-tvtclight hover:text-white rounded-lg transition"><i class="fas fa-columns"></i> كروت</button>
+                                <button onclick="window.insertTemplate('cms-content', 'table')" title="إدراج جدول منسق" class="text-orange-700 font-bold text-[10px] md:text-xs flex items-center gap-1 w-full justify-center md:w-auto bg-orange-50 border border-orange-200 hover:bg-orange-100 rounded-lg transition"><i class="fas fa-table"></i> جدول</button>
                             </div>
                         </div>
                         <div id="cms-content" contenteditable="true" class="rich-editor w-full shadow-inner bg-white/80">اكتب المحتوى هنا...</div>
                         
-                        <div class="flex flex-col md:flex-row gap-3 mt-6"><button onclick="window.saveArticle()" class="flex-grow btn-primary text-lg"><i class="fas fa-save ml-2"></i> حفظ الدرس وتحديث الموقع</button><button onclick="window.resetCMSForm()" class="bg-white hover:bg-slate-50 text-slate-800 p-4 rounded-xl font-black transition text-base border border-slate-300 shadow-sm">إلغاء التعديل</button></div>
+                        <div class="flex flex-col md:flex-row gap-3 md:gap-4 mt-8"><button onclick="window.saveArticle()" class="flex-grow btn-primary text-lg md:text-xl"><i class="fas fa-save ml-2"></i> حفظ الدرس وتحديث الموقع</button><button onclick="window.resetCMSForm()" class="bg-white hover:bg-slate-100 text-slate-800 p-4 md:p-5 rounded-xl md:rounded-2xl font-black transition text-base md:text-lg border border-slate-300 shadow-sm">إلغاء التعديل</button></div>
                     </div>
                     
-                    <div class="glass-card p-8 border-t-[8px] border-tvtcdark bg-white/70 w-full">
-                        <div class="flex justify-between items-center mb-6 border-b border-slate-300 pb-3"><h3 class="font-black text-2xl text-tvtcmain">سجل الدروس المضافة والمعدلة</h3><button onclick="window.loadCmsList()" class="text-tvtcmain hover:rotate-180 transition bg-white border border-slate-300 w-10 h-10 rounded-lg shadow-sm text-xl"><i class="fas fa-sync"></i></button></div>
-                        <div id="cms-list" class="space-y-3 overflow-y-auto max-h-[600px] pr-2 custom-scrollbar">جاري التحميل...</div>
+                    <div class="glass-card p-6 md:p-10 border-t-[8px] border-blue-500 bg-white/80 mt-10 w-full">
+                        <div class="flex justify-between items-center mb-6 md:mb-8 border-b border-slate-300 pb-4 md:pb-5"><h3 class="font-black text-2xl md:text-3xl text-blue-900">سجل الدروس المضافة</h3><button onclick="window.loadCmsList()" class="text-blue-600 hover:rotate-180 transition bg-white border border-slate-300 w-10 h-10 md:w-12 md:h-12 rounded-xl shadow-sm text-xl md:text-2xl"><i class="fas fa-sync"></i></button></div>
+                        <div id="cms-list" class="space-y-4 overflow-y-auto h-[500px] md:h-[700px] pr-2 md:pr-4 custom-scrollbar">جاري التحميل...</div>
                     </div>
                 </div>
             </div>
 
             <!-- قسم إدارة الاختبارات (LMS) -->
-            <div id="view-lms" class="hidden grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto items-start page-enter">
-                <div class="glass-card p-8 md:p-10 border-t-[8px] border-emerald-500 bg-white/80">
-                    <h3 class="text-2xl font-black mb-6 flex items-center gap-2 text-emerald-800 border-b border-slate-300 pb-4"><i class="fas fa-file-circle-plus"></i> تصميم اختبار جديد</h3>
-                    <input type="text" id="quiz-t" class="w-full p-4 rounded-xl bg-white border border-slate-300 mb-6 font-bold text-slate-800 focus:border-emerald-500 outline-none shadow-inner text-lg" placeholder="عنوان الاختبار النهائي..">
+            <div id="view-lms" class="hidden grid lg:grid-cols-2 gap-8 md:gap-10 w-full mx-auto items-start page-enter">
+                <div class="glass-card p-6 md:p-10 border-t-[8px] border-emerald-500 bg-white/90">
+                    <h3 class="text-2xl md:text-3xl font-black mb-6 md:mb-8 flex items-center gap-2 text-emerald-900 border-b border-slate-300 pb-4 md:pb-5"><i class="fas fa-file-circle-plus"></i> تصميم اختبار جديد</h3>
+                    <input type="text" id="quiz-t" class="w-full p-4 md:p-5 rounded-xl md:rounded-2xl bg-white border border-slate-300 mb-6 md:mb-8 font-black text-slate-900 focus:border-emerald-500 outline-none shadow-inner text-lg md:text-xl" placeholder="عنوان الاختبار النهائي..">
                     
-                    <div id="quiz-c" class="space-y-6 mb-6"></div>
+                    <div id="quiz-c" class="space-y-6 md:space-y-8 mb-6 md:mb-8"></div>
                     
-                    <button onclick="window.addQForm()" class="w-full bg-white text-slate-800 p-4 rounded-xl font-bold mb-4 border border-slate-300 hover:bg-slate-50 transition text-sm shadow-sm"><i class="fas fa-plus ml-2 text-emerald-600"></i> إضافة سؤال يدوياً (بمحرر مخصص)</button>
+                    <button onclick="window.addQForm()" class="w-full bg-white text-slate-800 p-4 md:p-5 rounded-xl md:rounded-2xl font-black mb-4 border border-slate-300 hover:bg-slate-50 transition text-base md:text-lg shadow-sm"><i class="fas fa-plus ml-2 text-emerald-600"></i> إضافة سؤال يدوياً (محرر)</button>
                     <input type="file" id="json-file" accept=".json" class="hidden" onchange="window.impJ(event)">
-                    <button onclick="document.getElementById('json-file').click()" class="w-full bg-white text-tvtcmain font-bold py-4 rounded-xl mb-6 border border-tvtclight hover:bg-tvtclight hover:text-white transition text-sm shadow-sm"><i class="fas fa-file-import ml-2"></i> استيراد أسئلة جاهزة (JSON)</button>
-                    <button onclick="window.saveQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-5 rounded-[1.5rem] font-black text-xl transition shadow-lg shadow-emerald-600/30"><i class="fas fa-cloud-upload-alt ml-2"></i> حفظ الاختبار سحابياً</button>
+                    <button onclick="document.getElementById('json-file').click()" class="w-full bg-blue-50 text-blue-800 font-black py-4 md:py-5 rounded-xl md:rounded-2xl mb-8 md:mb-10 border border-blue-200 hover:bg-blue-100 transition text-base md:text-lg shadow-sm"><i class="fas fa-file-import ml-2"></i> استيراد أسئلة جاهزة (JSON)</button>
+                    <button onclick="window.saveQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] font-black text-xl md:text-2xl transition shadow-lg shadow-emerald-600/30"><i class="fas fa-cloud-upload-alt ml-2"></i> حفظ الاختبار سحابياً</button>
                 </div>
-                <div class="glass-card p-8 md:p-10 border-t-[8px] border-tvtcmain bg-white/80">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-slate-300 pb-4 gap-4"><h3 class="text-2xl font-black text-tvtcdark">سجل درجات الطلاب</h3><div class="flex gap-2 w-full md:w-auto"><button onclick="window.exportToExcel()" class="flex-grow md:flex-grow-0 bg-white hover:bg-emerald-50 border border-slate-300 text-emerald-700 font-bold text-xs px-4 py-2 rounded-lg shadow-sm transition"><i class="fas fa-file-excel ml-1"></i> تحميل (Excel)</button><button onclick="window.loadRes()" class="text-tvtcmain hover:rotate-180 transition bg-white border border-slate-300 shadow-sm w-10 h-10 rounded-lg text-lg shrink-0"><i class="fas fa-sync-alt"></i></button></div></div>
+                <div class="glass-card p-6 md:p-10 border-t-[8px] border-tvtcmain bg-white/90">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 border-b border-slate-300 pb-4 md:pb-5 gap-4"><h3 class="text-2xl md:text-3xl font-black text-tvtcdark">سجل الدرجات</h3><div class="flex gap-2 w-full md:w-auto"><button onclick="window.exportToExcel()" class="flex-grow md:flex-grow-0 bg-white hover:bg-emerald-50 border border-slate-300 text-emerald-700 font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-2.5 rounded-lg md:rounded-xl shadow-sm transition"><i class="fas fa-file-excel ml-1"></i> تحميل (Excel)</button><button onclick="window.loadRes()" class="text-tvtcmain hover:rotate-180 transition bg-white border border-slate-300 shadow-sm w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl text-lg md:text-xl shrink-0"><i class="fas fa-sync-alt"></i></button></div></div>
                     <div id="res-list" class="overflow-x-auto custom-scrollbar"><p class="text-center font-bold text-slate-500">جاري التحميل..</p></div>
                 </div>
             </div>
             `;
             
-            // تعبئة حقول الصفحة الرئيسية إذا كانت محفوظة
             if(window.allArticlesMap && window.allArticlesMap['homepage_settings']) {
                 const data = window.allArticlesMap['homepage_settings'];
                 if(data.htmlContent) {
@@ -1109,7 +1100,15 @@
 
         window.execCmd = (editorId, cmd, val=null) => { document.execCommand(cmd, false, val); document.getElementById(editorId).focus(); };
         
-        window.insertImagePrompt = (editorId) => { const url = prompt("أدخل رابط الصورة (URL):"); if(url) window.execCmd(editorId, 'insertImage', url); };
+        // --- دالة إدراج الصورة المطورة (قابلة للتحجيم والتحريك) ---
+        window.insertResizableImage = (editorId) => { 
+            const url = prompt("أدخل رابط الصورة (URL):"); 
+            if(url) {
+                // إدراج الصورة بداخل إطار يسمح بتغيير الحجم والمحاذاة بسهولة
+                const html = `<span style="display: inline-block; width: 300px; max-width: 100%; resize: both; overflow: hidden; border: 2px dashed #94a3b8; padding: 2px; margin: 0.5rem; border-radius: 0.5rem;"><img src="${url}" style="width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer;" alt="صورة مدرجة" /></span>&nbsp;`;
+                window.execCmd(editorId, 'insertHTML', html);
+            }
+        };
 
         window.insertShape = (type, editorId) => {
             let html = '';
@@ -1193,22 +1192,23 @@
                 const s = await getDocs(collection(db, PATH, 'articles')); let arr = [];
                 s.forEach(d => arr.push({id: d.id, ...d.data()}));
                 
-                let html = '';
+                let html = '<div class="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-6 shadow-sm"><p class="text-sm font-bold text-blue-900"><i class="fas fa-info-circle text-blue-600"></i> <b>ملاحظة هامة:</b> يمكنك تعديل أي درس من الدروس الأساسية للمنهج من القائمة أدناه، وسيقوم النظام باستبدال الدرس القديم بتعديلك الجديد في الموقع فوراً.</p></div>';
+                
                 Object.keys(CORE_DATA).forEach(secKey => {
-                    html += `<div class="bg-white/80 p-3 rounded-xl text-slate-900 font-black text-sm mt-5 mb-3 border border-slate-300 shadow-sm flex items-center gap-2"><i class="fas ${CORE_DATA[secKey].icon} text-tvtcmain"></i> ${CORE_DATA[secKey].title}</div>`;
+                    html += `<div class="bg-white/80 p-4 rounded-xl text-slate-900 font-black text-lg mt-6 mb-4 border border-slate-200 shadow-sm flex items-center gap-3"><i class="fas ${CORE_DATA[secKey].icon} text-tvtcmain"></i> ${CORE_DATA[secKey].title}</div>`;
                     
                     CORE_DATA[secKey].tabs.forEach((tab, idx) => {
                         let coreId = `core_${secKey}_${idx}`;
                         let modified = arr.find(a => a.id === coreId);
                         let dTitle = modified ? modified.tabName : tab;
-                        let modBadge = modified ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-lg ml-2 shadow-sm font-black border border-emerald-300">معدل</span>' : '';
+                        let modBadge = modified ? '<span class="text-[11px] bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg ml-2 shadow-sm font-black border border-emerald-300">معدل</span>' : '';
                         
                         html += `
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center transition hover:shadow-md mb-2 shadow-sm hover:border-tvtcmain">
-                            <div><p class="font-bold text-slate-900 text-xs md:text-sm">${dTitle} ${modBadge}</p></div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 flex justify-between items-center transition hover:shadow-md mb-3 shadow-sm hover:border-tvtcmain">
+                            <div><p class="font-bold text-slate-900 text-sm md:text-base">${dTitle} ${modBadge}</p></div>
                             <div class="flex gap-2">
-                                <button onclick="window.editCoreArticle('${secKey}', ${idx})" class="w-8 h-8 bg-white text-tvtcmain rounded-lg hover:bg-tvtcmain hover:text-white transition shadow-sm border border-slate-300" title="تعديل الدرس"><i class="fas fa-edit text-xs"></i></button>
-                                ${modified ? `<button onclick="window.delArticle('${coreId}')" class="w-8 h-8 bg-white text-red-700 rounded-lg hover:bg-red-600 hover:text-white transition shadow-sm border border-slate-300" title="استعادة المحتوى الأصلي"><i class="fas fa-undo text-xs"></i></button>` : ''}
+                                <button onclick="window.editCoreArticle('${secKey}', ${idx})" class="w-10 h-10 bg-white text-tvtcmain rounded-xl hover:bg-tvtcmain hover:text-white transition shadow-sm border border-slate-200" title="تعديل الدرس"><i class="fas fa-edit"></i></button>
+                                ${modified ? `<button onclick="window.delArticle('${coreId}')" class="w-10 h-10 bg-white text-red-700 rounded-xl hover:bg-red-600 hover:text-white transition shadow-sm border border-slate-200" title="استعادة المحتوى الأصلي"><i class="fas fa-undo"></i></button>` : ''}
                             </div>
                         </div>`;
                     });
@@ -1217,25 +1217,25 @@
                     dynamicArr.sort((a,b) => (a.order || 0) - (b.order || 0));
                     dynamicArr.forEach(a => {
                         html += `
-                        <div class="bg-tvtcteal/10 p-4 rounded-xl border border-tvtcteal/30 flex justify-between items-center transition hover:shadow-md mb-2 shadow-sm border-r-[6px] border-r-tvtcteal">
-                            <div><p class="font-bold text-tvtcdark text-xs md:text-sm"><i class="fas fa-plus text-tvtcteal ml-1 text-xs"></i> ${a.tabName}</p></div>
+                        <div class="bg-tvtcteal/10 p-5 rounded-2xl border border-tvtcteal/30 flex justify-between items-center transition hover:shadow-md mb-3 shadow-sm border-r-[8px] border-r-tvtcteal">
+                            <div><p class="font-bold text-tvtcdark text-sm md:text-base"><i class="fas fa-plus text-tvtcteal ml-1 text-sm"></i> ${a.tabName}</p></div>
                             <div class="flex gap-2">
-                                <button onclick="window.editArticleId('${a.id}')" class="w-8 h-8 bg-white text-tvtcteal rounded-lg hover:bg-tvtcteal hover:text-white transition shadow-sm border border-slate-300" title="تعديل"><i class="fas fa-edit text-xs"></i></button>
-                                <button onclick="window.delArticle('${a.id}')" class="w-8 h-8 bg-white text-red-800 rounded-lg hover:bg-red-600 hover:text-white transition shadow-sm border border-slate-300" title="حذف"><i class="fas fa-trash text-xs"></i></button>
+                                <button onclick="window.editArticleId('${a.id}')" class="w-10 h-10 bg-white text-tvtcteal rounded-xl hover:bg-tvtcteal hover:text-white transition shadow-sm border border-slate-200" title="تعديل"><i class="fas fa-edit"></i></button>
+                                <button onclick="window.delArticle('${a.id}')" class="w-10 h-10 bg-white text-red-800 rounded-xl hover:bg-red-600 hover:text-white transition shadow-sm border border-slate-200" title="حذف"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>`;
                     });
                 });
 
                 list.innerHTML = html;
-            } catch(e) { list.innerHTML = '<p class="text-red-600 text-sm font-bold text-center mt-10">حدث خطأ في الجلب</p>'; }
+            } catch(e) { list.innerHTML = '<p class="text-red-600 text-base font-bold text-center mt-10">حدث خطأ في الجلب</p>'; }
         };
 
         window.editCoreArticle = (secKey, idx) => {
             let coreId = `core_${secKey}_${idx}`;
             let article = window.allArticlesMap[coreId];
             document.getElementById('edit-doc-id').value = coreId;
-            document.getElementById('cms-editor-title').innerHTML = '<i class="fas fa-edit text-blue-600"></i> تعديل درس أساسي: <span class="text-slate-700">' + (article ? article.tabName : CORE_DATA[secKey].tabs[idx]) + '</span>';
+            document.getElementById('cms-editor-title').innerHTML = '<i class="fas fa-edit text-blue-600"></i> تعديل درس أساسي: <span class="text-slate-800">' + (article ? article.tabName : CORE_DATA[secKey].tabs[idx]) + '</span>';
             const secSelect = document.getElementById('cms-section'); if(secSelect){ secSelect.value = secKey; secSelect.disabled = true; }
             const orderInput = document.getElementById('cms-order'); if(orderInput){ orderInput.value = idx + 1; orderInput.disabled = true; }
             document.getElementById('cms-tab-name').value = article ? article.tabName : CORE_DATA[secKey].tabs[idx];
@@ -1247,7 +1247,7 @@
             const obj = window.allArticlesMap[id];
             if(!obj) return window.toast("خطأ في جلب الدرس", "error");
             document.getElementById('edit-doc-id').value = obj.id;
-            document.getElementById('cms-editor-title').innerHTML = '<i class="fas fa-edit text-cyan-600"></i> تعديل مقال إضافي: <span class="text-slate-700">' + obj.tabName + '</span>';
+            document.getElementById('cms-editor-title').innerHTML = '<i class="fas fa-edit text-cyan-600"></i> تعديل مقال إضافي: <span class="text-slate-800">' + obj.tabName + '</span>';
             const secSelect = document.getElementById('cms-section'); if(secSelect){ secSelect.value = obj.sectionId; secSelect.disabled = false; }
             const orderInput = document.getElementById('cms-order'); if(orderInput){ orderInput.value = obj.order || 1; orderInput.disabled = false; }
             document.getElementById('cms-tab-name').value = obj.tabName;
@@ -1259,6 +1259,43 @@
             if(!confirm("هل أنت متأكد من الحذف؟")) return;
             try { await deleteDoc(doc(db, PATH, 'articles', id)); window.toast("تم الحذف بنجاح"); window.loadCmsList(); fetchCloudArticles(); } catch(e) { window.toast("خطأ في الحذف", "error"); }
         };
+
+        // -------- وظائف مكتبة الأيقونات (Emoji Picker) --------
+        const EMOJI_BANK = {
+            "الأمن السيبراني والحماية": ["🛡️", "🔒", "🔓", "🔏", "🔐", "🔑", "🗝️", "🕵️", "👁️", "🚨", "⚠️", "🛑", "⛔", "🧱", "🦠", "👾", "🏴‍☠️", "🪪", "🛡️"],
+            "الشبكات والاتصالات": ["🌐", "📡", "🛰️", "📶", "🔌", "🌍", "🗺️", "🔗", "🔄", "🔀", "🕸️", "📍", "📱", "📞", "☎️", "📡"],
+            "الأجهزة والعتاد": ["💻", "🖥️", "🖨️", "🖱️", "⌨️", "🖲️", "🕹️", "💾", "💽", "💿", "📀", "🔋", "🪫", "⌚", "📷", "📸", "📟", "📠", "📺", "📻"],
+            "البيانات والمعالجة": ["📁", "📂", "🗂️", "🗄️", "📊", "📈", "📉", "📄", "📝", "🧮", "🤖", "🧠", "⚙️", "🛠️", "🔧", "⚡", "🔥", "💧", "📦"],
+            "أشكال ورموز تعليمية": ["✅", "❌", "❓", "❕", "🎓", "🏫", "🏢", "💡", "🎯", "📌", "⭐", "🏆", "🥇", "🚀", "⏳", "⏱️", "➡️", "⬅️", "⬆️", "⬇️", "↔️", "↕️", "🟢", "🔴", "🟡", "🔵", "⬛", "⬜", "▬", "⭕"]
+        };
+
+        window.currentEmojiEditor = '';
+
+        window.showEmojiPicker = (editorId) => {
+            window.currentEmojiEditor = editorId;
+            const modal = document.getElementById('emoji-picker-modal');
+            const container = document.getElementById('emoji-grid-container');
+            
+            if(container.innerHTML.trim() === '') {
+                let html = '';
+                for(let cat in EMOJI_BANK) {
+                    html += `<h4 class="font-black text-tvtcmain mt-6 mb-3 text-lg border-b border-slate-200 pb-2">${cat}</h4>`;
+                    html += `<div class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-3">`;
+                    EMOJI_BANK[cat].forEach(em => {
+                        html += `<button onclick="window.insertEmoji('${em}')" class="text-3xl md:text-4xl hover:bg-blue-50 hover:scale-125 transition-transform p-2 rounded-xl border border-transparent hover:border-blue-200">${em}</button>`;
+                    });
+                    html += `</div>`;
+                }
+                container.innerHTML = html;
+            }
+            modal.classList.remove('hidden');
+        };
+
+        window.insertEmoji = (em) => {
+            document.getElementById('emoji-picker-modal').classList.add('hidden');
+            window.execCmd(window.currentEmojiEditor, 'insertHTML', em);
+        };
+
 
         // -------- وظائف LMS (بمحرر نصوص غني للأسئلة) --------
         let qCount = 0;
@@ -1291,9 +1328,10 @@
                         <input type="color" onchange="window.execCmd('${editorId}', 'foreColor', this.value)" class="w-6 h-6 p-0 border-none bg-transparent cursor-pointer rounded">
                     </div>
                     <div class="w-px h-4 bg-slate-300 mx-1"></div>
-                    <button onclick="window.insertImagePrompt('${editorId}')" title="صورة برابط" class="text-blue-700 font-bold text-xs"><i class="fas fa-link"></i> إدراج صورة</button>
+                    <button onclick="window.insertResizableImage('${editorId}')" title="صورة برابط" class="text-blue-700 font-bold"><i class="fas fa-link"></i> إدراج صورة</button>
+                    <button onclick="window.showEmojiPicker('${editorId}')" title="مكتبة الأيقونات" class="text-orange-600 font-bold ml-1"><i class="fas fa-icons"></i> أيقونات</button>
                 </div>
-                <div id="${editorId}" contenteditable="true" class="q-t w-full p-4 bg-white border border-slate-300 rounded-b-xl mb-6 text-slate-900 font-bold text-base outline-none overflow-y-auto shadow-sm min-h-[100px] resize-y" placeholder="اكتب السؤال هنا.. ظلل النص لتنسيقه"></div>
+                <div id="${editorId}" contenteditable="true" class="q-t w-full p-4 bg-white border border-slate-300 rounded-b-xl mb-6 text-slate-900 font-bold text-base outline-none overflow-y-auto shadow-sm min-h-[120px] resize-y" placeholder="اكتب السؤال هنا.. ظلل النص لتنسيقه"></div>
                 
                 <div class="q-opts grid grid-cols-2 gap-3 md:gap-4 mb-6">
                     <input class="o1 p-3 md:p-4 bg-slate-50 border border-slate-300 rounded-xl text-sm md:text-base font-bold text-slate-800 outline-none focus:border-tvtcmain shadow-sm" placeholder="الخيار 1">
