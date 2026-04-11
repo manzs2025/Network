@@ -366,116 +366,117 @@
                                     </tr>
                                     <tr class="l5-row hover-scale">
                                         <td>5</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-handshake"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة الجلسة</div><div class="text-xs uppercase font-mono">SESSION</div></td>
-                                        <td><div class="font-black text-lg">DATA</div></td>
-                                        <td><div class="text-xs font-mono">Establishment, maintenance, termination</div><div class="font-bold text-sm">إنشاء الجلسات، صيانة، إنهاؤها</div></td>
-                                        <td><div class="font-bold text-sm font-mono">NFS<br>SQL</div></td>
-                                        <td><div class="font-black text-3xl">-</div></td>
-                                    </tr>
-                                    <tr class="l4-row hover-scale">
-                                        <td>4</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-cloud-upload-alt"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة النقل</div><div class="text-xs uppercase font-mono">TRANSPORT</div></td>
-                                        <td><div class="font-black text-lg">Segment</div></td>
-                                        <td><div class="text-xs font-mono">protocol TCP/UDP, Data type</div><div class="font-bold text-sm">تحديد نوع البيانات، تحديد البروتوكول المستخدم</div></td>
-                                        <td><div class="font-bold text-sm font-mono">TCP<br>UDP</div></td>
-                                        <td><div class="font-black text-3xl">-</div></td>
-                                    </tr>
-                                    <tr class="l3-row hover-scale">
-                                        <td>3</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-random"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة الشبكة</div><div class="text-xs uppercase font-mono">NETWORK</div></td>
-                                        <td><div class="font-black text-lg">Packet</div></td>
-                                        <td><div class="text-xs font-mono">Routing, IP Addressing</div><div class="font-bold text-sm">التوجيه، العنونة المنطقية IP</div></td>
-                                        <td><div class="font-bold text-sm font-mono">IP Address<br>OSPF</div></td>
-                                        <td><div class="font-black text-2xl"><i class="fas fa-route"></i></div><div class="text-[10px] font-black">Routers</div></td>
-                                    </tr>
-                                    <tr class="l2-row hover-scale">
-                                        <td>2</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-link"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة ربط البيانات</div><div class="text-xs uppercase font-mono">DATA LINK</div></td>
-                                        <td><div class="font-black text-lg">Frame</div></td>
-                                        <td><div class="text-xs font-mono">Physical Addressing (MAC), Error Detection</div><div class="font-bold text-sm">العنونة المادية MAC، كشف الأخطاء</div></td>
-                                        <td><div class="font-bold text-sm font-mono">MAC Address<br>Wi-Fi</div></td>
-                                        <td><div class="font-black text-2xl"><i class="fas fa-network-wired"></i></div><div class="text-[10px] font-black">Switches</div></td>
-                                    </tr>
-                                    <tr class="l1-row hover-scale">
-                                        <td>1</td>
-                                        <td><div class="osi-icon-box flex flex-col leading-[1.2]" style="font-size: 7px; font-family: monospace;"><span>10111</span><span>01010</span><span>10111</span></div></td>
-                                        <td><div class="font-black text-lg">الطبقة الفيزيائية</div><div class="text-xs uppercase font-mono">PHYSICAL</div></td>
-                                        <td><div class="font-black text-lg">Bits</div></td>
-                                        <td><div class="text-xs font-mono">Cabling, Connector Types</div><div class="font-bold text-sm">الكابلات، أنواع الموصلات</div></td>
-                                        <td><div class="font-bold text-sm font-mono">Ethernet<br>802.11</div></td>
-                                        <td><div class="font-black text-2xl flex gap-1 justify-center"><i class="fas fa-ethernet"></i></div><div class="text-[10px] font-black">Cables, NICs</div></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>`,
-                    `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
-                        <div class="bg-white/80 p-8 rounded-[2rem] shadow-sm border border-slate-200">
-                            <div class="text-center mb-8 border-b border-slate-200 pb-6">
-                                <h1 class="text-2xl md:text-4xl font-black text-tvtcdark m-0">المقارنة بين الراوتر والسويتش باحترافية</h1>
-                                <p class="text-tvtcmain font-mono tracking-widest text-xs md:text-sm mt-3 m-0">PROFESSIONAL COMPARISON: ROUTER VS. SWITCH</p>
-                            </div>
+                        <h2 style="margin-top: 3rem; color: #00627a;">الفروق بين TCP و UDP (في طبقة النقل)</h2>
+                        <table style="font-size: 1.1rem;">
+                            <thead style="background: rgba(255,255,255,0.8);">
+                                <tr>
+                                    <th style="padding: 1.5rem;">وجه المقارنة</th>
+                                    <th style="padding: 1.5rem;">بروتوكول TCP</th>
+                                    <th style="padding: 1.5rem;">بروتوكول UDP</th>
+                                </tr>
+                            </thead>
+                            <tbody style="background: rgba(255,255,255,0.5);">
+                                <tr><td style="padding: 1rem;">حجم الـ Header</td><td style="padding: 1rem;">20 bytes</td><td style="padding: 1rem;">8 bytes</td></tr>
+                                <tr><td style="padding: 1rem;">السرعة</td><td style="padding: 1rem;">أبطأ</td><td style="padding: 1rem;">أسرع</td></tr>
+                                <tr><td style="padding: 1rem;">التحقق من الأخطاء وترتيب الأجزاء</td><td style="color: #059669; padding: 1rem; font-weight: 900;">نعم</td><td style="color: #ef4444; padding: 1rem; font-weight: 900;">لا</td></tr>
+                                <tr><td style="padding: 1rem;">الاستخدام الشائع</td><td style="padding: 1rem;">تحميل الملفات، التصفح، الإيميل</td><td style="padding: 1rem;">البث المرئي، ألعاب الأونلاين المباشرة</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- تصميم إنفوجرافيك المقارنة الجديد بين الراوتر والسويتش بناءً على ملف PDF -->
+                        <div style="background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(241,245,249,0.9)); border-radius: 2rem; padding: 3rem 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,98,122,0.15); margin-top: 4rem; overflow: hidden;">
                             
-                            <div class="grid grid-cols-[1fr_auto_1fr] gap-3 md:gap-6 items-center w-full max-w-4xl mx-auto text-xs md:text-base">
-                                <!-- الرؤوس -->
-                                <div class="text-center text-emerald-600 font-black text-xl md:text-3xl mb-4 tracking-wider uppercase">الراوتر</div>
-                                <div></div>
-                                <div class="text-center text-orange-600 font-black text-xl md:text-3xl mb-4 tracking-wider uppercase">السويتش</div>
+                            <div style="text-align: center; margin-bottom: 3rem;">
+                                <h2 style="color: #004d60; font-size: 2.5rem; font-weight: 900; margin-top: 0; margin-bottom: 0.5rem;">مقارنة بين جهازي الراوتر والسويتش</h2>
+                                <p style="color: #64748b; font-weight: bold; font-family: Tahoma, sans-serif; letter-spacing: 2px;">ROUTER VS SWITCH</p>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 1.5rem; position: relative; max-width: 900px; margin: 0 auto;">
                                 
-                                <!-- الوظيفة الرئيسية -->
-                                <div class="bg-emerald-50 p-3 md:p-4 rounded-r-xl border-r-4 border-emerald-500 text-left text-emerald-900 font-bold leading-snug shadow-sm">ربط شبكات مختلفة</div>
-                                <div class="bg-white text-tvtcmain font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-slate-200 text-center shadow-sm whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">الوظيفة الرئيسية<br><span class="text-[9px] md:text-[11px] text-slate-500 font-mono">Function</span></div>
-                                <div class="bg-orange-50 p-3 md:p-4 rounded-l-xl border-l-4 border-orange-500 text-right text-orange-900 font-bold leading-snug shadow-sm">ربط أجهزة داخل الشبكة</div>
-                                
-                                <!-- طبقة OSI -->
-                                <div class="bg-emerald-50 p-3 md:p-4 rounded-r-xl border-r-4 border-emerald-500 text-left text-emerald-900 font-bold leading-snug shadow-sm">الطبقة الثالثة (Network) <span class="text-emerald-600 ml-1">L3</span></div>
-                                <div class="bg-white text-tvtcmain font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-slate-200 text-center shadow-sm whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">طبقة OSI<br><span class="text-[9px] md:text-[11px] text-slate-500 font-mono">Layer</span></div>
-                                <div class="bg-orange-50 p-3 md:p-4 rounded-l-xl border-l-4 border-orange-500 text-right text-orange-900 font-bold leading-snug shadow-sm"><span class="text-orange-600 mr-1">L2</span> الطبقة الثانية (Data Link)</div>
+                                <!-- الخط المركزي -->
+                                <div style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; border-left: 3px dashed #cbd5e1; transform: translateX(-50%); z-index: 0;"></div>
 
-                                <!-- العنونة -->
-                                <div class="bg-emerald-50 p-3 md:p-4 rounded-r-xl border-r-4 border-emerald-500 text-left text-emerald-900 font-bold leading-snug shadow-sm">يعتمد على IP Address</div>
-                                <div class="bg-white text-tvtcmain font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-slate-200 text-center shadow-sm whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">العنونة<br><span class="text-[9px] md:text-[11px] text-slate-500 font-mono">Addressing</span></div>
-                                <div class="bg-orange-50 p-3 md:p-4 rounded-l-xl border-l-4 border-orange-500 text-right text-orange-900 font-bold leading-snug shadow-sm">يعتمد على MAC Address</div>
+                                <!-- عناوين الأجهزة -->
+                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; margin-bottom: 1rem;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 4rem; color: #00627a; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🎛️</div>
+                                        <h3 style="font-size: 1.8rem; font-weight: 900; color: #004d60; margin: 0;">السويتش SWITCH</h3>
+                                    </div>
+                                    <div style="width: 130px;"></div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 4rem; color: #29b5a8; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">📡</div>
+                                        <h3 style="font-size: 1.8rem; font-weight: 900; color: #00627a; margin: 0;">الراوتر ROUTER</h3>
+                                    </div>
+                                </div>
 
-                                <!-- البيانات -->
-                                <div class="bg-emerald-50 p-3 md:p-4 rounded-r-xl border-r-4 border-emerald-500 text-left text-emerald-900 font-bold leading-snug shadow-sm">حزم البيانات (Packets)</div>
-                                <div class="bg-white text-tvtcmain font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-slate-200 text-center shadow-sm whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">البيانات<br><span class="text-[9px] md:text-[11px] text-slate-500 font-mono">Data Unit</span></div>
-                                <div class="bg-orange-50 p-3 md:p-4 rounded-l-xl border-l-4 border-orange-500 text-right text-orange-900 font-bold leading-snug shadow-sm">إطارات البيانات (Frames)</div>
+                                <!-- نقطة المقارنة 1: الطبقة -->
+                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
+                                        <span style="font-weight: 900; color: #064e3b; font-size: 1.2rem; display: block;">الطبقة الثانية</span>
+                                        <p style="margin: 0; color: #047857; font-weight: bold; font-size: 0.95rem;">(ربط البيانات data link layer)</p>
+                                    </div>
+                                    <div style="background: #004d60; color: white; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1.1rem;">طبقة العمل</div>
+                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
+                                        <span style="font-weight: 900; color: #1e3a8a; font-size: 1.2rem; display: block;">الطبقة الثالثة</span>
+                                        <p style="margin: 0; color: #1d4ed8; font-weight: bold; font-size: 0.95rem;">(طبقة الشبكة network layer)</p>
+                                    </div>
+                                </div>
 
-                                <!-- جدول التوجيه -->
-                                <div class="bg-emerald-50 p-3 md:p-4 rounded-r-xl border-r-4 border-emerald-500 text-left text-emerald-900 font-bold leading-snug shadow-sm">جدول التوجيه <br><span class="text-[10px] md:text-xs text-emerald-600">يحدد أفضل مسار (Routing Table)</span></div>
-                                <div class="bg-white text-tvtcmain font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-slate-200 text-center shadow-sm whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">القرار<br><span class="text-[9px] md:text-[11px] text-slate-500 font-mono">Decision</span></div>
-                                <div class="bg-orange-50 p-3 md:p-4 rounded-l-xl border-l-4 border-orange-500 text-right text-orange-900 font-bold leading-snug shadow-sm">جدول الماك <br><span class="text-[10px] md:text-xs text-orange-600">يوجّه للبورت الصحيح (MAC Table)</span></div>
+                                <!-- نقطة المقارنة 2: الرسالة -->
+                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
+                                        <span style="font-weight: 900; color: #064e3b; font-size: 1.1rem; display: block;">تسمى الرسالة المحولة بـ</span>
+                                        <p style="margin: 0; color: #047857; font-weight: 900; font-size: 1.4rem; font-family: Tahoma, sans-serif;">(Frame)</p>
+                                    </div>
+                                    <div style="background: #00627a; color: white; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1.1rem;">اسم الرسالة</div>
+                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
+                                        <span style="font-weight: 900; color: #1e3a8a; font-size: 1.1rem; display: block;">تسمى الرسالة الموجهة بـ</span>
+                                        <p style="margin: 0; color: #1d4ed8; font-weight: 900; font-size: 1.4rem; font-family: Tahoma, sans-serif;">(Packet)</p>
+                                    </div>
+                                </div>
 
-                                <!-- مثال -->
-                                <div class="bg-emerald-50 p-3 md:p-4 rounded-r-xl border-r-4 border-emerald-500 text-left text-emerald-900 font-bold leading-snug shadow-sm flex items-center justify-end gap-2"><span>الاتصال بالإنترنت</span><i class="fas fa-globe text-emerald-600 text-xl"></i></div>
-                                <div class="bg-white text-tvtcmain font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-slate-200 text-center shadow-sm whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">مثال<br><span class="text-[9px] md:text-[11px] text-slate-500 font-mono">Example</span></div>
-                                <div class="bg-orange-50 p-3 md:p-4 rounded-l-xl border-l-4 border-orange-500 text-right text-orange-900 font-bold leading-snug shadow-sm flex items-center justify-start gap-2"><i class="fas fa-network-wired text-orange-600 text-xl"></i><span>توسيع عدد المنافذ بالشركة</span></div>
+                                <!-- نقطة المقارنة 3: نطاق الاستخدام -->
+                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
+                                        <span style="font-weight: 900; color: #064e3b; font-size: 1.2rem; display: block;">الشبكات المحلية</span>
+                                        <p style="margin: 0; color: #047857; font-weight: bold; font-size: 1.1rem; font-family: Tahoma, sans-serif;">LAN</p>
+                                    </div>
+                                    <div style="background: #0083a3; color: white; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1.1rem;">الاستخدام</div>
+                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
+                                        <span style="font-weight: 900; color: #1e3a8a; font-size: 1.2rem; display: block;">الشبكات الواسعة</span>
+                                        <p style="margin: 0; color: #1d4ed8; font-weight: bold; font-size: 1.1rem; font-family: Tahoma, sans-serif;">WAN</p>
+                                    </div>
+                                </div>
+
+                                <!-- نقطة المقارنة 4: المنافذ -->
+                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
+                                        <p style="margin: 0 0 0.5rem 0; color: #064e3b; font-weight: bold; font-size: 1rem;">منافذ ايثرنت بعدد <span style="font-weight: 900; color: #059669;">24 أو 48 منفذ</span></p>
+                                        <p style="margin: 0; color: #b91c1c; font-weight: bold; font-size: 0.95rem;">❌ لا يوجد به منافذ سيريال</p>
+                                    </div>
+                                    <div style="background: #29b5a8; color: white; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1.1rem;">المنافذ</div>
+                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
+                                        <p style="margin: 0 0 0.5rem 0; color: #1e3a8a; font-weight: bold; font-size: 1rem;">منافذ ايثرنت تصل إلى <span style="font-weight: 900; color: #2563eb;">4 منافذ</span></p>
+                                        <p style="margin: 0; color: #15803d; font-weight: bold; font-size: 0.95rem;">✅ يوجد به منافذ سيريال</p>
+                                    </div>
+                                </div>
+
+                                <!-- نقطة المقارنة 5: الاعتماد الأساسي -->
+                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
+                                        <span style="font-weight: bold; color: #064e3b; font-size: 1rem; display: block; margin-bottom: 0.25rem;">يعتمد اعتماد كلي على جدول:</span>
+                                        <p style="margin: 0; color: #047857; font-weight: 900; font-size: 1.2rem;">العناوين الفيزيائية MAC Address</p>
+                                    </div>
+                                    <div style="background: #4bd5c9; color: #004d60; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1rem;">التوجيه بناءً على</div>
+                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
+                                        <span style="font-weight: bold; color: #1e3a8a; font-size: 1rem; display: block; margin-bottom: 0.25rem;">يعتمد اعتماد كلي على بروتوكول:</span>
+                                        <p style="margin: 0; color: #1d4ed8; font-weight: 900; font-size: 1.2rem; font-family: Tahoma, sans-serif;">IP Address</p>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
-                        <h2 style="margin-top: 4rem; color: #00627a; text-align: center;">الفروق بين TCP و UDP (في طبقة النقل)</h2>
-                        <div style="overflow-x: auto;">
-                            <table class="modern-table">
-                                <thead>
-                                    <tr>
-                                        <th>وجه المقارنة</th>
-                                        <th>بروتوكول TCP</th>
-                                        <th style="color: #fbd38d;">بروتوكول UDP</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>حجم الـ Header</td><td>20 bytes</td><td>8 bytes</td></tr>
-                                    <tr><td>السرعة</td><td>أبطأ</td><td>أسرع</td></tr>
-                                    <tr><td>التحقق من الأخطاء وترتيب الأجزاء</td><td style="color: #059669;">نعم</td><td style="color: #ef4444;">لا</td></tr>
-                                    <tr><td>الاستخدام الشائع</td><td>تحميل الملفات، التصفح، الإيميل</td><td>البث المرئي، ألعاب الأونلاين المباشرة</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
                     </div>`
                 ]
             },
