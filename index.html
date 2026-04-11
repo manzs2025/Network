@@ -70,7 +70,6 @@
             .rich-editor ul, .rich-display ul { @apply list-disc list-inside mb-6 mr-4 space-y-2 font-bold text-slate-800 text-sm md:text-base; }
             .rich-editor ol, .rich-display ol { @apply list-decimal list-inside mb-6 mr-4 space-y-2 font-bold text-slate-800 text-sm md:text-base; }
             
-            /* منع الصور من تجاوز الحدود ودعم تغيير الحجم */
             .rich-display img:not([style*="resize"]) { @apply max-w-full h-auto rounded-xl shadow-md my-4 object-contain inline-block border border-slate-200 cursor-move transition-transform duration-300 hover:scale-[1.02]; }
 
             .custom-grid-container { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 my-6 md:my-8 text-center items-stretch; }
@@ -86,6 +85,30 @@
         .modern-table td { padding: 1.2rem; font-weight: bold; color: #334155; text-align: center; background: #ffffff; border-bottom: 1px solid #e2e8f0; transition: background 0.3s; }
         .modern-table tr:hover td { background: #f1f5f9; }
         .modern-table tr:last-child td { border-bottom: none; }
+
+        /* تنسيقات تصميم OSI الجديد المطابق للصورة */
+        .osi-wrapper { display: flex; gap: 0.5rem; align-items: stretch; margin-top: 2rem; direction: ltr; font-family: 'Cairo', sans-serif; overflow-x: auto; padding-bottom: 1rem; justify-content: center; min-width: 100%; }
+        .osi-arrows { display: flex; flex-direction: column; justify-content: space-between; width: 40px; flex-shrink: 0; padding: 2rem 0; align-items: center; }
+        .osi-arrow-down, .osi-arrow-up { display: flex; flex-direction: column; align-items: center; height: 48%; }
+        .osi-text-vertical { writing-mode: vertical-rl; transform: rotate(180deg); font-weight: 900; font-size: 0.75rem; letter-spacing: 1px; text-align: center; }
+        .osi-table-new { border-collapse: separate; border-spacing: 0 8px; width: 100%; min-width: 900px; text-align: center; }
+        .osi-table-new th { background-color: #e2e8f0; color: #334155; font-weight: 900; padding: 0.75rem; border: 1px solid #cbd5e1; font-size: 0.9rem; font-family: Tahoma, sans-serif; }
+        .osi-table-new th:first-child { border-radius: 8px 0 0 8px; }
+        .osi-table-new th:last-child { border-radius: 0 8px 8px 0; }
+        .osi-table-new td { padding: 0.5rem; border-top: 1px solid; border-bottom: 1px solid; font-weight: bold; color: #1e293b; font-size: 0.9rem; transition: transform 0.2s; }
+        .osi-table-new tr:hover td { transform: scale(1.01); z-index: 10; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .osi-table-new td:first-child { border-left: 1px solid; border-radius: 8px 0 0 8px; font-size: 1.5rem; font-weight: 900; }
+        .osi-table-new td:last-child { border-right: 1px solid; border-radius: 0 8px 8px 0; }
+        .osi-icon-box { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; margin: auto; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); flex-direction: column; }
+        
+        /* Row Colors */
+        .l7-row td { background-color: #f3e8ff; border-color: #e9d5ff; color: #4c1d95; } .l7-row td:first-child, .l7-row .osi-icon-box { background-color: #7e22ce; color: white; border-color: #7e22ce; }
+        .l6-row td { background-color: #ffedd5; border-color: #fed7aa; color: #7c2d12; } .l6-row td:first-child, .l6-row .osi-icon-box { background-color: #ea580c; color: white; border-color: #ea580c; }
+        .l5-row td { background-color: #fce7f3; border-color: #fbcfe8; color: #831843; } .l5-row td:first-child, .l5-row .osi-icon-box { background-color: #be185d; color: white; border-color: #be185d; }
+        .l4-row td { background-color: #e0f2fe; border-color: #bae6fd; color: #0c4a6e; } .l4-row td:first-child, .l4-row .osi-icon-box { background-color: #0284c7; color: white; border-color: #0284c7; }
+        .l3-row td { background-color: #dcfce7; border-color: #bbf7d0; color: #064e3b; } .l3-row td:first-child, .l3-row .osi-icon-box { background-color: #16a34a; color: white; border-color: #16a34a; }
+        .l2-row td { background-color: #ccfbf1; border-color: #99f6e4; color: #134e4a; } .l2-row td:first-child, .l2-row .osi-icon-box { background-color: #0d9488; color: white; border-color: #0d9488; }
+        .l1-row td { background-color: #fee2e2; border-color: #fecaca; color: #881337; } .l1-row td:first-child, .l1-row .osi-icon-box { background-color: #e11d48; color: white; border-color: #e11d48; }
 
         .page-enter { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -103,7 +126,6 @@
 
     <div class="absolute inset-0 bg-white/10 backdrop-blur-[2px] -z-10"></div>
 
-    <!-- النافبار العلوي -->
     <nav class="bg-gradient-to-r from-tvtcdark via-tvtcmain to-tvtcteal p-3 md:p-4 sticky top-0 z-50 shadow-md flex justify-between items-center shrink-0 w-full">
         <div class="flex items-center gap-2 md:gap-4">
             <button onclick="document.getElementById('main-sidebar').classList.remove('hidden')" class="lg:hidden text-white hover:text-tvtcaccent text-xl md:text-2xl p-1 transition"><i class="fas fa-bars"></i></button>
@@ -118,6 +140,9 @@
         </div>
 
         <div class="flex items-center gap-2 md:gap-4">
+            <!-- تمت إضافة زر العودة للرئيسية هنا -->
+            <button onclick="window.goHome()" class="text-white/90 hover:text-white font-bold transition text-[10px] md:text-sm flex items-center gap-1 md:gap-1.5 bg-white/10 hover:bg-white/20 px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg border border-white/20 shadow-sm whitespace-nowrap"><i class="fas fa-home"></i> <span class="hidden md:inline">الرئيسية</span><span class="md:hidden">الرئيسية</span></button>
+            
             <button onclick="window.directLMS('admin')" class="text-white/90 hover:text-white font-bold transition text-[10px] md:text-sm flex items-center gap-1 md:gap-1.5 bg-white/10 hover:bg-white/20 px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg border border-white/20 shadow-sm whitespace-nowrap"><i class="fas fa-cog"></i> <span class="hidden md:inline">إدارة الموقع</span><span class="md:hidden">إدارة</span></button>
             <button onclick="window.directLMS('student')" class="text-tvtcmain bg-white hover:bg-slate-100 font-black transition text-[10px] md:text-sm flex items-center gap-1 md:gap-1.5 px-2 md:px-4 py-1.5 md:py-2.5 rounded-lg shadow-sm whitespace-nowrap"><i class="fas fa-user-graduate"></i> <span class="hidden md:inline">الواجبات والاختبارات</span><span class="md:hidden">الواجبات</span></button>
             <div class="w-px h-5 bg-white/30 hidden md:block mx-1"></div>
@@ -125,9 +150,7 @@
         </div>
     </nav>
 
-    <!-- المساحة الوسطى -->
     <div class="flex-1 flex h-full overflow-hidden w-full relative">
-        
         <aside id="main-sidebar" class="w-72 md:w-80 sidebar-bg z-[100] flex-col hidden fixed inset-y-0 right-0 lg:static lg:flex h-[100dvh] lg:h-full flex-shrink-0 transition-transform duration-300">
             <div class="p-4 flex justify-end lg:hidden shrink-0">
                 <button onclick="document.getElementById('main-sidebar').classList.add('hidden')" class="text-slate-500 hover:text-red-500 text-2xl bg-white/70 w-10 h-10 rounded-xl shadow-sm"><i class="fas fa-times"></i></button>
@@ -141,7 +164,6 @@
 
         <main id="main-scroll-area" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
             
-            <!-- الواجهة الرئيسية -->
             <div id="portal-dashboard" class="block page-enter max-w-7xl mx-auto">
                 <header class="glass-card p-6 md:p-16 text-center border-t-[8px] border-tvtcmain mb-8 md:mb-12 relative overflow-hidden bg-white/70">
                     <div class="relative z-10 w-full">
@@ -293,30 +315,19 @@
                 content: [
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcteal">
                         <h1 style="color: #004d60; margin-bottom: 1rem; text-align: center; font-weight: 900;">📚 نموذج OSI المرجعي (الطبقات السبع)</h1>
-                            <i class="fas fa-layer-group absolute -left-10 -bottom-10 text-[10rem] opacity-10"></i>
-                            <h1 class="text-white border-none mt-0 mb-2 text-3xl md:text-5xl font-black drop-shadow-md">📚 نموذج OSI المرجعي</h1>
-                            <p class="text-[#4bd5c9] font-mono tracking-widest text-xs md:text-sm mb-6 uppercase">The 7 Layers of the OSI Model</p>
-                            <p class="text-base md:text-lg font-bold leading-relaxed max-w-4xl">هو مراحل تكوّن البيانات ونقلها من الجهاز المرسل <span class="bg-white/20 px-2 py-1 rounded text-sm font-mono mx-1">Source</span> إلى الجهاز المستقبل <span class="bg-white/20 px-2 py-1 rounded text-sm font-mono mx-1">Destination</span>. وضعته المنظمة الدولية للمعايير (ISO) ليكون نموذجاً نظرياً موثوقاً للاتصالات مقسم لـ 7 طبقات.</p>
-                        </div>
+                        <p style="text-align: justify; font-size: 1.1rem; font-weight: bold; color: #1e293b;">هو مراحل تكون البيانات ونقلها من الجهاز المرسل (Source device) إلى الجهاز المستقبل (Destination device). وضعته المنظمة الدولية للمعايير (ISO) سنة 1983 برقم 7498 ليكون نموذج نظري موثوق للاتصالات مقسم لـ 7 طبقات.</p>
                         
-                        <h2 class="text-center text-[#004d60] mb-8 font-black text-2xl md:text-3xl border-none">💡 لماذا ندرس ونفهم طبقات OSI؟</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-12">
-                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:shadow-md hover:border-[#29b5a8] transition-all">
-                                <div class="bg-[#e0f2fe] text-[#0284c7] w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-tools"></i></div>
-                                <div><h4 class="font-black text-slate-800 text-lg m-0 mb-1">اكتشاف الأعطال</h4><p class="text-sm font-bold text-slate-600 m-0">تسهيل فهم وحل المشاكل (Troubleshooting) المعقدة للشبكات.</p></div>
-                            </div>
-                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:shadow-md hover:border-[#29b5a8] transition-all">
-                                <div class="bg-[#fce7f3] text-[#be185d] w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-microscope"></i></div>
-                                <div><h4 class="font-black text-slate-800 text-lg m-0 mb-1">تتبع البيانات</h4><p class="text-sm font-bold text-slate-600 m-0">معرفة كيفية تكوين البيانات وما هو شكلها الفعلي في كل مرحلة.</p></div>
-                            </div>
-                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:shadow-md hover:border-[#29b5a8] transition-all">
-                                <div class="bg-[#ffedd5] text-[#c2410c] w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-shield-alt"></i></div>
-                                <div><h4 class="font-black text-slate-800 text-lg m-0 mb-1">أمن المعلومات</h4><p class="text-sm font-bold text-slate-600 m-0">معرفة النقاط الحساسة وكيفية تشفير وفك البيانات أثناء النقل.</p></div>
-                            </div>
-                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:shadow-md hover:border-[#29b5a8] transition-all">
-                                <div class="bg-[#dcfce7] text-[#15803d] w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-server"></i></div>
-                                <div><h4 class="font-black text-slate-800 text-lg m-0 mb-1">تصنيف الأجهزة</h4><p class="text-sm font-bold text-slate-600 m-0">معرفة كل جهاز في أية طبقة يعمل (مثل الراوتر والسويتش).</p></div>
-                            </div>
+                        <h2 style="color: #00627a; margin-top: 1.5rem;">فائدة فهم طبقات OSI:</h2>
+                        <ul style="color: #334155; font-weight: bold; margin-bottom: 3rem;">
+                            <li>تستطيع فهم وحل المشاكل (Troubleshooting) للشبكات.</li>
+                            <li>معرفة كيفية تكوين البيانات وما هو شكلها في كل مرحلة.</li>
+                            <li>تفيد بمعرفة النقاط الحساسة وكيفية تشفير وفك البيانات.</li>
+                            <li>معرفة كل جهاز في أية طبقة يعمل (مثل HUB والراوتر والسويتش).</li>
+                        </ul>
+
+                        <div style="text-align: center; margin-bottom: 2rem; border-top: 2px dashed rgba(0,98,122,0.2); padding-top: 2rem;">
+                            <h2 style="color: #004d60; margin-bottom: 0.5rem; font-size: 2.2rem; font-weight: 900; text-transform: uppercase;">نموذج OSI للطبقات السبع</h2>
+                            <p style="font-size: 1rem; font-weight: bold; color: #475569; letter-spacing: 1px;">THE 7 LAYERS OF THE OSI MODEL | EDUCATIONAL TEMPLATE</p>
                         </div>
 
                         <!-- الجدول المخصص مع منع كسر التصميم (التمرير الأفقي) -->
@@ -355,7 +366,6 @@
                                         </tr>
                                     </thead>
                                     <tbody style="font-weight: bold; color: #0f172a;">
-                                        <!-- الصف 7 -->
                                         <tr style="background: #faf5ff; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
                                             <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #d8b4fe; border-radius: 8px 0 0 8px; border-left: 8px solid #7e22ce;">7</td>
                                             <td style="border-top: 1px solid #d8b4fe; border-bottom: 1px solid #d8b4fe; padding: 5px;">
@@ -371,7 +381,6 @@
                                             <td style="border-top: 1px solid #d8b4fe; border-bottom: 1px solid #d8b4fe; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">HTTP, SMTP<br>FTP</td>
                                             <td style="border: 1px solid #d8b4fe; border-radius: 0 8px 8px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
                                         </tr>
-                                        <!-- الصف 6 -->
                                         <tr style="background: #fff7ed; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
                                             <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fdba74; border-radius: 8px 0 0 8px; border-left: 8px solid #ea580c;">6</td>
                                             <td style="border-top: 1px solid #fdba74; border-bottom: 1px solid #fdba74; padding: 5px;">
@@ -387,7 +396,6 @@
                                             <td style="border-top: 1px solid #fdba74; border-bottom: 1px solid #fdba74; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">HTML<br>JPEG</td>
                                             <td style="border: 1px solid #fdba74; border-radius: 0 8px 8px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
                                         </tr>
-                                        <!-- الصف 5 -->
                                         <tr style="background: #fdf2f8; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
                                             <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fbcfe8; border-radius: 8px 0 0 8px; border-left: 8px solid #be185d;">5</td>
                                             <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 5px;">
@@ -403,7 +411,6 @@
                                             <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">NFS<br>SQL</td>
                                             <td style="border: 1px solid #fbcfe8; border-radius: 0 8px 8px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
                                         </tr>
-                                        <!-- الصف 4 -->
                                         <tr style="background: #f0f9ff; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
                                             <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #93c5fd; border-radius: 8px 0 0 8px; border-left: 8px solid #0284c7;">4</td>
                                             <td style="border-top: 1px solid #93c5fd; border-bottom: 1px solid #93c5fd; padding: 5px;">
@@ -419,7 +426,6 @@
                                             <td style="border-top: 1px solid #93c5fd; border-bottom: 1px solid #93c5fd; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">TCP<br>UDP</td>
                                             <td style="border: 1px solid #93c5fd; border-radius: 0 8px 8px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
                                         </tr>
-                                        <!-- الصف 3 -->
                                         <tr style="background: #f0fdf4; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
                                             <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #86efac; border-radius: 8px 0 0 8px; border-left: 8px solid #16a34a;">3</td>
                                             <td style="border-top: 1px solid #86efac; border-bottom: 1px solid #86efac; padding: 5px;">
@@ -437,7 +443,6 @@
                                                 <div style="font-size: 1.8rem;"><i class="fas fa-route"></i></div><div style="font-size: 0.75rem; font-weight: 900; font-family: Tahoma;">Routers</div>
                                             </td>
                                         </tr>
-                                        <!-- الصف 2 -->
                                         <tr style="background: #f0fdfa; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
                                             <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #5eead4; border-radius: 8px 0 0 8px; border-left: 8px solid #0d9488;">2</td>
                                             <td style="border-top: 1px solid #5eead4; border-bottom: 1px solid #5eead4; padding: 5px;">
@@ -455,7 +460,6 @@
                                                 <div style="font-size: 1.8rem;"><i class="fas fa-network-wired"></i></div><div style="font-size: 0.75rem; font-weight: 900; font-family: Tahoma;">Switches</div>
                                             </td>
                                         </tr>
-                                        <!-- الصف 1 -->
                                         <tr style="background: #fef2f2; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
                                             <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fca5a5; border-radius: 8px 0 0 8px; border-left: 8px solid #e11d48;">1</td>
                                             <td style="border-top: 1px solid #fca5a5; border-bottom: 1px solid #fca5a5; padding: 5px;">
@@ -1229,13 +1233,13 @@
                     <button onclick="document.getElementById('json-file').click()" class="w-full bg-blue-50 text-blue-800 font-black py-4 md:py-5 rounded-xl md:rounded-2xl mb-8 md:mb-10 border border-blue-200 hover:bg-blue-100 transition text-base md:text-lg shadow-sm"><i class="fas fa-file-import ml-2"></i> استيراد أسئلة جاهزة (JSON)</button>
                     <button onclick="window.saveQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] font-black text-xl md:text-2xl transition shadow-lg shadow-emerald-600/30"><i class="fas fa-cloud-upload-alt ml-2"></i> حفظ الاختبار سحابياً</button>
                 </div>
-                <div class="glass-card p-6 md:p-10 border-t-[8px] border-tvtcmain bg-white/90">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 border-b border-slate-300 pb-4 md:pb-5 gap-4"><h3 class="text-2xl md:text-3xl font-black text-tvtcdark">سجل الدرجات</h3><div class="flex gap-2 w-full md:w-auto"><button onclick="window.exportToExcel()" class="flex-grow md:flex-grow-0 bg-white hover:bg-emerald-50 border border-slate-300 text-emerald-700 font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-2.5 rounded-lg md:rounded-xl shadow-sm transition"><i class="fas fa-file-excel ml-1"></i> تحميل (Excel)</button><button onclick="window.loadRes()" class="text-tvtcmain hover:rotate-180 transition bg-white border border-slate-300 shadow-sm w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl text-lg md:text-xl shrink-0"><i class="fas fa-sync-alt"></i></button></div></div>
-                    <div id="res-list" class="overflow-x-auto custom-scrollbar"><p class="text-center font-bold text-slate-500">جاري التحميل..</p></div>
+                        <div class="flex gap-2 w-full md:w-auto"><button onclick="window.exportToExcel()" class="flex-grow md:flex-grow-0 bg-white hover:bg-emerald-50 border border-slate-300 text-emerald-700 font-bold text-xs md:text-sm px-3 md:px-4 py-2 md:py-2.5 rounded-lg md:rounded-xl shadow-sm transition"><i class="fas fa-file-excel ml-1"></i> تحميل (Excel)</button><button onclick="window.loadRes()" class="text-tvtcmain hover:rotate-180 transition bg-white border border-slate-300 shadow-sm w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl text-lg md:text-xl shrink-0"><i class="fas fa-sync-alt"></i></button></div></div>
+                        <div id="res-list" class="overflow-x-auto custom-scrollbar"><p class="text-center font-bold text-slate-500">جاري التحميل..</p></div>
+                    </div>
                 </div>
-            </div>
             `;
             
+            // فتح التبويب الافتراضي
             window.switchTab('home');
             window.loadCmsList();
         };
@@ -1272,380 +1276,205 @@
 
         window.execCmd = (editorId, cmd, val=null) => { document.execCommand(cmd, false, val); document.getElementById(editorId).focus(); };
         
-        window.insertResizableImage = (editorId) => { 
-            let url = prompt("أدخل رابط الصورة (URL):"); 
-            if(url) {
-                if (url.includes('drive.google.com/file/d/')) {
-                    const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-                    if (match && match[1]) url = 'https://lh3.googleusercontent.com/d/' + match[1];
-                } else if (url.includes('drive.google.com/open?id=')) {
-                    const match = url.match(/id=([a-zA-Z0-9_-]+)/);
-                    if (match && match[1]) url = 'https://lh3.googleusercontent.com/d/' + match[1];
-                }
-                const html = `<span style="display: inline-block; width: 400px; max-width: 100%; resize: both; overflow: hidden; padding: 0; margin: 1rem auto; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.15); background-color: transparent;"><img src="${url}" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 1rem;" alt="صورة مدرجة" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x250?text=Error+Loading+Image';" /></span>&nbsp;`;
-                window.execCmd(editorId, 'insertHTML', html);
-            }
-        };
-
-        window.toggleImageShadow = () => {
-            let sel = window.getSelection();
-            if(sel.rangeCount > 0) {
-                let node = sel.focusNode;
-                if (node.nodeType === 3) node = node.parentNode;
-                let wrapper = node.closest('span[style*="resize"]');
-                if (!wrapper && node.tagName === 'IMG') wrapper = node.parentElement;
+        window.onload = () => { 
+            setTimeout(() => {
+                document.execCommand('styleWithCSS', false, true);
+                window.renderSidebar(); 
+                window.initMainGrid(); 
                 
-                if(wrapper) {
-                    if(wrapper.style.boxShadow) wrapper.style.boxShadow = '';
-                    else wrapper.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                // استعادة الحالة من LocalStorage هنا ستتم بعد جلب البيانات لضمان الموثوقية
+            }, 100);
+        };
+        
+        // تعديل وظيفة حفظ الحالة و استرجاعها
+        window.restoreAppState = () => {
+            const currentView = localStorage.getItem('app_current_view') || 'home';
+            if(currentView === 'home') {
+                // Do nothing, defaults to home dashboard.
+            } else if(currentView === 'section') {
+                const sec = localStorage.getItem('app_current_section');
+                const tab = parseInt(localStorage.getItem('app_current_tab') || '0');
+                if (CORE_DATA[sec]) {
+                    window.openSection(sec);
+                    setTimeout(() => {
+                        const tabsCount = document.querySelectorAll('[id^="mtab-"]').length;
+                        if(tab < tabsCount) window.loadTabContent(tab);
+                        else window.loadTabContent(0);
+                    }, 100); 
                 } else {
-                    window.toast("الرجاء تحديد الصورة أولاً", "error");
+                    window.goHome();
                 }
+            } else if(currentView.startsWith('lms_')) {
+                const type = currentView.replace('lms_', '');
+                window.directLMS(type);
             }
         };
 
-        window.changeBoxColor = (color) => {
-            let sel = window.getSelection();
-            if(sel.rangeCount > 0) {
-                let node = sel.focusNode;
-                if(node.nodeType === 3) node = node.parentNode;
-                let box = node.closest('div[contenteditable="true"], div.custom-grid-card, td, th');
-                if(!box) box = node.closest('div'); 
+    </script>
+
+    <!-- النظام السحابي (LMS & CMS) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const config = { apiKey: "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww", authDomain: "networkacademy-795c8.firebaseapp.com", projectId: "networkacademy-795c8", storageBucket: "networkacademy-795c8.firebasestorage.app", messagingSenderId: "458132238000", appId: "1:458132238000:web:bffd7321407b094bb21575" };
+        const app = initializeApp(config); const db = getFirestore(app); const auth = getAuth(app);
+        
+        const PATH = `artifacts/networkacademy-795c8/public/data`;
+        
+        window.quizzesCache = []; window.activeQuiz = null; window.allArticlesMap = {}; window.loadedResults = [];
+
+        signInAnonymously(auth).then(() => { fetchCloudArticles(); }).catch(() => {
+            window.toast("النظام السحابي غير متصل", "error");
+            window.restoreAppState();
+        });
+
+        async function fetchCloudArticles() {
+            try {
+                const s = await getDocs(collection(db, PATH, 'articles'));
+                window.allArticlesMap = {};
+                s.forEach(d => { window.allArticlesMap[d.id] = { id: d.id, ...d.data() }; });
                 
-                if(box && box.id !== 'cms-content' && box.id !== 'cms-home-content') {
-                    box.style.backgroundColor = color;
+                const hr = document.getElementById('home-rich-content');
+                if(window.allArticlesMap['homepage_settings']) {
+                    const data = window.allArticlesMap['homepage_settings'];
+                    if(hr && data.htmlContent) hr.innerHTML = data.htmlContent;
                 } else {
-                    window.toast("الرجاء وضع المؤشر داخل الكرت أو المربع أولاً", "error");
+                    if(hr) hr.innerHTML = `
+                        <img src="tvtc.png" alt="TVTC Logo" style="height: 100px; margin: 0 auto 20px; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); object-fit: contain;">
+                        <h1 class="text-3xl md:text-7xl font-black mb-4 md:mb-8 text-tvtcdark tracking-tight drop-shadow-md">شبكات <span class="text-tvtcteal">الحاسب الآلي</span></h1>
+                        <p class="text-sm md:text-2xl text-tvtcmain max-w-4xl mx-auto font-bold leading-relaxed drop-shadow-sm">المرجع الأكاديمي الشامل لمهندسي الشبكات، يغطي المبادئ، الأمان، بروتوكولات التوجيه، والمعايير الفيزيائية.</p>`;
                 }
+                
+                window.restoreAppState();
+            } catch(e) { 
+                console.error("Error fetching articles."); 
+                window.restoreAppState();
             }
-        };
-
-        window.insertCards = (num, editorId) => {
-            if(!num) return;
-            num = parseInt(num);
-            let html = `<div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; margin: 2rem 0; width: 100%;" contenteditable="false">`;
-            for(let i=0; i<num; i++) {
-                html += `<div style="flex: 1; min-width: 200px; border: 1px solid rgba(0,98,122,0.2); padding: 1.5rem; border-radius: 1.5rem; background-color: rgba(255,255,255,0.9); box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; resize: both; overflow: auto; display: flex; flex-direction: column; vertical-align: top;" contenteditable="true">
-                            <div style="font-size: 3rem; margin-bottom: 1rem;">🏷️</div>
-                            <h3 style="color: #004d60; font-size: 1.5rem; font-weight: 900; margin-bottom: 0.5rem; margin-top: 0;">عنوان الكرت</h3>
-                            <p style="color: #475569; font-size: 1rem; font-weight: bold;">اكتب الوصف هنا...</p>
-                        </div>`;
-            }
-            html += `</div><p><br></p>`;
-            window.execCmd(editorId, 'insertHTML', html);
-        };
-
-
-        window.insertShape = (type, editorId) => {
-            let html = '';
-            if(type === 'square') html = `<div style="display:inline-block; margin:10px;"><div style="width: 100px; height: 100px; background-color: #00627a; display: inline-block; resize: both; overflow: hidden; border: 2px solid #004d60; border-radius: 8px;"></div></div>&nbsp;`;
-            if(type === 'rectangle') html = `<div style="display:inline-block; margin:10px;"><div style="width: 200px; height: 100px; background-color: #29b5a8; display: inline-block; resize: both; overflow: hidden; border: 2px solid #0083a3; border-radius: 8px;"></div></div>&nbsp;`;
-            if(type === 'circle') html = `<div style="display:inline-block; margin:10px;"><div style="width: 100px; height: 100px; background-color: #4bd5c9; display: inline-block; resize: both; overflow: hidden; border-radius: 50%; border: 2px solid #29b5a8;"></div></div>&nbsp;`;
-            window.execCmd(editorId, 'insertHTML', html);
         }
-
-        window.insertTemplate = (editorId, type) => {
-            let html = '';
-            if (type === 'table') {
-                html = `<div style="background: rgba(255,255,255,0.8); border: 1px solid rgba(0,98,122,0.2); border-radius: 1.5rem; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow-x: auto;">
-                            <table class="modern-table">
-                                <thead>
-                                    <tr><th>العمود الأول</th><th>العمود الثاني</th><th>العمود الثالث</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>بيانات</td><td>بيانات</td><td style="color: #00627a;">بيانات هامة</td></tr>
-                                    <tr><td>بيانات</td><td>بيانات</td><td style="color: #00627a;">بيانات هامة</td></tr>
-                                </tbody>
-                            </table>
-                        </div><p><br></p>`;
-            }
-            window.execCmd(editorId, 'insertHTML', html);
+        
+        window.goHome = () => {
+            localStorage.setItem('app_current_view', 'home');
+            const portal = document.getElementById('portal-dashboard'); if(portal) portal.classList.remove('hidden');
+            const secContainer = document.getElementById('section-container'); if(secContainer) secContainer.classList.add('hidden');
+            const examContainer = document.getElementById('section-exams'); if(examContainer) examContainer.classList.add('hidden');
+            
+            window.clearActiveSidebar(); window.smoothScrollTop();
+            const sidebar = document.getElementById('main-sidebar'); if(sidebar && window.innerWidth < 1024) sidebar.classList.add('hidden');
         };
 
-        window.resetCMSForm = () => {
-            const docIdEl = document.getElementById('edit-doc-id'); if(docIdEl) docIdEl.value = '';
-            const titleEl = document.getElementById('cms-editor-title'); if(titleEl) titleEl.innerHTML = '<i class="fas fa-plus-circle text-tvtcmain"></i> إضافة مقال أو تعديل درس';
-            const secEl = document.getElementById('cms-section'); if(secEl) { secEl.value = 'networks'; secEl.disabled = false; }
-            const ordEl = document.getElementById('cms-order'); if(ordEl) { ordEl.value = '1'; ordEl.disabled = false; }
-            const nameEl = document.getElementById('cms-tab-name'); if(nameEl) nameEl.value = '';
+        window.openSection = (key, el=null) => {
+            localStorage.setItem('app_current_view', 'section');
+            localStorage.setItem('app_current_section', key);
             
-            const titleColor = document.getElementById('cms-title-color'); if(titleColor) titleColor.value = '#004d60';
-            const titleSize = document.getElementById('cms-title-size'); if(titleSize) titleSize.value = 'text-4xl md:text-5xl';
+            window.activeSection = key; const s = CORE_DATA[key];
+            const portal = document.getElementById('portal-dashboard'); if(portal) portal.classList.add('hidden');
+            const examContainer = document.getElementById('section-exams'); if(examContainer) examContainer.classList.add('hidden');
             
-            const contEl = document.getElementById('cms-content'); if(contEl) contEl.innerHTML = 'اكتب المحتوى هنا... لتعديل العناوين ظلل النص واختر لونه وحجمه';
+            const sectionContainer = document.getElementById('section-container');
+            if(sectionContainer) sectionContainer.classList.remove('hidden');
             
-            window.switchTab('add');
-        };
-
-        window.saveArticle = async () => {
-            const docId = document.getElementById('edit-doc-id').value;
-            const sectionId = document.getElementById('cms-section').value;
-            const order = parseInt(document.getElementById('cms-order').value) || 1;
-            const tabName = document.getElementById('cms-tab-name').value.trim();
-            const htmlContent = document.getElementById('cms-content').innerHTML;
+            const titleEl = document.getElementById('section-title');
+            if(titleEl) titleEl.innerText = s.title; 
             
-            const titleColor = document.getElementById('cms-title-color').value;
-            const titleSize = document.getElementById('cms-title-size').value;
+            window.clearActiveSidebar();
+            const sideItem = document.getElementById(`side-${key}`);
+            if(sideItem) sideItem.classList.add('active');
 
-            if(!tabName || !htmlContent || htmlContent.trim() === '') return window.toast("أدخل العنوان والمحتوى", "error");
-
-            const payload = { sectionId, tabName, htmlContent, order, titleColor, titleSize, timestamp: new Date().toISOString() };
-
-            try {
-                if(docId && docId.startsWith('core_')) {
-                    await setDoc(doc(db, PATH, 'articles', docId), payload); window.toast("تم تعديل الدرس الأساسي بنجاح!");
-                } else if(docId) { 
-                    await updateDoc(doc(db, PATH, 'articles', docId), payload); window.toast("تم تعديل الدرس بنجاح!"); 
-                } else { 
-                    await addDoc(collection(db, PATH, 'articles'), payload); window.toast("تم نشر الدرس بنجاح!"); 
-                }
-                window.resetCMSForm(); window.loadCmsList(); fetchCloudArticles(); window.switchTab('edit');
-            } catch(e) { window.toast("خطأ في الحفظ", "error"); }
-        };
-
-        window.loadCmsList = async () => {
-            const list = document.getElementById('cms-list'); list.innerHTML = '<p class="text-lg text-slate-600 font-bold text-center mt-10"><i class="fas fa-spinner fa-spin text-4xl mb-4 text-tvtcteal"></i><br>جاري التحميل...</p>';
-            try {
-                const s = await getDocs(collection(db, PATH, 'articles')); let arr = [];
-                s.forEach(d => arr.push({id: d.id, ...d.data()}));
-                
-                let html = '<div class="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-6 shadow-sm"><p class="text-sm font-bold text-blue-900"><i class="fas fa-info-circle text-blue-600"></i> <b>ملاحظة هامة:</b> يمكنك تعديل أي درس من الدروس الأساسية للمنهج من القائمة أدناه، وسيقوم النظام باستبدال الدرس القديم بتعديلك الجديد في الموقع فوراً.</p></div>';
-                
-                Object.keys(CORE_DATA).forEach(secKey => {
-                    html += `<div class="bg-white/80 p-4 rounded-xl text-slate-900 font-black text-lg mt-6 mb-4 border border-slate-200 shadow-sm flex items-center gap-3"><i class="fas ${CORE_DATA[secKey].icon} text-tvtcmain"></i> ${CORE_DATA[secKey].title}</div>`;
-                    
-                    CORE_DATA[secKey].tabs.forEach((tab, idx) => {
-                        let coreId = `core_${secKey}_${idx}`;
-                        let modified = arr.find(a => a.id === coreId);
-                        let dTitle = modified ? modified.tabName : tab;
-                        let modBadge = modified ? '<span class="text-[11px] bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg ml-2 shadow-sm font-black border border-emerald-300">معدل</span>' : '';
-                        
-                        html += `
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 flex justify-between items-center transition hover:shadow-md mb-3 shadow-sm hover:border-tvtcmain">
-                            <div><p class="font-bold text-slate-900 text-sm md:text-base">${dTitle} ${modBadge}</p></div>
-                            <div class="flex gap-2">
-                                <button onclick="window.editCoreArticle('${secKey}', ${idx})" class="w-10 h-10 bg-white text-tvtcmain rounded-xl hover:bg-tvtcmain hover:text-white transition shadow-sm border border-slate-200" title="تعديل الدرس"><i class="fas fa-edit"></i></button>
-                                ${modified ? `<button onclick="window.delArticle('${coreId}')" class="w-10 h-10 bg-white text-red-700 rounded-xl hover:bg-red-600 hover:text-white transition shadow-sm border border-slate-200" title="استعادة المحتوى الأصلي"><i class="fas fa-undo"></i></button>` : ''}
-                            </div>
-                        </div>`;
-                    });
-
-                    let dynamicArr = arr.filter(a => a.sectionId === secKey && !a.id.startsWith('core_'));
-                    dynamicArr.sort((a,b) => (a.order || 0) - (b.order || 0));
-                    dynamicArr.forEach(a => {
-                        html += `
-                        <div class="bg-tvtcteal/10 p-5 rounded-2xl border border-tvtcteal/30 flex justify-between items-center transition hover:shadow-md mb-3 shadow-sm border-r-[8px] border-r-tvtcteal">
-                            <div><p class="font-bold text-tvtcdark text-sm md:text-base"><i class="fas fa-plus text-tvtcteal ml-1 text-sm"></i> ${a.tabName}</p></div>
-                            <div class="flex gap-2">
-                                <button onclick="window.editArticleId('${a.id}')" class="w-10 h-10 bg-white text-tvtcteal rounded-xl hover:bg-tvtcteal hover:text-white transition shadow-sm border border-slate-200" title="تعديل"><i class="fas fa-edit"></i></button>
-                                <button onclick="window.delArticle('${a.id}')" class="w-10 h-10 bg-white text-red-800 rounded-xl hover:bg-red-600 hover:text-white transition shadow-sm border border-slate-200" title="حذف"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </div>`;
-                    });
+            let allTabs = [...s.tabs];
+            if(window.allArticlesMap) {
+                Object.values(window.allArticlesMap).forEach(a => { 
+                    if(a.sectionId === key && !a.id.startsWith('core_')) allTabs.push(a.tabName); 
                 });
-
-                list.innerHTML = html;
-            } catch(e) { list.innerHTML = '<p class="text-red-600 text-base font-bold text-center mt-10">حدث خطأ في الجلب</p>'; }
-        };
-
-        window.editCoreArticle = (secKey, idx) => {
-            let coreId = `core_${secKey}_${idx}`;
-            let article = window.allArticlesMap[coreId];
-            document.getElementById('edit-doc-id').value = coreId;
-            document.getElementById('cms-editor-title').innerHTML = '<i class="fas fa-edit text-blue-600"></i> تعديل درس أساسي: <span class="text-slate-800">' + (article ? article.tabName : CORE_DATA[secKey].tabs[idx]) + '</span>';
-            const secSelect = document.getElementById('cms-section'); if(secSelect){ secSelect.value = secKey; secSelect.disabled = true; }
-            const orderInput = document.getElementById('cms-order'); if(orderInput){ orderInput.value = idx + 1; orderInput.disabled = true; }
-            
-            const titleColor = document.getElementById('cms-title-color'); if(titleColor) titleColor.value = article && article.titleColor ? article.titleColor : '#004d60';
-            const titleSize = document.getElementById('cms-title-size'); if(titleSize) titleSize.value = article && article.titleSize ? article.titleSize : 'text-4xl md:text-5xl';
-
-            document.getElementById('cms-tab-name').value = article ? article.tabName : CORE_DATA[secKey].tabs[idx];
-            document.getElementById('cms-content').innerHTML = article ? article.htmlContent : CORE_DATA[secKey].content[idx];
-            window.switchTab('add');
-            document.getElementById('main-scroll-area').scrollTo({top:0, behavior:'smooth'});
-        };
-
-        window.editArticleId = (id) => {
-            const obj = window.allArticlesMap[id];
-            if(!obj) return window.toast("خطأ في جلب الدرس", "error");
-            document.getElementById('edit-doc-id').value = obj.id;
-            document.getElementById('cms-editor-title').innerHTML = '<i class="fas fa-edit text-cyan-600"></i> تعديل مقال إضافي: <span class="text-slate-800">' + obj.tabName + '</span>';
-            const secSelect = document.getElementById('cms-section'); if(secSelect){ secSelect.value = obj.sectionId; secSelect.disabled = false; }
-            const orderInput = document.getElementById('cms-order'); if(orderInput){ orderInput.value = obj.order || 1; orderInput.disabled = false; }
-            
-            const titleColor = document.getElementById('cms-title-color'); if(titleColor) titleColor.value = obj.titleColor || '#004d60';
-            const titleSize = document.getElementById('cms-title-size'); if(titleSize) titleSize.value = obj.titleSize || 'text-4xl md:text-5xl';
-
-            document.getElementById('cms-tab-name').value = obj.tabName;
-            document.getElementById('cms-content').innerHTML = obj.htmlContent;
-            window.switchTab('add');
-            document.getElementById('main-scroll-area').scrollTo({top:0, behavior:'smooth'});
-        };
-
-        window.delArticle = async (id) => {
-            if(!confirm("هل أنت متأكد من الحذف؟")) return;
-            try { await deleteDoc(doc(db, PATH, 'articles', id)); window.toast("تم الحذف بنجاح"); window.loadCmsList(); fetchCloudArticles(); } catch(e) { window.toast("خطأ في الحذف", "error"); }
-        };
-
-        window.EMOJI_BANK = {
-            "الأمن السيبراني والحماية": ["🛡️", "🔒", "🔓", "🔏", "🔐", "🔑", "🗝️", "🕵️", "👁️", "🚨", "⚠️", "🛑", "⛔", "🧱", "🦠", "👾", "🏴‍☠️", "🪪", "💣", "🧨", "🕸️", "🕷️", "🎭"],
-            "الشبكات والاتصالات والسحابة": ["🌐", "📡", "🛰️", "📶", "🔌", "🌍", "🗺️", "🔗", "🔄", "🔀", "📍", "📱", "📞", "☎️", "☁️", "🌩️", "⚡", "🗼", "🛤️", "🚦", "🚥", "📨", "📧"],
-            "الأجهزة والعتاد": ["💻", "🖥️", "🖨️", "🖱️", "⌨️", "🖲️", "🕹️", "💾", "💽", "💿", "📀", "🔋", "🪫", "⌚", "📷", "📸", "📟", "📠", "📺", "📻", "🎙️", "🎛️", "🎚️", "📲"],
-            "البيانات والمعالجة": ["📁", "📂", "🗂️", "🗄️", "📊", "📈", "📉", "📄", "📝", "🧮", "🤖", "🧠", "⚙️", "🛠️", "🔧", "🔥", "💧", "📦", "🧾", "📋", "📌", "🗑️", "🗃️"],
-            "مؤشرات ورموز تعليمية": ["✅", "❌", "❓", "❕", "🎓", "🏫", "🏢", "💡", "🎯", "📌", "⭐", "🏆", "🥇", "🚀", "⏳", "⏱️", "➡️", "⬅️", "⬆️", "⬇️", "↔️", "↕️", "🟢", "🔴", "🟡", "🔵", "⬛", "⬜", "▬", "⭕", "➕", "➖", "✖️", "➗", "💯"]
-        };
-
-        window.currentEmojiEditor = '';
-
-        window.showEmojiPicker = (editorId) => {
-            window.currentEmojiEditor = editorId;
-            const modal = document.getElementById('emoji-picker-modal');
-            const container = document.getElementById('emoji-grid-container');
-            
-            if(container.children.length === 0) {
-                let html = '';
-                for(let cat in window.EMOJI_BANK) {
-                    html += `<h4 class="font-black text-tvtcmain mt-6 mb-3 text-lg border-b border-slate-200 pb-2">${cat}</h4>`;
-                    html += `<div class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-3">`;
-                    window.EMOJI_BANK[cat].forEach(em => {
-                        html += `<button onclick="window.insertEmoji('${em}')" class="text-3xl md:text-4xl hover:bg-blue-50 hover:scale-125 transition-transform p-2 rounded-xl border border-transparent hover:border-blue-200">${em}</button>`;
-                    });
-                    html += `</div>`;
-                }
-                container.innerHTML = html;
             }
-            modal.classList.remove('hidden');
+
+            const mobileTabs = document.getElementById('mobile-tabs');
+            if(mobileTabs) mobileTabs.innerHTML = allTabs.map((t, i) => `<button onclick="window.loadTabContent(${i})" id="mtab-${i}" class="px-5 py-2.5 whitespace-nowrap border-b-[6px] font-black text-xs md:text-sm transition bg-white/80 rounded-t-xl shadow-sm ${i===0?'border-tvtcmain text-tvtcdark':'border-transparent text-slate-600 hover:text-tvtcmain'}">${t}</button>`).join('');
+
+            const subNav = document.getElementById(`subnav-${key}`);
+            if(subNav) {
+                subNav.innerHTML = allTabs.map((t, i) => `<div onclick="window.loadTabContent(${i})" id="stab-${i}" class="sub-tab ${i===0?'active':''}"><i class="fas fa-chevron-left ml-2 text-[10px] opacity-40"></i> ${t}</div>`).join('');
+                subNav.classList.remove('hidden');
+            }
+
+            if(window.innerWidth < 1024) {
+                const sidebar = document.getElementById('main-sidebar');
+                if(sidebar) sidebar.classList.add('hidden');
+            }
+
+            window.loadTabContent(0);
         };
-
-        window.insertEmoji = (em) => {
-            document.getElementById('emoji-picker-modal').classList.add('hidden');
-            window.execCmd(window.currentEmojiEditor, 'insertHTML', em);
-        };
-
-
-        let qCount = 0;
-        window.addQForm = () => {
-            qCount++;
-            const editorId = 'q-editor-' + qCount;
-            const d = document.createElement('div'); d.className = 'p-6 md:p-8 bg-white/90 backdrop-blur border border-slate-300 rounded-[2rem] q-form-block relative shadow-lg mb-8';
-            d.innerHTML = `
-                <select class="q-ty w-full p-3 md:p-4 bg-white border border-slate-300 rounded-xl mb-4 font-bold text-slate-800 outline-none text-sm md:text-base shadow-sm" onchange="window.updTy(this)">
-                    <option value="multiple-choice">اختيار من متعدد (إجابة واحدة)</option>
-                    <option value="multiple-answers">إجابات متعددة (Checkboxes)</option>
-                    <option value="true-false">صح أم خطأ</option>
-                    <option value="short-answer">إجابة قصيرة (نصية)</option>
-                </select>
-                
-                <div class="editor-toolbar bg-slate-50 p-2.5 rounded-t-xl flex flex-wrap gap-1.5 border border-slate-300 border-b-0 text-xs items-center shadow-inner">
-                    <select onchange="window.execCmd('${editorId}', 'fontName', this.value); this.value='';" class="text-[10px] p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg" title="نوع الخط">
-                        <option value="">نوع الخط</option><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option><option value="Arial">Arial</option>
-                    </select>
-                    <div class="w-px h-4 bg-slate-300 mx-1"></div>
-                    <button onclick="window.execCmd('${editorId}', 'bold')" title="عريض"><i class="fas fa-bold"></i></button>
-                    <button onclick="window.execCmd('${editorId}', 'italic')" title="مائل"><i class="fas fa-italic"></i></button>
-                    <button onclick="window.execCmd('${editorId}', 'underline')" title="تسطير"><i class="fas fa-underline"></i></button>
-                    <div class="w-px h-4 bg-slate-300 mx-1"></div>
-                    <select onchange="window.execCmd('${editorId}', 'fontSize', this.value); this.value='';" class="text-[10px] p-1.5 font-bold text-slate-800 border border-slate-300 rounded-lg" title="حجم الخط">
-                        <option value="">الحجم</option><option value="3">عادي</option><option value="5">كبير</option><option value="6">أكبر</option>
-                    </select>
-                    <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 shadow-sm">
-                        <span class="text-[9px] font-bold text-slate-600">لون:</span>
-                        <input type="color" onchange="window.execCmd('${editorId}', 'foreColor', this.value)" class="w-6 h-6 p-0 border-none bg-transparent cursor-pointer rounded">
-                    </div>
-                    <div class="w-px h-4 bg-slate-300 mx-1"></div>
-                    <button onclick="window.insertResizableImage('${editorId}')" title="صورة برابط" class="text-blue-700 font-bold"><i class="fas fa-link"></i> إدراج صورة</button>
-                    <button onclick="window.showEmojiPicker('${editorId}')" title="مكتبة الأيقونات" class="text-orange-600 font-bold ml-1"><i class="fas fa-icons"></i> أيقونات</button>
-                </div>
-                <div id="${editorId}" contenteditable="true" class="q-t w-full p-4 bg-white border border-slate-300 rounded-b-xl mb-6 text-slate-900 font-bold text-base outline-none overflow-y-auto shadow-sm min-h-[120px] resize-y" placeholder="اكتب السؤال هنا.. ظلل النص لتنسيقه"></div>
-                
-                <div class="q-opts grid grid-cols-2 gap-3 md:gap-4 mb-6">
-                    <input class="o1 p-3 md:p-4 bg-slate-50 border border-slate-300 rounded-xl text-sm md:text-base font-bold text-slate-800 outline-none focus:border-tvtcmain shadow-sm" placeholder="الخيار 1">
-                    <input class="o2 p-3 md:p-4 bg-slate-50 border border-slate-300 rounded-xl text-sm md:text-base font-bold text-slate-800 outline-none focus:border-tvtcmain shadow-sm" placeholder="الخيار 2">
-                    <input class="o3 p-3 md:p-4 bg-slate-50 border border-slate-300 rounded-xl text-sm md:text-base font-bold text-slate-800 outline-none focus:border-tvtcmain shadow-sm" placeholder="الخيار 3">
-                    <input class="o4 p-3 md:p-4 bg-slate-50 border border-slate-300 rounded-xl text-sm md:text-base font-bold text-slate-800 outline-none focus:border-tvtcmain shadow-sm" placeholder="الخيار 4">
-                </div>
-                <input type="text" class="q-c w-full p-3 md:p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-center text-emerald-900 font-black text-sm md:text-lg outline-none placeholder:text-emerald-600 shadow-sm" placeholder="رقم الإجابة الصحيحة (مثال: 2)">
-                <button onclick="this.parentElement.remove()" class="absolute top-4 left-4 text-red-600 hover:text-white bg-white hover:bg-red-600 border border-slate-200 p-2.5 rounded-lg transition shadow-sm"><i class="fas fa-trash"></i></button>`;
-            document.getElementById('quiz-c').appendChild(d);
-        };
-
-        window.updTy = s => {
-            const b = s.closest('.q-form-block'), t = s.value, oc = b.querySelector('.q-opts'), c = b.querySelector('.q-c');
-            if(t==='short-answer'){ oc.style.display='none'; c.placeholder="اكتب النص الصحيح"; }
-            else if(t==='true-false'){ oc.style.display='grid'; b.querySelector('.o1').value="صح"; b.querySelector('.o2').value="خطأ"; b.querySelector('.o3').style.display=b.querySelector('.o4').style.display='none'; c.placeholder="1 لصح، 2 لخطأ"; }
-            else { oc.style.display='grid'; b.querySelector('.o3').style.display=b.querySelector('.o4').style.display='block'; c.placeholder=t==='multiple-answers'?"أرقام مفصولة (1,3)":"رقم الإجابة"; }
-        };
-
-        window.saveQuiz = async () => {
-            const title = document.getElementById('quiz-t').value.trim(); if(!title) return window.toast("أدخل عنوان الاختبار", "error");
-            let qs = [], ok = true; document.querySelectorAll('.q-form-block').forEach(b => { 
-                const ty = b.querySelector('.q-ty').value, tx = b.querySelector('.q-t').innerHTML.trim(), crRaw = b.querySelector('.q-c').value.trim();
-                if(!tx || !crRaw) { ok = false; return; }
-                let opts = [], cr = crRaw;
-                if(ty !== 'short-answer') { opts = [b.querySelector('.o1').value, b.querySelector('.o2').value, b.querySelector('.o3').value, b.querySelector('.o4').value].filter(x=>x); if(ty==='true-false') opts.length=2; }
-                if(ty === 'multiple-answers') cr = crRaw.split(',').map(n=>parseInt(n.trim())-1); else if(ty!=='short-answer') cr = parseInt(crRaw)-1;
-                qs.push({ type: ty, text: tx, options: opts, correctAnswer: cr }); 
-            });
-            if(!qs.length || !ok) return window.toast("تأكد من تعبئة جميع الحقول", "error");
-            try { await addDoc(collection(db, PATH, 'quizzes'), { title, questions: qs, createdAt: new Date().toISOString() }); window.toast("تم الحفظ سحابياً بنجاح"); window.renderDash(); } catch(e){window.toast("خطأ","error");}
-        };
-
-        window.renderStudentPortal = async () => {
-            const area = document.getElementById('lms-area'); if(!area) return;
-            area.innerHTML = `
-            <div class="max-w-5xl mx-auto">
-                <div class="glass-card p-8 md:p-12 flex flex-col md:flex-row items-center gap-6 mb-12 shadow-xl border-t-[8px] border-tvtcmain bg-white/90">
-                    <div class="w-24 h-24 bg-tvtclight/20 text-tvtcdark rounded-[2rem] flex items-center justify-center text-4xl shadow-md border border-tvtcteal/50 shrink-0"><i class="fas fa-user-edit"></i></div>
-                    <div class="flex-grow w-full space-y-4">
-                        <input type="text" id="student-n" class="w-full bg-white border border-slate-300 rounded-xl p-4 md:p-5 text-xl font-black text-slate-900 focus:border-tvtcteal outline-none placeholder:text-slate-500 shadow-sm" placeholder="الاسم الثلاثي..">
-                        <input type="text" id="student-id" class="w-full bg-white border border-slate-300 rounded-xl p-4 md:p-5 text-xl font-black text-slate-900 focus:border-tvtcteal outline-none placeholder:text-slate-500 shadow-sm" placeholder="الرقم التدريبي..">
-                    </div>
-                    <button onclick="window.showExamsList()" class="bg-tvtcmain hover:bg-tvtcdark text-white px-6 py-4 rounded-xl font-black text-lg transition shadow-lg w-full md:w-auto h-full mt-2 md:mt-0 whitespace-nowrap">عرض الاختبارات</button>
-                </div>
-                <div id="quizzes-container" class="hidden">
-                    <h3 class="text-2xl md:text-3xl font-black mb-6 text-slate-900 border-b-2 border-slate-300 pb-3 bg-white/60 p-4 md:p-6 rounded-2xl shadow-sm inline-block w-full">الواجبات والاختبارات المتاحة:</h3>
-                    <div id="quizzes-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 text-center text-slate-600 font-bold"><div class="col-span-full py-10"><i class="fas fa-spinner fa-spin text-5xl mb-4 text-tvtcteal"></i><br>جاري جلب البيانات..</div></div>
-                </div>
-            </div>`;
-        };
-
-        window.showExamsList = async () => {
-            const n = document.getElementById('student-n').value.trim(); 
-            const sId = document.getElementById('student-id').value.trim();
-            if(!n || !sId) return window.toast("يرجى تعبئة الاسم والرقم التدريبي أولاً", "error");
+        
+        window.loadTabContent = (index) => {
+            localStorage.setItem('app_current_tab', index);
             
-            window.currentStudent = { name: n, id: sId };
-            document.getElementById('quizzes-container').classList.remove('hidden');
+            const area = document.getElementById('content-area'); if(!area) return;
+            const s = CORE_DATA[window.activeSection];
+            const titleEl = document.getElementById('section-title');
             
-            try {
-                const s = await getDocs(collection(db, PATH, 'quizzes')); window.quizzesCache = []; s.forEach(d => window.quizzesCache.push({id:d.id, ...d.data()}));
-                const qg = document.getElementById('quizzes-grid');
-                if(!window.quizzesCache.length) qg.innerHTML = '<p class="col-span-full bg-white/80 p-8 rounded-[2rem] border border-slate-300 text-lg shadow-sm">لا توجد اختبارات متاحة حالياً.</p>';
-                else qg.innerHTML = window.quizzesCache.map(q => `
-                    <div onclick="window.startQuiz('${q.id}')" class="glass-card p-6 md:p-8 border-t-[6px] border-tvtcteal cursor-pointer hover-scale text-center flex flex-col items-center bg-white/95">
-                        <h4 class="font-black text-xl mb-4 text-tvtcdark">${q.title}</h4>
-                        <p class="text-sm font-bold text-slate-800 bg-tvtclight/10 px-4 py-2 rounded-lg border border-tvtcteal/30 mt-auto w-full"><i class="fas fa-list-ol text-tvtcteal ml-1"></i> ${q.questions.length} أسئلة تقييمية</p>
-                    </div>`).join('');
-            } catch(e) { document.getElementById('quizzes-grid').innerHTML = '<p class="col-span-full text-red-600 text-lg font-bold">خطأ في جلب البيانات.</p>'; }
+            document.querySelectorAll('[id^="mtab-"]').forEach(t => { t.classList.remove('border-tvtcmain', 'text-tvtcdark'); t.classList.add('border-transparent', 'text-slate-600'); });
+            document.querySelectorAll('[id^="stab-"]').forEach(t => t.classList.remove('active'));
+            
+            const activeMTab = document.getElementById(`mtab-${index}`); if(activeMTab) activeMTab.classList.add('border-tvtcmain', 'text-tvtcdark');
+            const activeSTab = document.getElementById(`stab-${index}`); if(activeSTab) activeSTab.classList.add('active');
+
+            area.classList.remove('page-enter'); void area.offsetWidth; area.classList.add('page-enter');
+
+            let currentContent = '';
+            let titleColor = '#004d60';
+            let titleSize = 'text-3xl md:text-5xl';
+            let finalTitle = s.title;
+
+            if (index < s.content.length) {
+                let coreId = `core_${window.activeSection}_${index}`;
+                if(window.allArticlesMap && window.allArticlesMap[coreId]) {
+                    currentContent = window.allArticlesMap[coreId].htmlContent;
+                    if(window.allArticlesMap[coreId].titleColor) titleColor = window.allArticlesMap[coreId].titleColor;
+                    if(window.allArticlesMap[coreId].titleSize) titleSize = window.allArticlesMap[coreId].titleSize;
+                    finalTitle = window.allArticlesMap[coreId].tabName;
+                }
+                else currentContent = s.content[index];
+                area.innerHTML = `<div class="glass-card rich-display h-auto border-t-[8px] border-tvtcmain bg-white/70">${currentContent}</div>`;
+            } else {
+                const cloudIdx = index - s.content.length; let cloudArticlesForThisSection = [];
+                Object.values(window.allArticlesMap).forEach(a => { if(a.sectionId === window.activeSection && !a.id.startsWith('core_')) cloudArticlesForThisSection.push(a); });
+                cloudArticlesForThisSection.sort((a,b) => (a.order || 0) - (b.order || 0));
+                
+                if(cloudArticlesForThisSection[cloudIdx]) {
+                    currentContent = cloudArticlesForThisSection[cloudIdx].htmlContent;
+                    if(cloudArticlesForThisSection[cloudIdx].titleColor) titleColor = cloudArticlesForThisSection[cloudIdx].titleColor;
+                    if(cloudArticlesForThisSection[cloudIdx].titleSize) titleSize = cloudArticlesForThisSection[cloudIdx].titleSize;
+                    finalTitle = cloudArticlesForThisSection[cloudIdx].tabName;
+                    area.innerHTML = `<div class="glass-card rich-display h-auto border-t-[8px] border-tvtcteal bg-white/70">${currentContent}</div>`;
+                }
+            }
+
+            if(titleEl) {
+                titleEl.innerText = finalTitle;
+                titleEl.style.color = titleColor;
+                titleEl.className = `font-black tracking-tight drop-shadow-sm transition-all duration-300 ${titleSize}`;
+            }
+
+            window.smoothScrollTop();
         };
 
-        window.startQuiz = id => {
-            if(!window.currentStudent || !window.currentStudent.name) return window.toast("يرجى إدخال بياناتك أولاً", "error");
-
-            const q = window.quizzesCache.find(x => x.id === id); window.activeQuiz = q;
-            document.getElementById('lms-area').innerHTML = `<div class="glass-card max-w-4xl mx-auto p-8 md:p-14 border-t-[10px] md:border-t-[15px] border-tvtcmain shadow-2xl bg-white/95"><div class="flex justify-between items-center mb-8 md:mb-12 border-b-2 border-slate-200 pb-4 md:pb-6"><h2 class="text-2xl md:text-4xl font-black text-tvtcdark">${q.title}</h2><button onclick="window.renderStudentPortal()" class="text-red-600 bg-red-50 hover:bg-red-600 hover:text-white p-2 md:p-3 rounded-xl transition shadow-sm border border-red-200"><i class="fas fa-times text-xl"></i></button></div><div id="q-render-area" class="space-y-8 md:space-y-12"></div><button onclick="window.processSubmit()" class="w-full bg-tvtcteal hover:bg-tvtcmain text-white py-5 rounded-2xl font-black text-2xl shadow-xl mt-10 transition">تسليم الإجابات <i class="fas fa-paper-plane ml-2"></i></button></div>`;
+        window.directLMS = (type) => {
+            localStorage.setItem('app_current_view', 'lms_' + type);
+            const portal = document.getElementById('portal-dashboard'); if(portal) portal.classList.add('hidden');
+            const secContainer = document.getElementById('section-container'); if(secContainer) secContainer.classList.add('hidden');
+            const examContainer = document.getElementById('section-exams'); if(examContainer) examContainer.classList.remove('hidden');
             
-            document.getElementById('q-render-area').innerHTML = q.questions.map((qu, i) => {
-                let optsHtml = '';
-                if(qu.type === 'short-answer') optsHtml = `<input type="text" class="w-full p-4 md:p-6 bg-white border border-slate-300 rounded-xl text-slate-900 font-black focus:border-tvtcmain outline-none tin text-lg shadow-inner" placeholder="اكتب إجابتك هنا..">`;
-                else if(qu.type === 'multiple-answers') optsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${qu.options.map((o, j) => `<label class="p-4 md:p-5 border border-slate-200 bg-slate-50 rounded-2xl flex items-center gap-4 cursor-pointer hover:border-tvtcteal hover:bg-tvtclight/10 transition shadow-sm"><input type="checkbox" class="w-5 h-5 md:w-6 md:h-6 rounded border-slate-400 text-tvtcmain focus:ring-tvtcmain" value="${j}"> <span class="font-bold text-sm md:text-lg text-slate-800">${o}</span></label>`).join('')}</div>`;
-                else optsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${qu.options.map((o, j) => `<div onclick="window.selectOpt(this)" class="p-4 md:p-5 border border-slate-200 bg-slate-50 rounded-2xl cursor-pointer opt-box hover:border-tvtcteal hover:bg-tvtclight/10 font-bold text-sm md:text-lg text-slate-800 transition shadow-sm" data-v="${j}">${o}</div>`).join('')}</div>`;
-                
-                return `<div class="p-6 md:p-10 bg-white border border-slate-300 rounded-2xl md:rounded-[3rem] q-entry shadow-md" data-i="${i}" data-ty="${qu.type}" data-cr="${typeof qu.correctAnswer==='object'?qu.correctAnswer.join(','):qu.correctAnswer}">
-                    <div class="text-lg md:text-2xl font-black mb-6 leading-relaxed text-tvtcdark rich-display p-0 border-none bg-transparent min-h-0 h-auto inline shadow-none">${i+1}. ${qu.text}</div> ${qu.type==='multiple-answers'?'<span class="text-[10px] md:text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2 font-black align-top shadow-sm border border-blue-200">(اختيار متعدد)</span>':''}
-                    <div class="mt-6">${optsHtml}</div>
-                </div>`;
-            }).join('');
+            window.clearActiveSidebar();
+
+            if(window.innerWidth < 1024) {
+                const sidebar = document.getElementById('main-sidebar');
+                if(sidebar) sidebar.classList.add('hidden');
+            }
+            
+            if(type === 'student') window.renderStudentPortal();
+            else if(type === 'admin') window.renderAdminLogin();
+            
             window.smoothScrollTop();
         };
 
