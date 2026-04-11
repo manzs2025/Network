@@ -292,20 +292,31 @@
                 tabs: ['المرجع والطبقات السبع', 'التغليف وأنواع الاتصال', 'مقارنات بروتوكولات وأجهزة'],
                 content: [
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcteal">
-                        <h1 style="color: #004d60; margin-bottom: 1rem; text-align: center; font-weight: 900;">📚 نموذج OSI المرجعي (الطبقات السبع)</h1>
-                        <p style="text-align: justify; font-size: 1.1rem; font-weight: bold; color: #1e293b;">هو مراحل تكون البيانات ونقلها من الجهاز المرسل (Source device) إلى الجهاز المستقبل (Destination device). وضعته المنظمة الدولية للمعايير (ISO) سنة 1983 برقم 7498 ليكون نموذج نظري موثوق للاتصالات مقسم لـ 7 طبقات.</p>
+                        <div class="bg-gradient-to-l from-[#004d60] to-[#0083a3] rounded-[2rem] p-8 md:p-10 mb-10 shadow-lg relative overflow-hidden text-white">
+                            <i class="fas fa-layer-group absolute -left-10 -bottom-10 text-[10rem] opacity-10"></i>
+                            <h1 class="text-white border-none mt-0 mb-2 text-3xl md:text-5xl font-black drop-shadow-md">📚 نموذج OSI المرجعي</h1>
+                            <p class="text-[#4bd5c9] font-mono tracking-widest text-xs md:text-sm mb-6 uppercase">The 7 Layers of the OSI Model</p>
+                            <p class="text-base md:text-lg font-bold leading-relaxed max-w-4xl">هو مراحل تكوّن البيانات ونقلها من الجهاز المرسل <span class="bg-white/20 px-2 py-1 rounded text-sm font-mono mx-1">Source</span> إلى الجهاز المستقبل <span class="bg-white/20 px-2 py-1 rounded text-sm font-mono mx-1">Destination</span>. وضعته المنظمة الدولية للمعايير (ISO) ليكون نموذجاً نظرياً موثوقاً للاتصالات مقسم لـ 7 طبقات.</p>
+                        </div>
                         
-                        <h2 style="color: #00627a; margin-top: 1.5rem;">فائدة فهم طبقات OSI:</h2>
-                        <ul style="color: #334155; font-weight: bold; margin-bottom: 3rem;">
-                            <li>تستطيع فهم وحل المشاكل (Troubleshooting) للشبكات.</li>
-                            <li>معرفة كيفية تكوين البيانات وما هو شكلها في كل مرحلة.</li>
-                            <li>تفيد بمعرفة النقاط الحساسة وكيفية تشفير وفك البيانات.</li>
-                            <li>معرفة كل جهاز في أية طبقة يعمل (مثل HUB والراوتر والسويتش).</li>
-                        </ul>
-
-                        <div style="text-align: center; margin-bottom: 2rem; border-top: 2px dashed rgba(0,98,122,0.2); padding-top: 2rem;">
-                            <h2 style="color: #004d60; margin-bottom: 0.5rem; font-size: 2.2rem; font-weight: 900; text-transform: uppercase;">نموذج OSI للطبقات السبع</h2>
-                            <p style="font-size: 1rem; font-weight: bold; color: #475569; letter-spacing: 1px;">THE 7 LAYERS OF THE OSI MODEL | EDUCATIONAL TEMPLATE</p>
+                        <h2 class="text-center text-[#004d60] mb-8 font-black text-2xl md:text-3xl border-none">💡 لماذا ندرس ونفهم طبقات OSI؟</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-12">
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:shadow-md hover:border-[#29b5a8] transition-all">
+                                <div class="bg-[#e0f2fe] text-[#0284c7] w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-tools"></i></div>
+                                <div><h4 class="font-black text-slate-800 text-lg m-0 mb-1">اكتشاف الأعطال</h4><p class="text-sm font-bold text-slate-600 m-0">تسهيل فهم وحل المشاكل (Troubleshooting) المعقدة للشبكات.</p></div>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:shadow-md hover:border-[#29b5a8] transition-all">
+                                <div class="bg-[#fce7f3] text-[#be185d] w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-microscope"></i></div>
+                                <div><h4 class="font-black text-slate-800 text-lg m-0 mb-1">تتبع البيانات</h4><p class="text-sm font-bold text-slate-600 m-0">معرفة كيفية تكوين البيانات وما هو شكلها الفعلي في كل مرحلة.</p></div>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:shadow-md hover:border-[#29b5a8] transition-all">
+                                <div class="bg-[#ffedd5] text-[#c2410c] w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-shield-alt"></i></div>
+                                <div><h4 class="font-black text-slate-800 text-lg m-0 mb-1">أمن المعلومات</h4><p class="text-sm font-bold text-slate-600 m-0">معرفة النقاط الحساسة وكيفية تشفير وفك البيانات أثناء النقل.</p></div>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:shadow-md hover:border-[#29b5a8] transition-all">
+                                <div class="bg-[#dcfce7] text-[#15803d] w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fas fa-server"></i></div>
+                                <div><h4 class="font-black text-slate-800 text-lg m-0 mb-1">تصنيف الأجهزة</h4><p class="text-sm font-bold text-slate-600 m-0">معرفة كل جهاز في أية طبقة يعمل (مثل الراوتر والسويتش).</p></div>
+                            </div>
                         </div>
 
                         <!-- الجدول المخصص مع منع كسر التصميم (التمرير الأفقي) -->
@@ -468,32 +479,54 @@
                         </div>
                     </div>`,
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
-                        <div style="background: rgba(255,255,255,0.7); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); margin-bottom: 2rem;">
-                            <h2 style="margin-top: 0; font-size: 2rem;">📜 ما هو البروتوكول Protocol؟</h2>
-                            <p class="!text-lg text-slate-900 font-bold text-justify mb-0">مجموعة من الأكواد البرمجية والقواعد التي تحدد كيف يمكن لأجهزة الكمبيوتر أن تتفاهم مع بعضها عبر الشبكة التي تتواجد عليها، لتسهيل عملية التخاطب.</p>
-                        </div>
-                        <div style="background: rgba(255,255,255,0.7); padding: 2.5rem; border-radius: 1.5rem; border: 1px solid rgba(0,98,122,0.2); margin-bottom: 2rem;">
-                            <h2 style="margin-top: 0; font-size: 2rem;">📦 تغليف البيانات (Encapsulation)</h2>
-                            <p class="!text-lg mb-4 text-slate-900 font-bold text-justify">تسمى العملية التي تضيف فيها البروتوكولات الترويسات (Header) والتذييل (Trailer) على البيانات بعملية تغليف البيانات، وهذا ما يحدث في عملية الإرسال نزولاً للطبقة الأولى.</p>
-                            <p class="!text-lg font-black text-white bg-tvtcmain p-4 rounded-xl border border-tvtcdark mt-4 text-center shadow-md">في عملية الاستقبال تسمى عملية فك التغليف (De-Encapsulation) وتحدث صعوداً للطبقة السابعة.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12 mt-4">
+                            <!-- كرت البروتوكول -->
+                            <div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-lg transition-shadow relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                                <div class="text-blue-500 text-5xl mb-6 drop-shadow-sm"><i class="fas fa-scroll"></i></div>
+                                <h2 class="text-slate-800 font-black text-2xl mt-0 mb-4 border-none">ما هو البروتوكول؟ <span class="text-sm text-slate-400 font-mono uppercase ml-2">(Protocol)</span></h2>
+                                <p class="text-slate-600 font-bold text-base leading-relaxed m-0">مجموعة من الأكواد البرمجية والقواعد المتفق عليها التي تحدد كيف يمكن لأجهزة الكمبيوتر أن تتفاهم مع بعضها عبر الشبكة، لتسهيل وتنظيم عملية التخاطب.</p>
+                            </div>
+
+                            <!-- كرت التغليف -->
+                            <div class="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-lg transition-shadow relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
+                                <div class="text-emerald-500 text-5xl mb-6 drop-shadow-sm"><i class="fas fa-box-open"></i></div>
+                                <h2 class="text-slate-800 font-black text-2xl mt-0 mb-4 border-none">تغليف البيانات <span class="text-sm text-slate-400 font-mono uppercase ml-2">(Encapsulation)</span></h2>
+                                <p class="text-slate-600 font-bold text-sm leading-relaxed mb-4 mt-0">العملية التي تضيف فيها البروتوكولات الترويسات (Header) والتذييل (Trailer) على البيانات.</p>
+                                <div class="flex flex-col gap-3">
+                                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-3">
+                                        <div class="bg-emerald-100 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center shrink-0"><i class="fas fa-arrow-down"></i></div>
+                                        <span class="font-bold text-sm text-slate-700">في الإرسال: <span class="text-emerald-700 font-black">تغليف</span> نزولاً للطبقة الأولى.</span>
+                                    </div>
+                                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-3">
+                                        <div class="bg-purple-100 text-purple-600 w-8 h-8 rounded-lg flex items-center justify-center shrink-0"><i class="fas fa-arrow-up"></i></div>
+                                        <span class="font-bold text-sm text-slate-700">في الاستقبال: <span class="text-purple-700 font-black">فك التغليف</span> صعوداً للطبقة السابعة.</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
-                        <h2 style="text-align: center; border-top: 2px solid rgba(0,98,122,0.2); padding-top: 2rem; margin-top: 3rem; font-size: 2.5rem;">أنواع الاتصالات في طبقة الجلسة</h2>
-                        <div class="custom-grid-container">
-                            <div class="custom-grid-card">
-                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">➡️</div>
-                                <h3 class="custom-grid-title text-2xl text-center">Simplex</h3>
-                                <p class="custom-grid-desc text-base text-center">إرسال في اتجاه واحد فقط يرسل مرة واحدة مثل الراديو والتلفزيون.</p>
+                        <div class="text-center mb-8 border-t border-slate-200 pt-10">
+                            <h2 class="text-[#004d60] font-black text-2xl md:text-3xl m-0 border-none">أنواع الاتصالات في طبقة الجلسة</h2>
+                            <p class="text-slate-500 font-bold text-sm mt-2">كيفية تدفق البيانات بين الأطراف</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+                            <div class="bg-white border border-slate-200 p-8 rounded-[2rem] text-center shadow-sm hover:border-[#29b5a8] hover:shadow-md transition-all group">
+                                <div class="w-16 h-16 mx-auto bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-[#29b5a8] group-hover:text-white transition-colors"><i class="fas fa-long-arrow-alt-right"></i></div>
+                                <h3 class="font-black text-xl text-slate-800 m-0 mb-3 border-none">Simplex</h3>
+                                <p class="text-sm font-bold text-slate-600 leading-relaxed m-0">إرسال في اتجاه واحد فقط دائماً.<br><span class="text-[#00627a] bg-slate-50 px-2 py-1 rounded-lg inline-block mt-3 text-xs border border-slate-200">مثل: الراديو والتلفزيون</span></p>
                             </div>
-                            <div class="custom-grid-card">
-                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">🔀</div>
-                                <h3 class="custom-grid-title text-2xl text-center">Half Duplex</h3>
-                                <p class="custom-grid-desc text-base text-center">إرسال واستقبال ولكن ليس في نفس الوقت مثل أجهزة الشرطة (اللاسلكي).</p>
+                            <div class="bg-white border border-slate-200 p-8 rounded-[2rem] text-center shadow-sm hover:border-[#29b5a8] hover:shadow-md transition-all group">
+                                <div class="w-16 h-16 mx-auto bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-[#29b5a8] group-hover:text-white transition-colors"><i class="fas fa-exchange-alt"></i></div>
+                                <h3 class="font-black text-xl text-slate-800 m-0 mb-3 border-none">Half Duplex</h3>
+                                <p class="text-sm font-bold text-slate-600 leading-relaxed m-0">إرسال واستقبال ولكن ليس في نفس الوقت.<br><span class="text-[#00627a] bg-slate-50 px-2 py-1 rounded-lg inline-block mt-3 text-xs border border-slate-200">مثل: أجهزة اللاسلكي</span></p>
                             </div>
-                            <div class="custom-grid-card">
-                                <div style="font-size: 4rem; margin-bottom: 1rem; text-align: center;">↔️</div>
-                                <h3 class="custom-grid-title text-2xl text-center">Full Duplex</h3>
-                                <p class="custom-grid-desc text-base text-center">استقبال وإرسال بخط واحد في نفس الوقت مثل الاتصال بالجوال.</p>
+                            <div class="bg-white border border-slate-200 p-8 rounded-[2rem] text-center shadow-sm hover:border-[#29b5a8] hover:shadow-md transition-all group">
+                                <div class="w-16 h-16 mx-auto bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-[#29b5a8] group-hover:text-white transition-colors"><i class="fas fa-arrows-alt-h"></i></div>
+                                <h3 class="font-black text-xl text-slate-800 m-0 mb-3 border-none">Full Duplex</h3>
+                                <p class="text-sm font-bold text-slate-600 leading-relaxed m-0">استقبال وإرسال في نفس الوقت.<br><span class="text-[#00627a] bg-slate-50 px-2 py-1 rounded-lg inline-block mt-3 text-xs border border-slate-200">مثل: الجوال والإنترنت</span></p>
                             </div>
                         </div>
                     </div>`,
