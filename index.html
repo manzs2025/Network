@@ -22,7 +22,6 @@
                         almarai: ['Almarai', 'sans-serif']
                     },
                     colors: { 
-                        /* ألوان الهوية البصرية TVTC */
                         tvtcdark: '#004d60',
                         tvtcmain: '#00627a',
                         tvtclight: '#0083a3',
@@ -71,6 +70,7 @@
             .rich-editor ul, .rich-display ul { @apply list-disc list-inside mb-6 mr-4 space-y-2 font-bold text-slate-800 text-sm md:text-base; }
             .rich-editor ol, .rich-display ol { @apply list-decimal list-inside mb-6 mr-4 space-y-2 font-bold text-slate-800 text-sm md:text-base; }
             
+            /* منع الصور من تجاوز الحدود ودعم تغيير الحجم */
             .rich-display img:not([style*="resize"]) { @apply max-w-full h-auto rounded-xl shadow-md my-4 object-contain inline-block border border-slate-200 cursor-move transition-transform duration-300 hover:scale-[1.02]; }
 
             .custom-grid-container { @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 my-6 md:my-8 text-center items-stretch; }
@@ -79,7 +79,7 @@
             .custom-grid-desc { @apply text-xs md:text-sm font-bold leading-relaxed flex-grow text-slate-700; }
         }
         
-        /* تنسيقات الجداول الحديثة */
+        /* التنسيقات العصرية للجداول العامة */
         .modern-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 2rem 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-radius: 1.5rem; overflow: hidden; min-width: 600px; }
         .modern-table thead { background: linear-gradient(90deg, #004d60, #0083a3); color: white; }
         .modern-table th { padding: 1.5rem; font-weight: 900; font-size: 1.2rem; text-align: center; border:none; }
@@ -87,39 +87,14 @@
         .modern-table tr:hover td { background: #f1f5f9; }
         .modern-table tr:last-child td { border-bottom: none; }
 
-        /* تنسيقات تصميم OSI الجديد المطابق للصورة */
-        .osi-wrapper { display: flex; gap: 0.5rem; align-items: stretch; margin-top: 2rem; direction: ltr; font-family: 'Cairo', sans-serif; overflow-x: auto; padding-bottom: 1rem; justify-content: center; min-width: 100%; }
-        .osi-arrows { display: flex; flex-direction: column; justify-content: space-between; width: 40px; flex-shrink: 0; padding: 2rem 0; align-items: center; }
-        .osi-arrow-down, .osi-arrow-up { display: flex; flex-direction: column; align-items: center; height: 48%; }
-        .osi-text-vertical { writing-mode: vertical-rl; transform: rotate(180deg); font-weight: 900; font-size: 0.75rem; letter-spacing: 1px; text-align: center; }
-        .osi-table-new { border-collapse: separate; border-spacing: 0 8px; width: 100%; min-width: 900px; text-align: center; }
-        .osi-table-new th { background-color: #e2e8f0; color: #334155; font-weight: 900; padding: 0.75rem; border: 1px solid #cbd5e1; font-size: 0.9rem; font-family: Tahoma, sans-serif; }
-        .osi-table-new th:first-child { border-radius: 8px 0 0 8px; }
-        .osi-table-new th:last-child { border-radius: 0 8px 8px 0; }
-        .osi-table-new td { padding: 0.5rem; border-top: 1px solid; border-bottom: 1px solid; font-weight: bold; color: #1e293b; font-size: 0.9rem; transition: transform 0.2s; }
-        .osi-table-new tr:hover td { transform: scale(1.01); z-index: 10; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .osi-table-new td:first-child { border-left: 1px solid; border-radius: 8px 0 0 8px; font-size: 1.5rem; font-weight: 900; }
-        .osi-table-new td:last-child { border-right: 1px solid; border-radius: 0 8px 8px 0; }
-        .osi-icon-box { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; margin: auto; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); flex-direction: column; }
-        
-        /* Row Colors */
-        .l7-row td { background-color: #f3e8ff; border-color: #e9d5ff; color: #4c1d95; } .l7-row td:first-child, .l7-row .osi-icon-box { background-color: #7e22ce; color: white; border-color: #7e22ce; }
-        .l6-row td { background-color: #ffedd5; border-color: #fed7aa; color: #7c2d12; } .l6-row td:first-child, .l6-row .osi-icon-box { background-color: #ea580c; color: white; border-color: #ea580c; }
-        .l5-row td { background-color: #fce7f3; border-color: #fbcfe8; color: #831843; } .l5-row td:first-child, .l5-row .osi-icon-box { background-color: #be185d; color: white; border-color: #be185d; }
-        .l4-row td { background-color: #e0f2fe; border-color: #bae6fd; color: #0c4a6e; } .l4-row td:first-child, .l4-row .osi-icon-box { background-color: #0284c7; color: white; border-color: #0284c7; }
-        .l3-row td { background-color: #dcfce7; border-color: #bbf7d0; color: #064e3b; } .l3-row td:first-child, .l3-row .osi-icon-box { background-color: #16a34a; color: white; border-color: #16a34a; }
-        .l2-row td { background-color: #ccfbf1; border-color: #99f6e4; color: #134e4a; } .l2-row td:first-child, .l2-row .osi-icon-box { background-color: #0d9488; color: white; border-color: #0d9488; }
-        .l1-row td { background-color: #fee2e2; border-color: #fecaca; color: #881337; } .l1-row td:first-child, .l1-row .osi-icon-box { background-color: #e11d48; color: white; border-color: #e11d48; }
-
         .page-enter { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .toast { @apply fixed bottom-5 left-5 z-[9999] opacity-0 translate-y-10 transition-all duration-300 bg-white/95 backdrop-blur border border-slate-200 px-6 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-2xl text-slate-800; }
         .toast.show { @apply opacity-100 translate-y-0; }
         
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        @media (min-width: 768px) { .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; } }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #29b5a8; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
 
         .mobile-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
     </style>
@@ -128,6 +103,7 @@
 
     <div class="absolute inset-0 bg-white/10 backdrop-blur-[2px] -z-10"></div>
 
+    <!-- النافبار العلوي -->
     <nav class="bg-gradient-to-r from-tvtcdark via-tvtcmain to-tvtcteal p-3 md:p-4 sticky top-0 z-50 shadow-md flex justify-between items-center shrink-0 w-full">
         <div class="flex items-center gap-2 md:gap-4">
             <button onclick="document.getElementById('main-sidebar').classList.remove('hidden')" class="lg:hidden text-white hover:text-tvtcaccent text-xl md:text-2xl p-1 transition"><i class="fas fa-bars"></i></button>
@@ -149,7 +125,9 @@
         </div>
     </nav>
 
+    <!-- المساحة الوسطى -->
     <div class="flex-1 flex h-full overflow-hidden w-full relative">
+        
         <aside id="main-sidebar" class="w-72 md:w-80 sidebar-bg z-[100] flex-col hidden fixed inset-y-0 right-0 lg:static lg:flex h-[100dvh] lg:h-full flex-shrink-0 transition-transform duration-300">
             <div class="p-4 flex justify-end lg:hidden shrink-0">
                 <button onclick="document.getElementById('main-sidebar').classList.add('hidden')" class="text-slate-500 hover:text-red-500 text-2xl bg-white/70 w-10 h-10 rounded-xl shadow-sm"><i class="fas fa-times"></i></button>
@@ -163,6 +141,7 @@
 
         <main id="main-scroll-area" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
             
+            <!-- الواجهة الرئيسية -->
             <div id="portal-dashboard" class="block page-enter max-w-7xl mx-auto">
                 <header class="glass-card p-6 md:p-16 text-center border-t-[8px] border-tvtcmain mb-8 md:mb-12 relative overflow-hidden bg-white/70">
                     <div class="relative z-10 w-full">
@@ -175,14 +154,16 @@
                 <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8"></div>
             </div>
 
+            <!-- عرض الدروس -->
             <div id="section-container" class="hidden page-enter max-w-6xl mx-auto pb-10 md:pb-20">
                 <header class="glass-card p-6 md:p-10 mb-6 md:mb-8 text-center border-t-[8px] border-tvtcmain bg-white/70">
                     <h1 id="section-title" class="font-black tracking-tight drop-shadow-sm text-3xl md:text-5xl text-tvtcdark transition-all duration-300">العنوان</h1>
                 </header>
                 <div id="mobile-tabs" class="lg:hidden flex gap-2 overflow-x-auto custom-scrollbar mb-6 pb-2"></div>
-                <div id="content-area" class="w-full page-enter"></div>
+                <div id="content-area" class="w-full page-enter overflow-x-hidden"></div>
             </div>
 
+            <!-- قسم النظام السحابي (الإدارة والاختبارات) -->
             <div id="section-exams" class="hidden page-enter w-full mx-auto pb-10 md:pb-20">
                 <div id="lms-area"></div>
             </div>
@@ -203,6 +184,7 @@
 
     <div id="tst" class="toast"><i id="tsti" class="fas"></i><span id="tstt"></span></div>
 
+    <!-- بيانات المنهج الأساسي -->
     <script>
         const CORE_DATA = {
             'networks': {
@@ -311,172 +293,180 @@
                 content: [
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcteal">
                         <div style="text-align: center; margin-bottom: 2rem;">
-                            <h1 style="color: #004d60; margin-bottom: 0.5rem; font-size: 2.2rem; font-weight: 900; text-transform: uppercase;">THE 7 LAYERS OF THE OSI MODEL | نموذج OSI للطبقات السبع</h1>
-                            <p style="font-size: 1rem; font-weight: bold; color: #475569; letter-spacing: 1px;">EDUCATIONAL TEMPLATE | نموذج تعليمي</p>
+                            <h1 style="color: #004d60; margin-bottom: 0.5rem; font-size: 2.2rem; font-weight: 900; text-transform: uppercase;">نموذج OSI للطبقات السبع</h1>
+                            <p style="font-size: 1rem; font-weight: bold; color: #475569; letter-spacing: 1px;">THE 7 LAYERS OF THE OSI MODEL | EDUCATIONAL TEMPLATE</p>
                         </div>
                         
-                        <p style="text-align: justify; font-size: 1.1rem; font-weight: bold; color: #1e293b;">هو مراحل تكون البيانات ونقلها من الجهاز المرسل (Source device) إلى الجهاز المستقبل (Destination device). وضعته المنظمة الدولية للمعايير (ISO) سنة 1983 برقم 7498 ليكون نموذج نظري موثوق للاتصالات مقسم لـ 7 طبقات.</p>
+                        <!-- التصميم الجديد للطبقات السبع (مطابق للصورة) ومعالج لتجنب التداخل والتكديس -->
+                        <div class="w-full overflow-x-auto custom-scrollbar pb-4" dir="ltr">
+                            <div style="display: flex; gap: 10px; min-width: 1050px; padding: 10px; align-items: stretch; font-family: 'Cairo', sans-serif;">
+                                
+                                <!-- أسهم التغليف وفك التغليف -->
+                                <div style="display: flex; flex-direction: column; justify-content: space-between; width: 40px; flex-shrink: 0; padding: 2.5rem 0;">
+                                    <div style="display: flex; flex-direction: column; align-items: center; height: 48%;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; color: #7e22ce; font-weight: 900; font-size: 11px; letter-spacing: 1px;">
+                                            <span style="font-size: 14px; margin-bottom: 4px;">تغليف</span><br>ENCAPSULATION
+                                        </div>
+                                        <div style="width: 4px; background: #7e22ce; flex-grow: 1; border-radius: 4px; margin: 4px 0;"></div>
+                                        <div style="width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #7e22ce;"></div>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; align-items: center; height: 48%;">
+                                        <div style="width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 12px solid #16a34a;"></div>
+                                        <div style="width: 4px; background: #16a34a; flex-grow: 1; border-radius: 4px; margin: 4px 0;"></div>
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; color: #16a34a; font-weight: 900; font-size: 11px; letter-spacing: 1px;">
+                                            <span style="font-size: 14px; margin-top: 4px;">فك التغليف</span><br>DECAPSULATION
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <div class="osi-wrapper custom-scrollbar">
-                            <!-- أسهم التغليف (على اليسار) -->
-                            <div class="osi-arrows">
-                                <div class="osi-arrow-down">
-                                    <div class="osi-text-vertical" style="color: #7e22ce;"><span style="font-family: Cairo, sans-serif; font-size: 12px;">تغليف</span><br>ENCAPSULATION</div>
-                                    <div style="width: 4px; background: #7e22ce; flex-grow: 1; border-radius: 4px; margin: 4px 0;"></div>
-                                    <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #7e22ce;"></div>
-                                </div>
-                                <div class="osi-arrow-up">
-                                    <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid #16a34a;"></div>
-                                    <div style="width: 4px; background: #16a34a; flex-grow: 1; border-radius: 4px; margin: 4px 0;"></div>
-                                    <div class="osi-text-vertical" style="color: #16a34a;"><span style="font-family: Cairo, sans-serif; font-size: 12px;">فك التغليف</span><br>DECAPSULATION</div>
-                                </div>
+                                <!-- جدول الطبقات -->
+                                <table style="width: 100%; border-collapse: separate; border-spacing: 0 8px; text-align: center;">
+                                    <thead style="background: #e2e8f0; color: #334155;">
+                                        <tr>
+                                            <th style="padding: 10px; border-radius: 8px 0 0 8px; border: 1px solid #cbd5e1; width: 60px;">Layer</th>
+                                            <th style="border: 1px solid #cbd5e1; width: 70px;">#</th>
+                                            <th style="border: 1px solid #cbd5e1; padding: 10px; width: 220px;">LAYERS / الطبقات</th>
+                                            <th style="border: 1px solid #cbd5e1; padding: 10px; width: 140px;">نوع البيانات</th>
+                                            <th style="border: 1px solid #cbd5e1; padding: 10px; width: 280px;">وظائف الطبقات</th>
+                                            <th style="border: 1px solid #cbd5e1; padding: 10px; width: 120px;">Protocols</th>
+                                            <th style="padding: 10px; border-radius: 0 8px 8px 0; border: 1px solid #cbd5e1; width: 160px;">أجهزة الطبقة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Layer 7 -->
+                                        <tr style="background: #f3e8ff; color: #4c1d95; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #e9d5ff; border-radius: 12px 0 0 12px; border-left: 8px solid #7e22ce;">7</td>
+                                            <td style="border-top: 1px solid #e9d5ff; border-bottom: 1px solid #e9d5ff; padding: 5px;"><div style="width: 50px; height: 50px; background: #7e22ce; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;">🌐</div></td>
+                                            <td style="border-top: 1px solid #e9d5ff; border-bottom: 1px solid #e9d5ff; padding: 10px;"><div style="font-weight: 900; font-size: 1.1rem; color: #4c1d95;">طبقة التطبيقات</div><div style="font-size: 0.8rem; font-weight: 700; font-family: monospace;">APPLICATION</div></td>
+                                            <td style="background: #fdf4ff; border-top: 1px solid #fae8ff; border-bottom: 1px solid #fae8ff; padding: 10px;"><div style="font-weight: 900; font-size: 1.2rem; color: #701a75;">DATA</div></td>
+                                            <td style="background: #fdf4ff; border-top: 1px solid #fae8ff; border-bottom: 1px solid #fae8ff; padding: 10px;"><div style="font-weight: bold; font-size: 0.95rem; color: #701a75;">تطبيقات الشبكة</div><div style="font-size: 0.75rem; font-family: monospace; color: #86198f;">WhatsApp - Snapchat - Telegram - Facebook</div></td>
+                                            <td style="background: #fdf4ff; border-top: 1px solid #fae8ff; border-bottom: 1px solid #fae8ff; padding: 10px; font-weight: bold; font-size: 0.9rem; font-family: monospace;">HTTP, SMTP<br>FTP</td>
+                                            <td style="background: #fdf4ff; border: 1px solid #fae8ff; border-radius: 0 12px 12px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
+                                        </tr>
+                                        <!-- Layer 6 -->
+                                        <tr style="background: #ffedd5; color: #7c2d12; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fed7aa; border-radius: 12px 0 0 12px; border-left: 8px solid #ea580c;">6</td>
+                                            <td style="border-top: 1px solid #fed7aa; border-bottom: 1px solid #fed7aa; padding: 5px;"><div style="width: 50px; height: 50px; background: #ea580c; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;">📄</div></td>
+                                            <td style="border-top: 1px solid #fed7aa; border-bottom: 1px solid #fed7aa; padding: 10px;"><div style="font-weight: 900; font-size: 1.1rem; color: #7c2d12;">طبقة العرض</div><div style="font-size: 0.8rem; font-weight: 700; font-family: monospace;">PRESENTATION</div></td>
+                                            <td style="background: #fff7ed; border-top: 1px solid #ffedd5; border-bottom: 1px solid #ffedd5; padding: 10px;"><div style="font-weight: 900; font-size: 1.2rem; color: #9a3412;">DATA</div></td>
+                                            <td style="background: #fff7ed; border-top: 1px solid #ffedd5; border-bottom: 1px solid #ffedd5; padding: 10px;"><div style="font-size: 0.8rem; font-family: monospace; color: #9a3412;">Formatting, Encryption, Compression</div><div style="font-weight: bold; font-size: 0.95rem; color: #7c2d12;">تنسيق البيانات، التشفير، الضغط</div></td>
+                                            <td style="background: #fff7ed; border-top: 1px solid #ffedd5; border-bottom: 1px solid #ffedd5; padding: 10px; font-weight: bold; font-size: 0.9rem; font-family: monospace;">HTML<br>JPEG</td>
+                                            <td style="background: #fff7ed; border: 1px solid #ffedd5; border-radius: 0 12px 12px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
+                                        </tr>
+                                        <!-- Layer 5 -->
+                                        <tr style="background: #fce7f3; color: #831843; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fbcfe8; border-radius: 12px 0 0 12px; border-left: 8px solid #be185d;">5</td>
+                                            <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 5px;"><div style="width: 50px; height: 50px; background: #be185d; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;">🤝</div></td>
+                                            <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 10px;"><div style="font-weight: 900; font-size: 1.1rem;">طبقة الجلسة</div><div style="font-size: 0.8rem; font-weight: 700; font-family: monospace;">SESSION</div></td>
+                                            <td style="background: #fdf2f8; border-top: 1px solid #fce7f3; border-bottom: 1px solid #fce7f3; padding: 10px;"><div style="font-weight: 900; font-size: 1.2rem; color: #9d174d;">DATA</div></td>
+                                            <td style="background: #fdf2f8; border-top: 1px solid #fce7f3; border-bottom: 1px solid #fce7f3; padding: 10px;"><div style="font-size: 0.8rem; font-family: monospace; color: #9d174d;">Establishment, maintenance, termination</div><div style="font-weight: bold; font-size: 0.95rem;">إنشاء الجلسات، صيانة، إنهاؤها</div></td>
+                                            <td style="background: #fdf2f8; border-top: 1px solid #fce7f3; border-bottom: 1px solid #fce7f3; padding: 10px; font-weight: bold; font-size: 0.9rem; font-family: monospace;">NFS<br>SQL</td>
+                                            <td style="background: #fdf2f8; border: 1px solid #fce7f3; border-radius: 0 12px 12px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
+                                        </tr>
+                                        <!-- Layer 4 -->
+                                        <tr style="background: #e0f2fe; color: #0c4a6e; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #bae6fd; border-radius: 12px 0 0 12px; border-left: 8px solid #0284c7;">4</td>
+                                            <td style="border-top: 1px solid #bae6fd; border-bottom: 1px solid #bae6fd; padding: 5px;"><div style="width: 50px; height: 50px; background: #0284c7; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;">🚚</div></td>
+                                            <td style="border-top: 1px solid #bae6fd; border-bottom: 1px solid #bae6fd; padding: 10px;"><div style="font-weight: 900; font-size: 1.1rem;">طبقة النقل</div><div style="font-size: 0.8rem; font-weight: 700; font-family: monospace;">TRANSPORT</div></td>
+                                            <td style="background: #f0f9ff; border-top: 1px solid #e0f2fe; border-bottom: 1px solid #e0f2fe; padding: 10px;"><div style="font-weight: 900; font-size: 1.2rem; color: #075985; font-family: monospace;">Segment</div></td>
+                                            <td style="background: #f0f9ff; border-top: 1px solid #e0f2fe; border-bottom: 1px solid #e0f2fe; padding: 10px;"><div style="font-size: 0.8rem; font-family: monospace; color: #075985;">protocol TCP/UDP, Data type</div><div style="font-weight: bold; font-size: 0.95rem;">تحديد نوع البيانات، تحديد البروتوكول</div></td>
+                                            <td style="background: #f0f9ff; border-top: 1px solid #e0f2fe; border-bottom: 1px solid #e0f2fe; padding: 10px; font-weight: bold; font-size: 0.9rem; font-family: monospace;">TCP<br>UDP</td>
+                                            <td style="background: #f0f9ff; border: 1px solid #e0f2fe; border-radius: 0 12px 12px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
+                                        </tr>
+                                        <!-- Layer 3 -->
+                                        <tr style="background: #dcfce7; color: #064e3b; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #bbf7d0; border-radius: 12px 0 0 12px; border-left: 8px solid #16a34a;">3</td>
+                                            <td style="border-top: 1px solid #bbf7d0; border-bottom: 1px solid #bbf7d0; padding: 5px;"><div style="width: 50px; height: 50px; background: #16a34a; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;">🔀</div></td>
+                                            <td style="border-top: 1px solid #bbf7d0; border-bottom: 1px solid #bbf7d0; padding: 10px;"><div style="font-weight: 900; font-size: 1.1rem;">طبقة الشبكة</div><div style="font-size: 0.8rem; font-weight: 700; font-family: monospace;">NETWORK</div></td>
+                                            <td style="background: #f0fdf4; border-top: 1px solid #dcfce7; border-bottom: 1px solid #dcfce7; padding: 10px;"><div style="font-weight: 900; font-size: 1.2rem; color: #065f46; font-family: monospace;">Packet</div></td>
+                                            <td style="background: #f0fdf4; border-top: 1px solid #dcfce7; border-bottom: 1px solid #dcfce7; padding: 10px;"><div style="font-size: 0.8rem; font-family: monospace; color: #065f46;">Routing, IP Addressing</div><div style="font-weight: bold; font-size: 0.95rem;">التوجيه، العنونة المنطقية IP</div></td>
+                                            <td style="background: #f0fdf4; border-top: 1px solid #dcfce7; border-bottom: 1px solid #dcfce7; padding: 10px; font-weight: bold; font-size: 0.9rem; font-family: monospace;">IP Address<br>OSPF</td>
+                                            <td style="background: #f0fdf4; border: 1px solid #dcfce7; border-radius: 0 12px 12px 0; padding: 10px; line-height: 1.2;"><div style="font-size: 2rem;">📡</div><div style="font-size: 0.75rem; font-weight: 900; font-family: monospace;">Routers</div></td>
+                                        </tr>
+                                        <!-- Layer 2 -->
+                                        <tr style="background: #ccfbf1; color: #134e4a; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #99f6e4; border-radius: 12px 0 0 12px; border-left: 8px solid #0d9488;">2</td>
+                                            <td style="border-top: 1px solid #99f6e4; border-bottom: 1px solid #99f6e4; padding: 5px;"><div style="width: 50px; height: 50px; background: #0d9488; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;">🔗</div></td>
+                                            <td style="border-top: 1px solid #99f6e4; border-bottom: 1px solid #99f6e4; padding: 10px;"><div style="font-weight: 900; font-size: 1.1rem;">طبقة ربط البيانات</div><div style="font-size: 0.8rem; font-weight: 700; font-family: monospace;">DATA LINK</div></td>
+                                            <td style="background: #f0fdfa; border-top: 1px solid #ccfbf1; border-bottom: 1px solid #ccfbf1; padding: 10px;"><div style="font-weight: 900; font-size: 1.2rem; color: #115e59; font-family: monospace;">Frame</div></td>
+                                            <td style="background: #f0fdfa; border-top: 1px solid #ccfbf1; border-bottom: 1px solid #ccfbf1; padding: 10px;"><div style="font-size: 0.8rem; font-family: monospace; color: #115e59;">Physical Addressing (MAC), Error Detection</div><div style="font-weight: bold; font-size: 0.95rem;">العنونة المادية MAC، كشف الأخطاء</div></td>
+                                            <td style="background: #f0fdfa; border-top: 1px solid #ccfbf1; border-bottom: 1px solid #ccfbf1; padding: 10px; font-weight: bold; font-size: 0.9rem; font-family: monospace;">MAC Address<br>Wi-Fi</td>
+                                            <td style="background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 0 12px 12px 0; padding: 10px; line-height: 1.2;"><div style="font-size: 2rem;">🎛️</div><div style="font-size: 0.75rem; font-weight: 900; font-family: monospace;">Switches</div></td>
+                                        </tr>
+                                        <!-- Layer 1 -->
+                                        <tr style="background: #fee2e2; color: #881337; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fecaca; border-radius: 12px 0 0 12px; border-left: 8px solid #e11d48;">1</td>
+                                            <td style="border-top: 1px solid #fecaca; border-bottom: 1px solid #fecaca; padding: 5px;">
+                                                <div style="width: 50px; height: 50px; background: #e11d48; color: white; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: auto; font-family: monospace; font-size: 9px; line-height: 1.1; font-weight: bold;"><span>10111</span><span>01010</span><span>10111</span></div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fecaca; border-bottom: 1px solid #fecaca; padding: 10px;"><div style="font-weight: 900; font-size: 1.1rem;">الطبقة الفيزيائية</div><div style="font-size: 0.8rem; font-weight: 700; font-family: monospace;">PHYSICAL</div></td>
+                                            <td style="background: #fef2f2; border-top: 1px solid #fee2e2; border-bottom: 1px solid #fee2e2; padding: 10px;"><div style="font-weight: 900; font-size: 1.2rem; color: #9f1239; font-family: monospace;">Bits</div></td>
+                                            <td style="background: #fef2f2; border-top: 1px solid #fee2e2; border-bottom: 1px solid #fee2e2; padding: 10px;"><div style="font-size: 0.8rem; font-family: monospace; color: #9f1239;">Cabling, Connector Types</div><div style="font-weight: bold; font-size: 0.95rem;">الكيابل، أنواع الموصلات</div></td>
+                                            <td style="background: #fef2f2; border-top: 1px solid #fee2e2; border-bottom: 1px solid #fee2e2; padding: 10px; font-weight: bold; font-size: 0.9rem; font-family: monospace;">Ethernet<br>802.11</td>
+                                            <td style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 0 12px 12px 0; padding: 10px; line-height: 1.2;"><div style="font-size: 2rem;">🔌</div><div style="font-size: 0.75rem; font-weight: 900; font-family: monospace;">Cables, NICs</div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
 
-                            <!-- جدول الطبقات -->
-                            <table class="osi-table-new">
+                    </div>`,
+                    `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
+                        <div class="bg-[#0f172a] text-white p-6 md:p-10 rounded-[2rem] shadow-[0_10px_30px_rgba(8,145,178,0.2)] border border-cyan-900">
+                            <div class="text-center mb-8 border-b border-cyan-900 pb-6">
+                                <h1 class="text-2xl md:text-4xl font-black text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)] m-0">المقارنة بين الراوتر والسويتش باحترافية</h1>
+                                <p class="text-cyan-700 font-mono tracking-widest text-xs md:text-sm mt-3 m-0">PROFESSIONAL COMPARISON: ROUTER VS. SWITCH</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-[1fr_auto_1fr] gap-3 md:gap-6 items-center w-full max-w-4xl mx-auto text-xs md:text-base">
+                                <div class="text-center text-emerald-400 font-black text-xl md:text-3xl mb-4 tracking-wider uppercase">الراوتر</div>
+                                <div></div>
+                                <div class="text-center text-orange-400 font-black text-xl md:text-3xl mb-4 tracking-wider uppercase">السويتش</div>
+                                
+                                <div class="bg-emerald-950/50 p-3 md:p-4 rounded-l-xl border-r-4 border-emerald-500 text-left text-emerald-100 font-bold leading-snug">ربط شبكات مختلفة</div>
+                                <div class="bg-[#1e293b] text-cyan-300 font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-cyan-800 text-center shadow-inner whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">الوظيفة الرئيسية<br><span class="text-[9px] md:text-[11px] text-cyan-600 font-mono">Function</span></div>
+                                <div class="bg-orange-950/50 p-3 md:p-4 rounded-r-xl border-l-4 border-orange-500 text-right text-orange-100 font-bold leading-snug">ربط أجهزة داخل الشبكة</div>
+                                
+                                <div class="bg-emerald-950/50 p-3 md:p-4 rounded-l-xl border-r-4 border-emerald-500 text-left text-emerald-100 font-bold leading-snug">الطبقة الثالثة (Network) <span class="text-emerald-500 ml-1">L3</span></div>
+                                <div class="bg-[#1e293b] text-cyan-300 font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-cyan-800 text-center shadow-inner whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">طبقة OSI<br><span class="text-[9px] md:text-[11px] text-cyan-600 font-mono">Layer</span></div>
+                                <div class="bg-orange-950/50 p-3 md:p-4 rounded-r-xl border-l-4 border-orange-500 text-right text-orange-100 font-bold leading-snug"><span class="text-orange-500 mr-1">L2</span> الطبقة الثانية (Data Link)</div>
+
+                                <div class="bg-emerald-950/50 p-3 md:p-4 rounded-l-xl border-r-4 border-emerald-500 text-left text-emerald-100 font-bold leading-snug">يعتمد على IP Address</div>
+                                <div class="bg-[#1e293b] text-cyan-300 font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-cyan-800 text-center shadow-inner whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">العنونة<br><span class="text-[9px] md:text-[11px] text-cyan-600 font-mono">Addressing</span></div>
+                                <div class="bg-orange-950/50 p-3 md:p-4 rounded-r-xl border-l-4 border-orange-500 text-right text-orange-100 font-bold leading-snug">يعتمد على MAC Address</div>
+
+                                <div class="bg-emerald-950/50 p-3 md:p-4 rounded-l-xl border-r-4 border-emerald-500 text-left text-emerald-100 font-bold leading-snug">حزم البيانات (Packets)</div>
+                                <div class="bg-[#1e293b] text-cyan-300 font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-cyan-800 text-center shadow-inner whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">البيانات<br><span class="text-[9px] md:text-[11px] text-cyan-600 font-mono">Data Unit</span></div>
+                                <div class="bg-orange-950/50 p-3 md:p-4 rounded-r-xl border-l-4 border-orange-500 text-right text-orange-100 font-bold leading-snug">إطارات البيانات (Frames)</div>
+
+                                <div class="bg-emerald-950/50 p-3 md:p-4 rounded-l-xl border-r-4 border-emerald-500 text-left text-emerald-100 font-bold leading-snug">جدول التوجيه <br><span class="text-[10px] md:text-xs text-emerald-400">يحدد أفضل مسار (Routing Table)</span></div>
+                                <div class="bg-[#1e293b] text-cyan-300 font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-cyan-800 text-center shadow-inner whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">القرار<br><span class="text-[9px] md:text-[11px] text-cyan-600 font-mono">Decision</span></div>
+                                <div class="bg-orange-950/50 p-3 md:p-4 rounded-r-xl border-l-4 border-orange-500 text-right text-orange-100 font-bold leading-snug">جدول الماك <br><span class="text-[10px] md:text-xs text-orange-400">يوجّه للبورت الصحيح (MAC Table)</span></div>
+
+                                <div class="bg-emerald-950/50 p-3 md:p-4 rounded-l-xl border-r-4 border-emerald-500 text-left text-emerald-100 font-bold leading-snug flex items-center justify-end gap-2"><span>الاتصال بالإنترنت</span><i class="fas fa-globe text-emerald-400 text-xl"></i></div>
+                                <div class="bg-[#1e293b] text-cyan-300 font-black px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg border border-cyan-800 text-center shadow-inner whitespace-nowrap z-10 mx-[-10px] md:mx-[-20px] relative">مثال<br><span class="text-[9px] md:text-[11px] text-cyan-600 font-mono">Example</span></div>
+                                <div class="bg-orange-950/50 p-3 md:p-4 rounded-r-xl border-l-4 border-orange-500 text-right text-orange-100 font-bold leading-snug flex items-center justify-start gap-2"><i class="fas fa-network-wired text-orange-400 text-xl"></i><span>توسيع عدد المنافذ</span></div>
+                            </div>
+                        </div>
+
+                        <h2 style="margin-top: 4rem; color: #00627a; text-align: center;">الفروق بين TCP و UDP (في طبقة النقل)</h2>
+                        <div style="overflow-x: auto;">
+                            <table class="modern-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 60px;">Layer</th>
-                                        <th style="width: 70px;">#</th>
-                                        <th>LAYERS / الطبقات</th>
-                                        <th>نوع البيانات</th>
-                                        <th>وظائف الطبقات</th>
-                                        <th>Protocols</th>
-                                        <th>أجهزة الطبقة</th>
+                                        <th>وجه المقارنة</th>
+                                        <th>بروتوكول TCP</th>
+                                        <th style="color: #fbd38d;">بروتوكول UDP</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr class="l7-row hover-scale">
-                                        <td>7</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-globe"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة التطبيقات</div><div class="text-xs uppercase font-mono">APPLICATION</div></td>
-                                        <td><div class="font-black text-lg">DATA</div></td>
-                                        <td><div class="font-bold text-sm">تطبيقات الشبكة</div><div class="text-[11px] font-mono">WhatsApp - Snapchat - Telegram - Facebook</div></td>
-                                        <td><div class="font-bold text-sm font-mono">HTTP, SMTP<br>FTP</div></td>
-                                        <td><div class="font-black text-3xl">-</div></td>
-                                    </tr>
-                                    <tr class="l6-row hover-scale">
-                                        <td>6</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-code"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة العرض</div><div class="text-xs uppercase font-mono">PRESENTATION</div></td>
-                                        <td><div class="font-black text-lg">DATA</div></td>
-                                        <td><div class="text-xs font-mono">Formatting, Encryption, Compression</div><div class="font-bold text-sm">تنسيق البيانات، التشفير، الضغط</div></td>
-                                        <td><div class="font-bold text-sm font-mono">HTML<br>JPEG</div></td>
-                                        <td><div class="font-black text-3xl">-</div></td>
-                                    </tr>
-                                    <tr class="l5-row hover-scale">
-                                        <td>5</td>
-                        <h2 style="margin-top: 3rem; color: #00627a;">الفروق بين TCP و UDP (في طبقة النقل)</h2>
-                        <table style="font-size: 1.1rem;">
-                            <thead style="background: rgba(255,255,255,0.8);">
-                                <tr>
-                                    <th style="padding: 1.5rem;">وجه المقارنة</th>
-                                    <th style="padding: 1.5rem;">بروتوكول TCP</th>
-                                    <th style="padding: 1.5rem;">بروتوكول UDP</th>
-                                </tr>
-                            </thead>
-                            <tbody style="background: rgba(255,255,255,0.5);">
-                                <tr><td style="padding: 1rem;">حجم الـ Header</td><td style="padding: 1rem;">20 bytes</td><td style="padding: 1rem;">8 bytes</td></tr>
-                                <tr><td style="padding: 1rem;">السرعة</td><td style="padding: 1rem;">أبطأ</td><td style="padding: 1rem;">أسرع</td></tr>
-                                <tr><td style="padding: 1rem;">التحقق من الأخطاء وترتيب الأجزاء</td><td style="color: #059669; padding: 1rem; font-weight: 900;">نعم</td><td style="color: #ef4444; padding: 1rem; font-weight: 900;">لا</td></tr>
-                                <tr><td style="padding: 1rem;">الاستخدام الشائع</td><td style="padding: 1rem;">تحميل الملفات، التصفح، الإيميل</td><td style="padding: 1rem;">البث المرئي، ألعاب الأونلاين المباشرة</td></tr>
-                            </tbody>
-                        </table>
-
-                        <!-- تصميم إنفوجرافيك المقارنة الجديد بين الراوتر والسويتش بناءً على ملف PDF -->
-                        <div style="background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(241,245,249,0.9)); border-radius: 2rem; padding: 3rem 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,98,122,0.15); margin-top: 4rem; overflow: hidden;">
-                            
-                            <div style="text-align: center; margin-bottom: 3rem;">
-                                <h2 style="color: #004d60; font-size: 2.5rem; font-weight: 900; margin-top: 0; margin-bottom: 0.5rem;">مقارنة بين جهازي الراوتر والسويتش</h2>
-                                <p style="color: #64748b; font-weight: bold; font-family: Tahoma, sans-serif; letter-spacing: 2px;">ROUTER VS SWITCH</p>
-                            </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 1.5rem; position: relative; max-width: 900px; margin: 0 auto;">
-                                
-                                <!-- الخط المركزي -->
-                                <div style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; border-left: 3px dashed #cbd5e1; transform: translateX(-50%); z-index: 0;"></div>
-
-                                <!-- عناوين الأجهزة -->
-                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; margin-bottom: 1rem;">
-                                    <div style="text-align: center;">
-                                        <div style="font-size: 4rem; color: #00627a; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🎛️</div>
-                                        <h3 style="font-size: 1.8rem; font-weight: 900; color: #004d60; margin: 0;">السويتش SWITCH</h3>
-                                    </div>
-                                    <div style="width: 130px;"></div>
-                                    <div style="text-align: center;">
-                                        <div style="font-size: 4rem; color: #29b5a8; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">📡</div>
-                                        <h3 style="font-size: 1.8rem; font-weight: 900; color: #00627a; margin: 0;">الراوتر ROUTER</h3>
-                                    </div>
-                                </div>
-
-                                <!-- نقطة المقارنة 1: الطبقة -->
-                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
-                                        <span style="font-weight: 900; color: #064e3b; font-size: 1.2rem; display: block;">الطبقة الثانية</span>
-                                        <p style="margin: 0; color: #047857; font-weight: bold; font-size: 0.95rem;">(ربط البيانات data link layer)</p>
-                                    </div>
-                                    <div style="background: #004d60; color: white; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1.1rem;">طبقة العمل</div>
-                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
-                                        <span style="font-weight: 900; color: #1e3a8a; font-size: 1.2rem; display: block;">الطبقة الثالثة</span>
-                                        <p style="margin: 0; color: #1d4ed8; font-weight: bold; font-size: 0.95rem;">(طبقة الشبكة network layer)</p>
-                                    </div>
-                                </div>
-
-                                <!-- نقطة المقارنة 2: الرسالة -->
-                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
-                                        <span style="font-weight: 900; color: #064e3b; font-size: 1.1rem; display: block;">تسمى الرسالة المحولة بـ</span>
-                                        <p style="margin: 0; color: #047857; font-weight: 900; font-size: 1.4rem; font-family: Tahoma, sans-serif;">(Frame)</p>
-                                    </div>
-                                    <div style="background: #00627a; color: white; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1.1rem;">اسم الرسالة</div>
-                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
-                                        <span style="font-weight: 900; color: #1e3a8a; font-size: 1.1rem; display: block;">تسمى الرسالة الموجهة بـ</span>
-                                        <p style="margin: 0; color: #1d4ed8; font-weight: 900; font-size: 1.4rem; font-family: Tahoma, sans-serif;">(Packet)</p>
-                                    </div>
-                                </div>
-
-                                <!-- نقطة المقارنة 3: نطاق الاستخدام -->
-                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
-                                        <span style="font-weight: 900; color: #064e3b; font-size: 1.2rem; display: block;">الشبكات المحلية</span>
-                                        <p style="margin: 0; color: #047857; font-weight: bold; font-size: 1.1rem; font-family: Tahoma, sans-serif;">LAN</p>
-                                    </div>
-                                    <div style="background: #0083a3; color: white; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1.1rem;">الاستخدام</div>
-                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
-                                        <span style="font-weight: 900; color: #1e3a8a; font-size: 1.2rem; display: block;">الشبكات الواسعة</span>
-                                        <p style="margin: 0; color: #1d4ed8; font-weight: bold; font-size: 1.1rem; font-family: Tahoma, sans-serif;">WAN</p>
-                                    </div>
-                                </div>
-
-                                <!-- نقطة المقارنة 4: المنافذ -->
-                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
-                                        <p style="margin: 0 0 0.5rem 0; color: #064e3b; font-weight: bold; font-size: 1rem;">منافذ ايثرنت بعدد <span style="font-weight: 900; color: #059669;">24 أو 48 منفذ</span></p>
-                                        <p style="margin: 0; color: #b91c1c; font-weight: bold; font-size: 0.95rem;">❌ لا يوجد به منافذ سيريال</p>
-                                    </div>
-                                    <div style="background: #29b5a8; color: white; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1.1rem;">المنافذ</div>
-                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
-                                        <p style="margin: 0 0 0.5rem 0; color: #1e3a8a; font-weight: bold; font-size: 1rem;">منافذ ايثرنت تصل إلى <span style="font-weight: 900; color: #2563eb;">4 منافذ</span></p>
-                                        <p style="margin: 0; color: #15803d; font-weight: bold; font-size: 0.95rem;">✅ يوجد به منافذ سيريال</p>
-                                    </div>
-                                </div>
-
-                                <!-- نقطة المقارنة 5: الاعتماد الأساسي -->
-                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: relative; z-index: 1; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                                    <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0 1.5rem 1.5rem 0; border-right: 6px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: left;">
-                                        <span style="font-weight: bold; color: #064e3b; font-size: 1rem; display: block; margin-bottom: 0.25rem;">يعتمد اعتماد كلي على جدول:</span>
-                                        <p style="margin: 0; color: #047857; font-weight: 900; font-size: 1.2rem;">العناوين الفيزيائية MAC Address</p>
-                                    </div>
-                                    <div style="background: #4bd5c9; color: #004d60; width: 130px; padding: 0.6rem; text-align: center; border-radius: 999px; font-weight: 900; box-shadow: 0 4px 6px rgba(0,0,0,0.15); margin: 0 -65px; z-index: 2; border: 4px solid white; font-size: 1rem;">التوجيه بناءً على</div>
-                                    <div style="background: #e0f2fe; padding: 1.5rem; border-radius: 1.5rem 0 0 1.5rem; border-left: 6px solid #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); text-align: right;">
-                                        <span style="font-weight: bold; color: #1e3a8a; font-size: 1rem; display: block; margin-bottom: 0.25rem;">يعتمد اعتماد كلي على بروتوكول:</span>
-                                        <p style="margin: 0; color: #1d4ed8; font-weight: 900; font-size: 1.2rem; font-family: Tahoma, sans-serif;">IP Address</p>
-                                    </div>
-                                </div>
-
-                            </div>
+                                    <tr><td>حجم الـ Header</td><td>20 bytes</td><td>8 bytes</td></tr>
+                                    <tr><td>السرعة</td><td>أبطأ</td><td>أسرع</td></tr>
+                                    <tr><td>التحقق من الأخطاء وترتيب الأجزاء</td><td style="color: #059669;">نعم</td><td style="color: #ef4444;">لا</td></tr>
+                                    <tr><td>الاستخدام الشائع</td><td>تحميل الملفات، التصفح، الإيميل</td><td>البث المرئي، ألعاب الأونلاين المباشرة</td></tr>
+                                </tbody>
+                            </table>
                         </div>
-
                     </div>`
                 ]
             },
@@ -884,7 +874,7 @@
 
         window.renderAdminLogin = () => {
             const area = document.getElementById('lms-area'); if(!area) return;
-            area.innerHTML = `<div class="max-w-xl mx-auto glass-card p-12 md:p-16 text-center bg-white/80 border-t-[8px] border-tvtcmain"><h3 class="text-3xl font-black mb-8 text-slate-900 border-b border-white/50 pb-4">رمز المرور السري للمعلم</h3><input type="password" id="lpass" class="w-full p-5 rounded-2xl bg-white border border-slate-300 mb-8 text-center text-3xl font-bold tracking-widest text-slate-800 focus:border-tvtcteal outline-none shadow-inner" placeholder="****"><button onclick="window.checkAdmin()" class="btn-primary shadow-md text-xl">دخول للوحة التحكم</button><button onclick="window.goHome()" class="mt-8 text-slate-600 font-bold hover:text-slate-900 transition text-lg bg-white/50 px-6 py-2 rounded-xl border border-white/60">العودة للرئيسية</button></div>`;
+            area.innerHTML = `<div class="max-w-xl mx-auto glass-card p-12 md:p-16 text-center bg-white/80 border-t-[8px] border-tvtcmain"><h3 class="text-3xl font-black mb-8 text-slate-900 border-b border-white/50 pb-4">رمز المرور السري للمعلم</h3><input type="password" id="lpass" class="w-full p-5 rounded-2xl bg-white border border-slate-300 mb-8 text-center text-3xl font-bold tracking-widest text-slate-800 focus:border-tvtcteal outline-none shadow-inner" placeholder="****"><button onclick="window.checkAdmin()" class="btn-primary shadow-md text-xl">دخول للوحة التحكم</button></div>`;
         };
 
         window.checkAdmin = () => { const p = document.getElementById('lpass'); if(p && p.value==='1234') window.renderDash(); else window.toast("الرمز غير صحيح", "error"); };
@@ -930,6 +920,7 @@
                 </div>
             </div>
 
+            <!-- قسم إضافة درس CMS -->
             <div id="view-add" class="w-full page-enter hidden">
                 <div class="grid lg:grid-cols-1 gap-10 items-start w-full">
                     <div class="glass-card p-8 md:p-12 border-t-[8px] border-tvtcteal relative bg-white/90 w-full">
@@ -991,6 +982,9 @@
                                 <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 shadow-sm"><span class="text-[9px] font-bold text-slate-600">لون المربع:</span><input type="color" onchange="window.changeBoxColor(this.value)" class="cursor-pointer" title="تغيير لون خلفية المربع المحدد"></div>
                                 <button onclick="window.showEmojiPicker('cms-content')" title="مكتبة الأيقونات" class="text-orange-600 font-bold text-[10px] md:text-xs flex items-center gap-1 bg-white border border-slate-300 px-3 py-2 rounded-lg shadow-sm"><i class="fas fa-icons"></i> أيقونات</button>
                                 <button onclick="window.insertResizableImage('cms-content')" title="إدراج صورة برابط (قابلة للتغيير والتحجيم)" class="text-tvtcmain font-bold text-[10px] md:text-xs flex items-center gap-1 bg-white border border-slate-300 px-3 py-2 rounded-lg shadow-sm"><i class="fas fa-link"></i> صورة برابط</button>
+                                <select onchange="window.insertShape(this.value, 'cms-content'); this.value='';" class="text-[10px] md:text-xs p-2 font-bold text-slate-800 border border-slate-300 rounded-lg shadow-sm">
+                                    <option value="">إدراج شكل هندسي</option><option value="square">مربع ⬛</option><option value="circle">دائرة 🟢</option><option value="rectangle">مستطيل ▬</option>
+                                </select>
                                 <select onchange="window.insertCards(this.value, 'cms-content'); this.value='';" class="text-[10px] md:text-xs p-2 font-bold text-tvtcmain border border-tvtcmain bg-white rounded-lg shadow-sm">
                                     <option value="">إدراج كروت جاهزة</option>
                                     <option value="1">كرت واحد</option>
@@ -999,6 +993,7 @@
                                     <option value="4">4 كروت</option>
                                     <option value="5">5 كروت</option>
                                 </select>
+                                <button onclick="window.insertTemplate('cms-content', 'table')" title="إدراج جدول منسق" class="text-orange-700 font-bold text-[10px] md:text-xs flex items-center gap-1 w-full justify-center md:w-auto bg-orange-50 border border-orange-200 hover:bg-orange-500 hover:text-white px-4 py-2 rounded-lg shadow-sm transition"><i class="fas fa-table"></i> جدول جاهز</button>
                             </div>
                         </div>
                         <div id="cms-content" contenteditable="true" class="rich-editor w-full shadow-inner bg-white/90">اكتب المحتوى هنا...</div>
@@ -1034,7 +1029,6 @@
             </div>
             `;
             
-            // فتح التبويب الافتراضي
             window.switchTab('home');
             window.loadCmsList();
         };
@@ -1074,7 +1068,6 @@
         window.insertResizableImage = (editorId) => { 
             let url = prompt("أدخل رابط الصورة (URL):"); 
             if(url) {
-                // دمج ذكي لروابط قوقل درايف
                 if (url.includes('drive.google.com/file/d/')) {
                     const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
                     if (match && match[1]) url = 'https://lh3.googleusercontent.com/d/' + match[1];
@@ -1135,6 +1128,32 @@
             window.execCmd(editorId, 'insertHTML', html);
         };
 
+
+        window.insertShape = (type, editorId) => {
+            let html = '';
+            if(type === 'square') html = `<div style="display:inline-block; margin:10px;"><div style="width: 100px; height: 100px; background-color: #00627a; display: inline-block; resize: both; overflow: hidden; border: 2px solid #004d60; border-radius: 8px;"></div></div>&nbsp;`;
+            if(type === 'rectangle') html = `<div style="display:inline-block; margin:10px;"><div style="width: 200px; height: 100px; background-color: #29b5a8; display: inline-block; resize: both; overflow: hidden; border: 2px solid #0083a3; border-radius: 8px;"></div></div>&nbsp;`;
+            if(type === 'circle') html = `<div style="display:inline-block; margin:10px;"><div style="width: 100px; height: 100px; background-color: #4bd5c9; display: inline-block; resize: both; overflow: hidden; border-radius: 50%; border: 2px solid #29b5a8;"></div></div>&nbsp;`;
+            window.execCmd(editorId, 'insertHTML', html);
+        }
+
+        window.insertTemplate = (editorId, type) => {
+            let html = '';
+            if (type === 'table') {
+                html = `<div style="background: rgba(255,255,255,0.8); border: 1px solid rgba(0,98,122,0.2); border-radius: 1.5rem; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow-x: auto;">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr><th>العمود الأول</th><th>العمود الثاني</th><th>العمود الثالث</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>بيانات</td><td>بيانات</td><td style="color: #00627a;">بيانات هامة</td></tr>
+                                    <tr><td>بيانات</td><td>بيانات</td><td style="color: #00627a;">بيانات هامة</td></tr>
+                                </tbody>
+                            </table>
+                        </div><p><br></p>`;
+            }
+            window.execCmd(editorId, 'insertHTML', html);
+        };
 
         window.resetCMSForm = () => {
             const docIdEl = document.getElementById('edit-doc-id'); if(docIdEl) docIdEl.value = '';
@@ -1412,8 +1431,8 @@
             document.getElementById('q-render-area').innerHTML = q.questions.map((qu, i) => {
                 let optsHtml = '';
                 if(qu.type === 'short-answer') optsHtml = `<input type="text" class="w-full p-4 md:p-6 bg-white border border-slate-300 rounded-xl text-slate-900 font-black focus:border-tvtcmain outline-none tin text-lg shadow-inner" placeholder="اكتب إجابتك هنا..">`;
-                else if(qu.type === 'multiple-answers') optsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">${qu.options.map((o, j) => `<label class="p-4 md:p-5 border border-slate-200 bg-slate-50 rounded-2xl flex items-center gap-4 cursor-pointer hover:border-tvtcteal hover:bg-tvtclight/10 transition shadow-sm"><input type="checkbox" class="w-5 h-5 md:w-6 md:h-6 rounded border-slate-400 text-tvtcmain focus:ring-tvtcmain" value="${j}"> <span class="font-bold text-sm md:text-lg text-slate-800">${o}</span></label>`).join('')}</div>`;
-                else optsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">${qu.options.map((o, j) => `<div onclick="window.selectOpt(this)" class="p-4 md:p-5 border border-slate-200 bg-slate-50 rounded-2xl cursor-pointer opt-box hover:border-tvtcteal hover:bg-tvtclight/10 font-bold text-sm md:text-lg text-slate-800 transition shadow-sm" data-v="${j}">${o}</div>`).join('')}</div>`;
+                else if(qu.type === 'multiple-answers') optsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${qu.options.map((o, j) => `<label class="p-4 md:p-5 border border-slate-200 bg-slate-50 rounded-2xl flex items-center gap-4 cursor-pointer hover:border-tvtcteal hover:bg-tvtclight/10 transition shadow-sm"><input type="checkbox" class="w-5 h-5 md:w-6 md:h-6 rounded border-slate-400 text-tvtcmain focus:ring-tvtcmain" value="${j}"> <span class="font-bold text-sm md:text-lg text-slate-800">${o}</span></label>`).join('')}</div>`;
+                else optsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${qu.options.map((o, j) => `<div onclick="window.selectOpt(this)" class="p-4 md:p-5 border border-slate-200 bg-slate-50 rounded-2xl cursor-pointer opt-box hover:border-tvtcteal hover:bg-tvtclight/10 font-bold text-sm md:text-lg text-slate-800 transition shadow-sm" data-v="${j}">${o}</div>`).join('')}</div>`;
                 
                 return `<div class="p-6 md:p-10 bg-white border border-slate-300 rounded-2xl md:rounded-[3rem] q-entry shadow-md" data-i="${i}" data-ty="${qu.type}" data-cr="${typeof qu.correctAnswer==='object'?qu.correctAnswer.join(','):qu.correctAnswer}">
                     <div class="text-lg md:text-2xl font-black mb-6 leading-relaxed text-tvtcdark rich-display p-0 border-none bg-transparent min-h-0 h-auto inline shadow-none">${i+1}. ${qu.text}</div> ${qu.type==='multiple-answers'?'<span class="text-[10px] md:text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2 font-black align-top shadow-sm border border-blue-200">(اختيار متعدد)</span>':''}
