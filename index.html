@@ -292,7 +292,7 @@
                 tabs: ['المرجع والطبقات السبع', 'التغليف وأنواع الاتصال', 'مقارنات بروتوكولات وأجهزة'],
                 content: [
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcteal">
-                        <h1 style="color: #004d60; margin-bottom: 1rem;">📚 مرجع OSI (Open Systems Interconnection)</h1>
+                        <h1 style="color: #004d60; margin-bottom: 1rem; text-align: center; font-weight: 900;">📚 نموذج OSI المرجعي (الطبقات السبع)</h1>
                         <p style="text-align: justify; font-size: 1.1rem; font-weight: bold; color: #1e293b;">هو مراحل تكون البيانات ونقلها من الجهاز المرسل (Source device) إلى الجهاز المستقبل (Destination device). وضعته المنظمة الدولية للمعايير (ISO) سنة 1983 برقم 7498 ليكون نموذج نظري موثوق للاتصالات مقسم لـ 7 طبقات.</p>
                         
                         <h2 style="color: #00627a; margin-top: 1.5rem;">فائدة فهم طبقات OSI:</h2>
@@ -304,104 +304,167 @@
                         </ul>
 
                         <div style="text-align: center; margin-bottom: 2rem; border-top: 2px dashed rgba(0,98,122,0.2); padding-top: 2rem;">
-                            <h1 style="color: #004d60; margin-bottom: 0.5rem; font-size: 2.2rem; font-weight: 900; text-transform: uppercase;">THE 7 LAYERS OF THE OSI MODEL | نموذج OSI للطبقات السبع</h1>
-                            <p style="font-size: 1rem; font-weight: bold; color: #475569; letter-spacing: 1px;">EDUCATIONAL TEMPLATE | نموذج تعليمي</p>
+                            <h2 style="color: #004d60; margin-bottom: 0.5rem; font-size: 2.2rem; font-weight: 900; text-transform: uppercase;">نموذج OSI للطبقات السبع</h2>
+                            <p style="font-size: 1rem; font-weight: bold; color: #475569; letter-spacing: 1px;">THE 7 LAYERS OF THE OSI MODEL | EDUCATIONAL TEMPLATE</p>
                         </div>
 
-                        <div class="osi-wrapper custom-scrollbar">
-                            <!-- أسهم التغليف (على اليسار) -->
-                            <div class="osi-arrows">
-                                <div class="osi-arrow-down">
-                                    <div class="osi-text-vertical" style="color: #7e22ce;"><span style="font-family: Cairo, sans-serif; font-size: 12px;">تغليف</span><br>ENCAPSULATION</div>
-                                    <div style="width: 4px; background: #7e22ce; flex-grow: 1; border-radius: 4px; margin: 4px 0;"></div>
-                                    <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 10px solid #7e22ce;"></div>
+                        <!-- الجدول المخصص مع منع كسر التصميم (التمرير الأفقي) -->
+                        <div style="width: 100%; overflow-x: auto; padding-bottom: 1rem;" class="custom-scrollbar" dir="ltr">
+                            <div style="display: flex; gap: 15px; min-width: 1000px; padding: 10px; font-family: 'Cairo', sans-serif;">
+                                
+                                <!-- الأسهم الجانبية -->
+                                <div style="display: flex; flex-direction: column; width: 40px; flex-shrink: 0; padding: 3rem 0; justify-content: space-between; text-align: center;">
+                                    <div style="display: flex; flex-direction: column; align-items: center; height: 48%;">
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; font-weight: 900; color: #7e22ce; letter-spacing: 1px; line-height: 1.2;">
+                                            <span style="font-size: 16px; margin-bottom: 4px;">تغليف</span><br>ENCAPSULATION
+                                        </div>
+                                        <div style="width: 4px; background: #7e22ce; flex-grow: 1; border-radius: 4px; margin: 5px 0;"></div>
+                                        <div style="width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #7e22ce;"></div>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; align-items: center; height: 48%;">
+                                        <div style="width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 12px solid #16a34a;"></div>
+                                        <div style="width: 4px; background: #16a34a; flex-grow: 1; border-radius: 4px; margin: 5px 0;"></div>
+                                        <div style="writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; font-weight: 900; color: #16a34a; letter-spacing: 1px; line-height: 1.2;">
+                                            <span style="font-size: 16px; margin-top: 4px;">فك التغليف</span><br>DECAPSULATION
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="osi-arrow-up">
-                                    <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid #16a34a;"></div>
-                                    <div style="width: 4px; background: #16a34a; flex-grow: 1; border-radius: 4px; margin: 4px 0;"></div>
-                                    <div class="osi-text-vertical" style="color: #16a34a;"><span style="font-family: Cairo, sans-serif; font-size: 12px;">فك التغليف</span><br>DECAPSULATION</div>
-                                </div>
-                            </div>
 
-                            <!-- جدول الطبقات -->
-                            <table class="osi-table-new">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 60px;">Layer</th>
-                                        <th style="width: 70px;">#</th>
-                                        <th>LAYERS / الطبقات</th>
-                                        <th>نوع البيانات</th>
-                                        <th>وظائف الطبقات</th>
-                                        <th>Protocols</th>
-                                        <th>أجهزة الطبقة</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="l7-row hover-scale">
-                                        <td>7</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-globe"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة التطبيقات</div><div class="text-xs uppercase font-mono">APPLICATION</div></td>
-                                        <td><div class="font-black text-lg">DATA</div></td>
-                                        <td><div class="font-bold text-sm">تطبيقات الشبكة</div><div class="text-[11px] font-mono">WhatsApp - Snapchat - Telegram - Facebook</div></td>
-                                        <td><div class="font-bold text-sm font-mono">HTTP, SMTP<br>FTP</div></td>
-                                        <td><div class="font-black text-3xl">-</div></td>
-                                    </tr>
-                                    <tr class="l6-row hover-scale">
-                                        <td>6</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-code"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة العرض</div><div class="text-xs uppercase font-mono">PRESENTATION</div></td>
-                                        <td><div class="font-black text-lg">DATA</div></td>
-                                        <td><div class="text-xs font-mono">Formatting, Encryption, Compression</div><div class="font-bold text-sm">تنسيق البيانات، التشفير، الضغط</div></td>
-                                        <td><div class="font-bold text-sm font-mono">HTML<br>JPEG</div></td>
-                                        <td><div class="font-black text-3xl">-</div></td>
-                                    </tr>
-                                    <tr class="l5-row hover-scale">
-                                        <td>5</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-handshake"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة الجلسة</div><div class="text-xs uppercase font-mono">SESSION</div></td>
-                                        <td><div class="font-black text-lg">DATA</div></td>
-                                        <td><div class="text-xs font-mono">Establishment, maintenance, termination</div><div class="font-bold text-sm">إنشاء الجلسات، صيانة، إنهاؤها</div></td>
-                                        <td><div class="font-bold text-sm font-mono">NFS<br>SQL</div></td>
-                                        <td><div class="font-black text-3xl">-</div></td>
-                                    </tr>
-                                    <tr class="l4-row hover-scale">
-                                        <td>4</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-cloud-upload-alt"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة النقل</div><div class="text-xs uppercase font-mono">TRANSPORT</div></td>
-                                        <td><div class="font-black text-lg">Segment</div></td>
-                                        <td><div class="text-xs font-mono">protocol TCP/UDP, Data type</div><div class="font-bold text-sm">تحديد نوع البيانات، تحديد البروتوكول المستخدم</div></td>
-                                        <td><div class="font-bold text-sm font-mono">TCP<br>UDP</div></td>
-                                        <td><div class="font-black text-3xl">-</div></td>
-                                    </tr>
-                                    <tr class="l3-row hover-scale">
-                                        <td>3</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-random"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة الشبكة</div><div class="text-xs uppercase font-mono">NETWORK</div></td>
-                                        <td><div class="font-black text-lg">Packet</div></td>
-                                        <td><div class="text-xs font-mono">Routing, IP Addressing</div><div class="font-bold text-sm">التوجيه، العنونة المنطقية IP</div></td>
-                                        <td><div class="font-bold text-sm font-mono">IP Address<br>OSPF</div></td>
-                                        <td><div class="font-black text-2xl"><i class="fas fa-route"></i></div><div class="text-[10px] font-black">Routers</div></td>
-                                    </tr>
-                                    <tr class="l2-row hover-scale">
-                                        <td>2</td>
-                                        <td><div class="osi-icon-box"><i class="fas fa-link"></i></div></td>
-                                        <td><div class="font-black text-lg">طبقة ربط البيانات</div><div class="text-xs uppercase font-mono">DATA LINK</div></td>
-                                        <td><div class="font-black text-lg">Frame</div></td>
-                                        <td><div class="text-xs font-mono">Physical Addressing (MAC), Error Detection</div><div class="font-bold text-sm">العنونة المادية MAC، كشف الأخطاء</div></td>
-                                        <td><div class="font-bold text-sm font-mono">MAC Address<br>Wi-Fi</div></td>
-                                        <td><div class="font-black text-2xl"><i class="fas fa-network-wired"></i></div><div class="text-[10px] font-black">Switches</div></td>
-                                    </tr>
-                                    <tr class="l1-row hover-scale">
-                                        <td>1</td>
-                                        <td><div class="osi-icon-box flex flex-col leading-[1.2]" style="font-size: 7px; font-family: monospace;"><span>10111</span><span>01010</span><span>10111</span></div></td>
-                                        <td><div class="font-black text-lg">الطبقة الفيزيائية</div><div class="text-xs uppercase font-mono">PHYSICAL</div></td>
-                                        <td><div class="font-black text-lg">Bits</div></td>
-                                        <td><div class="text-xs font-mono">Cabling, Connector Types</div><div class="font-bold text-sm">الكابلات، أنواع الموصلات</div></td>
-                                        <td><div class="font-bold text-sm font-mono">Ethernet<br>802.11</div></td>
-                                        <td><div class="font-black text-2xl flex gap-1 justify-center"><i class="fas fa-ethernet"></i></div><div class="text-[10px] font-black">Cables, NICs</div></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                <!-- الجدول -->
+                                <table style="width: 100%; border-collapse: separate; border-spacing: 0 6px; text-align: center; box-shadow: none; border: none; margin: 0;">
+                                    <thead style="background: #e2e8f0; color: #1e293b; font-weight: 900;">
+                                        <tr>
+                                            <th style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px 0 0 8px; width: 60px;">Layer</th>
+                                            <th style="padding: 10px; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 60px;"></th>
+                                            <th style="padding: 10px; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 200px;">LAYERS / الطبقات</th>
+                                            <th style="padding: 10px; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 140px;">نوع البيانات</th>
+                                            <th style="padding: 10px; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1;">وظائف الطبقات</th>
+                                            <th style="padding: 10px; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; width: 140px;">Protocols</th>
+                                            <th style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 0 8px 8px 0; width: 140px;">أجهزة الطبقة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="font-weight: bold; color: #0f172a;">
+                                        <!-- الصف 7 -->
+                                        <tr style="background: #faf5ff; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #d8b4fe; border-radius: 8px 0 0 8px; border-left: 8px solid #7e22ce;">7</td>
+                                            <td style="border-top: 1px solid #d8b4fe; border-bottom: 1px solid #d8b4fe; padding: 5px;">
+                                                <div style="width: 45px; height: 45px; background: #7e22ce; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;"><i class="fas fa-globe"></i></div>
+                                            </td>
+                                            <td style="border-top: 1px solid #d8b4fe; border-bottom: 1px solid #d8b4fe; padding: 10px;">
+                                                <div style="font-weight: 900; font-size: 1.1rem;">طبقة التطبيقات</div><div style="font-size: 0.85rem; font-family: monospace;">APPLICATION</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #d8b4fe; border-bottom: 1px solid #d8b4fe; padding: 10px; font-weight: 900; font-size: 1.1rem;">DATA</td>
+                                            <td style="border-top: 1px solid #d8b4fe; border-bottom: 1px solid #d8b4fe; padding: 10px;">
+                                                <div style="font-weight: bold; font-size: 1rem;">تطبيقات الشبكة</div><div style="font-size: 0.75rem; color: #475569; font-family: Tahoma;">WhatsApp - Snapchat - Telegram - Facebook</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #d8b4fe; border-bottom: 1px solid #d8b4fe; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">HTTP, SMTP<br>FTP</td>
+                                            <td style="border: 1px solid #d8b4fe; border-radius: 0 8px 8px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
+                                        </tr>
+                                        <!-- الصف 6 -->
+                                        <tr style="background: #fff7ed; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fdba74; border-radius: 8px 0 0 8px; border-left: 8px solid #ea580c;">6</td>
+                                            <td style="border-top: 1px solid #fdba74; border-bottom: 1px solid #fdba74; padding: 5px;">
+                                                <div style="width: 45px; height: 45px; background: #ea580c; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;"><i class="fas fa-file-code"></i></div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fdba74; border-bottom: 1px solid #fdba74; padding: 10px;">
+                                                <div style="font-weight: 900; font-size: 1.1rem;">طبقة العرض</div><div style="font-size: 0.85rem; font-family: monospace;">PRESENTATION</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fdba74; border-bottom: 1px solid #fdba74; padding: 10px; font-weight: 900; font-size: 1.1rem;">DATA</td>
+                                            <td style="border-top: 1px solid #fdba74; border-bottom: 1px solid #fdba74; padding: 10px;">
+                                                <div style="font-size: 0.8rem; color: #475569; font-family: Tahoma;">Formatting, Encryption, Compression</div><div style="font-weight: bold; font-size: 1rem;">تنسيق البيانات، التشفير، الضغط</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fdba74; border-bottom: 1px solid #fdba74; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">HTML<br>JPEG</td>
+                                            <td style="border: 1px solid #fdba74; border-radius: 0 8px 8px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
+                                        </tr>
+                                        <!-- الصف 5 -->
+                                        <tr style="background: #fdf2f8; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fbcfe8; border-radius: 8px 0 0 8px; border-left: 8px solid #be185d;">5</td>
+                                            <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 5px;">
+                                                <div style="width: 45px; height: 45px; background: #be185d; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;"><i class="fas fa-handshake"></i></div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 10px;">
+                                                <div style="font-weight: 900; font-size: 1.1rem;">طبقة الجلسة</div><div style="font-size: 0.85rem; font-family: monospace;">SESSION</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 10px; font-weight: 900; font-size: 1.1rem;">DATA</td>
+                                            <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 10px;">
+                                                <div style="font-size: 0.8rem; color: #475569; font-family: Tahoma;">Establishment, maintenance, termination</div><div style="font-weight: bold; font-size: 1rem;">إنشاء الجلسات، صيانة، إنهاؤها</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">NFS<br>SQL</td>
+                                            <td style="border: 1px solid #fbcfe8; border-radius: 0 8px 8px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
+                                        </tr>
+                                        <!-- الصف 4 -->
+                                        <tr style="background: #f0f9ff; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #93c5fd; border-radius: 8px 0 0 8px; border-left: 8px solid #0284c7;">4</td>
+                                            <td style="border-top: 1px solid #93c5fd; border-bottom: 1px solid #93c5fd; padding: 5px;">
+                                                <div style="width: 45px; height: 45px; background: #0284c7; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;"><i class="fas fa-box-open"></i></div>
+                                            </td>
+                                            <td style="border-top: 1px solid #93c5fd; border-bottom: 1px solid #93c5fd; padding: 10px;">
+                                                <div style="font-weight: 900; font-size: 1.1rem;">طبقة النقل</div><div style="font-size: 0.85rem; font-family: monospace;">TRANSPORT</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #93c5fd; border-bottom: 1px solid #93c5fd; padding: 10px; font-weight: 900; font-size: 1.1rem; font-family: Tahoma;">Segment</td>
+                                            <td style="border-top: 1px solid #93c5fd; border-bottom: 1px solid #93c5fd; padding: 10px;">
+                                                <div style="font-size: 0.8rem; color: #475569; font-family: Tahoma;">protocol TCP/UDP, Data type</div><div style="font-weight: bold; font-size: 1rem;">تحديد نوع البيانات، تحديد البروتوكول المستخدم</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #93c5fd; border-bottom: 1px solid #93c5fd; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">TCP<br>UDP</td>
+                                            <td style="border: 1px solid #93c5fd; border-radius: 0 8px 8px 0; padding: 10px; font-size: 1.5rem; font-weight: 900;">-</td>
+                                        </tr>
+                                        <!-- الصف 3 -->
+                                        <tr style="background: #f0fdf4; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #86efac; border-radius: 8px 0 0 8px; border-left: 8px solid #16a34a;">3</td>
+                                            <td style="border-top: 1px solid #86efac; border-bottom: 1px solid #86efac; padding: 5px;">
+                                                <div style="width: 45px; height: 45px; background: #16a34a; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;"><i class="fas fa-project-diagram"></i></div>
+                                            </td>
+                                            <td style="border-top: 1px solid #86efac; border-bottom: 1px solid #86efac; padding: 10px;">
+                                                <div style="font-weight: 900; font-size: 1.1rem;">طبقة الشبكة</div><div style="font-size: 0.85rem; font-family: monospace;">NETWORK</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #86efac; border-bottom: 1px solid #86efac; padding: 10px; font-weight: 900; font-size: 1.1rem; font-family: Tahoma;">Packet</td>
+                                            <td style="border-top: 1px solid #86efac; border-bottom: 1px solid #86efac; padding: 10px;">
+                                                <div style="font-size: 0.8rem; color: #475569; font-family: Tahoma;">Routing, IP Addressing</div><div style="font-weight: bold; font-size: 1rem;">التوجيه، العنونة المنطقية IP</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #86efac; border-bottom: 1px solid #86efac; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">IP Address<br>OSPF</td>
+                                            <td style="border: 1px solid #86efac; border-radius: 0 8px 8px 0; padding: 10px; line-height: 1.2;">
+                                                <div style="font-size: 1.8rem;"><i class="fas fa-route"></i></div><div style="font-size: 0.75rem; font-weight: 900; font-family: Tahoma;">Routers</div>
+                                            </td>
+                                        </tr>
+                                        <!-- الصف 2 -->
+                                        <tr style="background: #f0fdfa; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #5eead4; border-radius: 8px 0 0 8px; border-left: 8px solid #0d9488;">2</td>
+                                            <td style="border-top: 1px solid #5eead4; border-bottom: 1px solid #5eead4; padding: 5px;">
+                                                <div style="width: 45px; height: 45px; background: #0d9488; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: auto;"><i class="fas fa-link"></i></div>
+                                            </td>
+                                            <td style="border-top: 1px solid #5eead4; border-bottom: 1px solid #5eead4; padding: 10px;">
+                                                <div style="font-weight: 900; font-size: 1.1rem;">طبقة ربط البيانات</div><div style="font-size: 0.85rem; font-family: monospace;">DATA LINK</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #5eead4; border-bottom: 1px solid #5eead4; padding: 10px; font-weight: 900; font-size: 1.1rem; font-family: Tahoma;">Frame</td>
+                                            <td style="border-top: 1px solid #5eead4; border-bottom: 1px solid #5eead4; padding: 10px;">
+                                                <div style="font-size: 0.8rem; color: #475569; font-family: Tahoma;">Physical Addressing (MAC), Error Detection</div><div style="font-weight: bold; font-size: 1rem;">العنونة المادية MAC، كشف الأخطاء</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #5eead4; border-bottom: 1px solid #5eead4; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">MAC Address<br>Wi-Fi</td>
+                                            <td style="border: 1px solid #5eead4; border-radius: 0 8px 8px 0; padding: 10px; line-height: 1.2;">
+                                                <div style="font-size: 1.8rem;"><i class="fas fa-network-wired"></i></div><div style="font-size: 0.75rem; font-weight: 900; font-family: Tahoma;">Switches</div>
+                                            </td>
+                                        </tr>
+                                        <!-- الصف 1 -->
+                                        <tr style="background: #fef2f2; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                                            <td style="font-size: 1.8rem; font-weight: 900; border: 1px solid #fca5a5; border-radius: 8px 0 0 8px; border-left: 8px solid #e11d48;">1</td>
+                                            <td style="border-top: 1px solid #fca5a5; border-bottom: 1px solid #fca5a5; padding: 5px;">
+                                                <div style="width: 45px; height: 45px; background: #e11d48; color: white; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: monospace; font-size: 8px; line-height: 1.1; font-weight: bold; margin: auto;"><span>10111</span><span>01010</span><span>10111</span></div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fca5a5; border-bottom: 1px solid #fca5a5; padding: 10px;">
+                                                <div style="font-weight: 900; font-size: 1.1rem;">الطبقة الفيزيائية</div><div style="font-size: 0.85rem; font-family: monospace;">PHYSICAL</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fca5a5; border-bottom: 1px solid #fca5a5; padding: 10px; font-weight: 900; font-size: 1.1rem; font-family: Tahoma;">Bits</td>
+                                            <td style="border-top: 1px solid #fca5a5; border-bottom: 1px solid #fca5a5; padding: 10px;">
+                                                <div style="font-size: 0.8rem; color: #475569; font-family: Tahoma;">Cabling, Connector Types</div><div style="font-weight: bold; font-size: 1rem;">الكابلات، أنواع الموصلات</div>
+                                            </td>
+                                            <td style="border-top: 1px solid #fca5a5; border-bottom: 1px solid #fca5a5; padding: 10px; font-weight: bold; font-family: Tahoma; font-size: 0.9rem;">Ethernet<br>802.11</td>
+                                            <td style="border: 1px solid #fca5a5; border-radius: 0 8px 8px 0; padding: 10px; line-height: 1.2;">
+                                                <div style="font-size: 1.8rem;"><i class="fas fa-plug"></i></div><div style="font-size: 0.75rem; font-weight: 900; font-family: Tahoma;">Cables, NICs</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>`,
                     `<div class="rich-display glass-card border-t-[8px] border-tvtcmain">
