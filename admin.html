@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم — أكاديمية الشبكات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════
+   RESET & VARIABLES
+════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary:       #6c2fa0;
+  --primary-l:     #8b46c8;
+  --primary-d:     #4a1f6e;
+  --accent:        #00c9b1;
+  --accent-d:      #00a896;
+  --bg:            #080a14;
+  --bg2:           #0e1022;
+  --bg3:           #131629;
+  --sidebar-w:     256px;
+  --topbar-h:      64px;
+  --card:          #161929;
+  --card2:         #1c2038;
+  --border:        rgba(108,47,160,0.2);
+  --border2:       rgba(255,255,255,0.06);
+  --text:          #e8eaf6;
+  --text-muted:    #7a7f9e;
+  --text-faint:    #4a4f6b;
+  --radius:        14px;
+  --radius-sm:     8px;
+  --sidebar-item-h:42px;
+  --transition:    0.22s ease;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+  overflow: hidden; /* prevent body scroll; only main-content scrolls */
+}
+
+/* ════════════════════════════════════════════════
+   LOADING OVERLAY (shown until auth confirmed)
+════════════════════════════════════════════════ */
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  transition: opacity 0.4s ease;
+}
+#loadingOverlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.loading-ring {
+  width: 44px; height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loadingOverlay p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+/* ════════════════════════════════════════════════
+   DASHBOARD SHELL
+════════════════════════════════════════════════ */
+#dashboardShell {
+  display: none; /* shown after auth */
+  height: 100vh;
+  /* sidebar + topbar + content */
+}
+#dashboardShell.visible { display: flex; }
+
+/* ════════════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  height: 100vh;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: width var(--transition);
+  z-index: 100;
+}
+
+/* sidebar top accent */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+/* ── Sidebar Brand ── */
+.sb-brand {
+  padding: 1.4rem 1.25rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sb-brand-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.sb-brand-text { overflow: hidden; }
+.sb-brand-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.sb-brand-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Sidebar Nav ── */
+.sb-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sb-nav::-webkit-scrollbar { width: 4px; }
+.sb-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sb-section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.75rem 0.5rem 0.3rem;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0 0.85rem;
+  height: var(--sidebar-item-h);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: right;
+  transition: background var(--transition), color var(--transition);
+  position: relative;
+  white-space: nowrap;
+}
+
+.sb-item:hover {
+  background: rgba(108,47,160,0.12);
+  color: var(--text);
+}
+
+.sb-item.active {
+  background: rgba(108,47,160,0.2);
+  color: var(--text);
+}
+
+/* active indicator bar */
+.sb-item.active::before {
+  content: '';
+  position: absolute;
+  right: 0; top: 25%; bottom: 25%;
+  width: 3px;
+  background: linear-gradient(180deg, var(--primary-l), var(--accent));
+  border-radius: 2px 0 0 2px;
+}
+
+.sb-item .sb-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.sb-item .sb-badge {
+  margin-right: auto;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  line-height: 1.4;
+}
+
+/* ── Sidebar Footer (user info) ── */
+.sb-footer {
+  padding: 0.9rem 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.sb-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--primary-d), var(--primary-l));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.sb-user-info { flex: 1; overflow: hidden; }
+.sb-user-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-user-role {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════
+   MAIN AREA (topbar + content)
+════════════════════════════════════════════════ */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Top Bar ── */
+.topbar {
+  height: var(--topbar-h);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.75rem;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.topbar-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.3rem;
+}
+
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.topbar-breadcrumb .crumb-active {
+  color: var(--text);
+  font-weight: 700;
+}
+.topbar-breadcrumb .sep { opacity: 0.4; font-size: 0.7rem; }
+
+.topbar-right {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.topbar-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  background: rgba(0,201,177,0.1);
+  border: 1px solid rgba(0,201,177,0.25);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.topbar-chip .chip-dot {
+  width: 7px; height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Main Content ── */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 1.75rem;
+  background: var(--bg);
+}
+
+.main-content::-webkit-scrollbar { width: 5px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ════════════════════════════════════════════════
+   PANELS (shown/hidden by JS)
+════════════════════════════════════════════════ */
+.panel { display: none; animation: panelIn 0.3s ease both; }
+.panel.active { display: block; }
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Panel Header ── */
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+.panel-title-group {}
+.panel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.85rem;
+  background: rgba(108,47,160,0.15);
+  border: 1px solid rgba(108,47,160,0.3);
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary-l);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
+}
+.panel-title {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.2;
+}
+.panel-title span { color: var(--accent); }
+.panel-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  line-height: 1.6;
+}
+
+/* ── Stats Grid (Home) ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s, border-color 0.25s;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(108,47,160,0.4);
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.stat-card:hover::before { opacity: 1; }
+.stat-card.c-purple::before { background: linear-gradient(90deg, var(--primary), var(--primary-l)); }
+.stat-card.c-teal::before   { background: linear-gradient(90deg, var(--accent-d), var(--accent)); }
+.stat-card.c-amber::before  { background: linear-gradient(90deg, #e67e00, #f5a623); }
+.stat-card.c-blue::before   { background: linear-gradient(90deg, #0077cc, #00aaff); }
+
+.stat-icon {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+.stat-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.stat-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.73rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  color: var(--accent);
+}
+
+/* ── Quick Actions ── */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.action-btn:hover {
+  background: rgba(108,47,160,0.12);
+  border-color: rgba(108,47,160,0.4);
+  transform: translateY(-2px);
+}
+.action-btn .ab-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.ab-purple { background: rgba(108,47,160,0.2); }
+.ab-teal   { background: rgba(0,201,177,0.15); }
+.ab-amber  { background: rgba(245,166,35,0.15); }
+.ab-blue   { background: rgba(0,170,255,0.13); }
+
+/* ── Info Card ── */
+.info-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+.info-card h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.info-card p {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.85;
+}
+
+/* Placeholder "Coming Soon" badge */
+.coming-soon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1.1rem;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f5a623;
+  margin-top: 1rem;
+}
+
+/* ── Section divider ── */
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border2);
+}
+
+/* ════════════════════════════════════════════════
+   MOBILE OVERLAY (sidebar drawer)
+════════════════════════════════════════════════ */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 99;
+}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════ */
+@media (max-width: 860px) {
+  .sidebar {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100vh;
+    transform: translateX(0);
+    z-index: 200;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.hidden {
+    transform: translateX(100%);
+  }
+  .sidebar-overlay { display: block; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+  .topbar-hamburger { display: flex; }
+  .main-content { padding: 1.5rem 1.25rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .quick-actions { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOADING OVERLAY ══════════ -->
+<div id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <p>جارٍ التحقق من صلاحياتك…</p>
+</div>
+
+<!-- ══════════ DASHBOARD SHELL ══════════ -->
+<div id="dashboardShell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar hidden" id="sidebar">
+
+    <div class="sb-brand">
+      <div class="sb-brand-icon">🌐</div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-title">أكاديمية الشبكات</div>
+        <div class="sb-brand-sub">لوحة التحكم</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav" id="sbNav">
+
+      <div class="sb-section-label">القائمة الرئيسية</div>
+
+      <button class="sb-item active" data-panel="home" onclick="switchPanel(this, 'home')">
+        <span class="sb-icon">🏠</span>
+        الرئيسية
+      </button>
+
+      <button class="sb-item" data-panel="articles" onclick="switchPanel(this, 'articles')">
+        <span class="sb-icon">📝</span>
+        إدارة المقالات
+      </button>
+
+      <button class="sb-item" data-panel="quizzes" onclick="switchPanel(this, 'quizzes')">
+        <span class="sb-icon">📋</span>
+        إدارة الاختبارات
+        <span class="sb-badge">قريباً</span>
+      </button>
+
+      <button class="sb-item" data-panel="trainees" onclick="switchPanel(this, 'trainees')">
+        <span class="sb-icon">👥</span>
+        المتدربون
+      </button>
+
+      <div class="sb-section-label">الحساب</div>
+
+      <button class="sb-item" data-panel="settings" onclick="switchPanel(this, 'settings')">
+        <span class="sb-icon">⚙️</span>
+        الإعدادات
+      </button>
+
+      <button class="sb-item" id="btnLogout" onclick="handleLogout()">
+        <span class="sb-icon">🚪</span>
+        تسجيل الخروج
+      </button>
+
+    </nav>
+
+    <!-- User Info Footer -->
+    <div class="sb-footer">
+      <div class="sb-avatar" id="sbAvatarInitial">م</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name" id="sbUserName">—</div>
+        <div class="sb-user-role">مشرف النظام</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ── MAIN AREA ── -->
+  <div class="main-area">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="topbar-hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="القائمة">
+        ☰
+      </button>
+      <div class="topbar-breadcrumb">
+        <span>لوحة التحكم</span>
+        <span class="sep">›</span>
+        <span class="crumb-active" id="topbarCrumb">الرئيسية</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-chip">
+          <div class="chip-dot"></div>
+          متصل
+        </div>
+      </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <main class="main-content">
+
+      <!-- ════════════ PANEL: HOME ════════════ -->
+      <section class="panel active" id="panel-home">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">🏠 الصفحة الرئيسية</div>
+            <div class="panel-title">مرحباً، <span id="welcomeName">المشرف</span> 👋</div>
+            <div class="panel-subtitle">إليك نظرة عامة على حالة الأكاديمية اليوم</div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="section-label">الإحصاءات العامة</div>
+        <div class="stats-grid">
+          <div class="stat-card c-purple">
+            <span class="stat-icon">👥</span>
+            <div class="stat-value" id="statTrainees">—</div>
+            <div class="stat-label">متدرب مسجّل</div>
+            <div class="stat-change">↑ جارٍ التحميل</div>
+          </div>
+          <div class="stat-card c-teal">
+            <span class="stat-icon">📋</span>
+            <div class="stat-value" id="statQuizzes">—</div>
+            <div class="stat-label">اختبار منشور</div>
+            <div class="stat-change">↑ جارٍ التحميل</div>
+          </div>
+          <div class="stat-card c-amber">
+            <span class="stat-icon">📝</span>
+            <div class="stat-value">5</div>
+            <div class="stat-label">صفحة محتوى</div>
+            <div class="stat-change">✓ مكتملة</div>
+          </div>
+          <div class="stat-card c-blue">
+            <span class="stat-icon">📊</span>
+            <div class="stat-value" id="statResults">—</div>
+            <div class="stat-label">نتيجة محفوظة</div>
+            <div class="stat-change">↑ جارٍ التحميل</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-label">إجراءات سريعة</div>
+        <div class="quick-actions">
+          <button class="action-btn" onclick="switchPanelById('articles')">
+            <div class="ab-icon ab-purple">📝</div>
+            تعديل المقالات
+          </button>
+          <button class="action-btn" onclick="switchPanelById('quizzes')">
+            <div class="ab-icon ab-teal">➕</div>
+            إنشاء اختبار جديد
+          </button>
+          <button class="action-btn" onclick="switchPanelById('trainees')">
+            <div class="ab-icon ab-amber">👥</div>
+            إضافة متدرب
+          </button>
+          <a href="index.html" target="_blank" class="action-btn">
+            <div class="ab-icon ab-blue">🌐</div>
+            عرض الموقع
+          </a>
+        </div>
+
+        <!-- System Info -->
+        <div class="section-label">معلومات النظام</div>
+        <div class="info-card">
+          <h3>📌 حالة المشروع</h3>
+          <p>
+            تم بناء الواجهة الأمامية للموقع بالكامل (5 صفحات) وربطها بـ Firebase.
+            المرحلة الحالية: إعداد لوحة التحكم (CMS) ونظام الاختبارات (LMS).
+            قاعدة البيانات: Firestore — <strong style="color:var(--accent)">networkacademy-795c8</strong>
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>🗓️ الخطوات القادمة</h3>
+          <p>
+            الخطوة 3: بناء محرر المحتوى (CMS) لتعديل صفحات الموقع.<br>
+            الخطوة 4: بناء نظام الاختبارات (LMS) لإنشاء الأسئلة ومتابعة الدرجات.<br>
+            الخطوة 5: واجهة المتدرب لحل الاختبارات وعرض نتائجه.
+          </p>
+          <div class="coming-soon">⏳ قريباً — الخطوة 3</div>
+        </div>
+
+      </section>
+
+      <!-- ════════════ PANEL: ARTICLES ════════════ -->
+      <section class="panel" id="panel-articles">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">📝 إدارة المقالات</div>
+            <div class="panel-title">محرر <span>المحتوى</span></div>
+            <div class="panel-subtitle">تعديل وتحديث محتوى صفحات الموقع الخمس</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>📝 محرر النصوص المتطور (Rich Text Editor)</h3>
+          <p>
+            سيتمكن المشرف هنا من تحديد الصفحة المطلوبة وتعديل محتواها عبر محرر نصوص متطور (WYSIWYG)
+            يدعم العناوين والقوائم والجداول والصور. يتم حفظ التعديلات مباشرة في Firestore وتظهر
+            فوراً في الصفحات المقابلة على الموقع.
+          </p>
+          <div class="coming-soon">⏳ سيتوفر هذا القسم في الخطوة 3</div>
+        </div>
+      </section>
+
+      <!-- ════════════ PANEL: QUIZZES ════════════ -->
+      <section class="panel" id="panel-quizzes">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">📋 إدارة الاختبارات</div>
+            <div class="panel-title">نظام <span>الاختبارات</span></div>
+            <div class="panel-subtitle">إنشاء الاختبارات والأسئلة ومتابعة نتائج المتدربين</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>📋 إنشاء وإدارة الاختبارات (LMS)</h3>
+          <p>
+            سيتمكن المشرف هنا من إنشاء اختبارات جديدة وإضافة أسئلة متعددة الخيارات أو صح وخطأ،
+            وتحديد الوقت ومنح النقاط. كما ستتوفر لوحة لمتابعة درجات المتدربين وتصدير النتائج.
+          </p>
+          <div class="coming-soon">⏳ سيتوفر هذا القسم في الخطوة 4</div>
+        </div>
+      </section>
+
+      <!-- ════════════ PANEL: TRAINEES ════════════ -->
+      <section class="panel" id="panel-trainees">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">👥 المتدربون</div>
+            <div class="panel-title">إدارة <span>المتدربين</span></div>
+            <div class="panel-subtitle">عرض قائمة المتدربين وإضافة حسابات جديدة</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>👥 قائمة المتدربين</h3>
+          <p>
+            ستظهر هنا قائمة كاملة بجميع المتدربين المسجّلين مع إمكانية إضافة حسابات جديدة
+            وعرض نتائج كل متدرب ومتابعة نشاطه. يتم تخزين جميع البيانات في Firestore Collection
+            <code style="color:var(--accent)">users</code>.
+          </p>
+          <div class="coming-soon">⏳ سيتوفر هذا القسم في الخطوة 4</div>
+        </div>
+      </section>
+
+      <!-- ════════════ PANEL: SETTINGS ════════════ -->
+      <section class="panel" id="panel-settings">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">⚙️ الإعدادات</div>
+            <div class="panel-title">إعدادات <span>النظام</span></div>
+            <div class="panel-subtitle">إدارة إعدادات الحساب والنظام</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>🔐 معلومات الحساب</h3>
+          <p>
+            الاسم: <strong id="settingsName" style="color:var(--text)">—</strong><br>
+            البريد: <strong id="settingsEmail" style="color:var(--text)">—</strong><br>
+            الدور: <strong style="color:var(--accent)">مشرف</strong>
+          </p>
+        </div>
+        <div class="info-card">
+          <h3>🚪 تسجيل الخروج</h3>
+          <p>الضغط على الزر أدناه سيُنهي جلستك الحالية ويعيدك لصفحة تسجيل الدخول.</p>
+          <button
+            onclick="handleLogout()"
+            style="
+              margin-top:1.1rem;
+              padding:0.7rem 1.5rem;
+              background:rgba(244,67,54,0.12);
+              border:1px solid rgba(244,67,54,0.3);
+              border-radius:8px;
+              color:#ff6b6b;
+              font-family:'Cairo',sans-serif;
+              font-size:0.88rem;
+              font-weight:700;
+              cursor:pointer;
+              transition:all 0.2s;
+            "
+            onmouseover="this.style.background='rgba(244,67,54,0.22)'"
+            onmouseout="this.style.background='rgba(244,67,54,0.12)'"
+          >
+            🚪 تسجيل الخروج
+          </button>
+        </div>
+      </section>
+
+    </main><!-- /main-content -->
+  </div><!-- /main-area -->
+</div><!-- /dashboardShell -->
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
