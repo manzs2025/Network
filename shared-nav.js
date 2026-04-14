@@ -1,12 +1,12 @@
 /* shared-nav.js — يُحقن في كل صفحة لتوليد nav ديناميكياً */
 (function () {
   const pages = [
-    { href: 'index.html',    label: 'الرئيسية',       icon: '🏠'  },
-    { href: 'networks.html', label: 'شبكات الحاسب',   icon: '📡' },
-    { href: 'security.html', label: 'الأمان',          icon: '🔒' },
-    { href: 'osi.html',      label: 'نموذج OSI',       icon: '🔁' },
-    { href: 'cables.html',   label: 'الكيابل',         icon: '🔌' },
-    { href: 'ip.html',       label: 'بروتوكول IP',     icon: '🌍' },
+    { href: 'index.html',    label: 'الرئيسية',       icon: '🏠', num: '' },
+    { href: 'networks.html', label: 'شبكات الحاسب',   icon: '📡', num: '01' },
+    { href: 'security.html', label: 'الأمان',          icon: '🔒', num: '02' },
+    { href: 'osi.html',      label: 'نموذج OSI',       icon: '🔁', num: '03' },
+    { href: 'cables.html',   label: 'الكيابل',         icon: '🔌', num: '04' },
+    { href: 'ip.html',       label: 'بروتوكول IP',     icon: '🌍', num: '05' },
   ];
 
   const current = window.location.pathname.split('/').pop() || 'index.html';
@@ -22,6 +22,8 @@
     return `<a href="${p.href}" class="${active}">${p.icon} ${p.label}</a>`;
   }).join('');
 
+  const loginActive = current === 'login.html' ? 'active' : '';
+
   const nav = document.createElement('nav');
   nav.className = 'main-nav';
   nav.innerHTML = `
@@ -31,6 +33,10 @@
         مبادئ الشبكات
       </a>
       <ul class="nav-links">${linksHTML}</ul>
+      <a href="login.html" class="nav-login-btn ${loginActive}" aria-label="تسجيل الدخول">
+        <span class="nav-login-icon">🔐</span>
+        <span class="nav-login-text">دخول المشرف</span>
+      </a>
       <button class="nav-hamburger" id="navHamburger" aria-label="القائمة">
         <span></span><span></span><span></span>
       </button>
@@ -41,8 +47,65 @@
   const drawer = document.createElement('div');
   drawer.className = 'nav-drawer';
   drawer.id = 'navDrawer';
-  drawer.innerHTML = drawerHTML;
+  drawer.innerHTML = drawerHTML
+    + `<a href="login.html" class="nav-drawer-login ${loginActive}">🔐 دخول المشرف</a>`;
   document.body.insertBefore(drawer, nav.nextSibling);
+
+  /* ── CSS خاص بزر الدخول — يُحقن مرة واحدة ── */
+  if (!document.getElementById('nav-login-style')) {
+    const style = document.createElement('style');
+    style.id = 'nav-login-style';
+    style.textContent = `
+      .nav-login-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.38rem 0.95rem;
+        border: 1px solid rgba(0,201,177,0.35);
+        border-radius: 20px;
+        color: #00c9b1;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: background 0.22s, border-color 0.22s, color 0.22s;
+        font-family: 'Cairo', sans-serif;
+      }
+      .nav-login-btn:hover,
+      .nav-login-btn.active {
+        background: rgba(0,201,177,0.12);
+        border-color: rgba(0,201,177,0.65);
+        color: #00e5cf;
+      }
+      .nav-login-icon { font-size: 0.88rem; line-height: 1; }
+      /* إخفاء النص على الشاشات الضيقة جداً مع إبقاء الأيقونة */
+      @media (max-width: 640px) {
+        .nav-login-text { display: none; }
+        .nav-login-btn  { padding: 0.38rem 0.65rem; }
+      }
+      /* في الـ drawer على الجوال */
+      .nav-drawer-login {
+        padding: 0.7rem 1rem;
+        color: #00c9b1;
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 700;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background 0.2s;
+        border: 1px solid rgba(0,201,177,0.2);
+        margin-top: 0.25rem;
+      }
+      .nav-drawer-login:hover,
+      .nav-drawer-login.active {
+        background: rgba(0,201,177,0.12);
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   document.getElementById('navHamburger').addEventListener('click', () => {
     drawer.classList.toggle('open');
