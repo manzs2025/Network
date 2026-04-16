@@ -1,5 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
   getFirestore, doc, getDoc, collection, getCountFromServer, 
   addDoc, getDocs, deleteDoc, updateDoc, setDoc,
@@ -22,7 +22,7 @@ const db   = getFirestore(app);
 const TRAINEE_DOMAIN = "@trainee.network.com";
 const TRAINEE_DEFAULT_PASS = "12345678";
 
-// --- ربط الوظائف بالنافذة ---
+// --- ربط الوظائف بالنافذة لملف HTML ---
 window.handleLogout = () => confirm("هل تريد تسجيل الخروج؟") && signOut(auth).then(() => location.replace("login.html"));
 
 window.toggleSidebar = () => {
@@ -75,94 +75,60 @@ async function loadStats() {
   }
 }
 
-// --- إدارة المتدربين ---
-async function _createTraineeAccount(name, studentId) {
-  const email = studentId + TRAINEE_DOMAIN;
-  const tempApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
-  const tempAuth = getAuth(tempApp);
-  const { createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-  const cred = await createUserWithEmailAndPassword(tempAuth, email, TRAINEE_DEFAULT_PASS);
-  await setDoc(doc(db, "users", cred.user.uid), {
-    uid: cred.user.uid, email, studentId, displayName: name,
-    role: "trainee", createdAt: serverTimestamp()
-  });
-  await signOut(tempAuth);
-  await tempApp.delete();
-}
-
+// --- وظيفة الرفع الجماعي المطورة ---
 window.handleBulkImport = async function (inputEl) {
   const file = inputEl.files?.[0];
   if (!file || typeof XLSX === "undefined") return;
-  const data = await file.arrayBuffer(), workbook = XLSX.read(data, { type: "array" }), rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-  const colKeys = Object.keys(rows[0] || {}), nK = colKeys.find(k => k.trim().includes("الاسم")) || colKeys[0], iK = colKeys.find(k => k.trim().includes("رقم")) || colKeys[1];
+
+  const data = await file.arrayBuffer();
+  const workbook = XLSX.read(data, { type: "array" });
+  const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+  
+  const colKeys = Object.keys(rows[0] || {});
+  const nK = colKeys.find(k => k.trim().includes("الاسم")) || colKeys[0];
+  const iK = colKeys.find(k => k.trim().includes("رقم")) || colKeys[1];
+
   const valid = rows.filter(r => r[nK] && /^\d{10}$/.test(String(r[iK]).trim()));
-  if (!valid.length) return alert("لا توجد بيانات صحيحة");
-  if (confirm(`رفع ${valid.length} حساب؟`)) {
+  if (!valid.length) { alert("لا توجد بيانات صحيحة (تأكد أن الأرقام التدريبية 10 خانات)"); return; }
+
+  if (confirm(`هل تود إضافة ${valid.length} متدرب؟`)) {
+    const log = document.getElementById("bulkProgressLog");
     document.getElementById("bulkProgressWrap").style.display = "block";
-    const log = document.getElementById("bulkProgressLog"); log.innerHTML = "";
+    log.innerHTML = "جارٍ البدء...";
+
     for (const r of valid) {
+      const name = String(r[nK]).trim();
+      const studentId = String(r[iK]).trim();
+      const email = studentId + TRAINEE_DOMAIN;
+
       try {
-        await _createTraineeAccount(String(r[nK]).trim(), String(r[iK]).trim());
-        log.innerHTML += `<div style="color:#a5d6a7">✅ تم: ${r[nK]}</div>`;
-      } catch (e) { 
-        let errorMsg = e.code === "auth/email-already-in-use" ? "مسجل مسبقاً" : "فشل";
-        log.innerHTML += `<div style="color:#ff6b6b">❌ ${errorMsg}: ${r[nK]}</div>`; 
+        // إنشاء تطبيق ثانوي واحد لكل عملية رفع
+        const tempAppName = "BulkApp-" + Date.now();
+        const tempApp = initializeApp(firebaseConfig, tempAppName);
+        const tempAuth = getAuth(tempApp);
+        
+        const cred = await createUserWithEmailAndPassword(tempAuth, email, TRAINEE_DEFAULT_PASS);
+        await setDoc(doc(db, "users", cred.user.uid), {
+          uid: cred.user.uid, email, studentId, displayName: name,
+          role: "trainee", createdAt: serverTimestamp()
+        });
+
+        await signOut(tempAuth);
+        await deleteApp(tempApp);
+        log.innerHTML += `<div style="color:#a5d6a7">✅ تم بنجاح: ${name}</div>`;
+      } catch (e) {
+        let errorMsg = e.code === "auth/email-already-in-use" ? "مسجل مسبقاً" : "خطأ تقني";
+        log.innerHTML += `<div style="color:#ff6b6b">❌ ${errorMsg}: ${name}</div>`;
       }
-      log.scrollTop = log.scrollHeight; // تم تصحيح مسمى المتغير هنا
+      log.scrollTop = log.scrollHeight;
     }
+    alert("اكتملت المعالجة");
     loadTrainees(); loadStats();
   }
+  inputEl.value = "";
 };
 
+// --- جلب المتدربين مع تفعيل أزرار الإجراءات ---
 window.loadTrainees = async function () {
   const loadingEl = document.getElementById("traineesLoading"), wrap = document.getElementById("traineesTableWrap"), tbody = document.getElementById("traineesTableBody");
-  if (!tbody) return;
-  try {
-    const snap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee"), orderBy("createdAt", "desc")));
-    loadingEl.style.display = "none"; wrap.style.display = "block"; tbody.innerHTML = "";
-    snap.forEach(s => {
-      const d = s.data();
-      tbody.innerHTML += `
-        <tr data-uid="${s.id}">
-          <td>${d.displayName || "—"}</td>
-          <td style="direction:ltr;text-align:center">${d.studentId || "—"}</td>
-          <td style="text-align:center">—</td>
-          <td style="text-align:center">—</td>
-          <td>
-            <button class="tr-edit-btn" onclick="openEditTraineeModal('${s.id}','${d.displayName || ""}','${d.studentId || ""}')">✏️</button>
-            <button class="tr-edit-btn" style="background:rgba(244,67,54,0.1); color:#ff6b6b; border-color:rgba(244,67,54,0.2)" onclick="deleteTrainee('${s.id}')">🗑️</button>
-          </td>
-        </tr>`;
-    });
-  } catch (e) { console.error(e); }
-};
-
-window.deleteTrainee = async function(uid) {
-  if (!confirm("هل أنت متأكد من حذف هذا المتدرب نهائياً؟")) return;
-  try {
-    await deleteDoc(doc(db, "users", uid));
-    alert("✅ تم حذف المتدرب بنجاح");
-    loadTrainees(); loadStats();
-  } catch (e) { alert("❌ فشل الحذف: " + e.message); }
-};
-
-window.loadLatestResults = async function () {
-  const loadingEl = document.getElementById("resultsLoading"), wrap = document.getElementById("resultsTableWrap"), tbody = document.getElementById("resultsTableBody");
-  if (!tbody) return;
-  try {
-    const snap = await getDocs(query(collection(db, "results"), orderBy("submittedAt", "desc")));
-    loadingEl.style.display = "none"; wrap.style.display = "block"; tbody.innerHTML = "";
-    snap.forEach(docSnap => {
-      const d = docSnap.data();
-      tbody.innerHTML += `<tr><td>${d.displayName || d.userEmail}</td><td>${d.quizTitle}</td><td>${d.score}</td><td>${d.percentage}%</td><td>${d.passed ? '✅' : '❌'}</td><td>—</td></tr>`;
-    });
-  } catch (e) { console.error(e); }
-};
-
-window.openEditTraineeModal = (uid, n, s) => {
-  document.getElementById("editTraineeUid").value = uid;
-  document.getElementById("editTraineeName").value = n;
-  document.getElementById("editTraineeStudentId").value = s;
-  document.getElementById("editTraineeModal").classList.add("open");
-};
-window.closeEditTraineeModal = () => document.getElementById("editTraineeModal").classList.remove("open");
+  if (!
