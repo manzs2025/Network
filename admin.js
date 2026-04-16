@@ -23,35 +23,24 @@ const db   = getFirestore(app);
 const TRAINEE_DOMAIN = "@trainee.network.com";
 const TRAINEE_DEFAULT_PASS = "12345678";
 
-/* ─── حارس الصفحة والتهيئة ─── */
+/* ─── حارس الصفحة ─── */
 onAuthStateChanged(auth, async (user) => {
-  const loadingOverlay = document.getElementById("loadingOverlay");
-  try {
-    if (!user) { window.location.replace("login.html"); return; }
-    const snap = await getDoc(doc(db, "users", user.uid));
-    const profile = snap.exists() ? snap.data() : null;
-    
-    if (!profile || profile.role !== "admin") {
-      await signOut(auth);
-      window.location.replace("login.html?reason=unauthorized");
-      return;
-    }
-
-    document.getElementById("welcomeName").textContent = profile.displayName || user.email;
-    document.getElementById("sbUserName").textContent = profile.displayName || user.email;
-    document.getElementById("sbAvatarInitial").textContent = (profile.displayName ? profile.displayName[0] : "م").toUpperCase();
-    
-    loadingOverlay.classList.add("hidden");
-    setTimeout(() => {
-      loadingOverlay.style.display = "none";
-      document.getElementById("dashboardShell").classList.add("visible");
-      document.getElementById("sidebar").classList.remove("hidden");
-    }, 420);
-
-    loadStats();
-  } catch (err) {
-    console.error("Auth Guard Error:", err);
+  if (!user) { window.location.replace("login.html"); return; }
+  const snap = await getDoc(doc(db, "users", user.uid));
+  const profile = snap.exists() ? snap.data() : null;
+  if (!profile || profile.role !== "admin") {
+    await signOut(auth); window.location.replace("login.html?reason=unauthorized"); return;
   }
+  document.getElementById("welcomeName").textContent = profile.displayName || user.email;
+  document.getElementById("sbUserName").textContent = profile.displayName || user.email;
+  document.getElementById("sbAvatarInitial").textContent = (profile.displayName ? profile.displayName[0] : "م").toUpperCase();
+  document.getElementById("loadingOverlay").classList.add("hidden");
+  setTimeout(() => {
+    document.getElementById("loadingOverlay").style.display = "none";
+    document.getElementById("dashboardShell").classList.add("visible");
+    document.getElementById("sidebar").classList.remove("hidden");
+  }, 420);
+  loadStats();
 });
 
 /* ─── وظائف التنقل ─── */
@@ -60,58 +49,73 @@ window.switchPanel = function (btn, panelId) {
   if (btn) btn.classList.add("active");
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById(`panel-${panelId}`)?.classList.add("active");
-  
   if (panelId === "trainees") { loadTrainees(); loadLatestResults(); }
   if (panelId === "quizzes") loadQuizzes();
-  if (panelId === "articles") { loadArticles(); _initTinyMCE(); }
-  if (window.innerWidth <= 860) window.closeSidebar();
+  if (panelId === "articles") loadArticles();
 };
 
-window.switchPanelById = (id) => window.switchPanel(document.querySelector(`[data-panel="${id}"]`), id);
-window.toggleSidebar = () => { document.getElementById("sidebar").classList.toggle("hidden"); document.getElementById("sidebarOverlay").classList.toggle("visible"); };
-window.closeSidebar = () => { document.getElementById("sidebar").classList.add("hidden"); document.getElementById("sidebarOverlay").classList.remove("visible"); };
-
-/* ─── إدارة المتدربين ─── */
-async function _createTraineeAccount(name, studentId) {
-  const email = studentId + TRAINEE_DOMAIN;
-  const tempApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
-  const tempAuth = getAuth(tempApp);
-  const cred = await createUserWithEmailAndPassword(tempAuth, email, TRAINEE_DEFAULT_PASS);
-  await setDoc(doc(db, "users", cred.user.uid), {
-    uid: cred.user.uid, email, studentId, displayName: name,
-    role: "trainee", createdAt: serverTimestamp()
-  });
-  await signOut(tempAuth);
-  await deleteApp(tempApp);
-}
-
-window.addTrainee = async function () {
-  const nameEl = document.getElementById("newTraineeName"), idEl = document.getElementById("newTraineeEmail"), msgEl = document.getElementById("addTraineeMsg");
-  if (!nameEl.value.trim() || !/^\d{10}$/.test(idEl.value.trim())) return _showMsg(msgEl, "بيانات غير صحيحة", "error");
+/* ─── إدارة المتدربين (الحذف المباشر) ─── */
+window.deleteTrainee = async function(uid) {
+  if (!confirm("هل أنت متأكد من حذف المتدرب من قاعدة البيانات؟")) return;
   try {
-    await _createTraineeAccount(nameEl.value.trim(), idEl.value.trim());
-    _showMsg(msgEl, "✅ تم إنشاء الحساب", "success");
-    nameEl.value = ""; idEl.value = "";
-    loadTrainees();
-  } catch (e) { _showMsg(msgEl, "❌ خطأ: " + e.message, "error"); }
+    await deleteDoc(doc(db, "users", uid));
+    // تحديث الواجهة فوراً بحذف الصف برمجياً
+    const row = document.querySelector(`tr[data-uid="${uid}"]`);
+    if (row) row.remove();
+    loadStats(); // تحديث الأرقام في الإحصائيات
+    alert("✅ تم الحذف من قاعدة البيانات بنجاح.");
+  } catch (e) { alert("❌ فشل الحذف: " + e.message); }
 };
 
+window.loadTrainees = async function () {
+  const loadingEl = document.getElementById("traineesLoading"), wrap = document.getElementById("traineesTableWrap"), tbody = document.getElementById("traineesTableBody");
+  if (!tbody) return;
+  try {
+    const snap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee")));
+    tbody.innerHTML = "";
+    snap.forEach(s => {
+      const d = s.data();
+      tbody.innerHTML += `
+        <tr data-uid="${s.id}">
+          <td>${d.displayName || "—"}</td>
+          <td style="direction:ltr;text-align:center">${d.studentId || "—"}</td>
+          <td style="text-align:center">—</td>
+          <td style="text-align:center">—</td>
+          <td>
+            <button class="tr-edit-btn" onclick="openEditTraineeModal('${s.id}','${d.displayName || ""}','${d.studentId || ""}')">✏️</button>
+            <button class="tr-edit-btn" style="background:rgba(244,67,54,0.1); color:#ff6b6b;" onclick="deleteTrainee('${s.id}')">🗑️</button>
+          </td>
+        </tr>`;
+    });
+  } catch (e) { console.error(e); }
+  finally { loadingEl.style.display = "none"; wrap.style.display = "block"; }
+};
+
+/* ─── الرفع الجماعي (مع تنظيف الـ App) ─── */
 window.handleBulkImport = async function (inputEl) {
   const file = inputEl.files?.[0];
   if (!file || typeof XLSX === "undefined") return;
   const data = await file.arrayBuffer(), workbook = XLSX.read(data, { type: "array" }), rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
   const colKeys = Object.keys(rows[0] || {}), nK = colKeys.find(k => k.trim().includes("الاسم")) || colKeys[0], iK = colKeys.find(k => k.trim().includes("رقم")) || colKeys[1];
   const valid = rows.filter(r => r[nK] && /^\d{10}$/.test(String(r[iK]).trim()));
-  if (!valid.length) return alert("لا توجد بيانات صحيحة (تأكد من الرقم التدريبي 10 خانات)");
+  if (!valid.length) return alert("لا توجد بيانات صحيحة");
+  
   if (confirm(`رفع ${valid.length} حساب؟`)) {
     const log = document.getElementById("bulkProgressLog"); document.getElementById("bulkProgressWrap").style.display = "block";
     log.innerHTML = "";
     for (const r of valid) {
-      const name = String(r[nK]).trim(), sid = String(r[iK]).trim();
+      const name = String(r[nK]).trim(), sid = String(r[iK]).trim(), email = sid + TRAINEE_DOMAIN;
       try {
-        await _createTraineeAccount(name, sid);
+        const tempAppName = "App-" + Date.now();
+        const tApp = initializeApp(firebaseConfig, tempAppName);
+        const tAuth = getAuth(tApp);
+        const cred = await createUserWithEmailAndPassword(tAuth, email, TRAINEE_DEFAULT_PASS);
+        await setDoc(doc(db, "users", cred.user.uid), { uid: cred.user.uid, email, studentId: sid, displayName: name, role: "trainee", createdAt: serverTimestamp() });
+        await signOut(tAuth); await deleteApp(tApp);
         log.innerHTML += `<div style="color:#a5d6a7">✅ تم: ${name}</div>`;
-      } catch (e) { log.innerHTML += `<div style="color:#ff6b6b">❌ ${e.code==='auth/email-already-in-use'?'مكرر': 'فشل'}: ${name}</div>`; }
+      } catch (e) {
+        log.innerHTML += `<div style="color:#ff6b6b">❌ ${e.code === 'auth/email-already-in-use' ? 'مكرر في Auth' : 'فشل'}: ${name}</div>`;
+      }
       log.scrollTop = log.scrollHeight;
     }
     loadTrainees();
@@ -119,26 +123,7 @@ window.handleBulkImport = async function (inputEl) {
   inputEl.value = "";
 };
 
-window.loadTrainees = async function () {
-  const loadingEl = document.getElementById("traineesLoading"), wrap = document.getElementById("traineesTableWrap"), tbody = document.getElementById("traineesTableBody");
-  if (!tbody) return;
-  try {
-    // جرب جلب البيانات بدون ترتيب أولاً لتلافي مشكلة الـ Index
-    const snap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee")));
-    tbody.innerHTML = "";
-    snap.forEach(s => {
-      const d = s.data();
-      tbody.innerHTML += `<tr data-uid="${s.id}"><td>${d.displayName}</td><td style="direction:ltr;text-align:center">${d.studentId}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td><button class="tr-edit-btn" onclick="openEditTraineeModal('${s.id}','${d.displayName}','${d.studentId}')">✏️</button> <button class="tr-edit-btn" style="background:rgba(244,67,54,0.1); color:#ff6b6b; border-color:rgba(244,67,54,0.2)" onclick="deleteTrainee('${s.id}')">🗑️</button></td></tr>`;
-    });
-  } catch (e) { console.error("LoadTrainees Error:", e); }
-  finally { loadingEl.style.display = "none"; wrap.style.display = "block"; }
-};
-
-window.deleteTrainee = async function(uid) {
-  if (confirm("حذف المتدرب نهائياً؟")) { await deleteDoc(doc(db, "users", uid)); loadTrainees(); }
-};
-
-/* ── وظائف الإحصاء والمقالات والاختبارات ── */
+/* ── وظائف الإحصاء والنتائج ── */
 async function loadStats() {
   const statMap = { users: "statTrainees", quizzes: "statQuizzes", results: "statResults" };
   for (const [col, id] of Object.entries(statMap)) {
@@ -148,19 +133,8 @@ async function loadStats() {
     } catch (e) { console.error(e); }
   }
 }
-
-window.loadArticles = async () => {
-  const snap = await getDocs(query(collection(db, "articles"), orderBy("createdAt", "desc")));
-  const tbody = document.getElementById("articlesTableBody");
-  document.getElementById("articlesLoading").style.display = "none";
-  document.getElementById("articlesTableWrap").style.display = "block";
-  tbody.innerHTML = "";
-  snap.forEach(s => { const d = s.data(); tbody.innerHTML += `<tr><td>${d.title}</td><td>${d.pageId}</td><td>—</td><td><button onclick="editArticle('${s.id}')">✏️</button> <button onclick="deleteArticle('${s.id}')">🗑️</button></td></tr>`; });
-};
-
 window.loadLatestResults = async function () {
   const loadingEl = document.getElementById("resultsLoading"), wrap = document.getElementById("resultsTableWrap"), tbody = document.getElementById("resultsTableBody");
-  if (!tbody) return;
   try {
     const snap = await getDocs(query(collection(db, "results"), orderBy("submittedAt", "desc")));
     tbody.innerHTML = "";
@@ -169,8 +143,9 @@ window.loadLatestResults = async function () {
   finally { loadingEl.style.display = "none"; wrap.style.display = "block"; }
 };
 
-function _showMsg(el, text, type) { el.textContent = text; el.className = `qz-form-msg ${type}`; el.style.display = "block"; setTimeout(() => el.style.display = "none", 5000); }
 window.handleLogout = () => confirm("خروج؟") && signOut(auth).then(() => location.replace("login.html"));
+window.toggleSidebar = () => { document.getElementById("sidebar").classList.toggle("hidden"); document.getElementById("sidebarOverlay").classList.toggle("visible"); };
+window.closeSidebar = () => { document.getElementById("sidebar").classList.add("hidden"); document.getElementById("sidebarOverlay").classList.remove("visible"); };
 window.openEditTraineeModal = (uid, n, s) => { document.getElementById("editTraineeUid").value = uid; document.getElementById("editTraineeName").value = n; document.getElementById("editTraineeStudentId").value = s; document.getElementById("editTraineeModal").classList.add("open"); };
 window.closeEditTraineeModal = () => document.getElementById("editTraineeModal").classList.remove("open");
 window.saveEditTrainee = async function () { const uid = document.getElementById("editTraineeUid").value, name = document.getElementById("editTraineeName").value.trim(), sid = document.getElementById("editTraineeStudentId").value.trim(); await updateDoc(doc(db, "users", uid), { displayName: name, studentId: sid, email: sid + TRAINEE_DOMAIN }); closeEditTraineeModal(); loadTrainees(); };
