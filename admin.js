@@ -15,7 +15,7 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, doc, getDoc,
          collection, getCountFromServer,
          addDoc, getDocs, deleteDoc, updateDoc,
-         query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+         query, orderBy, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 /* ─── إعدادات Firebase ────────────────────────────────── */
 const firebaseConfig = {
@@ -695,7 +695,226 @@ window.switchPanel = function (btn, panelId) {
   _origSwitchPanel(btn, panelId);
   if (panelId === "quizzes")  loadQuizzes();
   if (panelId === "articles") { loadArticles(); _initTinyMCE(); }
+  if (panelId === "trainees") { loadTrainees(); loadLatestResults(); }
 };
+
+/* ════════════════════════════════════════════════════════
+   8. إدارة المتدربين (Trainees CRUD + Results)
+════════════════════════════════════════════════════════ */
+
+const PAGE_LABELS_TR = {
+  networks:"شبكات الحاسب الآلي", security:"الأمان في الشبكات",
+  osi:"نموذج OSI", cables:"كيابل الشبكات", ip:"بروتوكول IP",
+};
+
+/* ════════════
+   addTrainee — إنشاء حساب متدرب جديد عبر Firebase Auth ثانوي
+════════════ */
+window.addTrainee = async function () {
+  const nameEl  = document.getElementById("newTraineeName");
+  const emailEl = document.getElementById("newTraineeEmail");
+  const passEl  = document.getElementById("newTraineePass");
+  const msgEl   = document.getElementById("addTraineeMsg");
+  const btn     = document.getElementById("btnAddTrainee");
+
+  const name  = nameEl.value.trim();
+  const email = emailEl.value.trim();
+  const pass  = passEl.value.trim();
+
+  if (!name)  { _showTrMsg(msgEl,"يرجى إدخال اسم المتدرب","error");   nameEl.focus();  return; }
+  if (!email) { _showTrMsg(msgEl,"يرجى إدخال البريد الإلكتروني","error"); emailEl.focus(); return; }
+  if (pass.length < 6) { _showTrMsg(msgEl,"كلمة المرور يجب أن تكون 6 أحرف على الأقل","error"); passEl.focus(); return; }
+
+  btn.disabled = true;
+  document.getElementById("addTraineeBtnText").style.display    = "none";
+  document.getElementById("addTraineeBtnSpinner").style.display = "inline";
+
+  try {
+    /* ── إنشاء حساب ثانوي مؤقت لإنشاء المستخدم دون تسجيل دخوله ── */
+    const { initializeApp: initApp2 }                = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getAuth: getAuth2, createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+    const { getFirestore: getFS2, doc: doc2, setDoc: setDoc2, serverTimestamp: sts2 } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const app2  = initApp2(firebaseConfig, "secondary-" + Date.now());
+    const auth2 = getAuth2(app2);
+    const db2   = getFS2(app2);
+
+    const cred = await createUserWithEmailAndPassword(auth2, email, pass);
+    const uid  = cred.user.uid;
+
+    await setDoc2(doc2(db2, "users", uid), {
+      uid,
+      email,
+      displayName: name,
+      role:        "trainee",
+      createdAt:   sts2(),
+      lastLogin:   null,
+    });
+
+    await auth2.signOut();
+
+    _showTrMsg(msgEl, `✅ تم إنشاء حساب "${name}" بنجاح`, "success");
+    nameEl.value = "";
+    emailEl.value = "";
+    passEl.value  = "";
+
+    /* تحديث الإحصاء */
+    countCollection("users").then(n => {
+      const el = document.getElementById("statTrainees");
+      if (el) el.textContent = n;
+    });
+
+    loadTrainees();
+
+  } catch (err) {
+    const errMap = {
+      "auth/email-already-in-use": "البريد الإلكتروني مسجّل مسبقاً",
+      "auth/invalid-email":        "صيغة البريد غير صحيحة",
+      "auth/weak-password":        "كلمة المرور ضعيفة جداً",
+    };
+    _showTrMsg(msgEl, errMap[err.code] ?? `خطأ: ${err.message}`, "error");
+  } finally {
+    btn.disabled = false;
+    document.getElementById("addTraineeBtnText").style.display    = "inline";
+    document.getElementById("addTraineeBtnSpinner").style.display = "none";
+  }
+};
+
+/* ════════════
+   loadTrainees — جلب قائمة المتدربين من Firestore
+════════════ */
+window.loadTrainees = async function () {
+  const loadingEl = document.getElementById("traineesLoading");
+  const emptyEl   = document.getElementById("traineesEmpty");
+  const wrap      = document.getElementById("traineesTableWrap");
+  const tbody     = document.getElementById("traineesTableBody");
+  if (!tbody) return;
+
+  loadingEl.style.display = "flex";
+  emptyEl.style.display   = "none";
+  wrap.style.display      = "none";
+
+  try {
+    const q    = query(
+      collection(db, "users"),
+      where("role", "==", "trainee"),
+      orderBy("createdAt", "desc")
+    );
+    const snap = await getDocs(q);
+
+    loadingEl.style.display = "none";
+
+    if (snap.empty) { emptyEl.style.display = "block"; return; }
+
+    wrap.style.display = "block";
+    tbody.innerHTML    = "";
+
+    /* جلب عدد اختبارات كل متدرب */
+    for (const docSnap of snap.docs) {
+      const d = docSnap.data();
+      const uid = docSnap.id;
+
+      const resultsSnap = await getDocs(
+        query(collection(db, "results"), where("userId", "==", uid))
+      );
+      const quizCount = resultsSnap.size;
+
+      const dateStr = d.createdAt?.toDate
+        ? d.createdAt.toDate().toLocaleDateString("ar-SA",{year:"numeric",month:"short",day:"numeric"})
+        : "—";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${_escHtml(d.displayName ?? "—")}</td>
+        <td style="direction:ltr;text-align:right;font-size:0.82rem;">${_escHtml(d.email ?? "—")}</td>
+        <td><span class="qz-count-badge">${quizCount}</span></td>
+        <td><span class="qz-date">${dateStr}</span></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+  } catch (err) {
+    console.error("loadTrainees:", err);
+    loadingEl.style.display = "none";
+    emptyEl.style.display   = "block";
+    emptyEl.textContent     = `خطأ: ${err.message}`;
+  }
+};
+
+/* ════════════
+   loadLatestResults — آخر 20 نتيجة لجميع المتدربين
+════════════ */
+window.loadLatestResults = async function () {
+  const loadingEl = document.getElementById("resultsLoading");
+  const emptyEl   = document.getElementById("resultsEmpty");
+  const wrap      = document.getElementById("resultsTableWrap");
+  const tbody     = document.getElementById("resultsTableBody");
+  if (!tbody) return;
+
+  loadingEl.style.display = "flex";
+  emptyEl.style.display   = "none";
+  wrap.style.display      = "none";
+
+  try {
+    const q    = query(
+      collection(db, "results"),
+      orderBy("submittedAt", "desc")
+    );
+    const snap = await getDocs(q);
+
+    loadingEl.style.display = "none";
+
+    if (snap.empty) { emptyEl.style.display = "block"; return; }
+
+    wrap.style.display = "block";
+    tbody.innerHTML    = "";
+
+    let count = 0;
+    snap.forEach(docSnap => {
+      if (count++ >= 30) return; /* آخر 30 نتيجة فقط */
+      const d      = docSnap.data();
+      const passed = d.passed ?? (d.percentage >= 50);
+      const date   = d.submittedAt?.toDate
+        ? d.submittedAt.toDate().toLocaleDateString("ar-SA",{year:"numeric",month:"short",day:"numeric"})
+        : "—";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${_escHtml(d.displayName ?? d.userEmail ?? "—")}</td>
+        <td><span class="qz-page-badge" style="font-size:0.72rem;">${_escHtml(d.quizTitle ?? "—")}</span></td>
+        <td>${d.score ?? 0} / ${d.totalPoints ?? 0}</td>
+        <td><strong style="color:${passed?"#a5d6a7":"#ef9a9a"}">${d.percentage ?? 0}%</strong></td>
+        <td>${passed
+          ? '<span style="color:#a5d6a7;font-size:0.78rem;font-weight:700;">✓ ناجح</span>'
+          : '<span style="color:#ef9a9a;font-size:0.78rem;font-weight:700;">✗ راسب</span>'}</td>
+        <td><span class="qz-date">${date}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error("loadLatestResults:", err);
+    loadingEl.style.display = "none";
+    emptyEl.style.display   = "block";
+  }
+};
+
+/* ── طي/فرد نموذج إضافة متدرب ── */
+window.toggleAddTrainee = function () {
+  const body = document.getElementById("addTraineeBody");
+  if (!body) return;
+  const isOpen = body.style.display !== "none";
+  body.style.display = isOpen ? "none" : "block";
+};
+
+/* ── رسائل نموذج المتدربين ── */
+function _showTrMsg(el, text, type) {
+  if (!el) return;
+  el.textContent   = text;
+  el.className     = `qz-form-msg ${type}`;
+  el.style.display = "block";
+  if (type === "success") setTimeout(() => { el.style.display = "none"; }, 6000);
+}
 
 /* ════════════════════════════════════════════════════════
    7. إدارة المقالات (Articles CRUD + TinyMCE Full Editor)

@@ -1693,18 +1693,97 @@ html, body {
           <div class="panel-title-group">
             <div class="panel-tag">👥 المتدربون</div>
             <div class="panel-title">إدارة <span>المتدربين</span></div>
-            <div class="panel-subtitle">عرض قائمة المتدربين وإضافة حسابات جديدة</div>
+            <div class="panel-subtitle">إضافة حسابات متدربين جديدة ومتابعة درجاتهم</div>
           </div>
         </div>
-        <div class="info-card">
-          <h3>👥 قائمة المتدربين</h3>
-          <p>
-            ستظهر هنا قائمة كاملة بجميع المتدربين المسجّلين مع إمكانية إضافة حسابات جديدة
-            وعرض نتائج كل متدرب ومتابعة نشاطه. يتم تخزين جميع البيانات في Firestore Collection
-            <code style="color:var(--accent)">users</code>.
-          </p>
-          <div class="coming-soon">⏳ سيتوفر هذا القسم في الخطوة 4</div>
+
+        <!-- نموذج إضافة متدرب -->
+        <div class="art-form-card" style="margin-bottom:1.75rem;">
+          <div class="art-form-header">
+            <h3 class="art-form-title"><span>➕</span> إضافة متدرب جديد</h3>
+            <button class="qz-collapse-btn" onclick="toggleAddTrainee()">تصغير ↑</button>
+          </div>
+          <div id="addTraineeBody" style="padding:1.5rem;">
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="newTraineeName">الاسم الكامل *</label>
+                <input type="text" id="newTraineeName" class="qz-input" placeholder="مثال: أحمد محمد العمري">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="newTraineeEmail">البريد الإلكتروني *</label>
+                <input type="email" id="newTraineeEmail" class="qz-input" placeholder="ahmed@example.com" style="direction:ltr;text-align:right">
+              </div>
+            </div>
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="newTraineePass">كلمة المرور *</label>
+                <input type="text" id="newTraineePass" class="qz-input" placeholder="6 أحرف على الأقل" style="direction:ltr;text-align:right">
+              </div>
+              <div class="qz-field-group" style="justify-content:flex-end;padding-top:1.4rem;">
+                <button class="qz-save-btn" id="btnAddTrainee" onclick="addTrainee()" style="width:100%;justify-content:center;">
+                  <span id="addTraineeBtnText">➕ إنشاء الحساب</span>
+                  <span id="addTraineeBtnSpinner" style="display:none">⏳</span>
+                </button>
+              </div>
+            </div>
+            <div class="qz-form-msg" id="addTraineeMsg" style="display:none"></div>
+          </div>
         </div>
+
+        <!-- جدول المتدربين -->
+        <div class="qz-table-section">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">👥 قائمة المتدربين</h3>
+            <button class="qz-refresh-btn" onclick="loadTrainees()">↻ تحديث</button>
+          </div>
+          <div class="qz-table-loading" id="traineesLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل المتدربين…</span>
+          </div>
+          <div class="qz-table-empty" id="traineesEmpty" style="display:none">لا يوجد متدربون مسجّلون بعد</div>
+          <div class="qz-table-wrap" id="traineesTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>الاسم</th>
+                  <th>البريد الإلكتروني</th>
+                  <th>عدد الاختبارات</th>
+                  <th>تاريخ التسجيل</th>
+                </tr>
+              </thead>
+              <tbody id="traineesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- جدول آخر النتائج -->
+        <div class="qz-table-section" style="margin-top:1.5rem;">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">📊 آخر نتائج المتدربين</h3>
+            <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
+          </div>
+          <div class="qz-table-loading" id="resultsLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل النتائج…</span>
+          </div>
+          <div class="qz-table-empty" id="resultsEmpty" style="display:none">لا توجد نتائج بعد</div>
+          <div class="qz-table-wrap" id="resultsTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>المتدرب</th>
+                  <th>الاختبار</th>
+                  <th>الدرجة</th>
+                  <th>النسبة</th>
+                  <th>النتيجة</th>
+                  <th>التاريخ</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
       </section>
 
       <!-- ════════════ PANEL: SETTINGS ════════════ -->

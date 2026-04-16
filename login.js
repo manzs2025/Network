@@ -92,9 +92,8 @@ passToggle.addEventListener("click", () => {
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
   const profile = await fetchUserProfile(user.uid);
-  if (profile?.role === "admin") {
-    window.location.href = "admin.html";
-  }
+  if (profile?.role === "admin")   { window.location.href = "admin.html";   }
+  if (profile?.role === "trainee") { window.location.href = "trainee.html"; }
 });
 
 /* ─── جلب ملف المستخدم من Firestore ───────────────────── */
@@ -153,11 +152,18 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    /* ── 4. نجاح: توجيه المشرف ── */
-    showSuccess(`مرحباً ${profile.displayName}، جارٍ التحويل…`);
-    setTimeout(() => {
-      window.location.href = "admin.html";
-    }, 900);
+    /* ── 4. توجيه حسب الدور ── */
+    if (profile.role === "admin") {
+      showSuccess(`مرحباً ${profile.displayName}، جارٍ التحويل…`);
+      setTimeout(() => { window.location.href = "admin.html"; }, 900);
+    } else if (profile.role === "trainee") {
+      showSuccess(`أهلاً ${profile.displayName}، جارٍ الدخول…`);
+      setTimeout(() => { window.location.href = "trainee.html"; }, 900);
+    } else {
+      await auth.signOut();
+      showError("عفواً، لا تملك صلاحية الدخول");
+      setLoading(false);
+    }
 
   } catch (err) {
     showError(translateError(err.code));

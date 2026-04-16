@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة المتدرب — أكاديمية الشبكات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & VARS ─── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --primary:      #6c2fa0;
+  --primary-l:    #8b46c8;
+  --accent:       #00c9b1;
+  --accent-d:     #00a896;
+  --bg:           #080a14;
+  --bg2:          #0e1022;
+  --card:         #161929;
+  --card2:        #1c2038;
+  --border:       rgba(108,47,160,0.22);
+  --border2:      rgba(255,255,255,0.06);
+  --text:         #e8eaf6;
+  --text-muted:   #7a7f9e;
+  --text-faint:   #4a4f6b;
+  --radius:       14px;
+  --radius-sm:    8px;
+}
+html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); direction:rtl; }
+
+/* ─── TOPBAR ─── */
+.topbar {
+  position:fixed; top:0; right:0; left:0; z-index:100;
+  height:64px; background:rgba(14,16,34,0.95);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 2rem; gap:1rem;
+}
+.topbar-logo { display:flex; align-items:center; gap:0.6rem; font-size:1rem; font-weight:900; color:var(--accent); text-decoration:none; }
+.topbar-logo .logo-box {
+  width:34px; height:34px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1rem;
+}
+.topbar-right { display:flex; align-items:center; gap:0.75rem; }
+.trainee-chip {
+  display:flex; align-items:center; gap:0.4rem;
+  padding:0.3rem 0.85rem;
+  background:rgba(108,47,160,0.12); border:1px solid rgba(108,47,160,0.28);
+  border-radius:20px; font-size:0.78rem; font-weight:700; color:var(--primary-l);
+}
+.btn-logout {
+  padding:0.35rem 0.9rem; background:rgba(244,67,54,0.08);
+  border:1px solid rgba(244,67,54,0.22); border-radius:20px;
+  color:#ff6b6b; font-family:'Cairo',sans-serif; font-size:0.78rem;
+  font-weight:700; cursor:pointer; transition:all 0.2s;
+}
+.btn-logout:hover { background:rgba(244,67,54,0.18); }
+
+/* ─── LOADING OVERLAY ─── */
+#loadingOverlay {
+  position:fixed; inset:0; background:var(--bg); z-index:9999;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:1rem; transition:opacity 0.4s;
+}
+#loadingOverlay.hidden { opacity:0; pointer-events:none; }
+.loading-ring {
+  width:44px; height:44px; border:3px solid var(--border);
+  border-top-color:var(--accent); border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ─── PAGE LAYOUT ─── */
+.page { display:none; padding-top:64px; min-height:100vh; }
+.page.active { display:block; }
+.container { max-width:1100px; margin:0 auto; padding:2.5rem 1.5rem 4rem; }
+
+/* ─── SECTION HEADING ─── */
+.sec-heading {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:1.75rem;
+}
+.sec-title { font-size:1.4rem; font-weight:900; }
+.sec-title span { color:var(--accent); }
+.sec-sub { font-size:0.85rem; color:var(--text-muted); margin-top:0.25rem; }
+
+/* ─── QUIZ CARDS GRID ─── */
+.quizzes-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.25rem;
+}
+.quiz-card {
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1.75rem; cursor:pointer; transition:all 0.28s; position:relative; overflow:hidden;
+}
+.quiz-card::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  transform:scaleX(0); transition:transform 0.28s;
+}
+.quiz-card:hover { border-color:rgba(108,47,160,0.5); transform:translateY(-4px); box-shadow:0 12px 32px rgba(108,47,160,0.18); }
+.quiz-card:hover::after { transform:scaleX(1); }
+.qc-tag { display:inline-flex; align-items:center; gap:0.35rem; padding:0.22rem 0.75rem; background:rgba(108,47,160,0.15); border:1px solid rgba(108,47,160,0.28); border-radius:20px; font-size:0.72rem; font-weight:700; color:var(--primary-l); margin-bottom:0.9rem; }
+.qc-title { font-size:1.05rem; font-weight:800; margin-bottom:0.5rem; color:var(--text); }
+.qc-meta { display:flex; gap:1rem; font-size:0.8rem; color:var(--text-muted); margin-bottom:1.25rem; }
+.qc-meta span { display:flex; align-items:center; gap:0.3rem; }
+.qc-btn {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  padding:0.6rem 1.25rem; background:linear-gradient(135deg,var(--primary),var(--primary-l));
+  border:none; border-radius:var(--radius-sm); color:#fff;
+  font-family:'Cairo',sans-serif; font-size:0.86rem; font-weight:700;
+  cursor:pointer; transition:all 0.22s;
+}
+.qc-btn:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(108,47,160,0.35); }
+
+/* ─── EMPTY / LOADING STATES ─── */
+.state-box {
+  text-align:center; padding:4rem 2rem;
+  color:var(--text-faint); font-size:0.9rem;
+  border:1px dashed var(--border2); border-radius:var(--radius);
+}
+.state-box .state-icon { font-size:2.5rem; margin-bottom:0.75rem; display:block; }
+
+/* ─── QUIZ SOLVER PAGE ─── */
+#quizSolver { background:var(--bg); }
+.solver-topbar {
+  display:flex; align-items:center; gap:1rem;
+  padding:1.25rem 2rem; border-bottom:1px solid var(--border2);
+  background:var(--bg2); position:sticky; top:64px; z-index:50;
+}
+.solver-back {
+  padding:0.4rem 0.9rem; background:rgba(255,255,255,0.05);
+  border:1px solid var(--border2); border-radius:var(--radius-sm);
+  color:var(--text-muted); font-family:'Cairo',sans-serif;
+  font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s;
+}
+.solver-back:hover { border-color:var(--primary-l); color:var(--text); }
+.solver-title { font-size:1rem; font-weight:800; flex:1; }
+.solver-progress-wrap { display:flex; align-items:center; gap:0.75rem; }
+.solver-progress-bar {
+  width:140px; height:6px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden;
+}
+.solver-progress-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:3px; transition:width 0.3s; }
+.solver-progress-text { font-size:0.78rem; font-weight:700; color:var(--text-muted); white-space:nowrap; }
+
+/* سؤال واحد */
+.solver-container { max-width:720px; margin:0 auto; padding:2.5rem 1.5rem; }
+.question-card {
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:2rem; margin-bottom:1.25rem; display:none; animation:fadeQ 0.3s ease;
+}
+.question-card.active { display:block; }
+@keyframes fadeQ { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+.q-num {
+  font-size:0.72rem; font-weight:700; color:var(--primary-l);
+  background:rgba(108,47,160,0.12); border:1px solid rgba(108,47,160,0.22);
+  border-radius:20px; padding:0.2rem 0.75rem; display:inline-block; margin-bottom:1rem;
+}
+.q-text { font-size:1rem; font-weight:700; line-height:1.75; margin-bottom:1.5rem; color:var(--text); }
+
+/* خيارات الإجابة */
+.options-list { display:flex; flex-direction:column; gap:0.65rem; }
+.option-item {
+  display:flex; align-items:center; gap:0.85rem;
+  padding:0.85rem 1.1rem; background:rgba(255,255,255,0.03);
+  border:1.5px solid var(--border2); border-radius:var(--radius-sm);
+  cursor:pointer; transition:all 0.22s; position:relative;
+}
+.option-item:hover { border-color:rgba(108,47,160,0.4); background:rgba(108,47,160,0.07); }
+.option-item.selected { border-color:var(--primary-l); background:rgba(108,47,160,0.14); }
+.option-item.correct  { border-color:#4CAF50; background:rgba(76,175,80,0.1); }
+.option-item.wrong    { border-color:#f44336; background:rgba(244,67,54,0.1); }
+
+.option-radio {
+  width:20px; height:20px; border:2px solid var(--border);
+  border-radius:50%; flex-shrink:0; transition:all 0.2s; position:relative;
+}
+.option-item.selected .option-radio { border-color:var(--primary-l); background:var(--primary-l); box-shadow:inset 0 0 0 4px var(--card); }
+.option-item.correct  .option-radio { border-color:#4CAF50; background:#4CAF50; box-shadow:inset 0 0 0 4px var(--card); }
+.option-item.wrong    .option-radio { border-color:#f44336; background:#f44336; box-shadow:inset 0 0 0 4px var(--card); }
+
+.option-label { font-size:0.92rem; line-height:1.6; flex:1; }
+.option-icon { font-size:1rem; flex-shrink:0; }
+
+/* navigation */
+.q-nav { display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; }
+.q-nav-btn {
+  padding:0.65rem 1.5rem; border-radius:var(--radius-sm);
+  font-family:'Cairo',sans-serif; font-size:0.88rem; font-weight:700;
+  cursor:pointer; transition:all 0.22s; border:none;
+}
+.btn-prev { background:rgba(255,255,255,0.05); color:var(--text-muted); border:1px solid var(--border2); }
+.btn-prev:hover { background:rgba(255,255,255,0.09); color:var(--text); }
+.btn-next { background:linear-gradient(135deg,var(--primary),var(--primary-l)); color:#fff; }
+.btn-next:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(108,47,160,0.35); }
+.btn-submit { background:linear-gradient(135deg,var(--accent-d),var(--accent)); color:#000; font-weight:900; }
+.btn-submit:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,201,177,0.35); }
+.btn-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+.q-dot-nav { display:flex; gap:0.4rem; flex-wrap:wrap; justify-content:center; }
+.q-dot {
+  width:10px; height:10px; border-radius:50%;
+  background:var(--border2); cursor:pointer; transition:all 0.2s;
+  border:none;
+}
+.q-dot.answered { background:var(--primary-l); }
+.q-dot.active   { background:var(--accent); transform:scale(1.35); }
+
+/* ─── RESULTS PAGE ─── */
+.result-hero {
+  text-align:center; padding:3rem 1.5rem 2rem;
+  background:linear-gradient(180deg,rgba(108,47,160,0.08),transparent);
+  border-bottom:1px solid var(--border2); margin-bottom:2rem;
+}
+.result-circle {
+  width:130px; height:130px; border-radius:50%; margin:0 auto 1.25rem;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  border:5px solid var(--primary-l); position:relative;
+}
+.result-circle.pass  { border-color:#4CAF50; }
+.result-circle.fail  { border-color:#f44336; }
+.result-pct { font-size:2rem; font-weight:900; line-height:1; }
+.result-circle.pass .result-pct { color:#4CAF50; }
+.result-circle.fail .result-pct { color:#f44336; }
+.result-pct-label { font-size:0.72rem; color:var(--text-muted); }
+.result-verdict { font-size:1.5rem; font-weight:900; margin-bottom:0.4rem; }
+.result-verdict.pass { color:#4CAF50; }
+.result-verdict.fail { color:#f44336; }
+.result-stats { display:flex; gap:2rem; justify-content:center; margin-top:1.5rem; flex-wrap:wrap; }
+.result-stat { text-align:center; }
+.result-stat .val { font-size:1.5rem; font-weight:900; color:var(--text); }
+.result-stat .lbl { font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem; }
+
+/* result answers review */
+.review-card {
+  background:var(--card); border:1px solid var(--border2);
+  border-radius:var(--radius); padding:1.5rem; margin-bottom:1rem;
+}
+.review-q { font-size:0.92rem; font-weight:700; margin-bottom:0.85rem; color:var(--text); }
+.review-opt { padding:0.5rem 0.85rem; border-radius:var(--radius-sm); font-size:0.85rem; margin-bottom:0.4rem; }
+.review-opt.correct-opt { background:rgba(76,175,80,0.12); border:1px solid rgba(76,175,80,0.3); color:#a5d6a7; }
+.review-opt.wrong-opt   { background:rgba(244,67,54,0.1);  border:1px solid rgba(244,67,54,0.25); color:#ef9a9a; }
+.review-opt.neutral-opt { background:rgba(255,255,255,0.03); border:1px solid var(--border2); color:var(--text-muted); }
+
+.result-actions { display:flex; gap:0.85rem; justify-content:center; flex-wrap:wrap; padding-top:1.5rem; }
+.btn-action {
+  padding:0.7rem 1.75rem; border-radius:var(--radius-sm);
+  font-family:'Cairo',sans-serif; font-size:0.9rem; font-weight:700;
+  cursor:pointer; transition:all 0.22s; border:none;
+}
+.btn-home-action { background:linear-gradient(135deg,var(--primary),var(--primary-l)); color:#fff; }
+.btn-home-action:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(108,47,160,0.35); }
+.btn-review-action { background:rgba(255,255,255,0.05); border:1px solid var(--border2); color:var(--text-muted); }
+.btn-review-action:hover { border-color:var(--accent); color:var(--accent); }
+
+/* ─── MY RESULTS PAGE ─── */
+.results-table-wrap { overflow-x:auto; border-radius:var(--radius); border:1px solid var(--border); }
+.results-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+.results-table thead { background:rgba(108,47,160,0.1); }
+.results-table thead th { padding:0.85rem 1.1rem; text-align:right; font-weight:700; color:var(--text-muted); font-size:0.78rem; white-space:nowrap; }
+.results-table tbody tr { border-bottom:1px solid var(--border2); transition:background 0.2s; }
+.results-table tbody tr:last-child { border-bottom:none; }
+.results-table tbody tr:hover { background:rgba(255,255,255,0.025); }
+.results-table tbody td { padding:0.8rem 1.1rem; color:var(--text-muted); vertical-align:middle; }
+.results-table tbody td:first-child { font-weight:700; color:var(--text); }
+.badge-pass { display:inline-block; padding:0.18rem 0.65rem; background:rgba(76,175,80,0.12); border:1px solid rgba(76,175,80,0.28); border-radius:10px; font-size:0.72rem; font-weight:700; color:#a5d6a7; }
+.badge-fail { display:inline-block; padding:0.18rem 0.65rem; background:rgba(244,67,54,0.1); border:1px solid rgba(244,67,54,0.22); border-radius:10px; font-size:0.72rem; font-weight:700; color:#ef9a9a; }
+
+/* ─── BOTTOM NAV (tabs) ─── */
+.bottom-nav {
+  position:fixed; bottom:0; right:0; left:0;
+  background:rgba(14,16,34,0.97); backdrop-filter:blur(16px);
+  border-top:1px solid var(--border); display:flex; z-index:100;
+}
+.bnav-item {
+  flex:1; padding:0.75rem 0.5rem; display:flex; flex-direction:column;
+  align-items:center; gap:0.25rem; cursor:pointer;
+  font-size:0.7rem; font-weight:600; color:var(--text-faint);
+  background:none; border:none; font-family:'Cairo',sans-serif;
+  transition:all 0.22s;
+}
+.bnav-item .bnav-icon { font-size:1.25rem; }
+.bnav-item:hover { color:var(--text-muted); }
+.bnav-item.active { color:var(--accent); }
+
+/* add bottom padding so content isn't hidden behind nav */
+.page-with-bnav { padding-bottom:80px; }
+
+@media (max-width:600px) {
+  .topbar { padding:0 1rem; }
+  .container { padding:2rem 1rem 4rem; }
+  .solver-topbar { padding:1rem; }
+  .solver-container { padding:1.5rem 1rem; }
+  .solver-progress-bar { width:90px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOADING ══ -->
+<div id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <p style="color:var(--text-muted);font-size:0.88rem;">جارٍ التحقق من جلستك…</p>
+</div>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar" id="mainTopbar" style="display:none">
+  <a href="index.html" class="topbar-logo">
+    <div class="logo-box">🌐</div>
+    أكاديمية الشبكات
+  </a>
+  <div class="topbar-right">
+    <div class="trainee-chip">👤 <span id="traineeNameChip">متدرب</span></div>
+    <button class="btn-logout" onclick="doLogout()">خروج 🚪</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     PAGE 1: قائمة الاختبارات (Home)
+══════════════════════════════════════ -->
+<div class="page active page-with-bnav" id="pageHome">
+  <div class="container">
+    <div class="sec-heading">
+      <div>
+        <div class="sec-title">الاختبارات <span>المتاحة</span></div>
+        <div class="sec-sub">اختر اختباراً لبدء التقييم</div>
+      </div>
+    </div>
+
+    <div id="quizzesLoadingState" class="state-box">
+      <span class="state-icon">⏳</span>
+      جارٍ تحميل الاختبارات…
+    </div>
+
+    <div id="quizzesEmptyState" class="state-box" style="display:none">
+      <span class="state-icon">📭</span>
+      لا توجد اختبارات متاحة حالياً
+    </div>
+
+    <div class="quizzes-grid" id="quizzesGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 2: حل الاختبار
+══════════════════════════════════════ -->
+<div class="page" id="pageQuiz">
+
+  <!-- solver topbar -->
+  <div class="solver-topbar">
+    <button class="solver-back" onclick="backToHome()">← رجوع</button>
+    <div class="solver-title" id="solverTitle">الاختبار</div>
+    <div class="solver-progress-wrap">
+      <div class="solver-progress-bar">
+        <div class="solver-progress-fill" id="solverProgressFill" style="width:0%"></div>
+      </div>
+      <span class="solver-progress-text" id="solverProgressText">0 / 0</span>
+    </div>
+  </div>
+
+  <div class="solver-container">
+
+    <!-- dot navigation -->
+    <div class="q-dot-nav" id="dotNav" style="margin-bottom:1.5rem"></div>
+
+    <!-- questions container -->
+    <div id="questionsContainer"></div>
+
+    <!-- nav buttons -->
+    <div class="q-nav">
+      <button class="q-nav-btn btn-prev" id="btnPrev" onclick="prevQuestion()">← السابق</button>
+      <button class="q-nav-btn btn-next" id="btnNext" onclick="nextQuestion()">التالي →</button>
+      <button class="q-nav-btn btn-submit" id="btnSubmit" onclick="submitQuiz()" style="display:none" disabled>
+        ✅ إرسال الاختبار
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 3: النتيجة
+══════════════════════════════════════ -->
+<div class="page" id="pageResult">
+  <div class="result-hero">
+    <div class="result-circle" id="resultCircle">
+      <div class="result-pct" id="resultPct">0%</div>
+      <div class="result-pct-label">درجتك</div>
+    </div>
+    <div class="result-verdict" id="resultVerdict">—</div>
+    <div style="font-size:0.88rem;color:var(--text-muted)" id="resultSubtitle"></div>
+
+    <div class="result-stats">
+      <div class="result-stat"><div class="val" id="rCorrect">0</div><div class="lbl">إجابات صحيحة</div></div>
+      <div class="result-stat"><div class="val" id="rWrong">0</div><div class="lbl">إجابات خاطئة</div></div>
+      <div class="result-stat"><div class="val" id="rTotal">0</div><div class="lbl">إجمالي الأسئلة</div></div>
+      <div class="result-stat"><div class="val" id="rScore">0</div><div class="lbl">الدرجة / الكلية</div></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-action btn-home-action" onclick="backToHome()">🏠 العودة للرئيسية</button>
+      <button class="btn-action btn-review-action" id="btnToggleReview" onclick="toggleReview()">👁 مراجعة الإجابات</button>
+    </div>
+  </div>
+
+  <!-- مراجعة الإجابات -->
+  <div class="container" id="reviewSection" style="display:none">
+    <h3 style="font-size:1rem;font-weight:800;margin-bottom:1.25rem;color:var(--text)">مراجعة الإجابات</h3>
+    <div id="reviewContainer"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 4: نتائجي السابقة
+══════════════════════════════════════ -->
+<div class="page page-with-bnav" id="pageMyResults">
+  <div class="container">
+    <div class="sec-heading">
+      <div>
+        <div class="sec-title">نتائجي <span>السابقة</span></div>
+        <div class="sec-sub">سجل اختباراتك وأدائك</div>
+      </div>
+      <button class="solver-back" onclick="loadMyResults()">↻ تحديث</button>
+    </div>
+
+    <div id="myResultsLoading" class="state-box">
+      <span class="state-icon">⏳</span>جارٍ التحميل…
+    </div>
+    <div id="myResultsEmpty" class="state-box" style="display:none">
+      <span class="state-icon">📊</span>لم تُجرِ أي اختبار بعد
+    </div>
+    <div class="results-table-wrap" id="myResultsWrap" style="display:none">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>الاختبار</th>
+            <th>القسم</th>
+            <th>الدرجة</th>
+            <th>النسبة</th>
+            <th>النتيجة</th>
+            <th>التاريخ</th>
+          </tr>
+        </thead>
+        <tbody id="myResultsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bottom-nav" id="mainBottomNav" style="display:none">
+  <button class="bnav-item active" id="bnav-home" onclick="showPage('pageHome','bnav-home')">
+    <span class="bnav-icon">📋</span>
+    الاختبارات
+  </button>
+  <button class="bnav-item" id="bnav-results" onclick="showPage('pageMyResults','bnav-results');loadMyResults()">
+    <span class="bnav-icon">📊</span>
+    نتائجي
+  </button>
+</nav>
+
+<script type="module" src="trainee.js"></script>
+</body>
+</html>
