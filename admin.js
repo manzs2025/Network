@@ -637,6 +637,8 @@ window.toggleQuizActive = async function (quizId, currentlyActive, btnEl) {
 };
 
 
+/* ════════════
+   resetQuizForm — يعيد تعيين النموذج بالكامل
 ════════════ */
 window.resetQuizForm = function () {
   document.getElementById("quizTitle").value = "";
