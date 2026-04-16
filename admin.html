@@ -1512,6 +1512,186 @@ html, body {
   font-family: 'Cairo', sans-serif;
 }
 .tr-edit-btn:hover { background: rgba(108,47,160,0.22); border-color: rgba(108,47,160,0.5); transform: translateY(-1px); }
+
+/* ════════════════════════════════════════════════
+   QUESTION BANK SELECTOR
+════════════════════════════════════════════════ */
+.bank-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.bank-filters select {
+  padding: 0.55rem 0.9rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7f9e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 0.7rem center;
+  padding-left: 2rem;
+}
+.bank-filters select option { background: var(--bg2); color: var(--text); }
+
+.bank-actions-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.bank-action-btn {
+  padding: 0.35rem 0.8rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bank-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.bank-q-container {
+  max-height: 420px;
+  overflow-y: auto;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+}
+.bank-q-container::-webkit-scrollbar { width: 4px; }
+.bank-q-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.bank-q-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.18s;
+  margin-bottom: 0.35rem;
+}
+.bank-q-item:hover { background: rgba(108,47,160,0.06); }
+.bank-q-item.selected {
+  background: rgba(0,201,177,0.06);
+  border-color: rgba(0,201,177,0.25);
+}
+
+.bank-q-check {
+  width: 18px; height: 18px;
+  margin-top: 0.15rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.bank-q-content { flex: 1; min-width: 0; }
+.bank-q-text {
+  font-size: 0.84rem;
+  color: var(--text);
+  line-height: 1.65;
+  margin-bottom: 0.4rem;
+}
+.bank-q-meta { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.bank-q-badge {
+  display: inline-block;
+  padding: 0.12rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.bank-q-badge.cat {
+  background: rgba(108,47,160,0.12);
+  border: 1px solid rgba(108,47,160,0.22);
+  color: var(--primary-l);
+}
+.bank-q-badge.type {
+  background: rgba(0,201,177,0.08);
+  border: 1px solid rgba(0,201,177,0.2);
+  color: var(--accent);
+}
+
+/* ── Schedule Badges ── */
+.schedule-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.schedule-badge.active   { background: rgba(0,201,177,0.1);  color: var(--accent); border: 1px solid rgba(0,201,177,0.25); }
+.schedule-badge.upcoming { background: rgba(245,166,35,0.1); color: #f5a623;      border: 1px solid rgba(245,166,35,0.25); }
+.schedule-badge.expired  { background: rgba(244,67,54,0.08); color: #ff6b6b;      border: 1px solid rgba(244,67,54,0.2); }
+
+/* ── Schedule Fields ── */
+.schedule-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(245,166,35,0.04);
+  border: 1px dashed rgba(245,166,35,0.2);
+  border-radius: var(--radius);
+}
+.schedule-row .qz-input[type="datetime-local"] {
+  direction: ltr;
+  text-align: right;
+}
+
+/* ── Seed Bank Button ── */
+.seed-bank-wrap {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: rgba(108,47,160,0.06);
+  border: 1px dashed rgba(108,47,160,0.25);
+  border-radius: var(--radius);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+.seed-bank-wrap .seed-info {
+  flex: 1;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.seed-bank-btn {
+  padding: 0.65rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-l));
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.seed-bank-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(108,47,160,0.35); }
+
+@media (max-width: 640px) {
+  .schedule-row { grid-template-columns: 1fr; }
+  .bank-filters { flex-direction: column; align-items: stretch; }
+}
 </style>
 </head>
 <body>
@@ -1647,6 +1827,12 @@ html, body {
             <span class="stat-icon">📊</span>
             <div class="stat-value" id="statResults">—</div>
             <div class="stat-label">نتيجة محفوظة</div>
+            <div class="stat-change">↑ جارٍ التحميل</div>
+          </div>
+          <div class="stat-card c-amber">
+            <span class="stat-icon">🏦</span>
+            <div class="stat-value" id="statBank">—</div>
+            <div class="stat-label">سؤال في البنك</div>
             <div class="stat-change">↑ جارٍ التحميل</div>
           </div>
         </div>
@@ -1816,12 +2002,22 @@ html, body {
         <div class="panel-header">
           <div class="panel-title-group">
             <div class="panel-tag">📋 إدارة الاختبارات</div>
-            <div class="panel-title">نظام <span>الاختبارات</span></div>
-            <div class="panel-subtitle">إنشاء اختبارات جديدة وإدارة الأسئلة والإجابات</div>
+            <div class="panel-title">نظام <span>الاختبارات المتقدم</span></div>
+            <div class="panel-subtitle">إنشاء اختبارات من بنك الأسئلة مع جدولة زمنية وإدارة المحاولات</div>
           </div>
         </div>
 
-        <!-- ── نموذج إنشاء اختبار ── -->
+        <!-- ── رفع بنك الأسئلة إلى Firestore ── -->
+        <div class="seed-bank-wrap">
+          <div class="seed-info">
+            🏦 <strong>بنك الأسئلة:</strong> يحتوي على 50 سؤالاً متنوعاً (صح/خطأ، اختيار من متعدد، إجابات متعددة، مطابقة) تغطي جميع الأقسام.
+            اضغط الزر لرفعها إلى Firestore للمرة الأولى.
+          </div>
+          <button class="seed-bank-btn" onclick="seedQuestionBank()">📤 رفع البنك إلى Firestore</button>
+        </div>
+        <div class="qz-form-msg" id="seedBankStatus" style="display:none"></div>
+
+        <!-- ── نموذج إنشاء اختبار (Quiz Builder) ── -->
         <div class="qz-form-card" id="quizFormCard">
           <div class="qz-form-header">
             <h3 class="qz-form-title">
@@ -1834,18 +2030,14 @@ html, body {
           </div>
 
           <div class="qz-form-body" id="quizFormBody">
+            <!-- حقل مخفي لمعرف التعديل -->
+            <input type="hidden" id="quizEditId" value="">
 
             <!-- الحقول الأساسية -->
             <div class="qz-fields-row">
               <div class="qz-field-group">
                 <label class="qz-label" for="quizTitle">عنوان الاختبار *</label>
-                <input
-                  type="text"
-                  id="quizTitle"
-                  class="qz-input"
-                  placeholder="مثال: اختبار شبكات الحاسب الآلي"
-                  maxlength="100"
-                >
+                <input type="text" id="quizTitle" class="qz-input" placeholder="مثال: اختبار شبكات الحاسب الآلي" maxlength="100">
               </div>
               <div class="qz-field-group">
                 <label class="qz-label" for="quizPage">القسم التابع له *</label>
@@ -1860,28 +2052,61 @@ html, body {
               </div>
             </div>
 
-            <!-- منطقة الأسئلة -->
+            <!-- الجدولة الزمنية -->
+            <div class="qz-label" style="margin-bottom:0.5rem;">📅 الجدولة الزمنية <small style="color:var(--text-faint);font-weight:400;">(اختياري — اتركها فارغة ليكون الاختبار متاحاً دائماً)</small></div>
+            <div class="schedule-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizStartDate">وقت البدء</label>
+                <input type="datetime-local" id="quizStartDate" class="qz-input">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizEndDate">وقت الانتهاء</label>
+                <input type="datetime-local" id="quizEndDate" class="qz-input">
+              </div>
+            </div>
+
+            <!-- اختيار الأسئلة من البنك -->
             <div class="qz-questions-area">
               <div class="qz-questions-header">
-                <span class="qz-questions-count" id="questionsCount">0 أسئلة</span>
-                <button class="qz-add-btn" onclick="addQuestion()">
-                  ＋ إضافة سؤال جديد
-                </button>
+                <span class="qz-questions-count" id="selectedQCount">0 سؤال محدد</span>
               </div>
 
-              <!-- حاوية الأسئلة الديناميكية -->
-              <div id="questionsList">
-                <!-- تُضاف الأسئلة هنا برمجياً -->
-                <div class="qz-empty-questions" id="emptyQuestionsMsg">
-                  <span>لا توجد أسئلة بعد</span>
-                  <small>اضغط "إضافة سؤال جديد" للبدء</small>
+              <!-- الفلاتر -->
+              <div class="bank-filters">
+                <select id="bankFilterCategory" onchange="filterBankQuestions()">
+                  <option value="">كل الأقسام</option>
+                  <option value="networks">شبكات الحاسب</option>
+                  <option value="security">الأمان</option>
+                  <option value="osi">نموذج OSI</option>
+                  <option value="cables">الكيابل</option>
+                  <option value="ip">بروتوكول IP</option>
+                </select>
+                <select id="bankFilterType" onchange="filterBankQuestions()">
+                  <option value="">كل الأنواع</option>
+                  <option value="tf">صح وخطأ</option>
+                  <option value="mcq">اختيار من متعدد</option>
+                  <option value="multi">إجابات متعددة</option>
+                  <option value="match">مطابقة</option>
+                </select>
+              </div>
+
+              <!-- أزرار تحديد/إلغاء الكل -->
+              <div class="bank-actions-row">
+                <button class="bank-action-btn" onclick="selectAllBankQuestions()">✅ تحديد الكل</button>
+                <button class="bank-action-btn" onclick="deselectAllBankQuestions()">✕ إلغاء الكل</button>
+              </div>
+
+              <!-- حاوية الأسئلة -->
+              <div class="bank-q-container" id="bankQuestionsContainer">
+                <div class="qz-empty-questions">
+                  <span>جارٍ تحميل بنك الأسئلة…</span>
                 </div>
               </div>
             </div>
 
             <!-- أزرار الحفظ -->
             <div class="qz-form-actions">
-              <button class="qz-save-btn" id="btnSaveQuiz" onclick="saveQuiz()">
+              <button class="qz-save-btn" id="btnSaveQuiz" onclick="saveQuizFromBank()">
                 <span class="qz-btn-text">💾 حفظ الاختبار</span>
                 <span class="qz-btn-spinner" style="display:none">⏳</span>
               </button>
@@ -1890,11 +2115,10 @@ html, body {
               </button>
             </div>
 
-            <!-- رسالة النموذج -->
             <div class="qz-form-msg" id="quizFormMsg" style="display:none"></div>
 
-          </div><!-- /quizFormBody -->
-        </div><!-- /quizFormCard -->
+          </div>
+        </div>
 
         <!-- ── جدول الاختبارات الحالية ── -->
         <div class="qz-table-section">
@@ -1903,18 +2127,15 @@ html, body {
             <button class="qz-refresh-btn" onclick="loadQuizzes()" title="تحديث">↻ تحديث</button>
           </div>
 
-          <!-- حالة التحميل -->
           <div class="qz-table-loading" id="quizzesLoading">
             <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
             <span>جارٍ تحميل الاختبارات…</span>
           </div>
 
-          <!-- رسالة فارغ -->
           <div class="qz-table-empty" id="quizzesEmpty" style="display:none">
             لا توجد اختبارات محفوظة بعد
           </div>
 
-          <!-- الجدول -->
           <div class="qz-table-wrap" id="quizzesTableWrap" style="display:none">
             <table class="qz-table">
               <thead>
@@ -1922,16 +2143,15 @@ html, body {
                   <th>عنوان الاختبار</th>
                   <th>القسم</th>
                   <th>عدد الأسئلة</th>
+                  <th>الحالة</th>
                   <th>تاريخ الإضافة</th>
                   <th>إجراءات</th>
                 </tr>
               </thead>
-              <tbody id="quizzesTableBody">
-                <!-- تُملأ برمجياً -->
-              </tbody>
+              <tbody id="quizzesTableBody"></tbody>
             </table>
           </div>
-        </div><!-- /qz-table-section -->
+        </div>
 
       </section>
 
@@ -2051,6 +2271,7 @@ html, body {
                   <th>الدرجة</th>
                   <th>النسبة</th>
                   <th>النتيجة</th>
+                  <th>المحاولة</th>
                   <th>التاريخ</th>
                 </tr>
               </thead>
@@ -2142,6 +2363,39 @@ html, body {
     </div>
 
     <div class="tr-modal-msg" id="editTraineeMsg"></div>
+  </div>
+</div>
+
+<!-- ════════════ RETAKE MODAL — إعادة الاختبار ════════════ -->
+<div class="tr-modal-overlay" id="retakeModal">
+  <div class="tr-modal">
+    <div class="tr-modal-header">
+      <div class="tr-modal-title">🔄 إعادة إتاحة الاختبار</div>
+      <button class="tr-modal-close" onclick="closeRetakeModal()" title="إغلاق">✕</button>
+    </div>
+
+    <input type="hidden" id="retakeTraineeUid">
+
+    <div style="margin-bottom:1.25rem;padding:0.85rem;background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:9px;">
+      <span style="font-size:0.82rem;color:var(--text-muted);">المتدرب:</span>
+      <strong style="color:var(--text);margin-right:0.4rem;" id="retakeTraineeName">—</strong>
+    </div>
+
+    <div class="tr-modal-field">
+      <label for="retakeQuizSelect">اختر الاختبار المراد إعادة إتاحته *</label>
+      <select id="retakeQuizSelect" style="width:100%;padding:0.75rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;">
+        <option value="">— اختر الاختبار —</option>
+      </select>
+    </div>
+
+    <div class="tr-modal-actions">
+      <button class="btn-modal-save" onclick="grantRetake()" style="background:linear-gradient(135deg, var(--accent-d), var(--accent));">
+        🔄 إتاحة إعادة الاختبار
+      </button>
+      <button class="btn-modal-cancel" onclick="closeRetakeModal()">إلغاء</button>
+    </div>
+
+    <div class="tr-modal-msg" id="retakeMsg"></div>
   </div>
 </div>
 
