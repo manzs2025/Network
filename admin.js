@@ -22,8 +22,8 @@ const db   = getFirestore(app);
 const TRAINEE_DOMAIN = "@trainee.network.com";
 const TRAINEE_DEFAULT_PASS = "12345678";
 
-// --- ربط الوظائف بالنافذة لملف HTML ---
-window.handleLogout = () => confirm("خروج؟") && signOut(auth).then(() => location.replace("login.html"));
+// --- ربط الوظائف بالنافذة ---
+window.handleLogout = () => confirm("هل تريد تسجيل الخروج؟") && signOut(auth).then(() => location.replace("login.html"));
 
 window.toggleSidebar = () => {
   document.getElementById("sidebar").classList.toggle("hidden");
@@ -35,7 +35,6 @@ window.switchPanel = (btn, panelId) => {
   btn?.classList.add("active");
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById(`panel-${panelId}`)?.classList.add("active");
-  
   if (panelId === "trainees") { loadTrainees(); loadLatestResults(); }
   if (window.innerWidth <= 860) {
     document.getElementById("sidebar").classList.add("hidden");
@@ -43,33 +42,28 @@ window.switchPanel = (btn, panelId) => {
   }
 };
 
-// --- حارس الصفحة الرئيسي ---
+// --- حارس الصفحة ---
 onAuthStateChanged(auth, async (user) => {
   if (!user) { location.replace("login.html"); return; }
   const snap = await getDoc(doc(db, "users", user.uid));
   const profile = snap.exists() ? snap.data() : null;
-  
   if (!profile || profile.role !== "admin") {
     await signOut(auth);
     location.replace("login.html?reason=unauthorized");
     return;
   }
-
   document.getElementById("welcomeName").textContent = profile.displayName || user.email;
   document.getElementById("sbUserName").textContent = profile.displayName || user.email;
   document.getElementById("sbAvatarInitial").textContent = (profile.displayName ? profile.displayName[0] : "م").toUpperCase();
-  
   document.getElementById("loadingOverlay").classList.add("hidden");
   setTimeout(() => {
     document.getElementById("loadingOverlay").style.display = "none";
     document.getElementById("dashboardShell").classList.add("visible");
     document.getElementById("sidebar").classList.remove("hidden");
   }, 420);
-
   loadStats();
 });
 
-// --- إحصاءات وحسابات ---
 async function loadStats() {
   const cols = ["users", "quizzes", "results"];
   for (const c of cols) {
@@ -81,7 +75,7 @@ async function loadStats() {
   }
 }
 
-// --- إنشاء الحسابات ---
+// --- إدارة المتدربين ---
 async function _createTraineeAccount(name, studentId) {
   const email = studentId + TRAINEE_DOMAIN;
   const tempApp = initializeApp(firebaseConfig, "Secondary-" + Date.now());
@@ -95,18 +89,6 @@ async function _createTraineeAccount(name, studentId) {
   await signOut(tempAuth);
   await tempApp.delete();
 }
-
-window.addTrainee = async function () {
-  const nameEl = document.getElementById("newTraineeName"), idEl = document.getElementById("newTraineeEmail"), msgEl = document.getElementById("addTraineeMsg");
-  const name = nameEl.value.trim(), studentId = idEl.value.trim();
-  if (!name || !/^\d{10}$/.test(studentId)) return _showMsg(msgEl, "بيانات غير صحيحة", "error");
-  try {
-    await _createTraineeAccount(name, studentId);
-    _showMsg(msgEl, "✅ تم بنجاح", "success");
-    nameEl.value = ""; idEl.value = "";
-    loadTrainees(); loadStats();
-  } catch (e) { _showMsg(msgEl, "❌ خطأ: " + e.message, "error"); }
-};
 
 window.handleBulkImport = async function (inputEl) {
   const file = inputEl.files?.[0];
@@ -122,58 +104,60 @@ window.handleBulkImport = async function (inputEl) {
       try {
         await _createTraineeAccount(String(r[nK]).trim(), String(r[iK]).trim());
         log.innerHTML += `<div style="color:#a5d6a7">✅ تم: ${r[nK]}</div>`;
-      } catch (e) { log.innerHTML += `<div style="color:#ff6b6b">❌ فشل: ${r[nK]}</div>`; }
-      log.scrollTop = logEl.scrollHeight;
+      } catch (e) { 
+        let errorMsg = e.code === "auth/email-already-in-use" ? "مسجل مسبقاً" : "فشل";
+        log.innerHTML += `<div style="color:#ff6b6b">❌ ${errorMsg}: ${r[nK]}</div>`; 
+      }
+      log.scrollTop = log.scrollHeight; // تم تصحيح مسمى المتغير هنا
     }
     loadTrainees(); loadStats();
   }
 };
 
-// --- جلب المتدربين (هنا تم الإصلاح) ---
 window.loadTrainees = async function () {
-  const loadingEl = document.getElementById("traineesLoading");
-  const wrap = document.getElementById("traineesTableWrap");
-  const tbody = document.getElementById("traineesTableBody");
+  const loadingEl = document.getElementById("traineesLoading"), wrap = document.getElementById("traineesTableWrap"), tbody = document.getElementById("traineesTableBody");
   if (!tbody) return;
-
   try {
     const snap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee"), orderBy("createdAt", "desc")));
-    
-    // إخفاء علامة التحميل وإظهار الجدول
-    loadingEl.style.display = "none";
-    wrap.style.display = "block";
-    tbody.innerHTML = "";
-
+    loadingEl.style.display = "none"; wrap.style.display = "block"; tbody.innerHTML = "";
     snap.forEach(s => {
       const d = s.data();
-      tbody.innerHTML += `<tr data-uid="${s.id}"><td>${d.displayName}</td><td>${d.studentId}</td><td>—</td><td>—</td><td><button class="tr-edit-btn" onclick="openEditTraineeModal('${s.id}','${d.displayName}','${d.studentId}')">✏️</button></td></tr>`;
+      tbody.innerHTML += `
+        <tr data-uid="${s.id}">
+          <td>${d.displayName || "—"}</td>
+          <td style="direction:ltr;text-align:center">${d.studentId || "—"}</td>
+          <td style="text-align:center">—</td>
+          <td style="text-align:center">—</td>
+          <td>
+            <button class="tr-edit-btn" onclick="openEditTraineeModal('${s.id}','${d.displayName || ""}','${d.studentId || ""}')">✏️</button>
+            <button class="tr-edit-btn" style="background:rgba(244,67,54,0.1); color:#ff6b6b; border-color:rgba(244,67,54,0.2)" onclick="deleteTrainee('${s.id}')">🗑️</button>
+          </td>
+        </tr>`;
     });
   } catch (e) { console.error(e); }
 };
 
-// --- جلب آخر النتائج ---
-window.loadLatestResults = async function () {
-  const loadingEl = document.getElementById("resultsLoading");
-  const wrap = document.getElementById("resultsTableWrap");
-  const tbody = document.getElementById("resultsTableBody");
-  if (!tbody) return;
+window.deleteTrainee = async function(uid) {
+  if (!confirm("هل أنت متأكد من حذف هذا المتدرب نهائياً؟")) return;
+  try {
+    await deleteDoc(doc(db, "users", uid));
+    alert("✅ تم حذف المتدرب بنجاح");
+    loadTrainees(); loadStats();
+  } catch (e) { alert("❌ فشل الحذف: " + e.message); }
+};
 
+window.loadLatestResults = async function () {
+  const loadingEl = document.getElementById("resultsLoading"), wrap = document.getElementById("resultsTableWrap"), tbody = document.getElementById("resultsTableBody");
+  if (!tbody) return;
   try {
     const snap = await getDocs(query(collection(db, "results"), orderBy("submittedAt", "desc")));
-    loadingEl.style.display = "none";
-    wrap.style.display = "block";
-    tbody.innerHTML = "";
+    loadingEl.style.display = "none"; wrap.style.display = "block"; tbody.innerHTML = "";
     snap.forEach(docSnap => {
       const d = docSnap.data();
       tbody.innerHTML += `<tr><td>${d.displayName || d.userEmail}</td><td>${d.quizTitle}</td><td>${d.score}</td><td>${d.percentage}%</td><td>${d.passed ? '✅' : '❌'}</td><td>—</td></tr>`;
     });
   } catch (e) { console.error(e); }
 };
-
-function _showMsg(el, text, type) {
-  el.textContent = text; el.className = `qz-form-msg ${type}`; el.style.display = "block";
-  setTimeout(() => el.style.display = "none", 5000);
-}
 
 window.openEditTraineeModal = (uid, n, s) => {
   document.getElementById("editTraineeUid").value = uid;
