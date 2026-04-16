@@ -2,7 +2,7 @@ import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.
 import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { 
   getFirestore, doc, getDoc, collection, getCountFromServer, 
-  addDoc, getDocs, deleteDoc, updateDoc, setDoc,
+  addDoc, getDocs, deleteDoc, updateDoc, setDoc, writeBatch,
   query, orderBy, where, serverTimestamp, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -220,28 +220,44 @@ async function loadStats() {
 }
 
 /* ═══════════════════════════════════════
-   رفع بنك الأسئلة إلى Firestore
+   رفع بنك الأسئلة إلى Firestore (بتقنية WriteBatch)
 ═══════════════════════════════════════ */
 window.seedQuestionBank = async function() {
   if (!confirm(`سيتم رفع ${QUESTION_BANK.length} سؤال إلى Firestore.\nهل تريد المتابعة؟`)) return;
   const statusEl = document.getElementById("seedBankStatus");
   statusEl.style.display = "block";
   statusEl.className = "qz-form-msg";
-  statusEl.textContent = "⏳ جارٍ الرفع…";
+  statusEl.textContent = "⏳ جارٍ الرفع السريع (Batch)...";
   statusEl.style.background = "rgba(108,47,160,0.1)";
   statusEl.style.border = "1px solid rgba(108,47,160,0.3)";
   statusEl.style.color = "var(--primary-l)";
-  let count = 0;
-  for (const q of QUESTION_BANK) {
-    try { await setDoc(doc(db, "questionBank", q.id), q); count++; } catch(e) { console.error(e); }
+
+  try {
+    // استخدام ميزة WriteBatch لرفع الـ 50 سؤال دفعة واحدة!
+    const batch = writeBatch(db);
+    let count = 0;
+    
+    for (const q of QUESTION_BANK) {
+      const docRef = doc(db, "questionBank", q.id);
+      batch.set(docRef, q);
+      count++;
+    }
+    
+    await batch.commit(); // تنفيذ جميع الأوامر في ثانية واحدة
+
+    statusEl.className = "qz-form-msg success";
+    statusEl.style.background = "";
+    statusEl.style.border = "";
+    statusEl.style.color = "";
+    statusEl.textContent = `✅ تم رفع ${count} سؤال بنجاح في أقل من ثانية! ⚡`;
+    
+    loadStats();
+    renderQuestionBankSelector();
+  } catch(e) {
+    console.error("Batch Upload Error:", e);
+    statusEl.className = "qz-form-msg error";
+    statusEl.textContent = `❌ فشل الرفع: ${e.message}`;
   }
-  statusEl.className = "qz-form-msg success";
-  statusEl.style.background = "";
-  statusEl.style.border = "";
-  statusEl.style.color = "";
-  statusEl.textContent = `✅ تم رفع ${count} سؤال بنجاح!`;
-  loadStats();
-  renderQuestionBankSelector();
 };
 
 /* ═══════════════════════════════════════
