@@ -2032,7 +2032,10 @@ html, body {
         <div class="qz-table-section" style="margin-top:1.5rem;">
           <div class="qz-table-header">
             <h3 class="qz-table-title">📊 آخر نتائج المتدربين</h3>
-            <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <button class="qz-refresh-btn" onclick="exportResultsToExcel()" style="background:rgba(0,201,177,0.10);color:var(--accent);border-color:rgba(0,201,177,0.3);">📥 تصدير Excel</button>
+              <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
+            </div>
           </div>
           <div class="qz-table-loading" id="resultsLoading">
             <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>

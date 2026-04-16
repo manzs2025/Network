@@ -134,14 +134,72 @@ async function loadStats() {
     } catch (e) { console.error(e); }
   }
 }
+/* ─── مصفوفة لتخزين بيانات النتائج للتصدير ─── */
+let cachedResults = [];
+
 window.loadLatestResults = async function () {
   const loadingEl = document.getElementById("resultsLoading"), wrap = document.getElementById("resultsTableWrap"), tbody = document.getElementById("resultsTableBody");
   try {
     const snap = await getDocs(query(collection(db, "results"), orderBy("submittedAt", "desc")));
     tbody.innerHTML = "";
-    snap.forEach(s => { const d = s.data(); tbody.innerHTML += `<tr><td>${d.displayName || d.userEmail}</td><td>${d.quizTitle}</td><td>${d.score}</td><td>${d.percentage}%</td><td>${d.passed?'✅':'❌'}</td><td>—</td></tr>`; });
+    cachedResults = [];
+    snap.forEach(s => {
+      const d = s.data();
+      // تنسيق التاريخ
+      let dateStr = "—";
+      if (d.submittedAt && d.submittedAt.toDate) {
+        const dt = d.submittedAt.toDate();
+        dateStr = dt.toLocaleDateString("ar-SA", { year: "numeric", month: "2-digit", day: "2-digit" })
+                + " " + dt.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
+      }
+      // تخزين البيانات للتصدير
+      cachedResults.push({
+        "المتدرب": d.displayName || d.userEmail || "—",
+        "الاختبار": d.quizTitle || "—",
+        "الدرجة": d.score ?? "—",
+        "النسبة": d.percentage != null ? d.percentage + "%" : "—",
+        "النتيجة": d.passed ? "ناجح" : "راسب",
+        "التاريخ": dateStr
+      });
+      tbody.innerHTML += `<tr><td>${d.displayName || d.userEmail}</td><td>${d.quizTitle}</td><td>${d.score}</td><td>${d.percentage}%</td><td>${d.passed?'✅':'❌'}</td><td>${dateStr}</td></tr>`;
+    });
   } catch (e) { console.error(e); }
   finally { loadingEl.style.display = "none"; wrap.style.display = "block"; }
+};
+
+/* ─── تصدير النتائج إلى ملف Excel ─── */
+window.exportResultsToExcel = function () {
+  if (!cachedResults.length) {
+    alert("لا توجد نتائج لتصديرها. يرجى تحميل النتائج أولاً.");
+    return;
+  }
+  if (typeof XLSX === "undefined") {
+    alert("مكتبة SheetJS غير متوفرة.");
+    return;
+  }
+
+  /* إنشاء ورقة العمل */
+  const ws = XLSX.utils.json_to_sheet(cachedResults, {
+    header: ["المتدرب", "الاختبار", "الدرجة", "النسبة", "النتيجة", "التاريخ"]
+  });
+
+  /* ── تنسيق عرض الأعمدة ── */
+  ws["!cols"] = [
+    { wch: 28 },  // المتدرب
+    { wch: 30 },  // الاختبار
+    { wch: 10 },  // الدرجة
+    { wch: 10 },  // النسبة
+    { wch: 10 },  // النتيجة
+    { wch: 22 }   // التاريخ
+  ];
+
+  /* إنشاء المصنف وتحميله */
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "نتائج المتدربين");
+
+  const now = new Date();
+  const fileName = `نتائج_المتدربين_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.xlsx`;
+  XLSX.writeFile(wb, fileName);
 };
 
 window.handleLogout = () => confirm("خروج؟") && signOut(auth).then(() => location.replace("login.html"));
