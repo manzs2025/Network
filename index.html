@@ -129,69 +129,34 @@
 
 /* ─── WELCOME ARTICLE SECTION ─── */
 .welcome-article-section {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 2rem 40px;
-  display: none; /* hidden until content loaded */
+  max-width: 900px; margin: 0 auto; padding: 0 2rem 40px; display: none;
 }
 .welcome-article-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2.5rem 2.25rem;
-  position: relative;
-  overflow: hidden;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 2.5rem 2.25rem; position: relative; overflow: hidden;
 }
 .welcome-article-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 3px;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
   background: linear-gradient(90deg, var(--primary), var(--accent));
 }
 .welcome-article-card h2 {
-  font-size: 1.35rem;
-  font-weight: 900;
-  margin-bottom: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.welcome-article-card h2 .grad {
-  background: linear-gradient(135deg, var(--primary-light), var(--accent));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 1.35rem; font-weight: 900; margin-bottom: 1.25rem;
+  display: flex; align-items: center; gap: 0.5rem;
 }
 .welcome-article-body {
-  font-size: 0.95rem;
-  line-height: 1.95;
-  color: var(--text-muted);
+  font-size: 0.95rem; line-height: 1.95; color: var(--text-muted);
 }
-.welcome-article-body h1,
-.welcome-article-body h2,
-.welcome-article-body h3 { color: var(--text); margin: 1rem 0 0.5rem; }
+.welcome-article-body h1,.welcome-article-body h2,.welcome-article-body h3 { color: var(--text); margin: 1rem 0 0.5rem; }
 .welcome-article-body a { color: var(--accent); }
 .welcome-article-body img { max-width: 100%; border-radius: 8px; margin: 1rem 0; }
 .welcome-article-body blockquote {
-  border-right: 4px solid var(--primary-light);
-  border-left: none;
-  padding: 0.5rem 1rem;
-  margin: 0.75rem 0;
-  background: rgba(108,47,160,0.08);
-  color: var(--text-muted);
-  border-radius: 0 8px 8px 0;
+  border-right: 4px solid var(--primary-light); border-left: none;
+  padding: 0.5rem 1rem; margin: 0.75rem 0;
+  background: rgba(108,47,160,0.08); color: var(--text-muted); border-radius: 0 8px 8px 0;
 }
 .welcome-article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-.welcome-article-body table td,
-.welcome-article-body table th {
-  border: 1px solid var(--border);
-  padding: 8px 12px;
-  text-align: right;
-}
-.welcome-article-body table th {
-  background: rgba(108,47,160,0.12);
-  font-weight: 700;
-  color: var(--text);
-}
+.welcome-article-body table td,.welcome-article-body table th { border: 1px solid var(--border); padding: 8px 12px; text-align: right; }
+.welcome-article-body table th { background: rgba(108,47,160,0.12); font-weight: 700; color: var(--text); }
 @media (max-width: 600px) {
   .welcome-article-section { padding: 0 1.25rem 30px; }
   .welcome-article-card { padding: 1.5rem 1.25rem; }
@@ -219,7 +184,7 @@
 </div>
 
 <!-- ═══ PAGES GRID ═══ -->
-<div class="pages-grid">
+<div class="pages-grid" id="pagesGrid">
 
   <a href="networks.html" class="page-card">
     <span class="pc-icon">📡</span>
@@ -325,44 +290,71 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
+/* ── البطاقات الافتراضية (fallback) ── */
+const DEFAULT_CARDS = [
+  { id:"networks", icon:"📡", title:"شبكات الحاسب الآلي", titleEn:"Computer Networks", desc:"مقدمة شاملة عن شبكات الحاسب الآلي وتعريفها ومكوناتها وفوائدها وأنواعها.", link:"networks.html", topics:"ما هي شبكة الحاسب؟\nمكونات شبكة الحاسب (الأجهزة الطرفية، الوسيطة، وسائط الشبكة)\nفوائد شبكات الحاسب\nأنواع الشبكات (LAN, WAN, MAN, PAN, WLAN)" },
+  { id:"security", icon:"🔒", title:"الأمان في الشبكات", titleEn:"Network Security", desc:"مفهوم أمان الشبكات والتهديدات الداخلية والخارجية وحلول الأمان الفعّالة.", link:"security.html", topics:"مفهوم أمان الشبكات وأهميته\nالتهديدات الداخلية للشبكة\nالتهديدات الخارجية (Hacking, Malware, DDoS)\nحلول الأمان (Firewall, Encryption, Backup)" },
+  { id:"osi", icon:"🔁", title:"نموذج OSI", titleEn:"OSI Model", desc:"النموذج المرجعي لبروتوكولات الاتصال في شبكات الحاسب — سبع طبقات ووظائفها.", link:"osi.html", topics:"ما هو نموذج OSI وفائدته\nعملية التغليف (Encapsulation)\nالبروتوكول (Protocol)\nالطبقات السبع بالتفصيل\nالفروقات TCP/UDP والسويتش والراوتر" },
+  { id:"cables", icon:"🔌", title:"كيابل الشبكات", titleEn:"Networking Cables", desc:"تعريف كابلات الشبكات وأنواعها المختلفة وأدوات تصنيعها وتركيبها.", link:"cables.html", topics:"الكابل المحوري (Coaxial Cable)\nالكابل المزدوج المجدول (Twisted Pair)\nالكابل الضوئي (Fiber Optic)\nأدوات تصنيع الكيابل" },
+  { id:"ip", icon:"🌍", title:"بروتوكول IP", titleEn:"Internet Protocol Address", desc:"تعريف بروتوكول IP وإصداراته وتدريبات عملية على IPv4 وIPv6.", link:"ip.html", topics:"تعريف بروتوكول IP\nعنوان IPv4 وفئاته\nتدريبات عملية على IPv4\nبروتوكول IPv6 ومزاياه" },
+];
+
+/* ── بناء HTML للبطاقات ── */
+function renderCards(cards) {
+  const grid = document.getElementById("pagesGrid");
+  if (!grid) return;
+  grid.innerHTML = cards.map(c => {
+    const topicsList = (c.topics || "").split("\n").filter(t => t.trim()).map(t => `<li>${t.trim()}</li>`).join("");
+    return `
+      <a href="${c.link}" class="page-card">
+        <span class="pc-icon">${c.icon}</span>
+        <div class="pc-title">${c.title}</div>
+        <div class="pc-en">${c.titleEn}</div>
+        <p class="pc-desc">${c.desc}</p>
+        <ul class="pc-topics">${topicsList}</ul>
+        <div class="pc-arrow">ابدأ التعلم ←</div>
+      </a>`;
+  }).join("");
+}
+
+/* ── تحميل وتطبيق الإعدادات ── */
 (async function loadSiteSettings() {
+  // عرض البطاقات الافتراضية فوراً (تجنب صفحة فارغة)
+  renderCards(DEFAULT_CARDS);
+
   try {
     const snap = await getDoc(doc(db, "settings", "general"));
     if (!snap.exists()) return;
     const s = snap.data();
 
-    /* ── 1) العنوان والوصف ── */
-    if (s.heroTitle) {
-      document.getElementById("heroTitle").textContent = s.heroTitle;
-    }
-    if (s.heroSubtitle) {
-      document.getElementById("heroSubtitle").textContent = s.heroSubtitle;
-    }
+    /* 1) العنوان والوصف */
+    if (s.heroTitle)    document.getElementById("heroTitle").textContent = s.heroTitle;
+    if (s.heroSubtitle) document.getElementById("heroSubtitle").textContent = s.heroSubtitle;
 
-    /* ── 2) الألوان — تطبيق عبر CSS Variables ── */
+    /* 2) الألوان — CSS Variables */
     const root = document.documentElement;
     if (s.bgColor)      root.style.setProperty("--bg", s.bgColor);
     if (s.sidebarColor) root.style.setProperty("--card", s.sidebarColor);
     if (s.primaryColor) {
       root.style.setProperty("--primary", s.primaryColor);
-      // حساب ألوان مشتقة أفتح وأغمق
       root.style.setProperty("--primary-light", lightenColor(s.primaryColor, 25));
       root.style.setProperty("--primary-dark",  darkenColor(s.primaryColor, 20));
     }
     if (s.textColor) root.style.setProperty("--text", s.textColor);
 
-    /* ── 3) الخطوط ── */
-    if (s.h1Size) {
-      document.querySelectorAll("h1").forEach(el => el.style.fontSize = s.h1Size + "rem");
-    }
-    if (s.pSize) {
-      document.querySelectorAll(".hero-sub, .pc-desc, .welcome-article-body").forEach(el => el.style.fontSize = s.pSize + "rem");
-    }
+    /* 3) الخطوط */
+    if (s.h1Size) document.querySelectorAll("h1").forEach(el => el.style.fontSize = s.h1Size + "rem");
+    if (s.pSize)  document.querySelectorAll(".hero-sub, .pc-desc, .welcome-article-body").forEach(el => el.style.fontSize = s.pSize + "rem");
 
-    /* ── 4) المقال الترحيبي ── */
+    /* 4) المقال الترحيبي */
     if (s.welcomeContent && s.welcomeContent.trim()) {
       document.getElementById("welcomeArticleBody").innerHTML = s.welcomeContent;
       document.getElementById("welcomeArticleSection").style.display = "block";
+    }
+
+    /* 5) بطاقات الأقسام */
+    if (s.homeCards && s.homeCards.length) {
+      renderCards(s.homeCards);
     }
 
   } catch (e) {
@@ -370,20 +362,20 @@ const db  = getFirestore(app);
   }
 })();
 
-/* ── دوال مساعدة لتفتيح/تغميق الألوان ── */
-function lightenColor(hex, percent) {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.min(255, (num >> 16) + Math.round(2.55 * percent));
-  const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(2.55 * percent));
-  const b = Math.min(255, (num & 0x0000FF) + Math.round(2.55 * percent));
-  return "#" + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+/* ── دوال مساعدة ── */
+function lightenColor(hex, pct) {
+  const n = parseInt(hex.replace("#",""),16);
+  const r = Math.min(255,(n>>16)+Math.round(2.55*pct));
+  const g = Math.min(255,((n>>8)&0xFF)+Math.round(2.55*pct));
+  const b = Math.min(255,(n&0xFF)+Math.round(2.55*pct));
+  return "#"+(0x1000000+(r<<16)+(g<<8)+b).toString(16).slice(1);
 }
-function darkenColor(hex, percent) {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.max(0, (num >> 16) - Math.round(2.55 * percent));
-  const g = Math.max(0, ((num >> 8) & 0x00FF) - Math.round(2.55 * percent));
-  const b = Math.max(0, (num & 0x0000FF) - Math.round(2.55 * percent));
-  return "#" + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+function darkenColor(hex, pct) {
+  const n = parseInt(hex.replace("#",""),16);
+  const r = Math.max(0,(n>>16)-Math.round(2.55*pct));
+  const g = Math.max(0,((n>>8)&0xFF)-Math.round(2.55*pct));
+  const b = Math.max(0,(n&0xFF)-Math.round(2.55*pct));
+  return "#"+(0x1000000+(r<<16)+(g<<8)+b).toString(16).slice(1);
 }
 </script>
 </body>

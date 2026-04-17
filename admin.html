@@ -563,36 +563,19 @@ html, body {
   border-bottom: 1px solid var(--border2);
   background: rgba(108,47,160,0.06);
 }
-.settings-section-icon {
-  font-size: 1.15rem;
-}
-.settings-section-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--text);
-}
-.settings-section-body {
-  padding: 1.5rem;
-  display: grid;
-  gap: 1.25rem;
-}
+.settings-section-icon { font-size: 1.15rem; }
+.settings-section-title { font-size: 1rem; font-weight: 800; color: var(--text); }
+.settings-section-body { padding: 1.5rem; display: grid; gap: 1.25rem; }
 .settings-row {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.25rem;
 }
-.sett-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-.sett-field label {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-muted);
-}
+.sett-field { display: flex; flex-direction: column; gap: 0.45rem; }
+.sett-field label { font-size: 0.82rem; font-weight: 700; color: var(--text-muted); }
 .sett-field input[type="text"],
-.sett-field input[type="number"] {
+.sett-field input[type="number"],
+.sett-field textarea {
   padding: 0.7rem 0.9rem;
   background: rgba(255,255,255,0.04);
   border: 1px solid var(--border);
@@ -603,80 +586,66 @@ html, body {
   outline: none;
   transition: border-color var(--transition);
 }
-.sett-field input[type="text"]:focus,
-.sett-field input[type="number"]:focus {
-  border-color: var(--primary-l);
-}
-.sett-color-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
+.sett-field input:focus, .sett-field textarea:focus { border-color: var(--primary-l); }
+.sett-field textarea { min-height: 70px; resize: vertical; line-height: 1.7; }
+.sett-color-wrap { display: flex; align-items: center; gap: 0.75rem; }
 .sett-color-wrap input[type="color"] {
-  width: 44px;
-  height: 44px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  cursor: pointer;
-  padding: 2px;
+  width: 44px; height: 44px; border: 2px solid var(--border);
+  border-radius: var(--radius-sm); background: transparent; cursor: pointer; padding: 2px;
   transition: border-color var(--transition);
 }
-.sett-color-wrap input[type="color"]:hover {
-  border-color: var(--primary-l);
-}
+.sett-color-wrap input[type="color"]:hover { border-color: var(--primary-l); }
 .sett-color-wrap .sett-color-hex {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  font-family: 'Courier New', monospace;
-  direction: ltr;
-  min-width: 65px;
+  font-size: 0.82rem; color: var(--text-muted);
+  font-family: 'Courier New', monospace; direction: ltr; min-width: 65px;
 }
 .sett-editor-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  overflow: hidden; min-height: 280px;
+}
+#settingsTinyEditor { visibility: hidden; height: 0; }
+.sett-save-bar { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 0 0; }
+.sett-save-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border: none; border-radius: var(--radius-sm);
+  color: #fff; font-family: 'Cairo', sans-serif; font-size: 0.92rem; font-weight: 700;
+  cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+}
+.sett-save-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.sett-save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.sett-save-msg { font-size: 0.85rem; font-weight: 700; display: none; }
+.sett-save-msg.success { color: var(--accent); display: inline; }
+.sett-save-msg.error   { color: #ff6b6b; display: inline; }
+
+/* ── Home card editor items ── */
+.hc-card-editor {
+  background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
-  min-height: 280px;
 }
-#settingsTinyEditor { visibility: hidden; height: 0; }
-
-.sett-save-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 0 0;
-}
-.sett-save-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 2rem;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  border: none;
-  border-radius: var(--radius-sm);
-  color: #fff;
-  font-family: 'Cairo', sans-serif;
-  font-size: 0.92rem;
-  font-weight: 700;
+.hc-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 1.1rem;
+  background: rgba(0,201,177,0.06);
+  border-bottom: 1px solid var(--border2);
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  transition: background 0.2s;
 }
-.sett-save-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+.hc-card-header:hover { background: rgba(0,201,177,0.1); }
+.hc-card-header-title {
+  font-size: 0.92rem; font-weight: 800; color: var(--text);
+  display: flex; align-items: center; gap: 0.5rem;
 }
-.sett-save-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+.hc-card-header-toggle {
+  font-size: 0.78rem; color: var(--text-muted); font-weight: 600;
+  background: none; border: none; cursor: pointer; font-family: 'Cairo', sans-serif;
 }
-.sett-save-msg {
-  font-size: 0.85rem;
-  font-weight: 700;
-  display: none;
-}
-.sett-save-msg.success { color: var(--accent); display: inline; }
-.sett-save-msg.error   { color: #ff6b6b; display: inline; }
+.hc-card-body { padding: 1.25rem; display: none; }
+.hc-card-body.open { display: grid; gap: 1rem; }
+.hc-card-body .settings-row { grid-template-columns: 1fr 1fr; }
 
 /* ── Section divider ── */
 .section-label {
@@ -2711,7 +2680,7 @@ html, body {
           <div class="panel-title-group">
             <div class="panel-tag">⚙️ الإعدادات</div>
             <div class="panel-title">المظهر و<span>الصفحة الرئيسية</span></div>
-            <div class="panel-subtitle">تخصيص ألوان الموقع والخطوط ومحتوى الصفحة الرئيسية</div>
+            <div class="panel-subtitle">تخصيص ألوان الموقع والخطوط ومحتوى الصفحة الرئيسية وبطاقات الأقسام</div>
           </div>
         </div>
 
@@ -2765,30 +2734,30 @@ html, body {
             <div class="settings-row">
               <div class="sett-field">
                 <label>حجم خط العناوين (H1) — بالـ rem</label>
-                <input type="number" id="settH1Size" value="2" min="1" max="6" step="0.1" placeholder="مثال: 2">
+                <input type="number" id="settH1Size" value="2" min="1" max="6" step="0.1">
               </div>
               <div class="sett-field">
                 <label>حجم خط النصوص العادية (P) — بالـ rem</label>
-                <input type="number" id="settPSize" value="1" min="0.5" max="3" step="0.05" placeholder="مثال: 1">
+                <input type="number" id="settPSize" value="1" min="0.5" max="3" step="0.05">
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ──── 3) محتوى الصفحة الرئيسية ──── -->
+        <!-- ──── 3) عنوان ووصف الصفحة الرئيسية ──── -->
         <div class="settings-section">
           <div class="settings-section-header">
             <span class="settings-section-icon">🏠</span>
-            <span class="settings-section-title">محتوى الصفحة الرئيسية</span>
+            <span class="settings-section-title">عنوان ووصف الصفحة الرئيسية</span>
           </div>
           <div class="settings-section-body">
             <div class="sett-field">
               <label>عنوان الصفحة الرئيسية (Hero Title)</label>
-              <input type="text" id="settHeroTitle" placeholder="مثال: مرحباً بكم في أكاديمية الشبكات">
+              <input type="text" id="settHeroTitle" placeholder="مثال: مبادئ شبكات الحاسب الآلي">
             </div>
             <div class="sett-field">
               <label>وصف الصفحة الرئيسية (Hero Subtitle)</label>
-              <input type="text" id="settHeroSubtitle" placeholder="مثال: منصتك التعليمية لاحتراف الشبكات">
+              <input type="text" id="settHeroSubtitle" placeholder="مثال: دليل شامل ومتكامل لتعلم شبكات الحاسب">
             </div>
             <div class="sett-field">
               <label>المقال الترحيبي / نبذة الصفحة الرئيسية</label>
@@ -2799,16 +2768,31 @@ html, body {
           </div>
         </div>
 
+        <!-- ──── 4) بطاقات أقسام الصفحة الرئيسية ──── -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <span class="settings-section-icon">📑</span>
+            <span class="settings-section-title">بطاقات أقسام الصفحة الرئيسية</span>
+          </div>
+          <div class="settings-section-body" id="homeCardsContainer">
+            <!-- يتم توليدها ديناميكياً بواسطة JS -->
+            <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+              <div class="loading-ring" style="width:28px;height:28px;border-width:2px;margin:0 auto 0.75rem"></div>
+              جارٍ تحميل بطاقات الأقسام...
+            </div>
+          </div>
+        </div>
+
         <!-- ──── شريط الحفظ ──── -->
         <div class="sett-save-bar">
           <button class="sett-save-btn" id="btnSaveSettings" onclick="saveSettings()">
-            <span id="settSaveBtnText">💾 حفظ الإعدادات</span>
+            <span id="settSaveBtnText">💾 حفظ جميع الإعدادات</span>
             <span id="settSaveBtnSpinner" style="display:none">⏳ جارٍ الحفظ...</span>
           </button>
           <span class="sett-save-msg" id="settSaveMsg"></span>
         </div>
 
-        <!-- ──── معلومات الحساب (كما كانت) ──── -->
+        <!-- ──── معلومات الحساب ──── -->
         <div class="info-card" style="margin-top:2rem;">
           <h3>🔐 معلومات الحساب</h3>
           <p>
@@ -2820,26 +2804,7 @@ html, body {
         <div class="info-card">
           <h3>🚪 تسجيل الخروج</h3>
           <p>الضغط على الزر أدناه سيُنهي جلستك الحالية ويعيدك لصفحة تسجيل الدخول.</p>
-          <button
-            onclick="handleLogout()"
-            style="
-              margin-top:1.1rem;
-              padding:0.7rem 1.5rem;
-              background:rgba(244,67,54,0.12);
-              border:1px solid rgba(244,67,54,0.3);
-              border-radius:8px;
-              color:#ff6b6b;
-              font-family:'Cairo',sans-serif;
-              font-size:0.88rem;
-              font-weight:700;
-              cursor:pointer;
-              transition:all 0.2s;
-            "
-            onmouseover="this.style.background='rgba(244,67,54,0.22)'"
-            onmouseout="this.style.background='rgba(244,67,54,0.12)'"
-          >
-            🚪 تسجيل الخروج
-          </button>
+          <button onclick="handleLogout()" style="margin-top:1.1rem;padding:0.7rem 1.5rem;background:rgba(244,67,54,0.12);border:1px solid rgba(244,67,54,0.3);border-radius:8px;color:#ff6b6b;font-family:'Cairo',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(244,67,54,0.22)'" onmouseout="this.style.background='rgba(244,67,54,0.12)'">🚪 تسجيل الخروج</button>
         </div>
       </section>
 

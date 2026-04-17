@@ -44,40 +44,49 @@ if (!document.getElementById("dynamicLmsStyles")) {
 
 // إنشاء نافذة إضافة/تعديل السؤال برمجياً
 function injectQuestionModal() {
-  if (document.getElementById("qModal")) return;
+  if (document.getElementById("qModalOverlay")) return;
   const html = `
-  <div id="qModal" class="tr-modal">
-    <div class="tr-modal-content" style="max-width:600px; max-height:90vh; overflow-y:auto;">
-      <h3 id="qModalTitle">✏️ إضافة / تعديل سؤال</h3>
+  <div id="qModalOverlay" class="tr-modal-overlay">
+    <div class="tr-modal" id="qModal" style="max-width:600px; max-height:90vh; overflow-y:auto;">
+      <div class="tr-modal-header">
+        <div class="tr-modal-title" id="qModalTitle">✏️ إضافة / تعديل سؤال</div>
+        <button class="tr-modal-close" onclick="document.getElementById('qModalOverlay').classList.remove('open')" title="إغلاق">✕</button>
+      </div>
       <input type="hidden" id="qModalId">
       
-      <label class="qz-form-label">القسم التابع له:</label>
-      <select id="qModalCat" class="qz-form-input">
-        <option value="networks">شبكات الحاسب الآلي</option>
-        <option value="security">الأمان في الشبكات</option>
-        <option value="osi">نموذج OSI</option>
-        <option value="cables">كيابل الشبكات</option>
-        <option value="ip">بروتوكول IP</option>
-      </select>
+      <div class="tr-modal-field">
+        <label for="qModalCat">القسم التابع له:</label>
+        <select id="qModalCat" class="qz-form-input" style="width:100%;padding:0.75rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;">
+          <option value="networks">شبكات الحاسب الآلي</option>
+          <option value="security">الأمان في الشبكات</option>
+          <option value="osi">نموذج OSI</option>
+          <option value="cables">كيابل الشبكات</option>
+          <option value="ip">بروتوكول IP</option>
+        </select>
+      </div>
       
-      <label class="qz-form-label">نوع السؤال:</label>
-      <select id="qModalType" class="qz-form-input" onchange="renderQModalDynamicFields()">
-        <option value="tf">صح وخطأ</option>
-        <option value="mcq">اختيار من متعدد</option>
-        <option value="multi">إجابات متعددة</option>
-        <option value="match">مطابقة</option>
-      </select>
+      <div class="tr-modal-field">
+        <label for="qModalType">نوع السؤال:</label>
+        <select id="qModalType" class="qz-form-input" onchange="renderQModalDynamicFields()" style="width:100%;padding:0.75rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;">
+          <option value="tf">صح وخطأ</option>
+          <option value="mcq">اختيار من متعدد</option>
+          <option value="multi">إجابات متعددة</option>
+          <option value="match">مطابقة</option>
+        </select>
+      </div>
       
-      <label class="qz-form-label">نص السؤال:</label>
-      <input type="text" id="qModalText" class="qz-form-input" placeholder="اكتب سؤالك هنا...">
+      <div class="tr-modal-field">
+        <label for="qModalText">نص السؤال:</label>
+        <input type="text" id="qModalText" placeholder="اكتب سؤالك هنا..." style="width:100%;padding:0.75rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;">
+      </div>
       
-      <div id="qModalDynamicFields" style="margin-top:15px; padding:15px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid #333;"></div>
+      <div id="qModalDynamicFields" style="margin-top:15px; padding:15px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border);"></div>
       
-      <div id="qModalMsg" style="display:none; margin-top:10px; padding:10px; border-radius:4px;"></div>
+      <div class="tr-modal-msg" id="qModalMsg" style="display:none"></div>
       
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="qz-btn" onclick="saveBankQuestion()">💾 حفظ السؤال</button>
-        <button class="qz-btn" style="background:#444;" onclick="document.getElementById('qModal').classList.remove('open')">❌ إلغاء</button>
+      <div class="tr-modal-actions">
+        <button class="btn-modal-save" onclick="saveBankQuestion()">💾 حفظ السؤال</button>
+        <button class="btn-modal-cancel" onclick="document.getElementById('qModalOverlay').classList.remove('open')">إلغاء</button>
       </div>
     </div>
   </div>`;
@@ -310,7 +319,7 @@ window.openAddQuestionModal = function() {
   document.getElementById("qModalType").value = "mcq";
   renderQModalDynamicFields();
   document.getElementById("qModalMsg").style.display = "none";
-  document.getElementById("qModal").classList.add("open");
+  document.getElementById("qModalOverlay").classList.add("open");
 };
 
 window.openEditQuestionModal = function(id, event) {
@@ -324,7 +333,7 @@ window.openEditQuestionModal = function(id, event) {
   document.getElementById("qModalText").value = q.text;
   renderQModalDynamicFields(q);
   document.getElementById("qModalMsg").style.display = "none";
-  document.getElementById("qModal").classList.add("open");
+  document.getElementById("qModalOverlay").classList.add("open");
 };
 
 window.saveBankQuestion = async function() {
@@ -371,7 +380,7 @@ window.saveBankQuestion = async function() {
     } else {
       await addDoc(collection(db, "questionBank"), data);
     }
-    document.getElementById("qModal").classList.remove("open");
+    document.getElementById("qModalOverlay").classList.remove("open");
     renderQuestionBankSelector(); // إعادة التحميل لإظهار التعديلات
     loadStats();
   } catch(e) {
@@ -720,100 +729,101 @@ window.saveEditTrainee = async function () { const uid = document.getElementById
    إعدادات المظهر والصفحة الرئيسية (Settings)
 ══════════════════════════════════════════════════ */
 
+/* البطاقات الافتراضية للصفحة الرئيسية */
+const DEFAULT_HOME_CARDS = [
+  { id: "networks", icon: "📡", title: "شبكات الحاسب الآلي", titleEn: "Computer Networks", desc: "مقدمة شاملة عن شبكات الحاسب الآلي وتعريفها ومكوناتها وفوائدها وأنواعها.", link: "networks.html", topics: "ما هي شبكة الحاسب؟\nمكونات شبكة الحاسب (الأجهزة الطرفية، الوسيطة، وسائط الشبكة)\nفوائد شبكات الحاسب\nأنواع الشبكات (LAN, WAN, MAN, PAN, WLAN)" },
+  { id: "security", icon: "🔒", title: "الأمان في الشبكات", titleEn: "Network Security", desc: "مفهوم أمان الشبكات والتهديدات الداخلية والخارجية وحلول الأمان الفعّالة.", link: "security.html", topics: "مفهوم أمان الشبكات وأهميته\nالتهديدات الداخلية للشبكة\nالتهديدات الخارجية (Hacking, Malware, DDoS)\nحلول الأمان (Firewall, Encryption, Backup)" },
+  { id: "osi",      icon: "🔁", title: "نموذج OSI", titleEn: "OSI Model", desc: "النموذج المرجعي لبروتوكولات الاتصال في شبكات الحاسب — سبع طبقات ووظائفها.", link: "osi.html", topics: "ما هو نموذج OSI وفائدته\nعملية التغليف (Encapsulation)\nالبروتوكول (Protocol)\nالطبقات السبع بالتفصيل\nالفروقات TCP/UDP والسويتش والراوتر" },
+  { id: "cables",   icon: "🔌", title: "كيابل الشبكات", titleEn: "Networking Cables", desc: "تعريف كابلات الشبكات وأنواعها المختلفة وأدوات تصنيعها وتركيبها.", link: "cables.html", topics: "الكابل المحوري (Coaxial Cable)\nالكابل المزدوج المجدول (Twisted Pair)\nالكابل الضوئي (Fiber Optic)\nأدوات تصنيع الكيابل" },
+  { id: "ip",       icon: "🌍", title: "بروتوكول IP", titleEn: "Internet Protocol Address", desc: "تعريف بروتوكول IP وإصداراته وتدريبات عملية على IPv4 وIPv6.", link: "ip.html", topics: "تعريف بروتوكول IP\nعنوان IPv4 وفئاته\nتدريبات عملية على IPv4\nبروتوكول IPv6 ومزاياه" },
+];
+
 /**
  * تهيئة محرر TinyMCE مخصص لقسم الإعدادات
  */
 window._initSettingsTinyMCE = function () {
   if (typeof tinymce === "undefined" || tinymce.get("settingsTinyEditor")) return;
-
   tinymce.init({
-    selector:       "#settingsTinyEditor",
-    language:       "ar",
-    language_url:   "https://cdn.jsdelivr.net/npm/tinymce-i18n@23.10.9/langs6/ar.js",
+    selector: "#settingsTinyEditor",
+    language: "ar",
+    language_url: "https://cdn.jsdelivr.net/npm/tinymce-i18n@23.10.9/langs6/ar.js",
     directionality: "rtl",
-    skin:           "oxide-dark",
-    content_css:    "dark",
-
+    skin: "oxide-dark",
+    content_css: "dark",
     toolbar_mode: "wrap",
-    plugins: [
-      "advlist", "autolink", "lists", "link", "image", "charmap",
-      "preview", "anchor", "searchreplace", "visualblocks", "code",
-      "fullscreen", "insertdatetime", "media", "table", "help",
-      "wordcount", "emoticons", "codesample",
-    ],
-    toolbar: [
-      "fontfamily fontsize | styles | bold italic underline strikethrough |",
-      "forecolor backcolor | alignright aligncenter alignleft alignjustify |",
-      "bullist numlist outdent indent | table | link image emoticons charmap |",
-      "blockquote codesample | removeformat | fullscreen preview code | help",
-    ].join(" "),
-
-    font_family_formats: [
-      "Cairo=Cairo,sans-serif",
-      "Tajawal=Tajawal,sans-serif",
-      "Almarai=Almarai,sans-serif",
-      "Arial=arial,helvetica,sans-serif",
-      "Times New Roman=times new roman,times",
-      "Courier New=courier new,courier",
-    ].join(";"),
-
-    font_size_formats:
-      "10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt 48pt",
-
+    plugins: ["advlist","autolink","lists","link","image","charmap","preview","anchor","searchreplace","visualblocks","code","fullscreen","insertdatetime","media","table","help","wordcount","emoticons","codesample"],
+    toolbar: "fontfamily fontsize | styles | bold italic underline strikethrough | forecolor backcolor | alignright aligncenter alignleft alignjustify | bullist numlist outdent indent | table | link image emoticons charmap | blockquote codesample | removeformat | fullscreen preview code | help",
+    font_family_formats: "Cairo=Cairo,sans-serif;Tajawal=Tajawal,sans-serif;Almarai=Almarai,sans-serif;Arial=arial,helvetica,sans-serif;Times New Roman=times new roman,times;Courier New=courier new,courier",
+    font_size_formats: "10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt 48pt",
     style_formats: [
-      { title: "عنوان 1",  block: "h1" },
-      { title: "عنوان 2",  block: "h2" },
-      { title: "عنوان 3",  block: "h3" },
-      { title: "نص عادي",  block: "p"  },
-      { title: "اقتباس",   block: "blockquote" },
-      { title: "كود",      block: "pre" },
+      { title: "عنوان 1", block: "h1" }, { title: "عنوان 2", block: "h2" },
+      { title: "عنوان 3", block: "h3" }, { title: "نص عادي", block: "p" },
+      { title: "اقتباس", block: "blockquote" }, { title: "كود", block: "pre" },
     ],
-
     content_style: `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&family=Almarai:wght@400;700&display=swap');
-      body {
-        font-family: 'Cairo', sans-serif;
-        font-size: 15px;
-        line-height: 1.85;
-        direction: rtl;
-        text-align: right;
-        color: #e8eaf6;
-        background: #161929;
-        margin: 12px 16px;
-      }
-      h1,h2,h3 { color:#fff; }
-      a        { color:#00c9b1; }
-      blockquote {
-        border-right: 4px solid #8b46c8;
-        border-left: none;
-        padding: 0.5rem 1rem;
-        margin: 0.75rem 0;
-        background: rgba(108,47,160,0.1);
-        color: #8c90b5;
-      }
-      table td, table th {
-        border: 1px solid rgba(108,47,160,0.25);
-        padding: 6px 10px;
-      }
-      table th { background: rgba(108,47,160,0.15); font-weight: 700; }
+      body { font-family:'Cairo',sans-serif; font-size:15px; line-height:1.85; direction:rtl; text-align:right; color:#e8eaf6; background:#161929; margin:12px 16px; }
+      h1,h2,h3 { color:#fff; } a { color:#00c9b1; }
+      blockquote { border-right:4px solid #8b46c8; border-left:none; padding:0.5rem 1rem; margin:0.75rem 0; background:rgba(108,47,160,0.1); color:#8c90b5; }
+      table td,table th { border:1px solid rgba(108,47,160,0.25); padding:6px 10px; }
+      table th { background:rgba(108,47,160,0.15); font-weight:700; }
     `,
-
-    height:             350,
-    min_height:         250,
-    menubar:            "file edit view insert format tools table help",
-    statusbar:          true,
-    branding:           false,
-    promotion:          false,
-    resize:             true,
-    paste_data_images:  true,
-
-    setup: (editor) => {
-      editor.on("init", () => {
-        editor.execCommand("fontName", false, "Cairo,sans-serif");
-      });
-    },
+    height: 350, min_height: 250,
+    menubar: "file edit view insert format tools table help",
+    statusbar: true, branding: false, promotion: false, resize: true, paste_data_images: true,
+    setup: (editor) => { editor.on("init", () => editor.execCommand("fontName", false, "Cairo,sans-serif")); },
   });
 };
+
+/**
+ * بناء واجهة محرر بطاقات الأقسام
+ */
+function renderHomeCardsEditor(cards) {
+  const container = document.getElementById("homeCardsContainer");
+  if (!container) return;
+  container.innerHTML = cards.map((c, i) => `
+    <div class="hc-card-editor" data-card-id="${c.id}">
+      <div class="hc-card-header" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.hc-card-header-toggle').textContent = this.nextElementSibling.classList.contains('open') ? '▲ إخفاء' : '▼ تعديل'">
+        <div class="hc-card-header-title">
+          <span>${c.icon}</span>
+          <span>${c.title}</span>
+          <span style="font-size:0.75rem;color:var(--accent);font-weight:600;">${c.titleEn}</span>
+        </div>
+        <span class="hc-card-header-toggle">▼ تعديل</span>
+      </div>
+      <div class="hc-card-body">
+        <div class="settings-row">
+          <div class="sett-field">
+            <label>الأيقونة (Emoji)</label>
+            <input type="text" id="hcIcon_${c.id}" value="${c.icon}" style="text-align:center;font-size:1.5rem;max-width:80px;">
+          </div>
+          <div class="sett-field">
+            <label>رابط الصفحة</label>
+            <input type="text" id="hcLink_${c.id}" value="${c.link}" style="direction:ltr;text-align:left;">
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="sett-field">
+            <label>العنوان بالعربي</label>
+            <input type="text" id="hcTitle_${c.id}" value="${c.title}">
+          </div>
+          <div class="sett-field">
+            <label>العنوان بالإنجليزي</label>
+            <input type="text" id="hcTitleEn_${c.id}" value="${c.titleEn}" style="direction:ltr;text-align:left;">
+          </div>
+        </div>
+        <div class="sett-field">
+          <label>وصف البطاقة</label>
+          <input type="text" id="hcDesc_${c.id}" value="${c.desc}">
+        </div>
+        <div class="sett-field">
+          <label>المواضيع (كل سطر = موضوع)</label>
+          <textarea id="hcTopics_${c.id}" rows="4">${c.topics}</textarea>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
 
 /**
  * تحميل الإعدادات من Firestore → settings/general
@@ -821,26 +831,13 @@ window._initSettingsTinyMCE = function () {
 window.loadSettings = async function () {
   try {
     const snap = await getDoc(doc(db, "settings", "general"));
-    if (!snap.exists()) return;
-    const d = snap.data();
+    const d = snap.exists() ? snap.data() : {};
 
     // ─ الألوان
-    if (d.bgColor) {
-      document.getElementById("settBgColor").value = d.bgColor;
-      document.getElementById("settBgColorHex").textContent = d.bgColor;
-    }
-    if (d.sidebarColor) {
-      document.getElementById("settSidebarColor").value = d.sidebarColor;
-      document.getElementById("settSidebarColorHex").textContent = d.sidebarColor;
-    }
-    if (d.primaryColor) {
-      document.getElementById("settPrimaryColor").value = d.primaryColor;
-      document.getElementById("settPrimaryColorHex").textContent = d.primaryColor;
-    }
-    if (d.textColor) {
-      document.getElementById("settTextColor").value = d.textColor;
-      document.getElementById("settTextColorHex").textContent = d.textColor;
-    }
+    if (d.bgColor) { document.getElementById("settBgColor").value = d.bgColor; document.getElementById("settBgColorHex").textContent = d.bgColor; }
+    if (d.sidebarColor) { document.getElementById("settSidebarColor").value = d.sidebarColor; document.getElementById("settSidebarColorHex").textContent = d.sidebarColor; }
+    if (d.primaryColor) { document.getElementById("settPrimaryColor").value = d.primaryColor; document.getElementById("settPrimaryColorHex").textContent = d.primaryColor; }
+    if (d.textColor) { document.getElementById("settTextColor").value = d.textColor; document.getElementById("settTextColorHex").textContent = d.textColor; }
 
     // ─ الخطوط
     if (d.h1Size) document.getElementById("settH1Size").value = d.h1Size;
@@ -854,67 +851,73 @@ window.loadSettings = async function () {
     if (d.welcomeContent) {
       const waitForEditor = setInterval(() => {
         const editor = tinymce.get("settingsTinyEditor");
-        if (editor) {
-          editor.setContent(d.welcomeContent);
-          clearInterval(waitForEditor);
-        }
+        if (editor) { editor.setContent(d.welcomeContent); clearInterval(waitForEditor); }
       }, 300);
-      // مهلة أمان: توقف بعد 10 ثوان
       setTimeout(() => clearInterval(waitForEditor), 10000);
     }
+
+    // ─ بطاقات الأقسام
+    const cards = d.homeCards && d.homeCards.length ? d.homeCards : DEFAULT_HOME_CARDS;
+    renderHomeCardsEditor(cards);
+
   } catch (e) {
     console.error("خطأ في تحميل الإعدادات:", e);
+    renderHomeCardsEditor(DEFAULT_HOME_CARDS);
   }
 };
+
+/**
+ * تجميع بيانات بطاقات الأقسام من الحقول
+ */
+function collectHomeCards() {
+  const ids = ["networks", "security", "osi", "cables", "ip"];
+  return ids.map(id => ({
+    id,
+    icon:    document.getElementById(`hcIcon_${id}`)?.value    || "",
+    title:   document.getElementById(`hcTitle_${id}`)?.value   || "",
+    titleEn: document.getElementById(`hcTitleEn_${id}`)?.value || "",
+    desc:    document.getElementById(`hcDesc_${id}`)?.value    || "",
+    link:    document.getElementById(`hcLink_${id}`)?.value    || "",
+    topics:  document.getElementById(`hcTopics_${id}`)?.value  || "",
+  }));
+}
 
 /**
  * حفظ جميع الإعدادات في Firestore → settings/general
  */
 window.saveSettings = async function () {
-  const btn     = document.getElementById("btnSaveSettings");
+  const btn = document.getElementById("btnSaveSettings");
   const btnText = document.getElementById("settSaveBtnText");
   const spinner = document.getElementById("settSaveBtnSpinner");
-  const msg     = document.getElementById("settSaveMsg");
+  const msg = document.getElementById("settSaveMsg");
 
-  btn.disabled = true;
-  btnText.style.display = "none";
-  spinner.style.display = "inline";
-  msg.className = "sett-save-msg";
-  msg.style.display = "none";
+  btn.disabled = true; btnText.style.display = "none"; spinner.style.display = "inline";
+  msg.className = "sett-save-msg"; msg.style.display = "none";
 
   const data = {
-    // الألوان
     bgColor:      document.getElementById("settBgColor").value,
     sidebarColor: document.getElementById("settSidebarColor").value,
     primaryColor: document.getElementById("settPrimaryColor").value,
     textColor:    document.getElementById("settTextColor").value,
-
-    // الخطوط
     h1Size: parseFloat(document.getElementById("settH1Size").value) || 2,
     pSize:  parseFloat(document.getElementById("settPSize").value)  || 1,
-
-    // محتوى الصفحة الرئيسية
     heroTitle:      document.getElementById("settHeroTitle").value.trim(),
     heroSubtitle:   document.getElementById("settHeroSubtitle").value.trim(),
     welcomeContent: tinymce.get("settingsTinyEditor")?.getContent() || "",
-
-    updatedAt: serverTimestamp()
+    homeCards:      collectHomeCards(),
+    updatedAt:      serverTimestamp()
   };
 
   try {
     await setDoc(doc(db, "settings", "general"), data, { merge: true });
-    msg.textContent = "✅ تم حفظ الإعدادات بنجاح";
-    msg.className = "sett-save-msg success";
-    msg.style.display = "inline";
+    msg.textContent = "✅ تم حفظ جميع الإعدادات بنجاح";
+    msg.className = "sett-save-msg success"; msg.style.display = "inline";
     setTimeout(() => { msg.style.display = "none"; }, 4000);
   } catch (e) {
     console.error("خطأ في حفظ الإعدادات:", e);
     msg.textContent = "❌ فشل الحفظ: " + e.message;
-    msg.className = "sett-save-msg error";
-    msg.style.display = "inline";
+    msg.className = "sett-save-msg error"; msg.style.display = "inline";
   } finally {
-    btn.disabled = false;
-    btnText.style.display = "inline";
-    spinner.style.display = "none";
+    btn.disabled = false; btnText.style.display = "inline"; spinner.style.display = "none";
   }
 };
