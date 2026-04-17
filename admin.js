@@ -393,11 +393,16 @@ window.saveBankQuestion = async function() {
 window.saveQuizFromBank = async function() {
   const title = document.getElementById("quizTitle")?.value.trim();
   const page  = document.getElementById("quizPage")?.value;
+  const durationRaw = document.getElementById("quizDuration")?.value;
+  const duration = durationRaw ? parseInt(durationRaw) : null;
   const startDate = document.getElementById("quizStartDate")?.value;
   const endDate   = document.getElementById("quizEndDate")?.value;
 
   if (!title) return showQuizMsg("❌ يرجى كتابة عنوان الاختبار.", "error");
   if (!page)  return showQuizMsg("❌ يرجى اختيار القسم.", "error");
+  if (duration !== null && (isNaN(duration) || duration < 1 || duration > 600)) {
+    return showQuizMsg("❌ مدة الاختبار يجب أن تكون بين 1 و 600 دقيقة.", "error");
+  }
   if (selectedQuestionIds.size === 0) return showQuizMsg("❌ يرجى تحديد سؤال واحد على الأقل.", "error");
 
   // تجميع الأسئلة مع درجاتها المخصصة
@@ -410,12 +415,14 @@ window.saveQuizFromBank = async function() {
 
   const quizData = {
     title, page,
+    duration: duration, // مدة الاختبار بالدقائق (null = بدون حد زمني)
     questions: selectedQuestions,
     questionCount: selectedQuestions.length,
     totalScore: totalScore, // حفظ الدرجة الإجمالية للاختبار
     createdAt: serverTimestamp(),
     startDate: startDate ? Timestamp.fromDate(new Date(startDate)) : null,
     endDate:   endDate   ? Timestamp.fromDate(new Date(endDate))   : null,
+    available: true, // افتراضياً مُتاح عند الإنشاء
     status: "active"
   };
 
@@ -424,7 +431,12 @@ window.saveQuizFromBank = async function() {
 
   try {
     const editId = document.getElementById("quizEditId")?.value;
-    if (editId) { await updateDoc(doc(db, "quizzes", editId), quizData); showQuizMsg(`✅ تم التحديث (${totalScore} درجة)!`, "success"); } 
+    if (editId) {
+      // عند التعديل لا نغيّر حقل available (نحافظ على الحالة الحالية)
+      const { available, ...editData } = quizData;
+      await updateDoc(doc(db, "quizzes", editId), editData);
+      showQuizMsg(`✅ تم التحديث (${totalScore} درجة)!`, "success");
+    }
     else { await addDoc(collection(db, "quizzes"), quizData); showQuizMsg(`✅ تم الحفظ (${totalScore} درجة)!`, "success"); }
     resetQuizForm(); loadQuizzes(); loadStats();
   } catch(e) { showQuizMsg("❌ فشل الحفظ: " + e.message, "error"); } 
@@ -438,7 +450,7 @@ function showQuizMsg(text, type) {
 }
 
 window.resetQuizForm = function() {
-  ["quizTitle","quizPage","quizStartDate","quizEndDate","quizEditId"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  ["quizTitle","quizPage","quizDuration","quizStartDate","quizEndDate","quizEditId"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
   selectedQuestionIds.clear(); renderFilteredBank();
   document.querySelector("#quizFormCard .qz-form-title").innerHTML = `<span class="qz-form-icon">✏️</span> إنشاء اختبار جديد`;
 };
@@ -457,6 +469,8 @@ window.loadQuizzes = async function() {
       const d = s.data();
       const catLabel = CATEGORY_LABELS[d.page] || d.page || "—";
       let dateStr = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleDateString("ar-SA") : "—";
+
+      // شارة الحالة الزمنية
       let schedBadge = `<span class="schedule-badge active">🟢 متاح دائماً</span>`;
       if (d.startDate && d.endDate) {
         const start = d.startDate.toDate(), end = d.endDate.toDate();
@@ -464,12 +478,27 @@ window.loadQuizzes = async function() {
         else if (now <= end) schedBadge = `<span class="schedule-badge active">🟢 متاح</span>`;
         else schedBadge = `<span class="schedule-badge expired">🔴 منتهي</span>`;
       }
+
+      // شارة الإتاحة اليدوية (available === false يعني مُعطّل يدوياً)
+      const isAvailable = d.available !== false; // الافتراضي: مُتاح
+      const availLabel  = isAvailable ? "🟢 مُتاح" : "🔒 مُقفل";
+      const availColor  = isAvailable ? "rgba(0,201,177,0.12);color:#00c9b1" : "rgba(244,67,54,0.12);color:#ff6b6b";
+      const nextAction  = isAvailable ? "إيقاف الإتاحة" : "تفعيل الإتاحة";
+
+      // مدة الاختبار (إن وُجدت)
+      const durTxt = d.duration ? `<br><span style="font-size:0.75em;color:#8c90b5;">⏱️ ${d.duration} دقيقة</span>` : "";
+
       tbody.innerHTML += `
-        <tr>
-          <td>${d.title} <br><span style="font-size:0.8em; color:#00c9b1;">${d.totalScore || 0} درجة</span></td>
+        <tr data-qzid="${s.id}">
+          <td>${d.title}${durTxt}</td>
           <td><span class="qz-page-badge">${catLabel}</span></td>
           <td style="text-align:center"><span class="qz-count-badge">${d.questionCount || d.questions?.length || 0}</span></td>
-          <td style="text-align:center">${schedBadge}</td>
+          <td style="text-align:center;font-weight:700;color:#00c9b1">${d.totalScore || 0}</td>
+          <td style="text-align:center">
+            ${schedBadge}
+            <br>
+            <button class="tr-edit-btn" style="background:${availColor};margin-top:4px;" title="${nextAction}" onclick="toggleQuizAvailability('${s.id}', ${isAvailable})">${availLabel}</button>
+          </td>
           <td><span class="qz-date">${dateStr}</span></td>
           <td style="white-space:nowrap">
             <button class="art-edit-btn" onclick="editQuiz('${s.id}')">✏️ تعديل</button>
@@ -479,6 +508,17 @@ window.loadQuizzes = async function() {
     });
     wrapEl.style.display = "block";
   } catch(e) { console.error(e); emptyEl.style.display = "block"; } finally { loadingEl.style.display = "none"; }
+};
+
+window.toggleQuizAvailability = async function (qid, currentlyAvailable) {
+  const action = currentlyAvailable ? "إيقاف" : "تفعيل";
+  if (!confirm(`هل أنت متأكد من ${action} إتاحة هذا الاختبار؟`)) return;
+  try {
+    await updateDoc(doc(db, "quizzes", qid), { available: !currentlyAvailable });
+    loadQuizzes();
+  } catch (e) {
+    alert("❌ فشل التحديث: " + e.message);
+  }
 };
 
 window.deleteQuiz = async function(id, title) { if (confirm(`حذف الاختبار "${title}"؟`)) { try { await deleteDoc(doc(db,"quizzes",id)); loadQuizzes(); loadStats(); } catch(e) { alert("❌ "+e.message); } } };
@@ -508,6 +548,7 @@ window.editQuiz = async function(quizId) {
     if (!snap.exists()) return alert("الاختبار غير موجود");
     const d = snap.data();
     document.getElementById("quizTitle").value = d.title || ""; document.getElementById("quizPage").value = d.page || ""; document.getElementById("quizEditId").value = quizId;
+    const durEl = document.getElementById("quizDuration"); if (durEl) durEl.value = d.duration || "";
     if (d.startDate?.toDate) document.getElementById("quizStartDate").value = toLocalDT(d.startDate.toDate());
     if (d.endDate?.toDate) document.getElementById("quizEndDate").value = toLocalDT(d.endDate.toDate());
     
@@ -990,3 +1031,56 @@ window.saveSettings = async function () {
     btn.disabled = false; btnText.style.display = "inline"; spinner.style.display = "none";
   }
 };
+
+/* ═══════════════════════════════════════
+   طبقة حماية الواجهة الأمامية (Client-side hardening)
+   ⚠️ ملاحظة: هذه الطبقة تُصعّب الأمر على المستخدم العادي فقط،
+   وليست بديلاً عن قواعد أمان Firebase (Firestore Security Rules).
+   يجب ضبط قواعد Firebase بشكل صحيح من لوحة تحكم Firebase Console.
+═══════════════════════════════════════ */
+(function enableClientSideProtection() {
+  // 1) منع النسخ، القص، اللصق
+  ["copy", "cut", "paste"].forEach(evt => {
+    document.addEventListener(evt, e => {
+      // نسمح بالنسخ داخل حقول الإدخال (لكي يمكن للمدير العمل بحرية)
+      const t = e.target;
+      const isEditable = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+      if (!isEditable) { e.preventDefault(); return false; }
+    });
+  });
+
+  // 2) منع القائمة السياقية (Right-click) خارج حقول الإدخال
+  document.addEventListener("contextmenu", e => {
+    const t = e.target;
+    const isEditable = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+    if (!isEditable) { e.preventDefault(); return false; }
+  });
+
+  // 3) منع تحديد النصوص (مع استثناء حقول الإدخال)
+  const styleGuard = document.createElement("style");
+  styleGuard.textContent = `
+    body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    input, textarea, [contenteditable="true"], .allow-select { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+  `;
+  document.head.appendChild(styleGuard);
+
+  // 4) منع اختصارات المطوّر الشائعة
+  document.addEventListener("keydown", e => {
+    const key = (e.key || "").toLowerCase();
+    // F12
+    if (key === "f12") { e.preventDefault(); return false; }
+    // Ctrl+Shift+I / J / C / K (DevTools)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && ["i","j","c","k"].includes(key)) { e.preventDefault(); return false; }
+    // Ctrl+U (View source)
+    if ((e.ctrlKey || e.metaKey) && key === "u") { e.preventDefault(); return false; }
+    // Ctrl+S (Save page)
+    if ((e.ctrlKey || e.metaKey) && key === "s") { e.preventDefault(); return false; }
+    // Ctrl+P (Print)
+    if ((e.ctrlKey || e.metaKey) && key === "p") { e.preventDefault(); return false; }
+  });
+
+  // 5) منع السحب والإفلات للصور والملفات
+  document.addEventListener("dragstart", e => {
+    if (e.target.tagName === "IMG") { e.preventDefault(); return false; }
+  });
+})();
