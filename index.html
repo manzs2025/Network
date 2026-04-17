@@ -126,6 +126,76 @@
   .pages-grid { padding: 40px 1.25rem 60px; }
   .hero { padding: calc(var(--nav-h) + 40px) 1.25rem 60px; }
 }
+
+/* ─── WELCOME ARTICLE SECTION ─── */
+.welcome-article-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 2rem 40px;
+  display: none; /* hidden until content loaded */
+}
+.welcome-article-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem 2.25rem;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-article-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+.welcome-article-card h2 {
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.welcome-article-card h2 .grad {
+  background: linear-gradient(135deg, var(--primary-light), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.welcome-article-body {
+  font-size: 0.95rem;
+  line-height: 1.95;
+  color: var(--text-muted);
+}
+.welcome-article-body h1,
+.welcome-article-body h2,
+.welcome-article-body h3 { color: var(--text); margin: 1rem 0 0.5rem; }
+.welcome-article-body a { color: var(--accent); }
+.welcome-article-body img { max-width: 100%; border-radius: 8px; margin: 1rem 0; }
+.welcome-article-body blockquote {
+  border-right: 4px solid var(--primary-light);
+  border-left: none;
+  padding: 0.5rem 1rem;
+  margin: 0.75rem 0;
+  background: rgba(108,47,160,0.08);
+  color: var(--text-muted);
+  border-radius: 0 8px 8px 0;
+}
+.welcome-article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.welcome-article-body table td,
+.welcome-article-body table th {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: right;
+}
+.welcome-article-body table th {
+  background: rgba(108,47,160,0.12);
+  font-weight: 700;
+  color: var(--text);
+}
+@media (max-width: 600px) {
+  .welcome-article-section { padding: 0 1.25rem 30px; }
+  .welcome-article-card { padding: 1.5rem 1.25rem; }
+}
 </style>
 </head>
 <body>
@@ -135,10 +205,18 @@
 <!-- ═══ HERO ═══ -->
 <section class="hero">
   <div class="hero-badge anim-1">📡 المؤسسة العامة للتدريب التقني والمهني</div>
-  <h1 class="anim-2">مبادئ <span class="grad">شبكات الحاسب</span> الآلي</h1>
-  <p class="hero-sub anim-3">دليل شامل ومتكامل لتعلم شبكات الحاسب — من المفاهيم الأساسية حتى بروتوكولات الشبكة والأمان والكيابل</p>
+  <h1 class="anim-2" id="heroTitle">مبادئ <span class="grad">شبكات الحاسب</span> الآلي</h1>
+  <p class="hero-sub anim-3" id="heroSubtitle">دليل شامل ومتكامل لتعلم شبكات الحاسب — من المفاهيم الأساسية حتى بروتوكولات الشبكة والأمان والكيابل</p>
   <p class="anim-4" style="font-size:0.88rem; color:var(--text-muted);">اختر أحد الأقسام للبدء ↓</p>
 </section>
+
+<!-- ═══ WELCOME ARTICLE (loaded from Firestore settings) ═══ -->
+<div class="welcome-article-section" id="welcomeArticleSection">
+  <div class="welcome-article-card">
+    <h2>📝 <span class="grad">نبذة تعريفية</span></h2>
+    <div class="welcome-article-body" id="welcomeArticleBody"></div>
+  </div>
+</div>
 
 <!-- ═══ PAGES GRID ═══ -->
 <div class="pages-grid">
@@ -229,5 +307,84 @@
 </footer>
 
 <script src="shared-nav.js"></script>
+
+<!-- ═══ Firebase — جلب إعدادات المظهر والصفحة الرئيسية ═══ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
+  authDomain:        "networkacademy-795c8.firebaseapp.com",
+  projectId:         "networkacademy-795c8",
+  storageBucket:     "networkacademy-795c8.firebasestorage.app",
+  messagingSenderId: "458132238000",
+  appId:             "1:458132238000:web:bffd7321407b094bb21575"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+(async function loadSiteSettings() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "general"));
+    if (!snap.exists()) return;
+    const s = snap.data();
+
+    /* ── 1) العنوان والوصف ── */
+    if (s.heroTitle) {
+      document.getElementById("heroTitle").textContent = s.heroTitle;
+    }
+    if (s.heroSubtitle) {
+      document.getElementById("heroSubtitle").textContent = s.heroSubtitle;
+    }
+
+    /* ── 2) الألوان — تطبيق عبر CSS Variables ── */
+    const root = document.documentElement;
+    if (s.bgColor)      root.style.setProperty("--bg", s.bgColor);
+    if (s.sidebarColor) root.style.setProperty("--card", s.sidebarColor);
+    if (s.primaryColor) {
+      root.style.setProperty("--primary", s.primaryColor);
+      // حساب ألوان مشتقة أفتح وأغمق
+      root.style.setProperty("--primary-light", lightenColor(s.primaryColor, 25));
+      root.style.setProperty("--primary-dark",  darkenColor(s.primaryColor, 20));
+    }
+    if (s.textColor) root.style.setProperty("--text", s.textColor);
+
+    /* ── 3) الخطوط ── */
+    if (s.h1Size) {
+      document.querySelectorAll("h1").forEach(el => el.style.fontSize = s.h1Size + "rem");
+    }
+    if (s.pSize) {
+      document.querySelectorAll(".hero-sub, .pc-desc, .welcome-article-body").forEach(el => el.style.fontSize = s.pSize + "rem");
+    }
+
+    /* ── 4) المقال الترحيبي ── */
+    if (s.welcomeContent && s.welcomeContent.trim()) {
+      document.getElementById("welcomeArticleBody").innerHTML = s.welcomeContent;
+      document.getElementById("welcomeArticleSection").style.display = "block";
+    }
+
+  } catch (e) {
+    console.warn("تعذّر تحميل إعدادات الموقع:", e);
+  }
+})();
+
+/* ── دوال مساعدة لتفتيح/تغميق الألوان ── */
+function lightenColor(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.min(255, (num >> 16) + Math.round(2.55 * percent));
+  const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(2.55 * percent));
+  const b = Math.min(255, (num & 0x0000FF) + Math.round(2.55 * percent));
+  return "#" + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+function darkenColor(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.max(0, (num >> 16) - Math.round(2.55 * percent));
+  const g = Math.max(0, ((num >> 8) & 0x00FF) - Math.round(2.55 * percent));
+  const b = Math.max(0, (num & 0x0000FF) - Math.round(2.55 * percent));
+  return "#" + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+</script>
 </body>
 </html>
