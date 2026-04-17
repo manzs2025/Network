@@ -532,8 +532,8 @@ window.handleBulkImport = async function (inputEl) {
   const file = inputEl.files?.[0]; if (!file || typeof XLSX === "undefined") return;
   const data = await file.arrayBuffer(), workbook = XLSX.read(data, { type: "array" }), rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
   const colKeys = Object.keys(rows[0] || {}), nK = colKeys.find(k => k.trim().includes("الاسم")) || colKeys[0], iK = colKeys.find(k => k.trim().includes("رقم")) || colKeys[1];
-  const valid = rows.filter(r => r[nK] && /^\d{10}$/.test(String(r[iK]).trim()));
-  if (!valid.length) return alert("لا توجد بيانات صحيحة");
+  const valid = rows.filter(r => r[nK] && /^\d{9}$/.test(String(r[iK]).trim()));
+  if (!valid.length) return alert("لا توجد بيانات صحيحة (يجب أن يكون الرقم التدريبي مكوناً من 9 أرقام)");
   if (confirm(`رفع ${valid.length} حساب؟`)) {
     const log = document.getElementById("bulkProgressLog"); document.getElementById("bulkProgressWrap").style.display = "block"; log.innerHTML = "";
     for (const r of valid) {
@@ -549,6 +549,41 @@ window.handleBulkImport = async function (inputEl) {
     }
     loadTrainees();
   } inputEl.value = "";
+};
+
+window.addTrainee = async function () {
+  const nameEl = document.getElementById("newTraineeName");
+  const sidEl  = document.getElementById("newTraineeEmail");
+  const msgEl  = document.getElementById("addTraineeMsg");
+  const btnTxt = document.getElementById("addTraineeBtnText");
+  const btnSpn = document.getElementById("addTraineeBtnSpinner");
+
+  const name = nameEl.value.trim();
+  const sid  = sidEl.value.trim();
+
+  const showMsg = (t, ok = false) => {
+    msgEl.style.display = "block";
+    msgEl.style.color = ok ? "#a5d6a7" : "#ff6b6b";
+    msgEl.textContent = t;
+  };
+
+  if (!name) return showMsg("يرجى إدخال الاسم الكامل.");
+  if (!/^\d{9}$/.test(sid)) return showMsg("الرقم التدريبي يجب أن يكون 9 أرقام بالضبط.");
+
+  btnTxt.style.display = "none"; btnSpn.style.display = "inline";
+  const email = sid + TRAINEE_DOMAIN;
+  try {
+    const tApp = initializeApp(firebaseConfig, "App-" + Date.now()), tAuth = getAuth(tApp);
+    const cred = await createUserWithEmailAndPassword(tAuth, email, TRAINEE_DEFAULT_PASS);
+    await setDoc(doc(db, "users", cred.user.uid), { uid: cred.user.uid, email, studentId: sid, displayName: name, role: "trainee", createdAt: serverTimestamp() });
+    await signOut(tAuth); await deleteApp(tApp);
+    showMsg("✅ تم إنشاء الحساب بنجاح.", true);
+    nameEl.value = ""; sidEl.value = ""; loadTrainees();
+  } catch (e) {
+    showMsg("❌ " + (e.code === 'auth/email-already-in-use' ? "هذا الرقم التدريبي مستخدم مسبقاً." : e.message));
+  } finally {
+    btnTxt.style.display = "inline"; btnSpn.style.display = "none";
+  }
 };
 
 window.openRetakeModal = async function(uid, displayName) {
