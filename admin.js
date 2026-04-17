@@ -283,6 +283,8 @@ window.renderQuestionBankSelector = async function() {
   renderFilteredBank();
 };
 
+let questionGrades = {}; // { qid: number }
+
 function renderFilteredBank() {
   const container = document.getElementById("bankQuestionsContainer");
   const filterCat  = document.getElementById("bankFilterCategory")?.value || "";
@@ -301,39 +303,93 @@ function renderFilteredBank() {
 
   container.innerHTML = filtered.map(q => {
     const checked = selectedQuestionIds.has(q.id) ? "checked" : "";
+    const gradeVal = questionGrades[q.id] ?? 1;
+    const gradeVisible = selectedQuestionIds.has(q.id) ? "visible" : "";
+
+    // Build options/details HTML based on type
+    let detailsHtml = "";
+    if (q.type === "tf") {
+      detailsHtml = `<div class="bank-q-options">
+        <div class="bank-q-options-title">الإجابة:</div>
+        <div class="bank-q-opt ${q.correctAnswer === 'true' ? 'correct' : ''}"><span class="opt-icon">${q.correctAnswer === 'true' ? '✅' : '⬜'}</span> صح</div>
+        <div class="bank-q-opt ${q.correctAnswer === 'false' ? 'correct' : ''}"><span class="opt-icon">${q.correctAnswer === 'false' ? '✅' : '⬜'}</span> خطأ</div>
+      </div>`;
+    } else if (q.type === "mcq" && q.options) {
+      detailsHtml = `<div class="bank-q-options">
+        <div class="bank-q-options-title">الخيارات:</div>
+        ${q.options.map(o => `<div class="bank-q-opt ${o === q.correctAnswer ? 'correct' : ''}"><span class="opt-icon">${o === q.correctAnswer ? '✅' : '⬜'}</span> ${o}</div>`).join("")}
+      </div>`;
+    } else if (q.type === "multi" && q.options) {
+      const corrSet = new Set(q.correctAnswers || []);
+      detailsHtml = `<div class="bank-q-options">
+        <div class="bank-q-options-title">الخيارات (إجابات متعددة):</div>
+        ${q.options.map(o => `<div class="bank-q-opt ${corrSet.has(o) ? 'correct' : ''}"><span class="opt-icon">${corrSet.has(o) ? '✅' : '⬜'}</span> ${o}</div>`).join("")}
+      </div>`;
+    } else if (q.type === "match" && q.pairs) {
+      detailsHtml = `<div class="bank-q-options">
+        <div class="bank-q-options-title">أزواج المطابقة:</div>
+        <div class="bank-q-match-grid">
+          ${q.pairs.map(p => `<span class="match-left">${p.left}</span><span class="match-arrow">↔</span><span class="match-right">${p.right}</span>`).join("")}
+        </div>
+      </div>`;
+    }
+
     return `
-      <label class="bank-q-item ${checked ? 'selected' : ''}" data-qid="${q.id}">
+      <div class="bank-q-item ${checked ? 'selected' : ''}" data-qid="${q.id}">
         <input type="checkbox" class="bank-q-check" value="${q.id}" ${checked} onchange="toggleBankQuestion('${q.id}', this)">
         <div class="bank-q-content">
           <div class="bank-q-text">${q.text}</div>
+          ${detailsHtml}
           <div class="bank-q-meta">
             <span class="bank-q-badge cat">${CATEGORY_LABELS[q.category] || q.category}</span>
             <span class="bank-q-badge type">${TYPE_LABELS[q.type] || q.type}</span>
           </div>
+          <!-- Grade input for selected questions -->
+          <div class="bank-q-grade-wrap ${gradeVisible}" id="grade-wrap-${q.id}">
+            <label>⭐ الدرجة:</label>
+            <input type="number" class="bank-q-grade-input" id="grade-${q.id}" value="${gradeVal}" min="0" step="0.5" onchange="updateQuestionGrade('${q.id}', this.value)" oninput="updateQuestionGrade('${q.id}', this.value)">
+          </div>
         </div>
-      </label>`;
+        <button class="bank-q-edit-btn" onclick="event.stopPropagation(); openQuestionModal('${q.id}')" title="تعديل السؤال">✏️</button>
+      </div>`;
   }).join("");
   updateSelectedCount();
+  recalcTotalScore();
 }
 
 window.toggleBankQuestion = function(qid, cb) {
-  if (cb.checked) selectedQuestionIds.add(qid); else selectedQuestionIds.delete(qid);
+  if (cb.checked) {
+    selectedQuestionIds.add(qid);
+    if (!(qid in questionGrades)) questionGrades[qid] = 1;
+  } else {
+    selectedQuestionIds.delete(qid);
+  }
   cb.closest(".bank-q-item")?.classList.toggle("selected", cb.checked);
+  const gradeWrap = document.getElementById(`grade-wrap-${qid}`);
+  if (gradeWrap) gradeWrap.classList.toggle("visible", cb.checked);
   updateSelectedCount();
+  recalcTotalScore();
 };
 window.selectAllBankQuestions = function() {
   document.querySelectorAll("#bankQuestionsContainer .bank-q-check").forEach(cb => {
     cb.checked = true; selectedQuestionIds.add(cb.value);
+    if (!(cb.value in questionGrades)) questionGrades[cb.value] = 1;
     cb.closest(".bank-q-item")?.classList.add("selected");
+    const gw = document.getElementById(`grade-wrap-${cb.value}`);
+    if (gw) gw.classList.add("visible");
   });
   updateSelectedCount();
+  recalcTotalScore();
 };
 window.deselectAllBankQuestions = function() {
   document.querySelectorAll("#bankQuestionsContainer .bank-q-check").forEach(cb => {
     cb.checked = false; selectedQuestionIds.delete(cb.value);
     cb.closest(".bank-q-item")?.classList.remove("selected");
+    const gw = document.getElementById(`grade-wrap-${cb.value}`);
+    if (gw) gw.classList.remove("visible");
   });
   updateSelectedCount();
+  recalcTotalScore();
 };
 function updateSelectedCount() {
   const el = document.getElementById("selectedQCount");
@@ -341,7 +397,243 @@ function updateSelectedCount() {
 }
 window.filterBankQuestions = renderFilteredBank;
 
-/* ── حفظ الاختبار ── */
+/* ── Grading System (Upgrade 3) ── */
+window.updateQuestionGrade = function(qid, val) {
+  questionGrades[qid] = parseFloat(val) || 0;
+  recalcTotalScore();
+};
+
+function recalcTotalScore() {
+  let total = 0;
+  selectedQuestionIds.forEach(qid => {
+    total += (questionGrades[qid] ?? 1);
+  });
+  const el = document.getElementById("quizTotalScoreValue");
+  if (el) el.textContent = total % 1 === 0 ? total : total.toFixed(1);
+}
+
+/* ══════════════════════════════════════════════════
+   Question Add/Edit Modal (Upgrade 2)
+══════════════════════════════════════════════════ */
+window.openQuestionModal = function(editId) {
+  const modal = document.getElementById("questionModal");
+  const title = document.getElementById("questionModalTitle");
+  const msg = document.getElementById("questionModalMsg");
+  msg.className = "tr-modal-msg"; msg.style.display = "none";
+
+  // Reset fields
+  document.getElementById("qmEditId").value = "";
+  document.getElementById("qmCategory").value = "";
+  document.getElementById("qmType").value = "";
+  document.getElementById("qmText").value = "";
+  document.getElementById("qmDynamicFields").innerHTML = "";
+
+  if (editId) {
+    // Edit mode — fill from bankQuestions
+    const q = bankQuestions.find(x => x.id === editId);
+    if (!q) { alert("السؤال غير موجود"); return; }
+    title.textContent = "✏️ تعديل السؤال";
+    document.getElementById("qmEditId").value = q.id;
+    document.getElementById("qmCategory").value = q.category || "";
+    document.getElementById("qmType").value = q.type || "";
+    document.getElementById("qmText").value = q.text || "";
+    onQuestionTypeChange(); // Build dynamic fields
+    // Now fill values
+    setTimeout(() => fillQuestionModalValues(q), 50);
+  } else {
+    title.textContent = "➕ إضافة سؤال جديد";
+  }
+  modal.classList.add("open");
+};
+
+window.closeQuestionModal = function() {
+  document.getElementById("questionModal").classList.remove("open");
+};
+
+window.onQuestionTypeChange = function() {
+  const type = document.getElementById("qmType").value;
+  const container = document.getElementById("qmDynamicFields");
+  container.innerHTML = "";
+
+  if (type === "tf") {
+    container.innerHTML = `
+      <div class="qm-field">
+        <label>الإجابة الصحيحة *</label>
+        <div class="qm-options-list">
+          <label class="qm-option-row"><input type="radio" name="qmTfAnswer" value="true"> صح</label>
+          <label class="qm-option-row"><input type="radio" name="qmTfAnswer" value="false"> خطأ</label>
+        </div>
+      </div>`;
+  } else if (type === "mcq") {
+    container.innerHTML = `
+      <div class="qm-field">
+        <label>الخيارات * <small style="color:var(--text-faint);font-weight:400">(حدد الإجابة الصحيحة بالنقر على الدائرة)</small></label>
+        <div class="qm-options-list" id="qmMcqOptions">
+          ${buildMcqOptionRow(0)}${buildMcqOptionRow(1)}${buildMcqOptionRow(2)}${buildMcqOptionRow(3)}
+        </div>
+        <button class="qm-add-option-btn" onclick="addMcqOption()">+ إضافة خيار</button>
+      </div>`;
+  } else if (type === "multi") {
+    container.innerHTML = `
+      <div class="qm-field">
+        <label>الخيارات * <small style="color:var(--text-faint);font-weight:400">(حدد الإجابات الصحيحة)</small></label>
+        <div class="qm-options-list" id="qmMultiOptions">
+          ${buildMultiOptionRow(0)}${buildMultiOptionRow(1)}${buildMultiOptionRow(2)}${buildMultiOptionRow(3)}${buildMultiOptionRow(4)}
+        </div>
+        <button class="qm-add-option-btn" onclick="addMultiOption()">+ إضافة خيار</button>
+      </div>`;
+  } else if (type === "match") {
+    container.innerHTML = `
+      <div class="qm-field">
+        <label>أزواج المطابقة * <small style="color:var(--text-faint);font-weight:400">(العمود الأيسر ↔ الأيمن)</small></label>
+        <div id="qmMatchPairs">
+          ${buildMatchPairRow(0)}${buildMatchPairRow(1)}${buildMatchPairRow(2)}${buildMatchPairRow(3)}
+        </div>
+        <button class="qm-add-option-btn" onclick="addMatchPair()">+ إضافة زوج</button>
+      </div>`;
+  }
+};
+
+function buildMcqOptionRow(i) {
+  return `<div class="qm-option-row"><input type="radio" name="qmMcqCorrect" value="${i}"><input type="text" class="qm-mcq-opt" placeholder="الخيار ${i+1}"><button class="qm-remove-opt" onclick="this.parentElement.remove()">✕</button></div>`;
+}
+function buildMultiOptionRow(i) {
+  return `<div class="qm-option-row"><input type="checkbox" class="qm-multi-check"><input type="text" class="qm-multi-opt" placeholder="الخيار ${i+1}"><button class="qm-remove-opt" onclick="this.parentElement.remove()">✕</button></div>`;
+}
+function buildMatchPairRow(i) {
+  return `<div class="qm-pair-row"><input type="text" class="qm-match-left" placeholder="المصطلح ${i+1}"><span class="pair-arrow">↔</span><input type="text" class="qm-match-right" placeholder="التعريف ${i+1}"></div>`;
+}
+
+window.addMcqOption = function() {
+  const list = document.getElementById("qmMcqOptions");
+  const idx = list.querySelectorAll(".qm-option-row").length;
+  list.insertAdjacentHTML("beforeend", buildMcqOptionRow(idx));
+};
+window.addMultiOption = function() {
+  const list = document.getElementById("qmMultiOptions");
+  const idx = list.querySelectorAll(".qm-option-row").length;
+  list.insertAdjacentHTML("beforeend", buildMultiOptionRow(idx));
+};
+window.addMatchPair = function() {
+  const list = document.getElementById("qmMatchPairs");
+  const idx = list.querySelectorAll(".qm-pair-row").length;
+  list.insertAdjacentHTML("beforeend", buildMatchPairRow(idx));
+};
+
+function fillQuestionModalValues(q) {
+  const type = q.type;
+  if (type === "tf") {
+    const radios = document.querySelectorAll('input[name="qmTfAnswer"]');
+    radios.forEach(r => { if (r.value === q.correctAnswer) r.checked = true; });
+  } else if (type === "mcq" && q.options) {
+    const inputs = document.querySelectorAll(".qm-mcq-opt");
+    const radios = document.querySelectorAll('input[name="qmMcqCorrect"]');
+    q.options.forEach((o, i) => {
+      if (inputs[i]) inputs[i].value = o;
+      if (o === q.correctAnswer && radios[i]) radios[i].checked = true;
+    });
+  } else if (type === "multi" && q.options) {
+    const inputs = document.querySelectorAll(".qm-multi-opt");
+    const checks = document.querySelectorAll(".qm-multi-check");
+    const corrSet = new Set(q.correctAnswers || []);
+    q.options.forEach((o, i) => {
+      if (inputs[i]) inputs[i].value = o;
+      if (checks[i] && corrSet.has(o)) checks[i].checked = true;
+    });
+  } else if (type === "match" && q.pairs) {
+    const lefts = document.querySelectorAll(".qm-match-left");
+    const rights = document.querySelectorAll(".qm-match-right");
+    q.pairs.forEach((p, i) => {
+      if (lefts[i]) lefts[i].value = p.left;
+      if (rights[i]) rights[i].value = p.right;
+    });
+  }
+}
+
+window.saveQuestion = async function() {
+  const editId = document.getElementById("qmEditId").value;
+  const category = document.getElementById("qmCategory").value;
+  const type = document.getElementById("qmType").value;
+  const text = document.getElementById("qmText").value.trim();
+  const msg = document.getElementById("questionModalMsg");
+
+  if (!category || !type || !text) {
+    msg.textContent = "❌ يرجى ملء جميع الحقول الأساسية.";
+    msg.className = "tr-modal-msg error"; msg.style.display = "block"; return;
+  }
+
+  let questionData = { category, type, text };
+
+  if (type === "tf") {
+    const sel = document.querySelector('input[name="qmTfAnswer"]:checked');
+    if (!sel) { msg.textContent = "❌ يرجى اختيار الإجابة الصحيحة."; msg.className = "tr-modal-msg error"; msg.style.display = "block"; return; }
+    questionData.correctAnswer = sel.value;
+  } else if (type === "mcq") {
+    const optInputs = document.querySelectorAll(".qm-mcq-opt");
+    const options = Array.from(optInputs).map(i => i.value.trim()).filter(Boolean);
+    const correctIdx = document.querySelector('input[name="qmMcqCorrect"]:checked');
+    if (options.length < 2) { msg.textContent = "❌ يرجى إدخال خيارين على الأقل."; msg.className = "tr-modal-msg error"; msg.style.display = "block"; return; }
+    if (!correctIdx) { msg.textContent = "❌ يرجى تحديد الإجابة الصحيحة."; msg.className = "tr-modal-msg error"; msg.style.display = "block"; return; }
+    questionData.options = options;
+    questionData.correctAnswer = options[parseInt(correctIdx.value)] || options[0];
+  } else if (type === "multi") {
+    const optInputs = document.querySelectorAll(".qm-multi-opt");
+    const checks = document.querySelectorAll(".qm-multi-check");
+    const options = []; const correctAnswers = [];
+    optInputs.forEach((inp, i) => {
+      const v = inp.value.trim();
+      if (v) { options.push(v); if (checks[i]?.checked) correctAnswers.push(v); }
+    });
+    if (options.length < 2) { msg.textContent = "❌ يرجى إدخال خيارين على الأقل."; msg.className = "tr-modal-msg error"; msg.style.display = "block"; return; }
+    if (!correctAnswers.length) { msg.textContent = "❌ يرجى تحديد إجابة صحيحة واحدة على الأقل."; msg.className = "tr-modal-msg error"; msg.style.display = "block"; return; }
+    questionData.options = options;
+    questionData.correctAnswers = correctAnswers;
+  } else if (type === "match") {
+    const lefts = document.querySelectorAll(".qm-match-left");
+    const rights = document.querySelectorAll(".qm-match-right");
+    const pairs = [];
+    lefts.forEach((l, i) => {
+      const lv = l.value.trim(), rv = rights[i]?.value.trim();
+      if (lv && rv) pairs.push({ left: lv, right: rv });
+    });
+    if (pairs.length < 2) { msg.textContent = "❌ يرجى إدخال زوجي مطابقة على الأقل."; msg.className = "tr-modal-msg error"; msg.style.display = "block"; return; }
+    questionData.pairs = pairs;
+  }
+
+  const btn = document.getElementById("btnSaveQuestion");
+  btn.disabled = true;
+  document.getElementById("qmSaveBtnText").style.display = "none";
+  document.getElementById("qmSaveBtnSpinner").style.display = "inline";
+
+  try {
+    if (editId) {
+      // Update existing
+      questionData.id = editId;
+      await updateDoc(doc(db, "questionBank", editId), questionData);
+      msg.textContent = "✅ تم تحديث السؤال بنجاح!";
+    } else {
+      // New question — generate ID
+      const newId = "Q" + Date.now().toString(36).toUpperCase();
+      questionData.id = newId;
+      await setDoc(doc(db, "questionBank", newId), questionData);
+      msg.textContent = `✅ تم إضافة السؤال (${newId}) بنجاح!`;
+    }
+    msg.className = "tr-modal-msg success"; msg.style.display = "block";
+    // Refresh bank
+    await renderQuestionBankSelector();
+    loadStats();
+    setTimeout(() => closeQuestionModal(), 1200);
+  } catch(e) {
+    msg.textContent = "❌ فشل الحفظ: " + e.message;
+    msg.className = "tr-modal-msg error"; msg.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    document.getElementById("qmSaveBtnText").style.display = "inline";
+    document.getElementById("qmSaveBtnSpinner").style.display = "none";
+  }
+};
+
+/* ── حفظ الاختبار (Updated with Grades) ── */
 window.saveQuizFromBank = async function() {
   const title = document.getElementById("quizTitle")?.value.trim();
   const page  = document.getElementById("quizPage")?.value;
@@ -353,11 +645,19 @@ window.saveQuizFromBank = async function() {
   if (selectedQuestionIds.size === 0) return showQuizMsg("❌ يرجى تحديد سؤال واحد على الأقل.", "error");
   if (startDate && endDate && new Date(startDate) >= new Date(endDate)) return showQuizMsg("❌ تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء.", "error");
 
-  const selectedQuestions = bankQuestions.filter(q => selectedQuestionIds.has(q.id));
+  const selectedQuestions = bankQuestions.filter(q => selectedQuestionIds.has(q.id)).map(q => ({
+    ...q,
+    grade: questionGrades[q.id] ?? 1
+  }));
+
+  let totalScore = 0;
+  selectedQuestions.forEach(q => totalScore += (q.grade || 1));
+
   const quizData = {
     title, page,
     questions: selectedQuestions,
     questionCount: selectedQuestions.length,
+    totalScore: totalScore,
     createdAt: serverTimestamp(),
     startDate: startDate ? Timestamp.fromDate(new Date(startDate)) : null,
     endDate:   endDate   ? Timestamp.fromDate(new Date(endDate))   : null,
@@ -373,10 +673,10 @@ window.saveQuizFromBank = async function() {
     const editId = document.getElementById("quizEditId")?.value;
     if (editId) {
       await updateDoc(doc(db, "quizzes", editId), quizData);
-      showQuizMsg(`✅ تم تحديث "${title}" بنجاح!`, "success");
+      showQuizMsg(`✅ تم تحديث "${title}" بنجاح! (الدرجة الإجمالية: ${totalScore})`, "success");
     } else {
       await addDoc(collection(db, "quizzes"), quizData);
-      showQuizMsg(`✅ تم حفظ "${title}" (${selectedQuestions.length} سؤال) بنجاح!`, "success");
+      showQuizMsg(`✅ تم حفظ "${title}" (${selectedQuestions.length} سؤال — الدرجة: ${totalScore}) بنجاح!`, "success");
     }
     resetQuizForm(); loadQuizzes(); loadStats();
   } catch(e) {
@@ -399,7 +699,9 @@ window.resetQuizForm = function() {
     const el = document.getElementById(id); if (el) el.value = "";
   });
   selectedQuestionIds.clear();
+  questionGrades = {};
   renderFilteredBank();
+  recalcTotalScore();
   const ft = document.querySelector("#quizFormCard .qz-form-title");
   if (ft) ft.innerHTML = `<span class="qz-form-icon">✏️</span> إنشاء اختبار جديد`;
 };
@@ -424,6 +726,7 @@ window.loadQuizzes = async function() {
       const d = s.data();
       const catLabel = CATEGORY_LABELS[d.page] || d.page || "—";
       const qCount = d.questionCount || d.questions?.length || 0;
+      const totalScore = d.totalScore || qCount;
       let dateStr = "—";
       if (d.createdAt?.toDate) dateStr = d.createdAt.toDate().toLocaleDateString("ar-SA");
       let schedBadge = `<span class="schedule-badge active">🟢 متاح دائماً</span>`;
@@ -438,6 +741,7 @@ window.loadQuizzes = async function() {
           <td>${d.title}</td>
           <td><span class="qz-page-badge">${catLabel}</span></td>
           <td style="text-align:center"><span class="qz-count-badge">${qCount}</span></td>
+          <td style="text-align:center"><span class="qz-count-badge" style="background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.2);color:#f5a623;">${totalScore}</span></td>
           <td style="text-align:center">${schedBadge}</td>
           <td><span class="qz-date">${dateStr}</span></td>
           <td style="white-space:nowrap">
@@ -467,8 +771,13 @@ window.editQuiz = async function(quizId) {
     if (d.startDate?.toDate) document.getElementById("quizStartDate").value = toLocalDT(d.startDate.toDate());
     if (d.endDate?.toDate) document.getElementById("quizEndDate").value = toLocalDT(d.endDate.toDate());
     selectedQuestionIds.clear();
-    (d.questions || []).forEach(q => selectedQuestionIds.add(q.id));
+    questionGrades = {};
+    (d.questions || []).forEach(q => {
+      selectedQuestionIds.add(q.id);
+      questionGrades[q.id] = q.grade ?? 1;
+    });
     renderFilteredBank();
+    recalcTotalScore();
     const ft = document.querySelector("#quizFormCard .qz-form-title");
     if (ft) ft.innerHTML = `<span class="qz-form-icon">✏️</span> تعديل الاختبار <span class="art-edit-badge">✏️ وضع التعديل</span>`;
     document.getElementById("quizFormBody")?.classList.remove("collapsed");
