@@ -412,6 +412,12 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
     <div class="result-verdict" id="resultVerdict">—</div>
     <div style="font-size:0.88rem;color:var(--text-muted)" id="resultSubtitle"></div>
 
+    <!-- رسالة تشجيعية/مدح حسب الدرجة -->
+    <div id="resultMotivationBox" style="margin:1.5rem auto;max-width:560px;padding:1.25rem 1.5rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;text-align:center;">
+      <div id="resultMotivationEmoji" style="font-size:2.2rem;margin-bottom:0.5rem;">✨</div>
+      <div id="resultMotivationText" style="font-size:1rem;color:var(--text);line-height:1.7;font-weight:600;"></div>
+    </div>
+
     <div class="result-stats">
       <div class="result-stat"><div class="val" id="rCorrect">0</div><div class="lbl">إجابات صحيحة</div></div>
       <div class="result-stat"><div class="val" id="rWrong">0</div><div class="lbl">إجابات خاطئة</div></div>

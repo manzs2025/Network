@@ -1082,6 +1082,10 @@ window.loadSettings = async function () {
     if (d.heroTitle)    document.getElementById("settHeroTitle").value    = d.heroTitle;
     if (d.heroSubtitle) document.getElementById("settHeroSubtitle").value = d.heroSubtitle;
 
+    // ─ إعدادات الاختبارات
+    const allowReviewEl = document.getElementById("settAllowReview");
+    if (allowReviewEl) allowReviewEl.checked = d.allowReview === true;
+
     // ─ المقال الترحيبي (TinyMCE)
     if (d.welcomeContent) {
       const waitForEditor = setInterval(() => {
@@ -1139,6 +1143,7 @@ window.saveSettings = async function () {
     heroTitle:      document.getElementById("settHeroTitle").value.trim(),
     heroSubtitle:   document.getElementById("settHeroSubtitle").value.trim(),
     welcomeContent: tinymce.get("settingsTinyEditor")?.getContent() || "",
+    allowReview:    document.getElementById("settAllowReview")?.checked ?? false,
     homeCards:      collectHomeCards(),
     updatedAt:      serverTimestamp()
   };
@@ -1302,6 +1307,445 @@ if (document.readyState === "loading") {
 } else {
   setTimeout(_initCustomSectionsDropdown, 1500);
 }
+
+/* ══════════════════════════════════════════════════════
+   تقارير PDF (نتائج + إحصائيات)
+   نستخدم html2canvas + jsPDF: نبني HTML جميلاً ثم نلتقطه
+   كصورة ونضعها في PDF — هذا يحلّ مشكلة الخطوط العربية.
+══════════════════════════════════════════════════════ */
+
+/**
+ * تحويل عنصر HTML إلى PDF وتنزيله
+ */
+async function _htmlToPDF(htmlContent, filename = "report.pdf") {
+  // إنشاء حاوية مؤقّتة خارج الشاشة
+  const temp = document.createElement("div");
+  temp.style.cssText = `
+    position: fixed; top: -99999px; right: 0;
+    width: 794px; background: #ffffff; color: #222;
+    font-family: 'Cairo', sans-serif; direction: rtl;
+    padding: 40px; box-sizing: border-box;
+  `;
+  temp.innerHTML = htmlContent;
+  document.body.appendChild(temp);
+
+  try {
+    // انتظار تحميل الخط
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+
+    // التقاط صورة بجودة عالية
+    const canvas = await html2canvas(temp, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+    });
+
+    // إنشاء PDF
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+    const imgWidth  = 210;  // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
+
+    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // صفحات إضافية إذا كان المحتوى طويلاً
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(filename);
+  } finally {
+    document.body.removeChild(temp);
+  }
+}
+
+/**
+ * توليد القالب العام للتقرير (رأس + ذيل)
+ */
+function _pdfTemplate(title, innerHtml) {
+  const today = new Date().toLocaleDateString("ar-SA", {
+    year: "numeric", month: "long", day: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+
+  return `
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: 'Cairo', 'Tahoma', sans-serif; }
+      .pdf-header {
+        border-bottom: 3px solid #6c2fa0;
+        padding-bottom: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .pdf-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .pdf-logo-icon {
+        width: 54px; height: 54px;
+        background: linear-gradient(135deg,#6c2fa0,#00c9b1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+      }
+      .pdf-logo-text {
+        font-size: 20px;
+        font-weight: 900;
+        color: #222;
+      }
+      .pdf-logo-sub {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+      .pdf-date {
+        text-align: left;
+        font-size: 12px;
+        color: #666;
+      }
+      .pdf-date strong { color: #333; font-size: 13px; }
+      .pdf-title {
+        font-size: 24px;
+        font-weight: 900;
+        color: #6c2fa0;
+        margin: 20px 0 16px;
+        text-align: center;
+      }
+      .pdf-footer {
+        margin-top: 30px;
+        padding-top: 14px;
+        border-top: 1px dashed #ccc;
+        font-size: 11px;
+        color: #888;
+        text-align: center;
+      }
+      table.pdf-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 12px;
+      }
+      table.pdf-table th {
+        background: #6c2fa0;
+        color: white;
+        padding: 10px 8px;
+        font-weight: 700;
+        text-align: center;
+      }
+      table.pdf-table td {
+        padding: 8px;
+        border: 1px solid #e0e0e0;
+        text-align: center;
+      }
+      table.pdf-table tr:nth-child(even) td { background: #f7f5fb; }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin: 20px 0;
+      }
+      .stat-box {
+        padding: 18px 12px;
+        border-radius: 10px;
+        text-align: center;
+        color: white;
+      }
+      .stat-box .v { font-size: 26px; font-weight: 900; }
+      .stat-box .l { font-size: 12px; opacity: 0.95; margin-top: 4px; }
+      .pass-badge { color: #2e7d32; font-weight: 700; }
+      .fail-badge { color: #c62828; font-weight: 700; }
+    </style>
+
+    <div class="pdf-header">
+      <div class="pdf-logo">
+        <div class="pdf-logo-icon">🌐</div>
+        <div>
+          <div class="pdf-logo-text">أكاديمية الشبكات</div>
+          <div class="pdf-logo-sub">الكلية التقنية بالمندق — المدرب: منصور الزهراني</div>
+        </div>
+      </div>
+      <div class="pdf-date">
+        <div><strong>تاريخ التقرير:</strong></div>
+        <div>${today}</div>
+      </div>
+    </div>
+
+    <h1 class="pdf-title">${title}</h1>
+
+    ${innerHtml}
+
+    <div class="pdf-footer">
+      تم توليد هذا التقرير آلياً من منصة أكاديمية الشبكات
+    </div>
+  `;
+}
+
+/**
+ * تصدير جدول "آخر نتائج المتدربين" إلى PDF
+ */
+window.exportResultsToPDF = async function () {
+  if (!cachedResults || !cachedResults.length) {
+    return alert("لا توجد نتائج لتصديرها. اضغط على تحديث أولاً.");
+  }
+
+  if (typeof window.jspdf === "undefined" || typeof html2canvas === "undefined") {
+    return alert("مكتبات PDF غير متوفرة. تحقق من الاتصال بالإنترنت.");
+  }
+
+  // بناء صفوف الجدول
+  const rows = cachedResults.map((r, i) => {
+    const passed = r["النتيجة"] === "ناجح";
+    return `
+      <tr>
+        <td>${i + 1}</td>
+        <td style="text-align:right">${_escHtml(r["المتدرب"] || "—")}</td>
+        <td style="text-align:right">${_escHtml(r["الاختبار"] || "—")}</td>
+        <td>${r["الدرجة"] ?? "—"}</td>
+        <td>${r["النسبة"] ?? "—"}</td>
+        <td class="${passed ? 'pass-badge' : 'fail-badge'}">${passed ? '✓ ناجح' : '✗ راسب'}</td>
+        <td>${r["المحاولة"] ?? 1}</td>
+        <td style="font-size:10px">${r["التاريخ"] ?? "—"}</td>
+      </tr>
+    `;
+  }).join("");
+
+  // حساب إحصائيات سريعة
+  const totalCount = cachedResults.length;
+  const passedCount = cachedResults.filter(r => r["النتيجة"] === "ناجح").length;
+  const failedCount = totalCount - passedCount;
+  const passRate = totalCount ? Math.round(passedCount / totalCount * 100) : 0;
+
+  const summary = `
+    <div class="stat-grid">
+      <div class="stat-box" style="background:linear-gradient(135deg,#6c2fa0,#8b46c8);">
+        <div class="v">${totalCount}</div>
+        <div class="l">إجمالي النتائج</div>
+      </div>
+      <div class="stat-box" style="background:linear-gradient(135deg,#00a896,#00c9b1);">
+        <div class="v">${passedCount}</div>
+        <div class="l">ناجح</div>
+      </div>
+      <div class="stat-box" style="background:linear-gradient(135deg,#e53935,#ef5350);">
+        <div class="v">${failedCount}</div>
+        <div class="l">راسب</div>
+      </div>
+      <div class="stat-box" style="background:linear-gradient(135deg,#fb8c00,#ffa726);">
+        <div class="v">${passRate}%</div>
+        <div class="l">نسبة النجاح</div>
+      </div>
+    </div>
+  `;
+
+  const tableHtml = `
+    ${summary}
+    <table class="pdf-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>المتدرب</th>
+          <th>الاختبار</th>
+          <th>الدرجة</th>
+          <th>النسبة</th>
+          <th>النتيجة</th>
+          <th>المحاولة</th>
+          <th>التاريخ</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+
+  const html = _pdfTemplate("📊 تقرير نتائج المتدربين", tableHtml);
+
+  try {
+    const fname = `نتائج_المتدربين_${new Date().toISOString().slice(0,10)}.pdf`;
+    await _htmlToPDF(html, fname);
+  } catch (e) {
+    alert("❌ فشل توليد PDF: " + e.message);
+    console.error(e);
+  }
+};
+
+/**
+ * تصدير تقرير الإحصائيات الشامل إلى PDF
+ */
+window.exportStatisticsToPDF = async function () {
+  if (typeof window.jspdf === "undefined" || typeof html2canvas === "undefined") {
+    return alert("مكتبات PDF غير متوفرة. تحقق من الاتصال بالإنترنت.");
+  }
+
+  try {
+    // جلب جميع البيانات اللازمة
+    const [trSnap, qzSnap, rsSnap, bkSnap] = await Promise.all([
+      getDocs(query(collection(db, "users"), where("role", "==", "trainee"))),
+      getDocs(collection(db, "quizzes")),
+      getDocs(collection(db, "results")),
+      getDocs(collection(db, "questionBank"))
+    ]);
+
+    const traineesCount = trSnap.size;
+    const quizzesCount  = qzSnap.size;
+    const resultsCount  = rsSnap.size;
+    const bankCount     = bkSnap.size;
+
+    // جمع النتائج لحساب الإحصائيات التفصيلية
+    const allResults = [];
+    rsSnap.forEach(s => allResults.push(s.data()));
+
+    const passedCount = allResults.filter(r => r.passed).length;
+    const failedCount = allResults.length - passedCount;
+    const passRate = allResults.length ? Math.round(passedCount / allResults.length * 100) : 0;
+    const avgScore = allResults.length
+      ? Math.round(allResults.reduce((s, r) => s + (r.percentage || 0), 0) / allResults.length)
+      : 0;
+
+    // إحصائيات لكل اختبار
+    const quizzesMap = {};
+    qzSnap.forEach(s => {
+      const d = s.data();
+      quizzesMap[s.id] = {
+        id: s.id,
+        title: d.title || "—",
+        page: d.page || "—",
+        questionCount: d.questionCount || d.questions?.length || 0,
+        totalScore: d.totalScore || 0,
+        duration: d.duration || null,
+        available: d.available !== false,
+        attempts: 0,
+        passes: 0,
+        avgPct: 0,
+        _sumPct: 0,
+      };
+    });
+
+    allResults.forEach(r => {
+      const q = quizzesMap[r.quizId];
+      if (!q) return;
+      q.attempts++;
+      if (r.passed) q.passes++;
+      q._sumPct += (r.percentage || 0);
+    });
+    Object.values(quizzesMap).forEach(q => {
+      q.avgPct = q.attempts ? Math.round(q._sumPct / q.attempts) : 0;
+    });
+
+    // بناء الـ HTML
+    const summary = `
+      <div class="stat-grid">
+        <div class="stat-box" style="background:linear-gradient(135deg,#6c2fa0,#8b46c8);">
+          <div class="v">${traineesCount}</div>
+          <div class="l">متدرب مسجّل</div>
+        </div>
+        <div class="stat-box" style="background:linear-gradient(135deg,#00a896,#00c9b1);">
+          <div class="v">${quizzesCount}</div>
+          <div class="l">اختبار منشور</div>
+        </div>
+        <div class="stat-box" style="background:linear-gradient(135deg,#fb8c00,#ffa726);">
+          <div class="v">${bankCount}</div>
+          <div class="l">سؤال في البنك</div>
+        </div>
+        <div class="stat-box" style="background:linear-gradient(135deg,#1976d2,#42a5f5);">
+          <div class="v">${resultsCount}</div>
+          <div class="l">نتيجة محفوظة</div>
+        </div>
+      </div>
+
+      <h2 style="font-size:18px;color:#6c2fa0;margin-top:28px;border-bottom:2px solid #ddd;padding-bottom:8px;">
+        📈 ملخّص الأداء العام
+      </h2>
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-box" style="background:linear-gradient(135deg,#00a896,#00c9b1);">
+          <div class="v">${passedCount}</div>
+          <div class="l">محاولة ناجحة</div>
+        </div>
+        <div class="stat-box" style="background:linear-gradient(135deg,#e53935,#ef5350);">
+          <div class="v">${failedCount}</div>
+          <div class="l">محاولة راسبة</div>
+        </div>
+        <div class="stat-box" style="background:linear-gradient(135deg,#fb8c00,#ffa726);">
+          <div class="v">${passRate}%</div>
+          <div class="l">نسبة النجاح</div>
+        </div>
+        <div class="stat-box" style="background:linear-gradient(135deg,#7b1fa2,#ab47bc);">
+          <div class="v">${avgScore}%</div>
+          <div class="l">متوسط الدرجات</div>
+        </div>
+      </div>
+    `;
+
+    // جدول الاختبارات
+    const quizRows = Object.values(quizzesMap)
+      .sort((a, b) => b.attempts - a.attempts)
+      .map((q, i) => {
+        const catLabel = (CATEGORY_LABELS || {})[q.page] || q.page;
+        const status = q.available ? '🟢 مُتاح' : '🔒 مُقفل';
+        return `
+          <tr>
+            <td>${i + 1}</td>
+            <td style="text-align:right">${_escHtml(q.title)}</td>
+            <td>${_escHtml(catLabel)}</td>
+            <td>${q.questionCount}</td>
+            <td>${q.totalScore}</td>
+            <td>${q.duration ? q.duration + " د" : "—"}</td>
+            <td>${q.attempts}</td>
+            <td class="${q.passes >= q.attempts/2 ? 'pass-badge' : 'fail-badge'}">${q.passes} / ${q.attempts}</td>
+            <td>${q.avgPct}%</td>
+            <td style="font-size:10px">${status}</td>
+          </tr>
+        `;
+      }).join("");
+
+    const quizzesTable = quizzesCount ? `
+      <h2 style="font-size:18px;color:#6c2fa0;margin-top:28px;border-bottom:2px solid #ddd;padding-bottom:8px;">
+        📋 تفاصيل الاختبارات
+      </h2>
+      <table class="pdf-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>عنوان الاختبار</th>
+            <th>القسم</th>
+            <th>أسئلة</th>
+            <th>درجات</th>
+            <th>المدة</th>
+            <th>محاولات</th>
+            <th>ناجح/إجمالي</th>
+            <th>متوسط</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody>${quizRows}</tbody>
+      </table>
+    ` : "";
+
+    const html = _pdfTemplate("📊 تقرير الإحصائيات الشامل", summary + quizzesTable);
+
+    const fname = `إحصائيات_الأكاديمية_${new Date().toISOString().slice(0,10)}.pdf`;
+    await _htmlToPDF(html, fname);
+
+  } catch (e) {
+    alert("❌ فشل توليد تقرير الإحصائيات: " + e.message);
+    console.error(e);
+  }
+};
 
 /* ═══════════════════════════════════════
    طبقة حماية الواجهة الأمامية (Client-side hardening)

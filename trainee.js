@@ -502,7 +502,103 @@ window.submitQuiz = async function (isAutoSubmit = false) {
   _showResult({ questions, answersMap, correct, total, score, totalPoints, percentage, passed });
 };
 
-function _showResult ({ questions, answersMap, correct, total, score, totalPoints, percentage, passed }) {
+/* ══════════════════════════════════════════════════════
+   مكتبة الرسائل التشجيعية
+══════════════════════════════════════════════════════ */
+const MOTIVATION_MESSAGES = {
+  // 90-100: ممتاز
+  excellent: {
+    emojis: ["🏆","🥇","⭐","🌟","💎","👑","🎯","🔥","💯","🎉"],
+    texts: [
+      "أداء استثنائي! أنت قدوة في الإتقان والاجتهاد.",
+      "رائع جداً! هذه النتيجة تعكس تميّزاً حقيقياً.",
+      "ممتاز! واصل هذا المستوى العالي، فأنت على الطريق الصحيح.",
+      "إبداع لا يُضاهى! فخورون بما حقّقت.",
+      "أنت نجم حقيقي 🌟 — استمرّ في التألّق.",
+      "علامة كاملة تقريباً! تستحقّ كل الثناء.",
+      "أداء احترافي — واضح أنك أتقنت المادة تماماً.",
+    ]
+  },
+  // 75-89: جيد جداً
+  very_good: {
+    emojis: ["💪","👏","🎊","✨","🚀","⚡","🎈","👍","😊","🌈"],
+    texts: [
+      "أداء رائع! خطوة واحدة فقط تفصلك عن الامتياز.",
+      "ممتاز — جهدك واضح، واصل المثابرة!",
+      "عمل جيّد جداً! أنت قريب من القمّة.",
+      "أحسنت! ثقّف نفسك أكثر بمراجعة بسيطة وستصل للامتياز.",
+      "نتيجة قوية — معلوماتك راسخة وفهمك جيد.",
+      "أداء يستحق الإشادة! استمر في التقدّم.",
+    ]
+  },
+  // 50-74: مقبول/جيد
+  pass: {
+    emojis: ["🌱","📚","💡","🔍","🎯","💫","☀️","🌤️","📖","✏️"],
+    texts: [
+      "نجحت! الآن استثمر هذا الأساس وارفع مستواك أكثر.",
+      "بداية جيدة — مع المزيد من المراجعة ستتميّز.",
+      "أنت على الطريق الصحيح، المزيد من التركيز والتدريب سيصنع الفرق.",
+      "أنجزت المطلوب. الخطوة التالية: إتقان كامل.",
+      "جيد — لا تتوقّف هنا، قمم أعلى تنتظرك.",
+      "نتيجة مقبولة، لكن بإمكانك تحقيق ما هو أفضل بكثير.",
+    ]
+  },
+  // 25-49: ضعيف
+  weak: {
+    emojis: ["🌻","🌈","💪","🎈","🤝","🌱","🌟","🔋","🚀","☕"],
+    texts: [
+      "لا تستسلم! كل خبير كان يوماً مبتدئاً. راجع الدروس وستلاحظ الفرق.",
+      "هذه فرصة للتعلّم! النجاح يأتي بعد المحاولة الجادة.",
+      "خطواتك الأولى أصعب، لكنها أهم. استمر وستصل.",
+      "لا تحزن — الفشل ليس نهاية الطريق، بل بدايته.",
+      "كل إنسان يتعلم بوتيرته الخاصة. راجع المادة بتمهّل وحاول مجدداً.",
+      "أنت أقوى مما تظن — خذ نفساً عميقاً وابدأ من جديد.",
+    ]
+  },
+  // 0-24: ضعيف جداً
+  very_weak: {
+    emojis: ["🌱","🤗","💛","🌷","🕊️","🌸","🌻","☕","📖","💪"],
+    texts: [
+      "البدايات صعبة للجميع. لا تقارن نفسك بغيرك، قارنها بنفسك بالأمس.",
+      "الرحلة طويلة والتعلم لا يتوقف. راجع الأساسيات ثم حاول مرة أخرى.",
+      "خذ وقتك، لا تستعجل. الفهم أهم من الحفظ.",
+      "نحن هنا لمساعدتك. اطلب الدعم من مدرّبك ولا تتردّد.",
+      "هذه ليست نهاية — هذه بداية معرفتك بنقاط تحتاج تقويتها.",
+      "الصبر مفتاح النجاح. ابدأ بمراجعة الأساسيات بتركيز.",
+    ]
+  },
+};
+
+function _pickMotivation(percentage) {
+  let tier;
+  if      (percentage >= 90) tier = "excellent";
+  else if (percentage >= 75) tier = "very_good";
+  else if (percentage >= 50) tier = "pass";
+  else if (percentage >= 25) tier = "weak";
+  else                        tier = "very_weak";
+
+  const pool = MOTIVATION_MESSAGES[tier];
+  const emoji = pool.emojis[Math.floor(Math.random() * pool.emojis.length)];
+  const text  = pool.texts[Math.floor(Math.random() * pool.texts.length)];
+  return { emoji, text, tier };
+}
+
+/* ══════════════════════════════════════════════════════
+   جلب إعدادات الموقع (للتحقق من allowReview)
+══════════════════════════════════════════════════════ */
+let _siteSettings = null;
+async function _fetchSiteSettings() {
+  if (_siteSettings) return _siteSettings;
+  try {
+    const snap = await getDoc(doc(db, "settings", "general"));
+    _siteSettings = snap.exists() ? snap.data() : {};
+  } catch (e) {
+    _siteSettings = {};
+  }
+  return _siteSettings;
+}
+
+async function _showResult ({ questions, answersMap, correct, total, score, totalPoints, percentage, passed }) {
   /* بطل النتيجة */
   const circle  = document.getElementById("resultCircle");
   circle.className = `result-circle ${passed ? "pass" : "fail"}`;
@@ -515,37 +611,72 @@ function _showResult ({ questions, answersMap, correct, total, score, totalPoint
   document.getElementById("resultSubtitle").textContent =
     `${_currentQuiz.title ?? "الاختبار"}`;
 
+  /* الرسالة التشجيعية */
+  const motivation = _pickMotivation(percentage);
+  const emojiEl = document.getElementById("resultMotivationEmoji");
+  const textEl  = document.getElementById("resultMotivationText");
+  if (emojiEl) emojiEl.textContent = motivation.emoji;
+  if (textEl)  textEl.textContent  = motivation.text;
+
+  // لون الإطار حسب المستوى
+  const box = document.getElementById("resultMotivationBox");
+  if (box) {
+    const colors = {
+      excellent: "rgba(255,215,0,0.5)",
+      very_good: "rgba(0,201,177,0.5)",
+      pass:      "rgba(139,70,200,0.5)",
+      weak:      "rgba(255,152,0,0.5)",
+      very_weak: "rgba(244,67,54,0.4)",
+    };
+    box.style.borderColor = colors[motivation.tier];
+  }
+
   document.getElementById("rCorrect").textContent = correct;
   document.getElementById("rWrong").textContent   = total - correct;
   document.getElementById("rTotal").textContent   = total;
   document.getElementById("rScore").textContent   = `${score} / ${totalPoints}`;
 
-  /* بناء مراجعة الإجابات */
-  const rc = document.getElementById("reviewContainer");
-  rc.innerHTML = "";
+  /* ── التحقق من السماح بالمراجعة من الإعدادات ── */
+  const settings = await _fetchSiteSettings();
+  const allowReview = settings.allowReview === true;
 
-  questions.forEach((q, idx) => {
-    const ans    = answersMap[idx];
-    const card   = document.createElement("div");
-    card.className = "review-card";
+  const btnReview = document.getElementById("btnToggleReview");
+  const reviewSection = document.getElementById("reviewSection");
 
-    const opts   = q.options ?? [];
-    const optsHtml = opts.map(opt => {
-      let cls = "neutral-opt";
-      if (opt === q.correctAnswer)             cls = "correct-opt";
-      if (opt === ans.selected && !ans.isCorrect) cls = "wrong-opt";
-      const icon = opt === q.correctAnswer ? "✅ " : (opt === ans.selected ? "❌ " : "");
-      return `<div class="review-opt ${cls}">${icon}${_esc(opt)}</div>`;
-    }).join("");
+  if (!allowReview) {
+    // إخفاء زر المراجعة وإخفاء قسم المراجعة
+    if (btnReview) btnReview.style.display = "none";
+    if (reviewSection) reviewSection.style.display = "none";
+  } else {
+    if (btnReview) btnReview.style.display = "inline-flex";
+    // بناء مراجعة الإجابات (فقط إذا كان مسموحاً)
+    const rc = document.getElementById("reviewContainer");
+    if (rc) {
+      rc.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const ans    = answersMap[idx];
+        const card   = document.createElement("div");
+        card.className = "review-card";
 
-    card.innerHTML = `
-      <div class="q-num">السؤال ${idx + 1}</div>
-      <div class="review-q">${_esc(q.text ?? "")}</div>
-      ${optsHtml}
-      ${!ans.isCorrect ? `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-faint)">إجابتك: <span style="color:#ef9a9a">${_esc(ans.selected)}</span> — الصحيحة: <span style="color:#a5d6a7">${_esc(q.correctAnswer)}</span></div>` : ""}
-    `;
-    rc.appendChild(card);
-  });
+        const opts   = q.options ?? [];
+        const optsHtml = opts.map(opt => {
+          let cls = "neutral-opt";
+          if (opt === q.correctAnswer)             cls = "correct-opt";
+          if (opt === ans.selected && !ans.isCorrect) cls = "wrong-opt";
+          const icon = opt === q.correctAnswer ? "✅ " : (opt === ans.selected ? "❌ " : "");
+          return `<div class="review-opt ${cls}">${icon}${_esc(opt)}</div>`;
+        }).join("");
+
+        card.innerHTML = `
+          <div class="q-num">السؤال ${idx + 1}</div>
+          <div class="review-q">${_esc(q.text ?? "")}</div>
+          ${optsHtml}
+          ${!ans.isCorrect ? `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-faint)">إجابتك: <span style="color:#ef9a9a">${_esc(ans.selected)}</span> — الصحيحة: <span style="color:#a5d6a7">${_esc(q.correctAnswer)}</span></div>` : ""}
+        `;
+        rc.appendChild(card);
+      });
+    }
+  }
 
   /* الانتقال لصفحة النتيجة */
   document.getElementById("mainBottomNav").style.display = "flex";

@@ -10,6 +10,9 @@
 <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.4/tinymce.min.js" referrerpolicy="origin"></script>
 <!-- SheetJS — معالجة ملفات Excel للرفع الجماعي -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- jsPDF + html2canvas — لإنشاء تقارير PDF بدعم العربية -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 /* ════════════════════════════════════════════════
    RESET & VARIABLES
@@ -2236,6 +2239,10 @@ html, body {
             <div class="ab-icon ab-amber">👥</div>
             إضافة متدرب
           </button>
+          <button class="action-btn" onclick="exportStatisticsToPDF()">
+            <div class="ab-icon" style="background:linear-gradient(135deg,#ff6b6b,#ee5a52);">📊</div>
+            تقرير إحصائيات PDF
+          </button>
           <a href="index.html" target="_blank" class="action-btn">
             <div class="ab-icon ab-blue">🌐</div>
             عرض الموقع
@@ -2653,6 +2660,7 @@ html, body {
           <div class="qz-table-header">
             <h3 class="qz-table-title">📊 آخر نتائج المتدربين</h3>
             <div style="display:flex;gap:0.5rem;align-items:center;">
+              <button class="qz-refresh-btn" onclick="exportResultsToPDF()" style="background:rgba(244,67,54,0.10);color:#ff6b6b;border-color:rgba(244,67,54,0.3);">📄 تقرير PDF</button>
               <button class="qz-refresh-btn" onclick="exportResultsToExcel()" style="background:rgba(0,201,177,0.10);color:var(--accent);border-color:rgba(0,201,177,0.3);">📥 تصدير Excel</button>
               <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
             </div>
@@ -2777,7 +2785,29 @@ html, body {
           </div>
         </div>
 
-        <!-- ──── 4) بطاقات أقسام الصفحة الرئيسية ──── -->
+        <!-- ──── 4) إعدادات الاختبارات ──── -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <span class="settings-section-icon">📋</span>
+            <span class="settings-section-title">إعدادات الاختبارات</span>
+          </div>
+          <div class="settings-section-body">
+            <div class="sett-field">
+              <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                <input type="checkbox" id="settAllowReview" style="width:20px;height:20px;cursor:pointer;accent-color:#00c9b1;">
+                <div>
+                  <div style="font-weight:700;color:var(--text);">السماح للمتدرب بمراجعة إجاباته بعد الاختبار</div>
+                  <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+                    عند تفعيل هذا الخيار، يرى المتدرب زر "مراجعة الإجابات" في نهاية الاختبار ويستطيع رؤية الإجابات الصحيحة والخاطئة.
+                    <br>⚠️ إذا كنت تستخدم الاختبارات للتقييم الرسمي، يُنصح بإبقائه مُعطّلاً.
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ──── 5) بطاقات أقسام الصفحة الرئيسية ──── -->
         <div class="settings-section">
           <div class="settings-section-header">
             <span class="settings-section-icon">📑</span>
