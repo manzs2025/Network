@@ -2313,14 +2313,16 @@ html, body {
                 >
               </div>
               <div class="qz-field-group">
-                <label class="qz-label" for="articlePage">القسم التابع له *</label>
+                <label class="qz-label" for="articlePage">القسم التابع له * <button type="button" onclick="openSectionsManager()" style="background:rgba(0,201,177,0.12);color:#00c9b1;border:1px solid rgba(0,201,177,0.35);border-radius:6px;padding:2px 10px;font-size:0.75rem;font-family:'Cairo',sans-serif;cursor:pointer;margin-right:0.5rem;">⚙️ إدارة الأقسام</button></label>
                 <select id="articlePage" class="qz-input qz-select">
                   <option value="">— اختر القسم —</option>
-                  <option value="networks">شبكات الحاسب الآلي</option>
-                  <option value="security">الأمان في الشبكات</option>
-                  <option value="osi">نموذج OSI</option>
-                  <option value="cables">كيابل الشبكات</option>
-                  <option value="ip">بروتوكول IP</option>
+                  <option value="home">🏠 الرئيسية</option>
+                  <option value="networks">📡 شبكات الحاسب الآلي</option>
+                  <option value="security">🔒 الأمان في الشبكات</option>
+                  <option value="osi">🔁 نموذج OSI</option>
+                  <option value="cables">🔌 كيابل الشبكات</option>
+                  <option value="ip">🌍 بروتوكول IP</option>
+                  <!-- الأقسام المخصّصة تُحقن هنا ديناميكياً -->
                 </select>
               </div>
             </div>
@@ -2939,6 +2941,60 @@ html, body {
     </div>
 
     <div class="tr-modal-msg" id="questionModalMsg"></div>
+  </div>
+</div>
+
+<!-- ════════════ MODAL: إدارة الأقسام المخصّصة ════════════ -->
+<div class="tr-modal-overlay" id="sectionsManagerModal">
+  <div class="tr-modal" style="max-width:700px;">
+    <div class="tr-modal-header">
+      <h3>⚙️ إدارة الأقسام المخصّصة</h3>
+      <button class="tr-modal-close" onclick="closeSectionsManager()">×</button>
+    </div>
+    <div class="tr-modal-body">
+
+      <div style="background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.35);border-radius:8px;padding:0.85rem 1rem;color:#ffc107;font-size:0.82rem;margin-bottom:1.25rem;">
+        💡 الأقسام المخصّصة تظهر في قائمة اختيار المقالات، ويمكن للزوار الوصول إليها عبر:
+        <br><code style="direction:ltr;display:inline-block;background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;margin-top:4px;">article.html?id=SECTION_ID</code>
+      </div>
+
+      <!-- إضافة قسم جديد -->
+      <div style="background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.35);border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;">
+        <div style="font-weight:800;color:#00c9b1;margin-bottom:1rem;">➕ إضافة قسم جديد</div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label class="qz-label">معرّف القسم (إنجليزي فقط، بدون مسافات) *</label>
+          <input type="text" id="newSectionId" class="qz-input" placeholder="مثال: wireless" style="direction:ltr;text-align:right;" pattern="[a-z0-9_-]+">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label class="qz-label">اسم القسم بالعربية *</label>
+          <input type="text" id="newSectionTitle" class="qz-input" placeholder="مثال: الشبكات اللاسلكية">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label class="qz-label">أيقونة القسم (اختياري)</label>
+          <input type="text" id="newSectionIcon" class="qz-input" placeholder="📶" maxlength="4">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label class="qz-label">وصف قصير (اختياري)</label>
+          <input type="text" id="newSectionDesc" class="qz-input" placeholder="نظرة عامة على الشبكات اللاسلكية ومعاييرها">
+        </div>
+
+        <button class="qz-save-btn" onclick="addCustomSection()" style="width:100%;justify-content:center;">
+          <span>➕ إضافة القسم</span>
+        </button>
+      </div>
+
+      <!-- قائمة الأقسام الموجودة -->
+      <div style="font-weight:800;color:var(--text);margin-bottom:0.75rem;">📋 الأقسام الحالية</div>
+      <div id="sectionsManagerList" style="max-height:300px;overflow-y:auto;">
+        <div style="text-align:center;padding:2rem;color:var(--text-muted);">جارٍ التحميل...</div>
+      </div>
+
+      <div class="tr-modal-msg" id="sectionsManagerMsg"></div>
+    </div>
   </div>
 </div>
 

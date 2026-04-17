@@ -728,7 +728,7 @@ window._initTinyMCE = function () {
     toolbar: [
       "fontfamily fontsize | styles | bold italic underline strikethrough |",
       "forecolor backcolor | alignright aligncenter alignleft alignjustify |",
-      "bullist numlist outdent indent | table | link image emoticons charmap |",
+      "bullist numlist outdent indent | table | link image emoticons customIcons charmap |",
       "blockquote codesample | removeformat | fullscreen preview code | help",
     ].join(" "),
 
@@ -797,9 +797,134 @@ window._initTinyMCE = function () {
       editor.on("init", () => {
         editor.execCommand("fontName", false, "Cairo,sans-serif");
       });
+      // تسجيل زر الأيقونات المخصّص
+      editor.ui.registry.addButton("customIcons", {
+        text: "🎨 أيقونات",
+        tooltip: "إدراج أيقونة",
+        onAction: () => openIconsPicker(editor),
+      });
     },
   });
 };
+
+/* ══════════════════════════════════════════════════════
+   نافذة اختيار الأيقونات (تُستخدم من زر customIcons في TinyMCE)
+══════════════════════════════════════════════════════ */
+const ICON_LIBRARY = {
+  "شبكات وإنترنت": ["🌐","📡","📶","🛰️","📻","📺","📱","💻","🖥️","⌨️","🖱️","🖨️","💾","💿","📀","🔌","🔋","📞","☎️","📠","📟"],
+  "أمان وحماية":   ["🔒","🔓","🔐","🔑","🗝️","🛡️","🔏","🚨","⚠️","❗","❓","✅","❌","⛔","🚫","👁️","👤","👥","🕵️","🔍","🔎"],
+  "ملفات وبيانات": ["📁","📂","🗂️","📄","📃","📑","📊","📈","📉","📋","📌","📍","📎","🖇️","📐","📏","✂️","📝","✏️","🖊️","🖋️","📔","📕","📗","📘","📙","📚","📖","🔖"],
+  "أجهزة ومكونات": ["⚙️","🔧","🔨","🛠️","⚡","💡","🔦","🎛️","🎚️","🎮","🕹️","💎","🧲","🧰","🧪","🧬","🔬","🔭","📸","📷","🎥","📹"],
+  "تواصل ورسائل":  ["📧","📨","📩","📤","📥","📬","📭","📮","💬","💭","🗨️","🗯️","📣","📢","🔔","🔕","📯","📡"],
+  "علامات وأسهم":  ["➡️","⬅️","⬆️","⬇️","↗️","↘️","↙️","↖️","↔️","↕️","🔄","🔁","🔂","⤴️","⤵️","🔼","🔽","⏫","⏬","▶️","◀️","⏸️","⏹️","⏺️","⏭️","⏮️","⏩","⏪"],
+  "أرقام ونقاط":   ["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟","•","◦","▪","▫","■","□","●","○"],
+  "تعليم وعلوم":   ["🎓","📚","📖","🏫","🎒","📝","🧮","🔬","🧪","🧬","⚗️","🧫","💊","🩺","🧠","🫀","🔢","🔡","🔤","📐","📏"],
+  "حالات وتقييم":  ["⭐","🌟","✨","💫","⚡","🔥","💯","👍","👎","👌","👏","🙌","💪","🎯","🏆","🥇","🥈","🥉","🏅","🎖️","✔️","☑️","✖️"],
+  "وقت ومؤقّت":    ["⏰","⏱️","⏲️","🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛","📅","📆","🗓️","⌚","⏳","⌛"],
+};
+
+function openIconsPicker(editor) {
+  // إزالة أي نافذة سابقة
+  const existing = document.getElementById("iconsPickerOverlay");
+  if (existing) existing.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "iconsPickerOverlay";
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 999999; display: flex; align-items: center; justify-content: center;
+    padding: 1rem; font-family: 'Cairo',sans-serif; direction: rtl;
+  `;
+
+  const modal = document.createElement("div");
+  modal.style.cssText = `
+    background: #13162a; border: 1px solid rgba(108,47,160,0.4);
+    border-radius: 14px; width: 100%; max-width: 680px; max-height: 85vh;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  `;
+
+  modal.innerHTML = `
+    <div style="padding: 1.1rem 1.5rem; border-bottom: 1px solid rgba(108,47,160,0.3); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(108,47,160,0.15), transparent);">
+      <h3 style="margin: 0; color: #fff; font-weight: 800; font-size: 1.1rem;">🎨 مكتبة الأيقونات</h3>
+      <button id="iconsPickerClose" style="background: none; border: none; color: #e8eaf6; font-size: 1.5rem; cursor: pointer; padding: 0 0.5rem;">×</button>
+    </div>
+
+    <div style="padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(108,47,160,0.2);">
+      <input id="iconsPickerSearch" type="text" placeholder="🔍 ابحث عن أيقونة..." style="width:100%; padding:0.6rem 0.9rem; background:rgba(255,255,255,0.04); border:1px solid rgba(108,47,160,0.35); border-radius:8px; color:#e8eaf6; font-family:'Cairo',sans-serif; font-size:0.88rem; outline:none;">
+    </div>
+
+    <div id="iconsPickerBody" style="padding: 1rem 1.5rem; overflow-y: auto; flex: 1;"></div>
+
+    <div style="padding: 0.85rem 1.5rem; border-top: 1px solid rgba(108,47,160,0.2); background: rgba(0,0,0,0.2); font-size: 0.78rem; color: #8c90b5; text-align: center;">
+      💡 انقر على أي أيقونة لإدراجها في المقال
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  const body = modal.querySelector("#iconsPickerBody");
+
+  function renderIcons(filter = "") {
+    body.innerHTML = "";
+    const f = filter.trim().toLowerCase();
+
+    Object.entries(ICON_LIBRARY).forEach(([cat, icons]) => {
+      const filteredIcons = f
+        ? icons.filter(ic => cat.toLowerCase().includes(f))
+        : icons;
+      if (!filteredIcons.length) return;
+
+      const group = document.createElement("div");
+      group.style.marginBottom = "1.5rem";
+      group.innerHTML = `
+        <div style="font-weight: 800; color: #00c9b1; margin-bottom: 0.6rem; font-size: 0.88rem;">${cat}</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px;"></div>
+      `;
+      const grid = group.querySelector("div:last-child");
+
+      filteredIcons.forEach(icon => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = icon;
+        btn.title = icon;
+        btn.style.cssText = `
+          aspect-ratio: 1; background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(108,47,160,0.25); border-radius: 8px;
+          font-size: 1.6rem; cursor: pointer; transition: all 0.15s;
+          padding: 0; display: flex; align-items: center; justify-content: center;
+        `;
+        btn.onmouseenter = () => {
+          btn.style.background = "rgba(0,201,177,0.15)";
+          btn.style.borderColor = "rgba(0,201,177,0.5)";
+          btn.style.transform = "scale(1.1)";
+        };
+        btn.onmouseleave = () => {
+          btn.style.background = "rgba(255,255,255,0.04)";
+          btn.style.borderColor = "rgba(108,47,160,0.25)";
+          btn.style.transform = "scale(1)";
+        };
+        btn.onclick = () => {
+          editor.insertContent(icon);
+          overlay.remove();
+        };
+        grid.appendChild(btn);
+      });
+      body.appendChild(group);
+    });
+
+    if (!body.innerHTML) {
+      body.innerHTML = `<div style="text-align:center;padding:2rem;color:#8c90b5;">لا توجد نتائج مطابقة.</div>`;
+    }
+  }
+
+  renderIcons();
+
+  modal.querySelector("#iconsPickerSearch").addEventListener("input", e => renderIcons(e.target.value));
+  modal.querySelector("#iconsPickerClose").onclick = () => overlay.remove();
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+}
 window.saveArticle = async function () {
   const title = document.getElementById("articleTitle").value.trim(), pageId = document.getElementById("articlePage").value, content = tinymce.get("tinyEditor")?.getContent() || "";
   if (!title || !pageId || !content) return alert("يرجى إكمال جميع البيانات.");
@@ -1031,6 +1156,152 @@ window.saveSettings = async function () {
     btn.disabled = false; btnText.style.display = "inline"; spinner.style.display = "none";
   }
 };
+
+/* ══════════════════════════════════════════════════════
+   إدارة الأقسام المخصّصة
+══════════════════════════════════════════════════════ */
+window.openSectionsManager = async function () {
+  document.getElementById("sectionsManagerModal").classList.add("open");
+  document.getElementById("sectionsManagerMsg").style.display = "none";
+  // تفريغ حقول الإضافة
+  ["newSectionId", "newSectionTitle", "newSectionIcon", "newSectionDesc"].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = "";
+  });
+  await loadCustomSections();
+};
+
+window.closeSectionsManager = function () {
+  document.getElementById("sectionsManagerModal").classList.remove("open");
+};
+
+async function loadCustomSections() {
+  const listEl = document.getElementById("sectionsManagerList");
+  try {
+    const snap = await getDocs(collection(db, "sections"));
+    if (snap.empty) {
+      listEl.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.85rem;">لا توجد أقسام مخصّصة بعد.<br>أضف قسمك الأول من الأعلى ⬆️</div>`;
+      refreshSectionsDropdown([]);
+      return;
+    }
+
+    const sections = [];
+    snap.forEach(s => sections.push({ id: s.id, ...s.data() }));
+
+    listEl.innerHTML = sections.map(sec => `
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;margin-bottom:0.6rem;">
+        <div style="font-size:1.5rem;">${sec.icon || "📄"}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;color:var(--text);">${_escHtml(sec.title || sec.id)}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);direction:ltr;text-align:right;">id: ${sec.id}</div>
+          ${sec.description ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">${_escHtml(sec.description)}</div>` : ""}
+        </div>
+        <a href="article.html?id=${encodeURIComponent(sec.id)}" target="_blank" class="tr-edit-btn" style="background:rgba(0,201,177,0.1);color:var(--accent);text-decoration:none;" title="معاينة">👁️</a>
+        <button class="tr-edit-btn" style="background:rgba(244,67,54,0.1);color:#ff6b6b;" title="حذف القسم" onclick="deleteCustomSection('${sec.id}','${_escJs(sec.title || sec.id)}')">🗑️</button>
+      </div>
+    `).join("");
+
+    refreshSectionsDropdown(sections);
+  } catch (e) {
+    listEl.innerHTML = `<div style="color:#ff6b6b;padding:1rem;">❌ خطأ: ${e.message}</div>`;
+  }
+}
+
+function refreshSectionsDropdown(customSections) {
+  const select = document.getElementById("articlePage");
+  if (!select) return;
+  const currentValue = select.value;
+
+  // نبني القائمة: الأقسام الثابتة + الأقسام المخصّصة
+  const staticOpts = `
+    <option value="">— اختر القسم —</option>
+    <option value="home">🏠 الرئيسية</option>
+    <option value="networks">📡 شبكات الحاسب الآلي</option>
+    <option value="security">🔒 الأمان في الشبكات</option>
+    <option value="osi">🔁 نموذج OSI</option>
+    <option value="cables">🔌 كيابل الشبكات</option>
+    <option value="ip">🌍 بروتوكول IP</option>
+  `;
+  const customOpts = customSections.length
+    ? `<optgroup label="— أقسام مخصّصة —">` +
+      customSections.map(s => `<option value="${s.id}">${s.icon || "📄"} ${_escHtml(s.title || s.id)}</option>`).join("") +
+      `</optgroup>`
+    : "";
+
+  select.innerHTML = staticOpts + customOpts;
+  if (currentValue) select.value = currentValue;
+}
+
+window.addCustomSection = async function () {
+  const id    = document.getElementById("newSectionId").value.trim().toLowerCase();
+  const title = document.getElementById("newSectionTitle").value.trim();
+  const icon  = document.getElementById("newSectionIcon").value.trim();
+  const desc  = document.getElementById("newSectionDesc").value.trim();
+  const msg   = document.getElementById("sectionsManagerMsg");
+
+  const showMsg = (t, ok = false) => {
+    msg.textContent = t;
+    msg.className = `tr-modal-msg ${ok ? "success" : "error"}`;
+    msg.style.display = "block";
+  };
+
+  if (!id) return showMsg("يرجى إدخال معرّف القسم.");
+  if (!/^[a-z0-9_-]+$/.test(id)) return showMsg("المعرّف يجب أن يحوي حروفاً إنجليزية صغيرة أو أرقاماً أو (- _) فقط.");
+  if (["home","networks","security","osi","cables","ip"].includes(id)) return showMsg("هذا المعرّف محجوز للأقسام الأساسية.");
+  if (!title) return showMsg("يرجى إدخال اسم القسم.");
+
+  try {
+    // التحقق من عدم التكرار
+    const existing = await getDoc(doc(db, "sections", id));
+    if (existing.exists()) return showMsg("هذا المعرّف مستخدم بالفعل، اختر معرّفاً آخر.");
+
+    await setDoc(doc(db, "sections", id), {
+      id, title, icon: icon || "📄", description: desc,
+      createdAt: serverTimestamp()
+    });
+    showMsg("✅ تمت إضافة القسم بنجاح.", true);
+    // تفريغ الحقول
+    ["newSectionId", "newSectionTitle", "newSectionIcon", "newSectionDesc"].forEach(fid => {
+      document.getElementById(fid).value = "";
+    });
+    await loadCustomSections();
+  } catch (e) {
+    showMsg("❌ " + e.message);
+  }
+};
+
+window.deleteCustomSection = async function (id, title) {
+  if (!confirm(`هل أنت متأكد من حذف قسم "${title}"؟\n\n⚠️ المقالات المنشورة فيه لن تُحذف، لكنها لن تظهر لأن القسم لم يعد موجوداً.`)) return;
+  try {
+    await deleteDoc(doc(db, "sections", id));
+    await loadCustomSections();
+  } catch (e) {
+    alert("❌ فشل الحذف: " + e.message);
+  }
+};
+
+// تحميل الأقسام المخصّصة في القائمة المنسدلة عند فتح لوحة التحكم
+async function _initCustomSectionsDropdown() {
+  try {
+    const snap = await getDocs(collection(db, "sections"));
+    const sections = [];
+    snap.forEach(s => sections.push({ id: s.id, ...s.data() }));
+    refreshSectionsDropdown(sections);
+  } catch (e) { /* تجاهل — القائمة تبقى بالأقسام الثابتة */ }
+}
+
+function _escHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function _escJs(s) {
+  return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+}
+
+// استدعاء أوّلي بعد تحميل لوحة التحكم
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => setTimeout(_initCustomSectionsDropdown, 1500));
+} else {
+  setTimeout(_initCustomSectionsDropdown, 1500);
+}
 
 /* ═══════════════════════════════════════
    طبقة حماية الواجهة الأمامية (Client-side hardening)
