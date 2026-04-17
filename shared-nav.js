@@ -147,4 +147,32 @@
       observer.observe(el);
     });
   });
+
+  /* ══════════════════════════════════════════════════════
+     طبقة حماية خفيفة لصفحات المحتوى
+     (تسمح بتحديد النصوص للدراسة، لكن تمنع F12 والنسخ الكامل)
+  ══════════════════════════════════════════════════════ */
+
+  // 1) منع القائمة السياقية (Right-click) خارج حقول الإدخال
+  document.addEventListener('contextmenu', e => {
+    const t = e.target;
+    const isEditable = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+    if (!isEditable) { e.preventDefault(); return false; }
+  });
+
+  // 2) منع اختصارات المطوّر الأكثر شيوعاً
+  document.addEventListener('keydown', e => {
+    const key = (e.key || '').toLowerCase();
+    // F12
+    if (key === 'f12') { e.preventDefault(); return false; }
+    // Ctrl+Shift+I/J/C (DevTools)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','j','c','k'].includes(key)) { e.preventDefault(); return false; }
+    // Ctrl+U (View source) و Ctrl+S (Save)
+    if ((e.ctrlKey || e.metaKey) && ['u','s'].includes(key)) { e.preventDefault(); return false; }
+  });
+
+  // 3) منع سحب الصور
+  document.addEventListener('dragstart', e => {
+    if (e.target.tagName === 'IMG') { e.preventDefault(); return false; }
+  });
 })();
