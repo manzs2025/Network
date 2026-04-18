@@ -187,7 +187,6 @@ window.switchPanel = function (btn, panelId) {
   if (panelId === "trainees") { loadTrainees(); loadLatestResults(); }
   if (panelId === "quizzes")  { renderQuestionBankSelector(); loadQuizzes(); }
   if (panelId === "articles") { loadArticles(); _initTinyMCE(); }
-  if (panelId === "pageContent") { _initPageContentTinyMCE(); }
   if (panelId === "settings") { loadSettings(); _initSettingsTinyMCE(); }
 };
 window.switchPanelById = function(panelId) { switchPanel(document.querySelector(`.sb-item[data-panel="${panelId}"]`), panelId); };
@@ -2456,6 +2455,31 @@ function _legacyRenderElements() {
   container.innerHTML = html;
 }
 
+let _legacyEditorInited = false;
+
+function _legacyInitEditor() {
+  if (_legacyEditorInited || typeof tinymce === "undefined") return;
+  tinymce.init({
+    selector: "#legacyEditModalEditor",
+    language: "ar",
+    language_url: "https://cdn.jsdelivr.net/npm/tinymce-i18n@23.10.9/langs6/ar.js",
+    directionality: "rtl",
+    skin: "oxide-dark", content_css: "dark",
+    height: 320, menubar: false, branding: false, promotion: false,
+    plugins: ["advlist","lists","link","image","table","code","fullscreen","emoticons","charmap"],
+    toolbar: "bold italic underline | forecolor backcolor | alignright aligncenter alignleft | bullist numlist | link image | table | removeformat | code fullscreen",
+    /* إعدادات الصور - نستخدم روابط خارجية فقط */
+    image_title: false,
+    image_description: false,
+    image_dimensions: true,
+    image_advtab: false,
+    automatic_uploads: false,
+    file_picker_types: "",
+    content_style: `body{font-family:'Cairo',sans-serif;direction:rtl;text-align:right;color:#e8eaf6;background:#161929;padding:12px;font-size:0.92rem;line-height:1.7}strong{color:#fff}a{color:#00c9b1}img{max-width:100%;border-radius:8px}`,
+  });
+  _legacyEditorInited = true;
+}
+
 window.legacyOpenEditModal = function(elId) {
   const el = _legacyElements.find(e => e.id === elId);
   if (!el) return;
@@ -2463,9 +2487,19 @@ window.legacyOpenEditModal = function(elId) {
 
   document.getElementById("legacyEditModalElId").value = elId;
   document.getElementById("legacyEditModalOriginal").innerHTML = el.originalText;
-  document.getElementById("legacyEditModalEditor").value = currentContent;
   document.getElementById("legacyEditModal").style.display = "flex";
   document.getElementById("legacyEditModal").classList.add("open");
+
+  /* تهيئة TinyMCE عند أول فتح ثم وضع المحتوى */
+  _legacyInitEditor();
+  setTimeout(() => {
+    const ed = tinymce.get("legacyEditModalEditor");
+    if (ed) {
+      ed.setContent(currentContent);
+    } else {
+      document.getElementById("legacyEditModalEditor").value = currentContent;
+    }
+  }, 200);
 };
 
 window.legacyCloseEditModal = function() {
@@ -2475,7 +2509,8 @@ window.legacyCloseEditModal = function() {
 
 window.legacySaveEdit = async function() {
   const elId = document.getElementById("legacyEditModalElId").value;
-  const newContent = document.getElementById("legacyEditModalEditor").value.trim();
+  const ed = tinymce.get("legacyEditModalEditor");
+  const newContent = (ed ? ed.getContent() : document.getElementById("legacyEditModalEditor").value).trim();
   const el = _legacyElements.find(e => e.id === elId);
   if (!el) return;
 

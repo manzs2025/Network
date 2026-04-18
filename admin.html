@@ -2117,11 +2117,6 @@ html, body {
         إدارة المقالات
       </button>
 
-      <button class="sb-item" data-panel="pageContent" onclick="switchPanel(this, 'pageContent')">
-        <span class="sb-icon">📄</span>
-        محتوى الصفحات
-      </button>
-
       <button class="sb-item" data-panel="cms" onclick="switchPanel(this, 'cms')">
         <span class="sb-icon">🌐</span>
         محرر الموقع
@@ -2404,68 +2399,6 @@ html, body {
 
       </section>
 
-      <!-- ════════════ PANEL: PAGE CONTENT ════════════ -->
-      <section class="panel" id="panel-pageContent">
-        <div class="panel-header">
-          <div class="panel-title-group">
-            <div class="panel-tag">📄 محتوى الصفحات</div>
-            <div class="panel-title">تعديل <span>محتوى الصفحات التعليمية</span></div>
-            <div class="panel-subtitle">أضف فقرات أو ملاحظات تظهر في أعلى كل صفحة (تظهر قبل المحتوى الأصلي)</div>
-          </div>
-        </div>
-
-        <div class="qz-form-card" style="margin-top:1rem;">
-          <div class="qz-form-header" style="padding:1.5rem;">
-            <div class="qz-form-title"><span class="qz-form-icon">📄</span> تعديل محتوى صفحة</div>
-          </div>
-
-          <div style="padding:1.5rem;">
-            <div style="background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.3);border-radius:10px;padding:0.85rem 1rem;color:var(--text-muted);font-size:0.83rem;margin-bottom:1.5rem;">
-              💡 يمكنك إضافة محتوى إضافي لكل صفحة يظهر في أعلى الصفحة (قبل المحتوى التعليمي الأصلي). استخدم هذا لإضافة مقدّمات، إعلانات، تحديثات، أو أي محتوى تريد أن يراه الزائر قبل المحتوى الرئيسي.
-            </div>
-
-            <div class="qz-field-group" style="margin-bottom:1rem;">
-              <label class="qz-label" for="pageContentSelect">اختر الصفحة *</label>
-              <select id="pageContentSelect" class="qz-input qz-select" onchange="loadPageContentForEdit()">
-                <option value="">— اختر صفحة —</option>
-                <option value="networks">📡 شبكات الحاسب الآلي (networks.html)</option>
-                <option value="security">🔒 الأمان في الشبكات (security.html)</option>
-                <option value="osi">🔁 نموذج OSI (osi.html)</option>
-                <option value="cables">🔌 كيابل الشبكات (cables.html)</option>
-                <option value="ip">🌍 بروتوكول IP (ip.html)</option>
-                <option value="home">🏠 الصفحة الرئيسية (index.html)</option>
-              </select>
-            </div>
-
-            <div class="qz-field-group" style="margin-bottom:1rem;">
-              <label class="qz-label" for="pageContentTitle">عنوان القسم الإضافي (اختياري)</label>
-              <input type="text" id="pageContentTitle" class="qz-input" placeholder="مثال: تحديثات المنهج لعام 2026">
-            </div>
-
-            <div class="qz-field-group" style="margin-bottom:1.25rem;">
-              <label class="qz-label">المحتوى الإضافي</label>
-              <div style="background:#161929;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
-                <textarea id="pageContentEditor"></textarea>
-              </div>
-            </div>
-
-            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-              <button class="qz-save-btn" onclick="savePageContent()">
-                <span>💾 حفظ المحتوى</span>
-              </button>
-              <button class="qz-refresh-btn" onclick="deletePageContent()" style="background:rgba(244,67,54,0.1);color:#ff6b6b;border-color:rgba(244,67,54,0.3);">
-                🗑️ حذف المحتوى الإضافي لهذه الصفحة
-              </button>
-              <button class="qz-refresh-btn" onclick="previewPageContent()" style="background:rgba(0,201,177,0.1);color:var(--accent);border-color:rgba(0,201,177,0.3);">
-                👁️ معاينة الصفحة
-              </button>
-            </div>
-
-            <div class="qz-form-msg" id="pageContentMsg" style="display:none;margin-top:1rem;"></div>
-          </div>
-        </div>
-      </section>
-
       <!-- ════════════ PANEL: CMS (محرر الموقع - صفحات جديدة) ════════════ -->
       <section class="panel" id="panel-cms">
         <div class="panel-header">
@@ -2647,8 +2580,12 @@ html, body {
               <div id="legacyEditModalOriginal" style="padding:0.75rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.87rem;max-height:120px;overflow-y:auto;line-height:1.7;"></div>
             </div>
             <div class="tr-modal-field">
-              <label>النص الجديد (يدعم HTML):</label>
-              <textarea id="legacyEditModalEditor" rows="8" style="width:100%;padding:0.75rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.9rem;line-height:1.7;resize:vertical;"></textarea>
+              <label>النص الجديد (يدعم التنسيق والصور):</label>
+              <div style="background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:0.5rem;font-size:0.78rem;color:var(--text-muted);line-height:1.6;">
+                💡 لإضافة صورة: اضغط زر 🖼️ → الصق رابط الصورة (من Google Drive، Imgur، إلخ).
+                الصور لا تُرفع على قاعدة البيانات — فقط روابطها.
+              </div>
+              <textarea id="legacyEditModalEditor"></textarea>
             </div>
             <div class="tr-modal-actions">
               <button class="btn-modal-save" onclick="legacySaveEdit()">💾 حفظ التعديل</button>
