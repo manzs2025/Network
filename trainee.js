@@ -349,7 +349,51 @@ async function _autoSubmitOnTimeout() {
   await window.submitQuiz(true);
 }
 
-/* ─── بناء الأسئلة ──────────────────────────────── */
+/* ─── حساب الدرجة المتراكمة وعرضها ─────────────── */
+function _updateRunningScore() {
+  if (!_currentQuiz) return;
+  const questions = _currentQuiz.questions ?? [];
+  let runScore = 0;
+  let totalPoints = 0;
+
+  questions.forEach((q, idx) => {
+    const qPoints = Number(q.points) || 1;
+    totalPoints += qPoints;
+    const qType = q.type || "mcq";
+    const ans = _answers[idx];
+
+    if (ans === undefined || ans === null) return;
+
+    let isCorrect = false;
+    if (qType === "multi") {
+      const opts = q.options ?? [];
+      const correctsSet = new Set(q.correctAnswers || []);
+      const selectedArr = Array.isArray(ans) ? ans.map(i => opts[i]).filter(Boolean) : [];
+      isCorrect = selectedArr.length === correctsSet.size && selectedArr.every(v => correctsSet.has(v));
+    } else if (qType === "tf") {
+      const opts = ["صح", "خطأ"];
+      const selectedText = typeof ans === "number" && ans >= 0 ? opts[ans] : null;
+      const correctText = q.correctAnswer === "true" ? "صح" : "خطأ";
+      isCorrect = selectedText === correctText;
+    } else {
+      const opts = q.options ?? [];
+      const selectedAnswer = typeof ans === "number" && ans >= 0 ? opts[ans] : null;
+      isCorrect = selectedAnswer === q.correctAnswer;
+    }
+    if (isCorrect) runScore += qPoints;
+  });
+
+  // تطبيق خصومات الخروج
+  const penalty = _currentQuiz._penaltyDeductions ?? 0;
+  const displayScore = Math.max(0, runScore - penalty);
+
+  const el = document.getElementById("runningScoreDisplay");
+  if (el) {
+    el.textContent = `✅ درجاتك حتى الآن: ${displayScore.toFixed(2)} / ${totalPoints}`;
+  }
+}
+
+/* ─── بناء شاشة الحل ──────────────────────────── */
 function _buildSolver(questions) {
   const container = document.getElementById("questionsContainer");
   const dotNav    = document.getElementById("dotNav");
@@ -358,6 +402,34 @@ function _buildSolver(questions) {
 
   document.getElementById("solverTitle").textContent =
     _currentQuiz.title ?? "الاختبار";
+
+  // أضف عنصر عرض الدرجة المتراكمة إذا لم يكن موجوداً
+  let runningEl = document.getElementById("runningScoreDisplay");
+  if (!runningEl) {
+    runningEl = document.createElement("div");
+    runningEl.id = "runningScoreDisplay";
+    runningEl.style.cssText = `
+      text-align:center; padding:6px 16px; margin:8px auto;
+      background:rgba(0,201,177,0.1); border:1px solid rgba(0,201,177,0.3);
+      border-radius:20px; color:#00c9b1; font-weight:700; font-size:0.85rem;
+      display:inline-block; width:fit-content;
+    `;
+    const solverHeader = document.getElementById("solverHeader") || container.parentElement;
+    if (solverHeader) {
+      const wrapper = document.createElement("div");
+      wrapper.style.textAlign = "center";
+      wrapper.appendChild(runningEl);
+      solverHeader.insertAdjacentElement("afterend", wrapper);
+    }
+  }
+  runningEl.textContent = "✅ درجاتك حتى الآن: 0";
+
+  // احسب عدد الأسئلة القابلة للإجابة
+  const answerableCount = questions.filter(q => {
+    const qType = q.type || "mcq";
+    const opts = qType === "tf" ? ["صح","خطأ"] : (q.options ?? []);
+    return opts.length > 0;
+  }).length;
 
   questions.forEach((q, idx) => {
     /* تطبيع بيانات السؤال لضمان وجود options حتى لأنواع tf */
@@ -418,6 +490,12 @@ function _buildSolver(questions) {
     dotNav.appendChild(dot);
   });
 
+  // إذا لم تكن هناك أسئلة قابلة للإجابة، فعّل زر الإرسال فوراً
+  if (answerableCount === 0) {
+    const btnSubmit = document.getElementById("btnSubmit");
+    if (btnSubmit) btnSubmit.disabled = false;
+  }
+
   _refreshNav();
 }
 
@@ -452,9 +530,17 @@ window.selectOption = function (qIdx, optIdx, isMulti = false) {
   const dot = document.getElementById(`dot_${qIdx}`);
   if (dot) dot.classList.add("answered");
 
-  /* تفعيل زر الإرسال إذا أُجيب على كل الأسئلة */
+  /* تحديث الدرجة المتراكمة */
+  _updateRunningScore();
+
+  /* تفعيل زر الإرسال إذا أُجيب على كل الأسئلة القابلة للإجابة */
   const total = _currentQuiz.questions?.length ?? 0;
-  if (Object.keys(_answers).length === total) {
+  const answerableCount = (_currentQuiz.questions ?? []).filter(q => {
+    const qType = q.type || "mcq";
+    const opts = qType === "tf" ? ["صح","خطأ"] : (q.options ?? []);
+    return opts.length > 0;
+  }).length;
+  if (Object.keys(_answers).length >= answerableCount) {
     document.getElementById("btnSubmit").disabled = false;
   }
 };
@@ -499,6 +585,9 @@ function _refreshNav() {
   document.getElementById("solverProgressFill").style.width = pct + "%";
   document.getElementById("solverProgressText").textContent =
     `${answered} / ${total}`;
+
+  /* تحديث الدرجة المتراكمة */
+  _updateRunningScore();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -588,6 +677,12 @@ window.submitQuiz = async function (isAutoSubmit = false) {
   // fallback إذا لم يحمل أي سؤال points
   if (totalPoints === 0) { totalPoints = total; score = correct; }
 
+  // خصم غرامات الخروج من التبويب (من المرة السادسة فأكثر)
+  const penalty = _currentQuiz._penaltyDeductions ?? 0;
+  if (penalty > 0) {
+    score = Math.max(0, score - penalty);
+  }
+
   const percentage  = totalPoints ? Math.round(score / totalPoints * 100) : 0;
   const passed      = percentage >= 50;
 
@@ -614,6 +709,8 @@ window.submitQuiz = async function (isAutoSubmit = false) {
       answers:     answersMap,
       duration,
       autoSubmitted: isAutoSubmit,
+      tabSwitchCount: _currentQuiz._tabSwitchCount ?? 0,
+      penaltyDeducted: penalty,
       attempt:     1,
       submittedAt: serverTimestamp(),
     });
@@ -978,21 +1075,37 @@ function _esc(str) {
     if (e.target.tagName === "IMG") { e.preventDefault(); return false; }
   });
 
-  // 7) كشف تبديل التبويب/النافذة أثناء الاختبار (anti-cheat)
+  // 7) كشف تبديل التبويب/النافذة أثناء الاختبار — نظام التحذيرات
   let tabSwitchCount = 0;
+  const TAB_FREE_WARNINGS = 5; // عدد التحذيرات المجانية
+  let _pendingWarning = false; // منع تكرار التحذير
+
   document.addEventListener("visibilitychange", () => {
-    // نُنبّه فقط إذا كان الاختبار جارياً
     if (document.hidden && _currentQuiz && !_submitted) {
       tabSwitchCount++;
-      console.warn(`⚠️ Tab switch detected during quiz (count: ${tabSwitchCount})`);
-      // نسجّل في الإجابة عند الإرسال لاحقاً
       if (!_currentQuiz._tabSwitchCount) _currentQuiz._tabSwitchCount = 0;
       _currentQuiz._tabSwitchCount = tabSwitchCount;
     } else if (!document.hidden && tabSwitchCount > 0 && _currentQuiz && !_submitted) {
-      // رسالة تحذيرية عند العودة
+      if (_pendingWarning) return;
+      _pendingWarning = true;
+
+      // نؤجل 200ms لضمان استقرار الواجهة، لكن المؤقت يستمر
       setTimeout(() => {
-        alert(`⚠️ تم رصد خروجك من صفحة الاختبار (${tabSwitchCount} مرة). سيتم تسجيل ذلك مع نتيجتك.`);
-      }, 100);
+        _pendingWarning = false;
+        if (tabSwitchCount <= TAB_FREE_WARNINGS) {
+          const remaining = TAB_FREE_WARNINGS - tabSwitchCount;
+          const msg = remaining > 0
+            ? `⚠️ تحذير ${tabSwitchCount}/${TAB_FREE_WARNINGS}: تم رصد خروجك من صفحة الاختبار!\n\nلديك ${remaining} تحذير متبقٍ قبل أن يبدأ خصم الدرجات.`
+            : `⚠️ تحذير أخير (${TAB_FREE_WARNINGS}/${TAB_FREE_WARNINGS}): هذا آخر تحذير مجاني!\n\nالمرة القادمة سيُخصم 0.25 درجة من درجتك الإجمالية عن كل خروج.`;
+          alert(msg);
+        } else {
+          // المرة السادسة فما فوق: خصم 0.25 درجة
+          const deductionCount = tabSwitchCount - TAB_FREE_WARNINGS;
+          if (!_currentQuiz._penaltyDeductions) _currentQuiz._penaltyDeductions = 0;
+          _currentQuiz._penaltyDeductions = deductionCount * 0.25;
+          alert(`🚨 تم رصد خروجك من الاختبار للمرة رقم ${tabSwitchCount}!\n\nتم خصم 0.25 درجة من درجتك الإجمالية.\nإجمالي الخصم حتى الآن: ${_currentQuiz._penaltyDeductions.toFixed(2)} درجة\n\n⚠️ أي خروج إضافي سيُكلّفك 0.25 درجة أخرى.`);
+        }
+      }, 200);
     }
   });
 
