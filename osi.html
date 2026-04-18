@@ -361,6 +361,93 @@
     </div>
   </div>
 
+
+<!-- ════════════ CMS: محتوى إضافي من لوحة التحكم ════════════ -->
+<div id="cms-dynamic-content" style="display:none;">
+  <div class="sec-divider"></div>
+  <div id="cms-sections-wrapper"></div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, query, orderBy, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
+  authDomain:        "networkacademy-795c8.firebaseapp.com",
+  projectId:         "networkacademy-795c8",
+  storageBucket:     "networkacademy-795c8.firebasestorage.app",
+  messagingSenderId: "458132238000",
+  appId:             "1:458132238000:web:bffd7321407b094bb21575",
+};
+const _app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const _db  = getFirestore(_app);
+
+(async function loadCmsContent() {
+  const PAGE_ID = "osi";
+  try {
+    const q    = query(collection(_db, "siteContent", PAGE_ID, "sections"), orderBy("order"));
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+
+    const wrapper = document.getElementById("cms-sections-wrapper");
+    const container = document.getElementById("cms-dynamic-content");
+    if (!wrapper || !container) return;
+
+    wrapper.innerHTML = "";
+    snap.forEach((d, i) => {
+      const sec = d.data();
+      const icon  = sec.icon  || "📄";
+      const title = sec.title || "";
+      const body  = sec.content || "";
+
+      const block = document.createElement("div");
+      block.className = "sec-block";
+      block.style.cssText = "animation: fadeUp 0.4s ease both; animation-delay:" + (i * 0.08) + "s";
+      block.innerHTML = `
+        <div class="sec-block-header">
+          <div class="sec-icon">${icon}</div>
+          <h2>${_esc(title)}</h2>
+        </div>
+        <div class="content-block cms-html-body">${body}</div>
+        <style>
+          .cms-html-body h2 { font-size:1rem; font-weight:800; color:#fff; margin:1.1rem 0 0.5rem; border-bottom:1px solid rgba(108,47,160,0.25); padding-bottom:0.3rem; }
+          .cms-html-body h3 { font-size:0.93rem; font-weight:700; color:var(--accent); margin:0.9rem 0 0.4rem; }
+          .cms-html-body p  { margin-bottom:0.75rem; line-height:1.75; }
+          .cms-html-body ul, .cms-html-body ol { padding-right:1.5rem; margin-bottom:0.75rem; }
+          .cms-html-body li { margin-bottom:0.35rem; }
+          .cms-html-body strong { color:#fff; }
+          .cms-html-body table { width:100%; border-collapse:collapse; margin:0.75rem 0; }
+          .cms-html-body td, .cms-html-body th { border:1px solid rgba(255,255,255,0.1); padding:0.45rem 0.7rem; text-align:right; font-size:0.87rem; }
+          .cms-html-body th { background:rgba(108,47,160,0.2); color:#fff; }
+          .cms-html-body img { max-width:100%; border-radius:8px; margin:0.5rem 0; }
+          .cms-html-body a { color:var(--accent); }
+          .cms-html-body blockquote { border-right:4px solid var(--accent); padding:0.5rem 1rem; margin:0.75rem 0; color:#9fa3c0; background:rgba(0,201,177,0.05); border-radius:0 8px 8px 0; }
+          @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        </style>
+      `;
+      wrapper.appendChild(block);
+      if (i < snap.size - 1) {
+        const div = document.createElement("div");
+        div.className = "sec-divider";
+        wrapper.appendChild(div);
+      }
+    });
+
+    container.style.display = "block";
+  } catch(e) {
+    console.warn("CMS loader:", e.message);
+  }
+
+  function _esc(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+})();
+</script>
+
 </main>
 
 <footer>
