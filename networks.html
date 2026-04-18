@@ -3,528 +3,266 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شبكات الحاسب الآلي — أكاديمية الشبكات</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-<style>
-/* ═══════════════════════════════════════
-   VARIABLES & RESET
-═══════════════════════════════════════ */
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-:root {
-  --primary:    #6c2fa0;
-  --primary-l:  #8b46c8;
-  --accent:     #00c9b1;
-  --bg:         #080a14;
-  --bg2:        #0e1022;
-  --bg3:        #131629;
-  --card:       #161929;
-  --card2:      #1c2038;
-  --border:     rgba(108,47,160,0.22);
-  --border2:    rgba(255,255,255,0.07);
-  --text:       #e8eaf6;
-  --text-muted: #7a7f9e;
-  --text-faint: #4a4f6b;
-  --radius:     14px;
-  --nav-h:      64px;
-}
-
-html, body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Cairo', sans-serif;
-  min-height: 100%;
-  direction: rtl;
-}
-
-/* ── شريط التنقل ── */
-.topnav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  height: var(--nav-h);
-  background: rgba(8,10,20,0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 0 1.5rem;
-}
-.nav-brand {
-  font-weight: 900;
-  font-size: 1rem;
-  color: var(--text);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 2rem;
-  white-space: nowrap;
-}
-.nav-brand-dot {
-  width: 8px; height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-}
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  flex: 1;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.nav-links::-webkit-scrollbar { display:none; }
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: 0.2s;
-}
-.nav-link:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-.nav-link.active {
-  background: rgba(108,47,160,0.2);
-  color: var(--text);
-}
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-right: auto;
-}
-.btn-login {
-  padding: 0.45rem 1.1rem;
-  background: var(--primary);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-family: 'Cairo', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
-  transition: 0.2s;
-}
-.btn-login:hover { background: var(--primary-l); }
-
-/* ── Hero ── */
-.page-hero {
-  background: linear-gradient(135deg, rgba(108,47,160,0.15) 0%, rgba(0,201,177,0.06) 100%);
-  border-bottom: 1px solid var(--border);
-  padding: 3rem 2rem 2.5rem;
-  text-align: center;
-}
-.hero-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(108,47,160,0.15);
-  border: 1px solid rgba(108,47,160,0.3);
-  color: var(--primary-l);
-  padding: 0.3rem 0.9rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-.hero-title {
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
-  font-weight: 900;
-  margin-bottom: 0.75rem;
-  line-height: 1.3;
-}
-.hero-title span { color: var(--accent); }
-.hero-desc {
-  color: var(--text-muted);
-  font-size: 1rem;
-  max-width: 560px;
-  margin: 0 auto;
-  line-height: 1.7;
-}
-
-/* ── Layout ── */
-.page-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
-}
-@media (max-width: 768px) {
-  .page-layout { grid-template-columns: 1fr; }
-  .page-sidebar { display: none; }
-}
-
-/* ── الشريط الجانبي (فهرس المحتوى) ── */
-.page-sidebar {
-  position: sticky;
-  top: calc(var(--nav-h) + 1rem);
-  height: fit-content;
-  max-height: calc(100vh - var(--nav-h) - 2rem);
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-.sidebar-card {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-}
-.sidebar-title {
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
-}
-.toc-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.6rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: 0.18s;
-  text-decoration: none;
-  margin-bottom: 0.2rem;
-}
-.toc-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
-.toc-item.active { background: rgba(108,47,160,0.15); color: var(--accent); }
-.toc-icon { font-size: 0.95rem; flex-shrink:0; }
-
-/* ── المحتوى الرئيسي ── */
-.page-main {}
-
-/* بطاقة القسم */
-.content-section {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  scroll-margin-top: calc(var(--nav-h) + 1rem);
-}
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.1rem 1.5rem;
-  background: var(--card2);
-  border-bottom: 1px solid var(--border2);
-  cursor: pointer;
-  user-select: none;
-  transition: 0.18s;
-}
-.section-header:hover { background: rgba(28,32,56,0.9); }
-.section-header-icon { font-size: 1.2rem; }
-.section-header-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--text);
-  flex: 1;
-}
-.section-toggle-arrow {
-  color: var(--text-faint);
-  font-size: 0.8rem;
-  transition: transform 0.25s;
-}
-.content-section.open .section-toggle-arrow {
-  transform: rotate(180deg);
-}
-.section-body {
-  padding: 1.5rem;
-  display: none;
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: #c8cce8;
-}
-.content-section.open .section-body {
-  display: block;
-  animation: fadeSlide 0.25s ease;
-}
-@keyframes fadeSlide {
-  from { opacity:0; transform:translateY(-6px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-
-/* تنسيق محتوى body */
-.section-body h2 {
-  font-size: 1.05rem; font-weight: 800; color: #fff;
-  margin: 1.2rem 0 0.6rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid rgba(108,47,160,0.25);
-}
-.section-body h3 {
-  font-size: 0.95rem; font-weight: 700; color: var(--accent);
-  margin: 1rem 0 0.5rem;
-}
-.section-body p  { margin-bottom: 0.85rem; }
-.section-body ul, .section-body ol { padding-right:1.5rem; margin-bottom:0.85rem; }
-.section-body li { margin-bottom: 0.4rem; }
-.section-body strong { color: #fff; font-weight: 700; }
-.section-body a  { color: var(--accent); }
-.section-body table {
-  width:100%; border-collapse:collapse; margin:1rem 0; font-size:0.88rem;
-}
-.section-body td, .section-body th {
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 0.5rem 0.75rem; text-align:right;
-}
-.section-body th { background:rgba(108,47,160,0.2); color:#fff; font-weight:700; }
-.section-body tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
-.section-body img { max-width:100%; border-radius:8px; margin:0.75rem 0; display:block; }
-.section-body blockquote {
-  border-right: 4px solid var(--accent); padding: 0.5rem 1rem;
-  margin:1rem 0; color:#9fa3c0; background:rgba(0,201,177,0.05);
-  border-radius: 0 8px 8px 0;
-}
-.section-body code {
-  background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;
-  font-family:monospace; font-size:0.88em; color:#a5d6a7;
-  direction:ltr; display:inline-block;
-}
-
-/* ── حالة التحميل ── */
-.skeleton {
-  background: linear-gradient(90deg, var(--card2) 25%, rgba(255,255,255,0.04) 50%, var(--card2) 75%);
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease infinite;
-  border-radius: 8px;
-}
-@keyframes shimmer { to { background-position: -400% 0; } }
-
-/* ── شريط التحديث ── */
-.update-bar {
-  background: linear-gradient(135deg, rgba(0,201,177,0.12), rgba(108,47,160,0.12));
-  border: 1px solid rgba(0,201,177,0.25);
-  border-radius: var(--radius);
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.88rem;
-  color: var(--text-muted);
-}
-.update-bar-icon { font-size: 1.1rem; }
-.update-bar-text strong { color: var(--accent); }
-</style>
+<title>شبكات الحاسب الآلي — مبادئ الشبكات</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ══ شريط التنقل ══ -->
-<nav class="topnav" id="mainNav">
-  <a href="index.html" class="nav-brand">
-    <div class="nav-brand-dot"></div>
-    مبادئ الشبكات
-  </a>
-  <div class="nav-links">
-    <a href="index.html"    class="nav-link">🏠 الرئيسية</a>
-    <a href="networks.html" class="nav-link active">📡 شبكات الحاسب</a>
-    <a href="security.html" class="nav-link">🔒 الأمان</a>
-    <a href="osi.html"      class="nav-link">🔁 نموذج OSI</a>
-    <a href="cables.html"   class="nav-link">🔌 الكيابل</a>
-    <a href="ip.html"       class="nav-link">🌍 بروتوكول IP</a>
+<!-- ═══ PAGE HERO ═══ -->
+<header class="page-hero">
+  <div class="breadcrumb anim-1">
+    <a href="index.html">الرئيسية</a>
+    <span class="sep">›</span>
+    <span>شبكات الحاسب الآلي</span>
   </div>
-  <div class="nav-actions">
-    <a href="login.html" class="btn-login">🔐 تسجيل الدخول</a>
+  <div class="page-hero-tag anim-1">📡 القسم الأول</div>
+  <h1 class="anim-2">شبكات الحاسب الآلي<br><span>Computer Networks</span></h1>
+  <p class="anim-3">مقدمة شاملة عن شبكات الحاسب — تعريفها، مكوناتها، فوائدها، وأنواعها المختلفة</p>
+  <nav class="sub-nav anim-4">
+    <a href="#what">ما هي الشبكة؟</a>
+    <a href="#components">المكونات</a>
+    <a href="#benefits">الفوائد</a>
+    <a href="#types">الأنواع</a>
+  </nav>
+</header>
+
+<!-- ═══ CONTENT ═══ -->
+<main class="page-content">
+
+  <!-- ── 1. ما هي شبكة الحاسب ── -->
+  <div class="sec-block" id="what">
+    <div class="sec-block-header">
+      <div class="sec-icon">❓</div>
+      <h2>ما هي شبكة الحاسب؟<br><span>(Network Computer)</span></h2>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>تعريف شبكة الحاسب</h3>
+      <div class="highlight-box">
+        <p>شبكة الحاسب عبارة عن مجموعة من الحاسبات والأجهزة الأخرى المتصلة مع بعضها البعض حيث يكون لها القدرة على مشاركة عدد كبير من المستخدمين للبيانات <strong>(Data)</strong> والأجهزة <strong>(Hardware)</strong> كما تعتبر الشبكة وسيلة اتصال إلكتروني بين الأفراد.</p>
+      </div>
+    </div>
   </div>
-</nav>
 
-<!-- ══ Hero ══ -->
-<section class="page-hero">
-  <div class="hero-tag">📡 الوحدة الأولى</div>
-  <h1 class="hero-title">شبكات <span>الحاسب الآلي</span></h1>
-  <p class="hero-desc">تعرّف على مفاهيم الشبكات الأساسية — أنواعها، مكوناتها، وكيفية عملها في ربط الأجهزة والأنظمة</p>
-</section>
+  <div class="sec-divider"></div>
 
-<!-- ══ Layout ══ -->
-<div class="page-layout">
-
-  <!-- الشريط الجانبي (فهرس) -->
-  <aside class="page-sidebar">
-    <div class="sidebar-card">
-      <div class="sidebar-title">📑 محتويات الصفحة</div>
-      <div id="tocList">
-        <!-- يُملأ ديناميكياً -->
-        <div class="skeleton" style="height:32px;margin-bottom:6px;"></div>
-        <div class="skeleton" style="height:32px;margin-bottom:6px;width:85%;"></div>
-        <div class="skeleton" style="height:32px;margin-bottom:6px;width:90%;"></div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- المحتوى الرئيسي -->
-  <main class="page-main">
-
-    <!-- شريط تحديثات المدرّب (يظهر فقط إن وُجد محتوى) -->
-    <div id="updateBar" style="display:none;" class="update-bar">
-      <span class="update-bar-icon">✨</span>
-      <span class="update-bar-text"><strong>تحديث من المدرّب:</strong> تم إضافة محتوى تعليمي جديد إلى هذه الصفحة</span>
+  <!-- ── 2. مكونات شبكة الحاسب ── -->
+  <div class="sec-block" id="components">
+    <div class="sec-block-header">
+      <div class="sec-icon">⚙️</div>
+      <h2>مكونات شبكة الحاسب</h2>
     </div>
 
-    <!-- حالة التحميل -->
-    <div id="pageLoading">
-      <div class="content-section" style="margin-bottom:1.5rem;">
-        <div class="section-header" style="cursor:default;">
-          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
-          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;"></div>
+    <div class="content-block">
+      <h3><span class="dot"></span>تتكون شبكة الحاسب من ثلاث مكونات رئيسية</h3>
+      <div class="cards-grid">
+
+        <div class="info-card">
+          <div class="card-icon">💻</div>
+          <h3>① الأجهزة الطرفية (Clients)</h3>
+          <p>أي جهاز يُرسل المعلومات ويستقبلها على الشبكة مثل كمبيوتر، طابعة.</p>
+          <div class="highlight-box" style="margin-top:1rem; padding:1rem;">
+            <p style="font-size:0.87rem;">الجهاز الطرفي هو المكان الذي تنشأ منه الرسالة أو المكان الذي يتم استلامها فيه. تنشأ البيانات باستخدام جهاز طرفي، وتتدفق خلال الشبكة، وتصل إلى جهاز طرفي آخر.</p>
+          </div>
         </div>
-      </div>
-      <div class="content-section" style="margin-bottom:1.5rem;">
-        <div class="section-header" style="cursor:default;">
-          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
-          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;width:75%;"></div>
+
+        <div class="info-card">
+          <div class="card-icon">🔀</div>
+          <h3>② الأجهزة الوسيطة</h3>
+          <p>هي الأجهزة المسؤولة عن توجيه الحزم ما بين المرسل والمستقبل.</p>
+          <div class="highlight-box" style="margin-top:1rem; padding:1rem;">
+            <p style="font-size:0.87rem;">تقوم الأجهزة الوسيطة بالاتصال البيني بين الأجهزة الطرفية. ومن الأمثلة على هذه الاجهزة:</p>
+          </div>
+          <ul>
+            <li>أجهزة التبديل — المبدل/المحول: <strong>Switch</strong></li>
+            <li>نقاط الوصول اللاسلكية: <strong>Access Point</strong></li>
+            <li>أجهزة التوجيه — الموجه: <strong>Router</strong></li>
+            <li>جدران الحماية: <strong>Firewall</strong></li>
+          </ul>
         </div>
+
+        <div class="info-card">
+          <div class="card-icon">📶</div>
+          <h3>③ وسائط الشبكة</h3>
+          <p>مكون تنتقل عبره الرسالة من المصدر إلى الوجهة.</p>
+          <div class="highlight-box" style="margin-top:1rem; padding:1rem;">
+            <p style="font-size:0.87rem;">يتم نقل الاتصالات عبر الشبكة من خلال وسيط يسمح للرسالة بالانتقال من المصدر إلى الوجهة.</p>
+          </div>
+          <ul>
+            <li><strong>Cable</strong> — كابل سلكي</li>
+            <li><strong>Fiber Optic</strong> — ألياف ضوئية</li>
+            <li><strong>Wireless</strong> — موجات لاسلكية</li>
+          </ul>
+        </div>
+
       </div>
-      <div class="content-section">
-        <div class="section-header" style="cursor:default;">
-          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
-          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;width:60%;"></div>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>مصطلحات مهمة</h3>
+      <div class="two-col">
+        <div style="background:var(--card2); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem;">
+          <h4 style="color:var(--accent); font-weight:800; margin-bottom:0.75rem;">الشبكة اللاسلكية (Wi-Fi)</h4>
+          <p style="font-size:0.87rem; color:var(--text-muted); line-height:1.75;">تتصل الأجهزة عبر نقطة وصول (Access Point) بالراوتر، ويتصل الراوتر بالإنترنت. تستخدم هذه الشبكة: Client (جهاز المستخدم)، Access Point (نقطة الوصول)، Router (الموجه).</p>
+        </div>
+        <div style="background:var(--card2); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem;">
+          <h4 style="color:var(--accent); font-weight:800; margin-bottom:0.75rem;">الشبكة السلكية (Ethernet)</h4>
+          <p style="font-size:0.87rem; color:var(--text-muted); line-height:1.75;">تتصل الأجهزة عبر كابل سلكي بالسويتش، ويتصل السويتش بالراوتر. تستخدم: Client 1 / Client 2 / Client 3، Switch (المبدل)، Router (الموجه) ← Internet.</p>
         </div>
       </div>
     </div>
 
-    <!-- الأقسام (تُحقن هنا) -->
-    <div id="sectionsContainer"></div>
+  </div>
 
-    <!-- رسالة فارغ -->
-    <div id="emptyState" style="display:none;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
-      <div style="font-size:2.5rem;margin-bottom:1rem;">📭</div>
-      <div style="font-weight:700;">لا يوجد محتوى بعد</div>
-      <div style="font-size:0.85rem;margin-top:0.5rem;">يمكن للمشرف إضافة المحتوى من لوحة التحكم</div>
+  <div class="sec-divider"></div>
+
+  <!-- ── 3. فوائد شبكات الحاسب ── -->
+  <div class="sec-block" id="benefits">
+    <div class="sec-block-header">
+      <div class="sec-icon">✅</div>
+      <h2>فوائد شبكات الحاسب</h2>
     </div>
 
-  </main>
-</div>
+    <div class="content-block">
+      <h3><span class="dot"></span>أبرز فوائد استخدام شبكات الحاسب</h3>
+      <div class="cards-grid">
 
-<!-- ══ JavaScript ══ -->
-<script type="module">
-import { initializeApp, getApps }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, collection, query, orderBy, getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey:            "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
-  authDomain:        "networkacademy-795c8.firebaseapp.com",
-  projectId:         "networkacademy-795c8",
-  storageBucket:     "networkacademy-795c8.firebasestorage.app",
-  messagingSenderId: "458132238000",
-  appId:             "1:458132238000:web:bffd7321407b094bb21575",
-};
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-const PAGE_ID = "networks"; /* ← هذا الوحيد الذي يتغير بين الصفحات */
-
-async function loadPage() {
-  const loadingEl   = document.getElementById("pageLoading");
-  const container   = document.getElementById("sectionsContainer");
-  const emptyEl     = document.getElementById("emptyState");
-  const tocList     = document.getElementById("tocList");
-  const updateBar   = document.getElementById("updateBar");
-
-  try {
-    const q    = query(collection(db, "siteContent", PAGE_ID, "sections"), orderBy("order"));
-    const snap = await getDocs(q);
-
-    loadingEl.style.display = "none";
-
-    if (snap.empty) {
-      emptyEl.style.display = "block";
-      tocList.innerHTML = '<div style="color:var(--text-faint);font-size:0.82rem;padding:0.5rem 0;">لا يوجد محتوى</div>';
-      return;
-    }
-
-    /* إظهار شريط التحديث */
-    updateBar.style.display = "flex";
-
-    const sections = [];
-    snap.forEach(d => sections.push({ id: d.id, ...d.data() }));
-
-    /* بناء الفهرس */
-    tocList.innerHTML = sections.map((sec, i) => `
-      <a class="toc-item ${i===0?'active':''}" id="toc_${sec.id}" href="#sec_${sec.id}">
-        <span class="toc-icon">${sec.icon || "📄"}</span>
-        ${_esc(sec.title || "قسم")}
-      </a>
-    `).join("");
-
-    /* بناء الأقسام */
-    container.innerHTML = sections.map((sec, i) => `
-      <div class="content-section ${i===0?'open':''}" id="sec_${sec.id}">
-        <div class="section-header" onclick="toggleSection('${sec.id}')">
-          <span class="section-header-icon">${sec.icon || "📄"}</span>
-          <h2 class="section-header-title">${_esc(sec.title || "قسم")}</h2>
-          <span class="section-toggle-arrow">▼</span>
+        <div class="info-card">
+          <div class="card-icon">🖨️</div>
+          <h3>01 — مشاركة موارد الشبكة (Hardware)</h3>
+          <p>مشاركة موارد الشبكة بين المستخدمين مثل الطابعة وأجهزة التخزين دون الحاجة إلى توفير نسخ متعددة من الجهاز لكل مستخدم.</p>
         </div>
-        <div class="section-body">${sec.content || ""}</div>
+
+        <div class="info-card">
+          <div class="card-icon">💾</div>
+          <h3>02 — مشاركة البرمجيات (Software)</h3>
+          <p>مشاركة البرمجيات بين المستخدمين على الشبكة مما يوفر تكلفة شراء نسخ متعددة من البرامج ويسهل تحديثها مركزياً.</p>
+        </div>
+
+        <div class="info-card">
+          <div class="card-icon">📁</div>
+          <h3>03 — مشاركة الملفات مباشرة</h3>
+          <p>مشاركة الملفات مباشرة بين الأجهزة بدلاً من نقلها عبر البريد الإلكتروني أو وسائط التخزين المحمولة.</p>
+        </div>
+
+        <div class="info-card">
+          <div class="card-icon">🎮</div>
+          <h3>04 — ممارسة الألعاب الجماعية (Multiplayer)</h3>
+          <p>ممارسة ألعاب الكمبيوتر الجماعية (Multiplayer) بين أكثر من مستخدم في نفس الوقت عبر الشبكة.</p>
+        </div>
+
       </div>
-    `).join("");
+    </div>
+  </div>
 
-    /* تحديث الفهرس عند التمرير */
-    _initScrollSpy(sections);
+  <div class="sec-divider"></div>
 
-  } catch(err) {
-    console.error("loadPage:", err);
-    loadingEl.style.display = "none";
-    container.innerHTML = `
-      <div style="padding:1.5rem;background:rgba(244,67,54,0.08);border:1px solid rgba(244,67,54,0.3);border-radius:10px;color:#ff6b6b;">
-        ⚠️ تعذّر تحميل المحتوى. تأكد من اتصالك بالإنترنت وأعد المحاولة.
-      </div>`;
-  }
-}
+  <!-- ── 4. أنواع شبكات الحاسب ── -->
+  <div class="sec-block" id="types">
+    <div class="sec-block-header">
+      <div class="sec-icon">🗂️</div>
+      <h2>أنواع شبكات الحاسب</h2>
+    </div>
 
-/* ── فتح/إغلاق القسم ── */
-window.toggleSection = function(secId) {
-  const sec = document.getElementById(`sec_${secId}`);
-  if (!sec) return;
-  sec.classList.toggle("open");
-  /* تحديث الفهرس */
-  document.querySelectorAll(".toc-item").forEach(t => t.classList.remove("active"));
-  document.getElementById(`toc_${secId}`)?.classList.add("active");
-};
+    <!-- أولاً: المدى الجغرافي -->
+    <div class="content-block">
+      <h3><span class="dot"></span>أولاً: الشبكات من حيث المدى الجغرافي</h3>
+      <div class="net-types-grid">
 
-/* ── ScrollSpy خفيف ── */
-function _initScrollSpy(sections) {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id.replace("sec_", "");
-        document.querySelectorAll(".toc-item").forEach(t => t.classList.remove("active"));
-        document.getElementById(`toc_${id}`)?.classList.add("active");
-      }
-    });
-  }, { rootMargin: "-30% 0px -60% 0px" });
+        <div class="net-type-card">
+          <div class="net-type-badge b-lan">LAN</div>
+          <h4>الشبكة المحلية</h4>
+          <p>هي شبكة تربط مجموعة من أجهزة الحاسوب والأجهزة الطرفية داخل منطقة جغرافية محدودة مثل منزل، مكتب، مدرسة أو مؤسسة. تُستخدم لتبادل البيانات ومشاركة الموارد مثل الطابعات والملفات والاتصال بالإنترنت.</p>
+        </div>
 
-  sections.forEach(sec => {
-    const el = document.getElementById(`sec_${sec.id}`);
-    if (el) observer.observe(el);
-  });
-}
+        <div class="net-type-card">
+          <div class="net-type-badge b-wlan">WLAN</div>
+          <h4>الشبكة المحلية اللاسلكية</h4>
+          <p>هي شبكة تستخدم تقنية الاتصال اللاسلكي (Wi-Fi) لربط الأجهزة مثل الحواسيب والهواتف الذكية والطابعات بنقطة وصول (Access Point) أو راوتر، مما يتيح تبادل البيانات والوصول إلى الإنترنت دون الحاجة إلى توصيلات سلكية.</p>
+        </div>
 
-function _esc(str) {
-  return String(str)
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
+        <div class="net-type-card">
+          <div class="net-type-badge b-pan">PAN</div>
+          <h4>الشبكة الخاصة (الشخصية)</h4>
+          <p>الشبكة الشخصية (PAN) هي نوع من الشبكات التي تُستخدم لتوصيل الأجهزة القريبة من الشخص، عادةً في نطاق بضعة أمتار. هذه الشبكة تُستخدم لتبادل البيانات بين الأجهزة الشخصية مثل الهواتف الذكية، الأجهزة اللوحية، أجهزة الكمبيوتر المحمولة، والسماعات اللاسلكية.</p>
+        </div>
 
-loadPage();
-</script>
+        <div class="net-type-card">
+          <div class="net-type-badge b-man">MAN</div>
+          <h4>الشبكة المتوسطة (الاقليمية)</h4>
+          <p>وتعني "شبكة الاقليمية". وهي شبكة حاسوبية تربط عدة شبكات محلية (LAN) ضمن نطاق جغرافي متوسط في حدود المنطقة.</p>
+        </div>
 
+        <div class="net-type-card">
+          <div class="net-type-badge b-wan">WAN</div>
+          <h4>الشبكة الواسعة</h4>
+          <p>وتعني "شبكة منطقة واسعة". وهي شبكة تربط بين شبكات محلية (LAN) أو شبكات اقليمية (MAN) عبر مسافات جغرافية كبيرة، مثل مدن أو دول أو حتى قارات.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ثانياً: معمارية الشبكة -->
+    <div class="content-block">
+      <h3><span class="dot"></span>ثانياً: الشبكات من حيث معمارية الشبكة</h3>
+      <div class="two-col">
+        <div class="info-card">
+          <div class="card-icon">🔗</div>
+          <h3>شبكة نظير إلى نظير (Peer to Peer)</h3>
+          <p>في هذا النوع من الشبكات تتصل الحواسيب ببعضها البعض مباشرة دون الحاجة لخادم مركزي. كل جهاز يعمل كعميل وخادم في آن واحد، يمكنه مشاركة موارده مع بقية الأجهزة.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">🖥️</div>
+          <h3>شبكة العميل والخادم (Client Server)</h3>
+          <p>في هذا النوع يوجد خادم مركزي (Server) يقدم الخدمات للعملاء (Clients). يطلب العملاء الخدمات من الخادم الذي يستجيب لطلباتهم. يوفر تحكماً مركزياً أفضل وأماناً أعلى.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ثالثاً: التصميم الهندسي -->
+    <div class="content-block">
+      <h3><span class="dot"></span>ثالثاً: الشبكات حسب التصميم الهندسي (Network Topology)</h3>
+      <p style="margin-bottom:1.25rem; color:var(--text-muted);">يُميز الطالب بين أنواع الشبكات حسب النطاق الجغرافي، ويشرح الفرق بين معمارية الشبكة، ويستنتج أشكال التصميم الهندسي.</p>
+      <div class="topo-grid">
+        <div class="topo-card">
+          <div class="topo-icon">━</div>
+          <h4>الشبكة الخطية (Bus)</h4>
+          <p>جميع الأجهزة متصلة بكابل واحد رئيسي</p>
+        </div>
+        <div class="topo-card">
+          <div class="topo-icon">⭐</div>
+          <h4>الشبكة النجمية (Star)</h4>
+          <p>جميع الأجهزة متصلة بمركز واحد (Switch)</p>
+        </div>
+        <div class="topo-card">
+          <div class="topo-icon">⭕</div>
+          <h4>الشبكة الحلقية (Ring)</h4>
+          <p>الأجهزة متصلة في شكل حلقة مغلقة</p>
+        </div>
+        <div class="topo-card">
+          <div class="topo-icon">🕸️</div>
+          <h4>الشبكة المعقدة (Mesh)</h4>
+          <p>كل جهاز متصل بجميع الأجهزة الأخرى</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <p>إعداد: <strong>الكلية التقنية بالمندق</strong> | المدرب: <strong>منصور الزهراني</strong></p>
+  <div class="footer-links">
+    <a href="index.html">الرئيسية</a>
+    <a href="security.html">الأمان ←</a>
+    <a href="osi.html">نموذج OSI</a>
+    <a href="cables.html">الكيابل</a>
+    <a href="ip.html">بروتوكول IP</a>
+  </div>
+</footer>
+
+<script type="module" src="articles-loader.js" data-page="networks"></script>
+<script src="shared-nav.js"></script>
 </body>
 </html>
