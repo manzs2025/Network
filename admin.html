@@ -2117,9 +2117,19 @@ html, body {
         إدارة المقالات
       </button>
 
+      <button class="sb-item" data-panel="pageContent" onclick="switchPanel(this, 'pageContent')">
+        <span class="sb-icon">📄</span>
+        محتوى الصفحات
+      </button>
+
       <button class="sb-item" data-panel="cms" onclick="switchPanel(this, 'cms')">
         <span class="sb-icon">🌐</span>
         محرر الموقع
+      </button>
+
+      <button class="sb-item" data-panel="legacyEdit" onclick="switchPanel(this, 'legacyEdit')">
+        <span class="sb-icon">✏️</span>
+        تعديل المحتوى القديم
       </button>
 
       <button class="sb-item" data-panel="quizzes" onclick="switchPanel(this, 'quizzes')">
@@ -2265,7 +2275,15 @@ html, body {
           </p>
         </div>
 
-
+        <div class="info-card">
+          <h3>🗓️ الخطوات القادمة</h3>
+          <p>
+            الخطوة 3: بناء محرر المحتوى (CMS) لتعديل صفحات الموقع.<br>
+            الخطوة 4: بناء نظام الاختبارات (LMS) لإنشاء الأسئلة ومتابعة الدرجات.<br>
+            الخطوة 5: واجهة المتدرب لحل الاختبارات وعرض نتائجه.
+          </p>
+          <div class="coming-soon">⏳ قريباً — الخطوة 3</div>
+        </div>
 
       </section>
 
@@ -2448,27 +2466,22 @@ html, body {
         </div>
       </section>
 
-      <!-- ════════════ PANEL: CMS ════════════ -->
+      <!-- ════════════ PANEL: CMS (محرر الموقع - صفحات جديدة) ════════════ -->
       <section class="panel" id="panel-cms">
         <div class="panel-header">
           <div class="panel-title-group">
             <div class="panel-tag">🌐 محرر الموقع</div>
-            <div class="panel-title">إدارة <span>محتوى الصفحات التعليمية</span></div>
-            <div class="panel-subtitle">تعديل وإضافة وحذف محتوى صفحات الموقع بالكامل — إضافة صفحات جديدة — كل شيء من هنا</div>
+            <div class="panel-title">إضافة <span>صفحات وأقسام جديدة</span></div>
+            <div class="panel-subtitle">إنشاء صفحات كاملة جديدة للموقع بمحتواها وأقسامها</div>
           </div>
         </div>
 
-        <!-- اختيار الصفحة -->
+        <!-- شريط أدوات -->
         <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:flex-end;">
           <div style="flex:1;min-width:200px;">
-            <label class="qz-label">اختر الصفحة</label>
+            <label class="qz-label">اختر صفحة للتحرير</label>
             <select id="cmsPageSelect" class="qz-input qz-select" onchange="cmsLoadPage()">
               <option value="">— اختر صفحة —</option>
-              <option value="networks">📡 شبكات الحاسب الآلي</option>
-              <option value="security">🔒 الأمان في الشبكات</option>
-              <option value="osi">🔁 نموذج OSI</option>
-              <option value="cables">🔌 كيابل الشبكات</option>
-              <option value="ip">🌍 بروتوكول IP</option>
             </select>
           </div>
           <button class="qz-save-btn" onclick="cmsShowNewPageForm()" style="white-space:nowrap;height:44px;">
@@ -2476,6 +2489,12 @@ html, body {
           </button>
           <button class="qz-refresh-btn" id="cmsBtnPreview" onclick="cmsPreview()" style="display:none;white-space:nowrap;height:44px;color:var(--accent);border-color:rgba(0,201,177,0.3);background:rgba(0,201,177,0.08);">
             👁️ معاينة الصفحة
+          </button>
+          <button class="qz-refresh-btn" id="cmsBtnDeletePage" onclick="cmsDeletePage()" style="display:none;white-space:nowrap;height:44px;color:#ff6b6b;border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.08);">
+            🗑️ حذف الصفحة
+          </button>
+          <button class="qz-refresh-btn" id="cmsBtnHidePage" onclick="cmsToggleHidePage()" style="display:none;white-space:nowrap;height:44px;">
+            👁️‍🗨️ إخفاء/إظهار
           </button>
         </div>
 
@@ -2499,13 +2518,11 @@ html, body {
             </div>
             <div>
               <label class="qz-label">وصف قصير للصفحة</label>
-              <input type="text" id="cmsNewPageDesc" class="qz-input" placeholder="وصف مختصر يظهر في القائمة">
+              <input type="text" id="cmsNewPageDesc" class="qz-input" placeholder="وصف مختصر">
             </div>
           </div>
-          <!-- معلومة الرابط -->
           <div style="background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text-muted);">
-            💡 الصفحة الجديدة ستكون متاحة على الرابط:
-            <code id="cmsNewPagePreviewUrl" style="color:#00c9b1;background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:4px;font-size:0.85rem;direction:ltr;display:inline-block;margin-right:4px;">page.html?id=<span id="cmsNewPageIdPreview">...</span></code>
+            💡 الرابط سيكون: <code style="color:#00c9b1;background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:4px;direction:ltr;display:inline-block;">page.html?id=<span id="cmsNewPageIdPreview">...</span></code>
           </div>
           <div style="display:flex;gap:0.75rem;">
             <button class="qz-save-btn" onclick="cmsCreateNewPage()" style="height:38px;padding:0 1.25rem;">✅ إنشاء الصفحة</button>
@@ -2522,26 +2539,20 @@ html, body {
           جارٍ تحميل المحتوى...
         </div>
 
-        <!-- محتوى الصفحة (قائمة الأقسام) -->
+        <!-- الأقسام -->
         <div id="cmsSectionsList" style="display:none;">
-
-          <!-- شريط الأدوات -->
           <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
             <div style="font-weight:800;font-size:1rem;color:var(--text);flex:1;">
               📄 أقسام الصفحة: <span id="cmsPageName" style="color:var(--accent)">—</span>
+              <span id="cmsPageHiddenBadge" style="display:none;margin-right:0.5rem;background:rgba(245,166,35,0.15);color:#f5a623;padding:2px 10px;border-radius:10px;font-size:0.72rem;">🔒 مخفية</span>
             </div>
             <button class="qz-save-btn" onclick="cmsAddSection()" style="height:38px;padding:0 1rem;font-size:0.85rem;">
               ➕ قسم جديد
             </button>
-            <button class="qz-save-btn" onclick="cmsSaveAll()" style="height:38px;padding:0 1rem;font-size:0.85rem;background:linear-gradient(135deg,#00a896,#00c9b1);">
-              💾 حفظ الكل
-            </button>
           </div>
 
-          <!-- الأقسام -->
           <div id="cmsSectionsContainer"></div>
 
-          <!-- نموذج إضافة قسم -->
           <div id="cmsAddSectionForm" style="display:none;background:var(--card2);border:2px dashed rgba(0,201,177,0.4);border-radius:12px;padding:1.25rem;margin-top:1rem;">
             <div style="font-weight:800;color:#00c9b1;margin-bottom:1rem;">➕ إضافة قسم جديد</div>
             <div style="margin-bottom:0.75rem;">
@@ -2557,16 +2568,94 @@ html, body {
               <button class="qz-refresh-btn" onclick="document.getElementById('cmsAddSectionForm').style.display='none'" style="height:38px;padding:0 1rem;">إلغاء</button>
             </div>
           </div>
-
         </div>
 
-        <!-- حالة فارغة / اختر صفحة -->
         <div id="cmsEmpty" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
           <div style="font-size:3rem;margin-bottom:1rem;">🌐</div>
-          <div style="font-weight:700;margin-bottom:0.5rem;">اختر صفحة لتبدأ التحرير</div>
-          <div style="font-size:0.85rem;">يمكنك تعديل أي قسم، إضافة أقسام جديدة، أو إضافة صفحة جديدة كلياً</div>
+          <div style="font-weight:700;margin-bottom:0.5rem;">اختر صفحة جديدة لتحريرها</div>
+          <div style="font-size:0.85rem;">هذه اللوحة لإدارة <strong>الصفحات الجديدة</strong> فقط.<br>لتعديل الصفحات الأصلية، استخدم "✏️ تعديل المحتوى القديم"</div>
+        </div>
+      </section>
+
+      <!-- ════════════ PANEL: LEGACY EDIT (تعديل المحتوى القديم) ════════════ -->
+      <section class="panel" id="panel-legacyEdit">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">✏️ تعديل المحتوى القديم</div>
+            <div class="panel-title">تعديل <span>نصوص الصفحات الأصلية</span></div>
+            <div class="panel-subtitle">عدّل أي نص في الصفحات الخمس القديمة (شبكات، أمان، OSI، كيابل، IP) — المحتوى الأصلي محفوظ دائماً</div>
+          </div>
         </div>
 
+        <div style="background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.25);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.87rem;color:var(--text-muted);line-height:1.7;">
+          💡 <strong>كيف يعمل النظام؟</strong><br>
+          • كل نص تعدّله يُحفظ في قاعدة البيانات كطبقة فوق الأصلي<br>
+          • المحتوى الأصلي لا يُمسّ أبداً — يبقى محفوظاً في ملفات HTML<br>
+          • يمكنك <strong>إرجاع أي عنصر لأصله</strong> في أي وقت<br>
+          • زر 🔄 <strong>إرجاع الكل للأصل</strong> يمسح جميع تعديلات الصفحة ويرجعها كما كانت
+        </div>
+
+        <!-- اختيار الصفحة -->
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:flex-end;">
+          <div style="flex:1;min-width:200px;">
+            <label class="qz-label">اختر الصفحة</label>
+            <select id="legacyPageSelect" class="qz-input qz-select" onchange="legacyLoadPage()">
+              <option value="">— اختر صفحة —</option>
+              <option value="networks">📡 شبكات الحاسب الآلي</option>
+              <option value="security">🔒 الأمان في الشبكات</option>
+              <option value="osi">🔁 نموذج OSI</option>
+              <option value="cables">🔌 كيابل الشبكات</option>
+              <option value="ip">🌍 بروتوكول IP</option>
+            </select>
+          </div>
+          <button class="qz-refresh-btn" id="legacyBtnPreview" onclick="legacyPreview()" style="display:none;white-space:nowrap;height:44px;color:var(--accent);border-color:rgba(0,201,177,0.3);background:rgba(0,201,177,0.08);">
+            👁️ معاينة
+          </button>
+          <button class="qz-refresh-btn" id="legacyBtnResetAll" onclick="legacyResetAll()" style="display:none;white-space:nowrap;height:44px;color:#ff6b6b;border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.08);">
+            🔄 إرجاع الكل للأصل
+          </button>
+        </div>
+
+        <!-- رسائل -->
+        <div id="legacyMsg" style="display:none;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-weight:600;font-size:0.88rem;"></div>
+
+        <!-- حالة التحميل -->
+        <div id="legacyLoading" style="display:none;text-align:center;padding:3rem;color:var(--text-muted);">
+          <div class="loading-ring" style="margin:0 auto 1rem;"></div>
+          جارٍ جلب محتوى الصفحة...
+        </div>
+
+        <!-- حاوية العناصر -->
+        <div id="legacyElements" style="display:none;"></div>
+
+        <div id="legacyEmpty" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+          <div style="font-size:3rem;margin-bottom:1rem;">✏️</div>
+          <div style="font-weight:700;margin-bottom:0.5rem;">اختر صفحة لتبدأ التحرير</div>
+          <div style="font-size:0.85rem;">ستظهر كل عناوين وفقرات الصفحة — عدّل أي عنصر مباشرة</div>
+        </div>
+
+        <!-- Modal للتعديل -->
+        <div id="legacyEditModal" class="tr-modal-overlay" style="display:none;">
+          <div class="tr-modal" style="max-width:700px;max-height:90vh;overflow-y:auto;">
+            <div class="tr-modal-header">
+              <div class="tr-modal-title">✏️ تعديل النص</div>
+              <button class="tr-modal-close" onclick="legacyCloseEditModal()">✕</button>
+            </div>
+            <input type="hidden" id="legacyEditModalElId">
+            <div class="tr-modal-field">
+              <label>النص الأصلي (للمقارنة):</label>
+              <div id="legacyEditModalOriginal" style="padding:0.75rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.87rem;max-height:120px;overflow-y:auto;line-height:1.7;"></div>
+            </div>
+            <div class="tr-modal-field">
+              <label>النص الجديد (يدعم HTML):</label>
+              <textarea id="legacyEditModalEditor" rows="8" style="width:100%;padding:0.75rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.9rem;line-height:1.7;resize:vertical;"></textarea>
+            </div>
+            <div class="tr-modal-actions">
+              <button class="btn-modal-save" onclick="legacySaveEdit()">💾 حفظ التعديل</button>
+              <button class="btn-modal-cancel" onclick="legacyCloseEditModal()">إلغاء</button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ════════════ PANEL: QUIZZES ════════════ -->
