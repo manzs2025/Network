@@ -3,234 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>جارٍ التحميل... — أكاديمية الشبكات</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<title>جارٍ التحميل... — مبادئ الشبكات</title>
+<link rel="stylesheet" href="style.css">
 <style>
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --primary:#6c2fa0; --primary-l:#8b46c8; --accent:#00c9b1;
-  --bg:#080a14; --bg2:#0e1022; --card:#161929; --card2:#1c2038;
-  --border:rgba(108,47,160,0.22); --border2:rgba(255,255,255,0.07);
-  --text:#e8eaf6; --text-muted:#7a7f9e; --text-faint:#4a4f6b;
-  --radius:14px; --nav-h:64px;
-}
-html,body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; min-height:100%; direction:rtl; }
+  /* أنماط إضافية خاصة بمحتوى CMS */
+  .cms-html-body h2 {
+    font-size:1rem; font-weight:800; color:#fff;
+    margin:1.1rem 0 0.5rem;
+    border-bottom:1px solid rgba(108,47,160,0.25);
+    padding-bottom:0.3rem;
+  }
+  .cms-html-body h3 {
+    font-size:0.93rem; font-weight:700;
+    color:var(--accent, #00c9b1);
+    margin:0.9rem 0 0.4rem;
+  }
+  .cms-html-body p  { margin-bottom:0.75rem; line-height:1.75; }
+  .cms-html-body ul, .cms-html-body ol { padding-right:1.5rem; margin-bottom:0.75rem; }
+  .cms-html-body li { margin-bottom:0.35rem; }
+  .cms-html-body strong { color:#fff; }
+  .cms-html-body table {
+    width:100%; border-collapse:collapse; margin:0.75rem 0;
+  }
+  .cms-html-body td, .cms-html-body th {
+    border:1px solid rgba(255,255,255,0.1);
+    padding:0.45rem 0.7rem; text-align:right; font-size:0.87rem;
+  }
+  .cms-html-body th {
+    background:rgba(108,47,160,0.2); color:#fff;
+  }
+  .cms-html-body img {
+    max-width:100%; border-radius:8px; margin:0.5rem 0;
+  }
+  .cms-html-body a { color:var(--accent, #00c9b1); }
+  .cms-html-body blockquote {
+    border-right:4px solid var(--accent, #00c9b1);
+    padding:0.5rem 1rem; margin:0.75rem 0;
+    color:#9fa3c0; background:rgba(0,201,177,0.05);
+    border-radius:0 8px 8px 0;
+  }
+  .cms-html-body code {
+    background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;
+    font-family:monospace; font-size:0.88em; color:#a5d6a7;
+    direction:ltr; display:inline-block;
+  }
 
-/* NAV */
-.topnav {
-  position:sticky; top:0; z-index:100; height:var(--nav-h);
-  background:rgba(8,10,20,0.92); backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:0; padding:0 1.5rem;
-}
-.nav-brand {
-  font-weight:900; font-size:1rem; color:var(--text); text-decoration:none;
-  display:flex; align-items:center; gap:0.5rem; margin-left:2rem; white-space:nowrap;
-}
-.nav-brand-dot { width:8px; height:8px; background:var(--accent); border-radius:50%; }
-.nav-links {
-  display:flex; align-items:center; gap:0.15rem; flex:1;
-  overflow-x:auto; scrollbar-width:none;
-}
-.nav-links::-webkit-scrollbar { display:none; }
-.nav-link {
-  display:flex; align-items:center; gap:0.4rem; padding:0.45rem 0.85rem;
-  border-radius:8px; font-size:0.85rem; font-weight:600; color:var(--text-muted);
-  text-decoration:none; white-space:nowrap; transition:0.2s;
-}
-.nav-link:hover { background:rgba(255,255,255,0.05); color:var(--text); }
-.nav-link.active { background:rgba(108,47,160,0.2); color:var(--text); }
-.nav-actions { display:flex; align-items:center; gap:0.75rem; margin-right:auto; }
-.btn-login {
-  padding:0.45rem 1.1rem; background:var(--primary); border:none;
-  border-radius:8px; color:#fff; font-family:'Cairo',sans-serif;
-  font-size:0.85rem; font-weight:700; cursor:pointer; text-decoration:none; transition:0.2s;
-}
-.btn-login:hover { background:var(--primary-l); }
+  .cms-skeleton {
+    background: linear-gradient(90deg, rgba(108,47,160,0.08) 25%, rgba(255,255,255,0.04) 50%, rgba(108,47,160,0.08) 75%);
+    background-size: 400% 100%;
+    animation: cmsShimmer 1.4s ease infinite;
+    border-radius: 8px;
+    display: inline-block;
+  }
+  @keyframes cmsShimmer { to { background-position: -400% 0; } }
 
-/* HERO */
-.page-hero {
-  background:linear-gradient(135deg,rgba(108,47,160,0.15) 0%,rgba(0,201,177,0.06) 100%);
-  border-bottom:1px solid var(--border);
-  padding:3rem 2rem 2.5rem; text-align:center;
-}
-.hero-tag {
-  display:inline-flex; align-items:center; gap:0.4rem;
-  background:rgba(108,47,160,0.15); border:1px solid rgba(108,47,160,0.3);
-  color:var(--primary-l); padding:0.3rem 0.9rem; border-radius:20px;
-  font-size:0.8rem; font-weight:700; margin-bottom:1rem;
-}
-.hero-title { font-size:clamp(1.6rem,4vw,2.4rem); font-weight:900; margin-bottom:0.75rem; line-height:1.3; }
-.hero-title span { color:var(--accent); }
-.hero-desc { color:var(--text-muted); font-size:1rem; max-width:560px; margin:0 auto; line-height:1.7; }
-
-/* LAYOUT */
-.page-layout {
-  display:grid; grid-template-columns:240px 1fr; gap:2rem;
-  max-width:1200px; margin:0 auto; padding:2rem 1.5rem;
-}
-@media(max-width:768px) { .page-layout{grid-template-columns:1fr;} .page-sidebar{display:none;} }
-
-/* SIDEBAR */
-.page-sidebar { position:sticky; top:calc(var(--nav-h) + 1rem); height:fit-content; max-height:calc(100vh - var(--nav-h) - 2rem); overflow-y:auto; }
-.sidebar-card { background:var(--card); border:1px solid var(--border2); border-radius:var(--radius); padding:1.25rem; }
-.sidebar-title { font-size:0.8rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem; }
-.toc-item {
-  display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0.6rem;
-  border-radius:8px; font-size:0.85rem; color:var(--text-muted);
-  cursor:pointer; transition:0.18s; text-decoration:none; margin-bottom:0.2rem;
-}
-.toc-item:hover { background:rgba(255,255,255,0.04); color:var(--text); }
-.toc-item.active { background:rgba(108,47,160,0.15); color:var(--accent); }
-
-/* SECTIONS */
-.content-section {
-  background:var(--card); border:1px solid var(--border2);
-  border-radius:var(--radius); margin-bottom:1.5rem; overflow:hidden;
-  scroll-margin-top:calc(var(--nav-h) + 1rem);
-}
-.section-header {
-  display:flex; align-items:center; gap:0.75rem; padding:1.1rem 1.5rem;
-  background:var(--card2); border-bottom:1px solid var(--border2);
-  cursor:pointer; user-select:none; transition:0.18s;
-}
-.section-header:hover { background:rgba(28,32,56,0.9); }
-.section-header-icon { font-size:1.2rem; }
-.section-header-title { font-size:1rem; font-weight:800; color:var(--text); flex:1; }
-.section-toggle-arrow { color:var(--text-faint); font-size:0.8rem; transition:transform 0.25s; }
-.content-section.open .section-toggle-arrow { transform:rotate(180deg); }
-.section-body {
-  padding:1.5rem; display:none; font-size:0.95rem;
-  line-height:1.8; color:#c8cce8;
-}
-.content-section.open .section-body { display:block; animation:fadeSlide 0.25s ease; }
-@keyframes fadeSlide { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
-
-/* body content styles */
-.section-body h2 { font-size:1.05rem; font-weight:800; color:#fff; margin:1.2rem 0 0.6rem; padding-bottom:0.35rem; border-bottom:1px solid rgba(108,47,160,0.25); }
-.section-body h3 { font-size:0.95rem; font-weight:700; color:var(--accent); margin:1rem 0 0.5rem; }
-.section-body p  { margin-bottom:0.85rem; }
-.section-body ul,.section-body ol { padding-right:1.5rem; margin-bottom:0.85rem; }
-.section-body li { margin-bottom:0.4rem; }
-.section-body strong { color:#fff; font-weight:700; }
-.section-body a  { color:var(--accent); }
-.section-body table { width:100%; border-collapse:collapse; margin:1rem 0; font-size:0.88rem; }
-.section-body td,.section-body th { border:1px solid rgba(255,255,255,0.1); padding:0.5rem 0.75rem; text-align:right; }
-.section-body th { background:rgba(108,47,160,0.2); color:#fff; font-weight:700; }
-.section-body tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
-.section-body img { max-width:100%; border-radius:8px; margin:0.75rem 0; display:block; }
-.section-body blockquote { border-right:4px solid var(--accent); padding:0.5rem 1rem; margin:1rem 0; color:#9fa3c0; background:rgba(0,201,177,0.05); border-radius:0 8px 8px 0; }
-.section-body code { background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px; font-family:monospace; font-size:0.88em; color:#a5d6a7; direction:ltr; display:inline-block; }
-
-/* SKELETON */
-.skeleton {
-  background:linear-gradient(90deg,var(--card2) 25%,rgba(255,255,255,0.04) 50%,var(--card2) 75%);
-  background-size:400% 100%; animation:shimmer 1.4s ease infinite; border-radius:8px;
-}
-@keyframes shimmer { to{background-position:-400% 0;} }
-
-/* 404 */
-.page-404 {
-  text-align:center; padding:5rem 2rem; color:var(--text-muted);
-}
-.page-404 .icon { font-size:4rem; margin-bottom:1.5rem; }
-.page-404 h2 { font-size:1.5rem; font-weight:800; color:var(--text); margin-bottom:0.75rem; }
-.page-404 p  { font-size:0.95rem; line-height:1.7; margin-bottom:1.5rem; }
-.btn-home {
-  display:inline-flex; align-items:center; gap:0.5rem;
-  padding:0.7rem 1.5rem; background:var(--primary); color:#fff;
-  border-radius:10px; font-family:'Cairo',sans-serif; font-weight:700;
-  text-decoration:none; font-size:0.9rem; transition:0.2s;
-}
-.btn-home:hover { background:var(--primary-l); }
+  .page-404 {
+    text-align:center; padding:5rem 2rem;
+    color: var(--text-muted, #7a7f9e);
+    max-width: 600px; margin: 0 auto;
+  }
+  .page-404 .icon { font-size:4rem; margin-bottom:1.5rem; }
+  .page-404 h2 {
+    font-size:1.5rem; font-weight:800;
+    color: var(--text, #e8eaf6); margin-bottom:0.75rem;
+  }
+  .page-404 p { font-size:0.95rem; line-height:1.7; margin-bottom:1.5rem; }
+  .btn-home {
+    display:inline-flex; align-items:center; gap:0.5rem;
+    padding:0.7rem 1.5rem;
+    background: var(--primary, #6c2fa0);
+    color:#fff; border-radius:10px;
+    font-family:'Cairo',sans-serif; font-weight:700;
+    text-decoration:none; font-size:0.9rem; transition:0.2s;
+  }
+  .btn-home:hover { background: var(--primary-l, #8b46c8); }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="topnav" id="mainNav">
-  <a href="index.html" class="nav-brand">
-    <div class="nav-brand-dot"></div>
-    مبادئ الشبكات
-  </a>
-  <div class="nav-links" id="navLinks">
-    <a href="index.html"    class="nav-link">🏠 الرئيسية</a>
-    <a href="networks.html" class="nav-link">📡 شبكات الحاسب</a>
-    <a href="security.html" class="nav-link">🔒 الأمان</a>
-    <a href="osi.html"      class="nav-link">🔁 نموذج OSI</a>
-    <a href="cables.html"   class="nav-link">🔌 الكيابل</a>
-    <a href="ip.html"       class="nav-link">🌍 بروتوكول IP</a>
-    <!-- الصفحات الإضافية تُضاف هنا ديناميكياً -->
+<header class="page-hero" id="pageHero">
+  <div class="breadcrumb anim-1">
+    <a href="index.html">الرئيسية</a>
+    <span class="sep">›</span>
+    <span id="crumbPage">جارٍ التحميل...</span>
   </div>
-  <div class="nav-actions">
-    <a href="login.html" class="btn-login">🔐 تسجيل الدخول</a>
+  <div class="page-hero-tag anim-1" id="heroTag">
+    <span class="cms-skeleton" style="width:80px;height:16px;"></span>
   </div>
-</nav>
-
-<!-- HERO (يُملأ ديناميكياً) -->
-<section class="page-hero" id="pageHero">
-  <div class="hero-tag" id="heroTag">
-    <div class="skeleton" style="width:80px;height:16px;border-radius:8px;"></div>
-  </div>
-  <h1 class="hero-title" id="heroTitle">
-    <div class="skeleton" style="width:280px;height:40px;border-radius:8px;margin:0 auto;"></div>
+  <h1 class="anim-2" id="heroTitle">
+    <span class="cms-skeleton" style="width:280px;height:40px;"></span>
   </h1>
-  <p class="hero-desc" id="heroDesc"></p>
-</section>
+  <p class="anim-3" id="heroDesc"></p>
+  <nav class="sub-nav anim-4" id="subNav"></nav>
+</header>
 
-<!-- LAYOUT -->
-<div class="page-layout">
+<main class="page-content">
 
-  <!-- SIDEBAR -->
-  <aside class="page-sidebar">
-    <div class="sidebar-card">
-      <div class="sidebar-title">📑 محتويات الصفحة</div>
-      <div id="tocList">
-        <div class="skeleton" style="height:32px;margin-bottom:6px;"></div>
-        <div class="skeleton" style="height:32px;margin-bottom:6px;width:85%;"></div>
-        <div class="skeleton" style="height:32px;width:70%;"></div>
+  <div id="pageLoading">
+    <div class="sec-block">
+      <div class="sec-block-header">
+        <span class="cms-skeleton" style="width:48px;height:48px;border-radius:10px;"></span>
+        <span class="cms-skeleton" style="flex:1;height:28px;"></span>
+      </div>
+      <div class="content-block">
+        <div class="cms-skeleton" style="width:100%;height:60px;margin-bottom:0.75rem;"></div>
+        <div class="cms-skeleton" style="width:85%;height:60px;"></div>
       </div>
     </div>
-  </aside>
+  </div>
 
-  <!-- MAIN -->
-  <main class="page-main">
+  <div id="sectionsContainer"></div>
 
-    <!-- loading skeletons -->
-    <div id="pageLoading">
-      <div class="content-section" style="margin-bottom:1.5rem;">
-        <div class="section-header" style="cursor:default;">
-          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;flex-shrink:0;"></div>
-          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;"></div>
-        </div>
-      </div>
-      <div class="content-section" style="margin-bottom:1.5rem;">
-        <div class="section-header" style="cursor:default;">
-          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;flex-shrink:0;"></div>
-          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;width:75%;"></div>
-        </div>
-      </div>
-    </div>
+  <div id="emptyState" style="display:none;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
+    <div style="font-size:2.5rem;margin-bottom:1rem;">📭</div>
+    <div style="font-weight:700;font-size:1.05rem;color:var(--text);">لا يوجد محتوى بعد</div>
+    <div style="font-size:0.88rem;margin-top:0.5rem;">يمكن للمشرف إضافة المحتوى من لوحة التحكم</div>
+  </div>
 
-    <div id="sectionsContainer"></div>
+  <div id="page404" style="display:none;" class="page-404">
+    <div class="icon">🔍</div>
+    <h2>الصفحة غير موجودة</h2>
+    <p>لم يتم العثور على الصفحة المطلوبة.<br>تأكد من الرابط أو تواصل مع المشرف.</p>
+    <a href="index.html" class="btn-home">🏠 العودة للرئيسية</a>
+  </div>
 
-    <div id="emptyState" style="display:none;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
-      <div style="font-size:2.5rem;margin-bottom:1rem;">📭</div>
-      <div style="font-weight:700;">لا يوجد محتوى بعد</div>
-      <div style="font-size:0.85rem;margin-top:0.5rem;">يمكن للمشرف إضافة المحتوى من لوحة التحكم</div>
-    </div>
+</main>
 
-    <div id="page404" style="display:none;" class="page-404">
-      <div class="icon">🔍</div>
-      <h2>الصفحة غير موجودة</h2>
-      <p>لم يتم العثور على الصفحة المطلوبة.<br>تأكد من الرابط أو تواصل مع المشرف.</p>
-      <a href="index.html" class="btn-home">🏠 العودة للرئيسية</a>
-    </div>
+<footer>
+  <p>إعداد: <strong>الكلية التقنية بالمندق</strong> | المدرب: <strong>منصور الزهراني</strong></p>
+  <div class="footer-links">
+    <a href="index.html">الرئيسية</a>
+    <a href="networks.html">شبكات الحاسب</a>
+    <a href="security.html">الأمان</a>
+    <a href="osi.html">نموذج OSI</a>
+    <a href="cables.html">الكيابل</a>
+    <a href="ip.html">بروتوكول IP</a>
+  </div>
+</footer>
 
-  </main>
-</div>
-
-<!-- ══ Firebase + Logic ══ -->
 <script type="module">
 import { initializeApp, getApps }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -249,29 +159,24 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-/* ── الصفحات الأساسية الثابتة ── */
 const STATIC_PAGES = {
-  networks: { name:"شبكات الحاسب الآلي", icon:"📡", unit:"الوحدة الأولى",   desc:"مفاهيم الشبكات الأساسية — أنواعها ومكوناتها وكيف تعمل", file:"networks.html" },
-  security: { name:"الأمان في الشبكات",  icon:"🔒", unit:"الوحدة الثانية",  desc:"الأمان والحماية في الشبكات الرقمية", file:"security.html" },
-  osi:      { name:"نموذج OSI",           icon:"🔁", unit:"الوحدة الثالثة", desc:"طبقات نموذج OSI وكيفية عمل الشبكات بشكل منظم", file:"osi.html" },
-  cables:   { name:"كيابل الشبكات",       icon:"🔌", unit:"الوحدة الرابعة",  desc:"أنواع كيابل الشبكات وخصائصها واستخداماتها", file:"cables.html" },
-  ip:       { name:"بروتوكول IP",         icon:"🌍", unit:"الوحدة الخامسة", desc:"عناوين IP وكيفية عمل بروتوكول الإنترنت", file:"ip.html" },
+  networks: "networks.html",
+  security: "security.html",
+  osi:      "osi.html",
+  cables:   "cables.html",
+  ip:       "ip.html",
 };
 
-/* ── قراءة pageId من URL ── */
 const params = new URLSearchParams(location.search);
 const PAGE_ID = params.get("id") || "";
 
 async function initPage() {
   if (!PAGE_ID) { show404(); return; }
-
-  /* هل هي صفحة ثابتة؟ إعادة توجيه لملفها */
   if (STATIC_PAGES[PAGE_ID]) {
-    location.replace(STATIC_PAGES[PAGE_ID].file);
+    location.replace(STATIC_PAGES[PAGE_ID]);
     return;
   }
 
-  /* صفحة ديناميكية — جلب معلوماتها من Firestore */
   try {
     const pageSnap = await getDoc(doc(db, "sitePages", PAGE_ID));
     if (!pageSnap.exists()) { show404(); return; }
@@ -280,23 +185,14 @@ async function initPage() {
     const icon     = pageInfo.icon  || "📄";
     const name     = pageInfo.name  || PAGE_ID;
     const desc     = pageInfo.desc  || "";
-    const unitNum  = pageInfo.order || "";
+    const orderNum = pageInfo.order || 0;
 
-    /* تحديث عنوان المتصفح والـ Hero */
-    document.title = `${name} — أكاديمية الشبكات`;
-    document.getElementById("heroTag").innerHTML   = `${icon} ${unitNum ? `الوحدة ${_ordinal(unitNum)}` : "صفحة إضافية"}`;
-    document.getElementById("heroTitle").innerHTML = `${icon} <span>${_esc(name)}</span>`;
+    document.title = `${name} — مبادئ الشبكات`;
+    document.getElementById("crumbPage").textContent = name;
+    document.getElementById("heroTag").innerHTML = `${icon} ${orderNum ? `الوحدة ${_ordinal(orderNum)}` : "قسم إضافي"}`;
+    document.getElementById("heroTitle").textContent = name;
     document.getElementById("heroDesc").textContent = desc;
 
-    /* تمييز الرابط النشط في شريط التنقل */
-    const navLinks = document.getElementById("navLinks");
-    const activeLink = document.createElement("a");
-    activeLink.className = "nav-link active";
-    activeLink.href = `page.html?id=${PAGE_ID}`;
-    activeLink.textContent = `${icon} ${name}`;
-    navLinks.appendChild(activeLink);
-
-    /* تحميل الأقسام */
     await loadSections();
 
   } catch(err) {
@@ -306,10 +202,10 @@ async function initPage() {
 }
 
 async function loadSections() {
-  const loadingEl   = document.getElementById("pageLoading");
-  const container   = document.getElementById("sectionsContainer");
-  const emptyEl     = document.getElementById("emptyState");
-  const tocList     = document.getElementById("tocList");
+  const loadingEl = document.getElementById("pageLoading");
+  const container = document.getElementById("sectionsContainer");
+  const emptyEl   = document.getElementById("emptyState");
+  const subNav    = document.getElementById("subNav");
 
   try {
     const q    = query(collection(db, "siteContent", PAGE_ID, "sections"), orderBy("order"));
@@ -319,39 +215,37 @@ async function loadSections() {
 
     if (snap.empty) {
       emptyEl.style.display = "block";
-      tocList.innerHTML = '<div style="color:var(--text-faint);font-size:0.82rem;padding:0.5rem 0;">لا يوجد محتوى</div>';
       return;
     }
 
     const sections = [];
     snap.forEach(d => sections.push({ id: d.id, ...d.data() }));
 
-    /* الفهرس */
-    tocList.innerHTML = sections.map((sec, i) => `
-      <a class="toc-item ${i===0?'active':''}" id="toc_${sec.id}" href="#sec_${sec.id}">
-        <span style="font-size:0.95rem;">${sec.icon || "📄"}</span>
-        ${_esc(sec.title || "قسم")}
-      </a>
+    subNav.innerHTML = sections.map(sec => `
+      <a href="#sec_${sec.id}">${sec.icon || "📄"} ${_esc(sec.title || "قسم")}</a>
     `).join("");
 
-    /* الأقسام */
-    container.innerHTML = sections.map((sec, i) => `
-      <div class="content-section ${i===0?'open':''}" id="sec_${sec.id}">
-        <div class="section-header" onclick="toggleSection('${sec.id}')">
-          <span class="section-header-icon">${sec.icon || "📄"}</span>
-          <h2 class="section-header-title">${_esc(sec.title || "قسم")}</h2>
-          <span class="section-toggle-arrow">▼</span>
+    let html = "";
+    sections.forEach((sec, i) => {
+      html += `
+        <div class="sec-block" id="sec_${sec.id}">
+          <div class="sec-block-header">
+            <div class="sec-icon">${sec.icon || "📄"}</div>
+            <h2>${_esc(sec.title || "قسم")}</h2>
+          </div>
+          <div class="content-block cms-html-body">${sec.content || ""}</div>
         </div>
-        <div class="section-body">${sec.content || ""}</div>
-      </div>
-    `).join("");
-
-    /* ScrollSpy */
-    _initScrollSpy(sections);
+      `;
+      if (i < sections.length - 1) html += '<div class="sec-divider"></div>';
+    });
+    container.innerHTML = html;
 
   } catch(err) {
     loadingEl.style.display = "none";
-    container.innerHTML = `<div style="padding:1.5rem;background:rgba(244,67,54,0.08);border:1px solid rgba(244,67,54,0.3);border-radius:10px;color:#ff6b6b;">⚠️ تعذّر تحميل المحتوى.</div>`;
+    container.innerHTML = `
+      <div style="padding:1.5rem;background:rgba(244,67,54,0.08);border:1px solid rgba(244,67,54,0.3);border-radius:10px;color:#ff6b6b;text-align:center;">
+        ⚠️ تعذّر تحميل المحتوى. تأكد من اتصالك بالإنترنت.
+      </div>`;
   }
 }
 
@@ -361,36 +255,17 @@ function show404() {
   document.getElementById("pageHero").style.display = "none";
 }
 
-window.toggleSection = function(secId) {
-  const sec = document.getElementById(`sec_${secId}`);
-  if (!sec) return;
-  sec.classList.toggle("open");
-  document.querySelectorAll(".toc-item").forEach(t => t.classList.remove("active"));
-  document.getElementById(`toc_${secId}`)?.classList.add("active");
-};
-
-function _initScrollSpy(sections) {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        const id = e.target.id.replace("sec_","");
-        document.querySelectorAll(".toc-item").forEach(t => t.classList.remove("active"));
-        document.getElementById(`toc_${id}`)?.classList.add("active");
-      }
-    });
-  }, { rootMargin:"-30% 0px -60% 0px" });
-  sections.forEach(s => { const el = document.getElementById(`sec_${s.id}`); if(el) observer.observe(el); });
-}
-
 function _esc(s) {
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 function _ordinal(n) {
-  const ord = ["","الأولى","الثانية","الثالثة","الرابعة","الخامسة","السادسة","السابعة","الثامنة","التاسعة","العاشرة"];
+  const ord = ["","الأولى","الثانية","الثالثة","الرابعة","الخامسة","السادسة","السابعة","الثامنة","التاسعة","العاشرة","الحادية عشرة","الثانية عشرة"];
   return ord[n] || n;
 }
 
 initPage();
 </script>
+
+<script src="shared-nav.js"></script>
 </body>
 </html>
