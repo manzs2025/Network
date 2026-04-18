@@ -2485,7 +2485,7 @@ html, body {
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
             <div>
               <label class="qz-label">معرّف الصفحة (إنجليزي) *</label>
-              <input type="text" id="cmsNewPageId" class="qz-input" placeholder="مثال: wireless" style="direction:ltr;text-align:left;">
+              <input type="text" id="cmsNewPageId" class="qz-input" placeholder="مثال: wireless" style="direction:ltr;text-align:left;" oninput="document.getElementById('cmsNewPageIdPreview').textContent=this.value||'...'">
             </div>
             <div>
               <label class="qz-label">اسم الصفحة بالعربية *</label>
@@ -2501,6 +2501,11 @@ html, body {
               <label class="qz-label">وصف قصير للصفحة</label>
               <input type="text" id="cmsNewPageDesc" class="qz-input" placeholder="وصف مختصر يظهر في القائمة">
             </div>
+          </div>
+          <!-- معلومة الرابط -->
+          <div style="background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text-muted);">
+            💡 الصفحة الجديدة ستكون متاحة على الرابط:
+            <code id="cmsNewPagePreviewUrl" style="color:#00c9b1;background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:4px;font-size:0.85rem;direction:ltr;display:inline-block;margin-right:4px;">page.html?id=<span id="cmsNewPageIdPreview">...</span></code>
           </div>
           <div style="display:flex;gap:0.75rem;">
             <button class="qz-save-btn" onclick="cmsCreateNewPage()" style="height:38px;padding:0 1.25rem;">✅ إنشاء الصفحة</button>

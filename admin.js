@@ -2293,7 +2293,11 @@ window.cmsMoveSection = async function(secId, direction) {
 /* ══ معاينة الصفحة ══ */
 window.cmsPreview = function() {
   if (!_cmsCurrentPage) return;
-  window.open(`${_cmsCurrentPage}.html`, "_blank");
+  const _staticPages = new Set(["networks","security","osi","cables","ip"]);
+  const url = _staticPages.has(_cmsCurrentPage)
+    ? `${_cmsCurrentPage}.html`
+    : `page.html?id=${_cmsCurrentPage}`;
+  window.open(url, "_blank");
 };
 
 /* ══ إظهار نموذج صفحة جديدة ══ */
@@ -2329,7 +2333,11 @@ window.cmsCreateNewPage = async function() {
     // تحديد الصفحة الجديدة تلقائياً
     document.getElementById("cmsPageSelect").value = pageId;
     await cmsLoadPage();
-    _cmsMsg(`✅ تم إنشاء صفحة "${pageName}" بنجاح — يمكنك الآن إضافة أقسامها`);
+    const pageUrl = `page.html?id=${pageId}`;
+    _cmsMsg(`✅ تم إنشاء صفحة "${pageName}" — رابطها: <a href="${pageUrl}" target="_blank" style="color:#fff;text-decoration:underline;">${pageUrl}</a>`);
+    // عرض الرابط في عنصر HTML (نستخدم innerHTML)
+    const msgEl = document.getElementById("cmsMsg");
+    if (msgEl) { msgEl.innerHTML = msgEl.textContent.replace(pageUrl, `<a href="${pageUrl}" target="_blank" style="color:#fff;">${pageUrl}</a>`); }
   } catch(e) {
     _cmsMsg("❌ فشل الإنشاء: " + e.message, "error");
   }

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الشبكات اللاسلكية — أكاديمية الشبكات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --primary:    #6c2fa0;
+  --primary-l:  #8b46c8;
+  --accent:     #00c9b1;
+  --bg:         #080a14;
+  --bg2:        #0e1022;
+  --bg3:        #131629;
+  --card:       #161929;
+  --card2:      #1c2038;
+  --border:     rgba(108,47,160,0.22);
+  --border2:    rgba(255,255,255,0.07);
+  --text:       #e8eaf6;
+  --text-muted: #7a7f9e;
+  --text-faint: #4a4f6b;
+  --radius:     14px;
+  --nav-h:      64px;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  min-height: 100%;
+  direction: rtl;
+}
+
+/* ── شريط التنقل ── */
+.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--nav-h);
+  background: rgba(8,10,20,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 1.5rem;
+}
+.nav-brand {
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 2rem;
+  white-space: nowrap;
+}
+.nav-brand-dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display:none; }
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: 0.2s;
+}
+.nav-link:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.nav-link.active {
+  background: rgba(108,47,160,0.2);
+  color: var(--text);
+}
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-right: auto;
+}
+.btn-login {
+  padding: 0.45rem 1.1rem;
+  background: var(--primary);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.2s;
+}
+.btn-login:hover { background: var(--primary-l); }
+
+/* ── Hero ── */
+.page-hero {
+  background: linear-gradient(135deg, rgba(108,47,160,0.15) 0%, rgba(0,201,177,0.06) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 3rem 2rem 2.5rem;
+  text-align: center;
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(108,47,160,0.15);
+  border: 1px solid rgba(108,47,160,0.3);
+  color: var(--primary-l);
+  padding: 0.3rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.hero-title {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 900;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+.hero-title span { color: var(--accent); }
+.hero-desc {
+  color: var(--text-muted);
+  font-size: 1rem;
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── Layout ── */
+.page-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+@media (max-width: 768px) {
+  .page-layout { grid-template-columns: 1fr; }
+  .page-sidebar { display: none; }
+}
+
+/* ── الشريط الجانبي (فهرس المحتوى) ── */
+.page-sidebar {
+  position: sticky;
+  top: calc(var(--nav-h) + 1rem);
+  height: fit-content;
+  max-height: calc(100vh - var(--nav-h) - 2rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.sidebar-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+.sidebar-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+.toc-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: 0.18s;
+  text-decoration: none;
+  margin-bottom: 0.2rem;
+}
+.toc-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.toc-item.active { background: rgba(108,47,160,0.15); color: var(--accent); }
+.toc-icon { font-size: 0.95rem; flex-shrink:0; }
+
+/* ── المحتوى الرئيسي ── */
+.page-main {}
+
+/* بطاقة القسم */
+.content-section {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  scroll-margin-top: calc(var(--nav-h) + 1rem);
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.1rem 1.5rem;
+  background: var(--card2);
+  border-bottom: 1px solid var(--border2);
+  cursor: pointer;
+  user-select: none;
+  transition: 0.18s;
+}
+.section-header:hover { background: rgba(28,32,56,0.9); }
+.section-header-icon { font-size: 1.2rem; }
+.section-header-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  flex: 1;
+}
+.section-toggle-arrow {
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  transition: transform 0.25s;
+}
+.content-section.open .section-toggle-arrow {
+  transform: rotate(180deg);
+}
+.section-body {
+  padding: 1.5rem;
+  display: none;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #c8cce8;
+}
+.content-section.open .section-body {
+  display: block;
+  animation: fadeSlide 0.25s ease;
+}
+@keyframes fadeSlide {
+  from { opacity:0; transform:translateY(-6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* تنسيق محتوى body */
+.section-body h2 {
+  font-size: 1.05rem; font-weight: 800; color: #fff;
+  margin: 1.2rem 0 0.6rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(108,47,160,0.25);
+}
+.section-body h3 {
+  font-size: 0.95rem; font-weight: 700; color: var(--accent);
+  margin: 1rem 0 0.5rem;
+}
+.section-body p  { margin-bottom: 0.85rem; }
+.section-body ul, .section-body ol { padding-right:1.5rem; margin-bottom:0.85rem; }
+.section-body li { margin-bottom: 0.4rem; }
+.section-body strong { color: #fff; font-weight: 700; }
+.section-body a  { color: var(--accent); }
+.section-body table {
+  width:100%; border-collapse:collapse; margin:1rem 0; font-size:0.88rem;
+}
+.section-body td, .section-body th {
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 0.5rem 0.75rem; text-align:right;
+}
+.section-body th { background:rgba(108,47,160,0.2); color:#fff; font-weight:700; }
+.section-body tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+.section-body img { max-width:100%; border-radius:8px; margin:0.75rem 0; display:block; }
+.section-body blockquote {
+  border-right: 4px solid var(--accent); padding: 0.5rem 1rem;
+  margin:1rem 0; color:#9fa3c0; background:rgba(0,201,177,0.05);
+  border-radius: 0 8px 8px 0;
+}
+.section-body code {
+  background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;
+  font-family:monospace; font-size:0.88em; color:#a5d6a7;
+  direction:ltr; display:inline-block;
+}
+
+/* ── حالة التحميل ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--card2) 25%, rgba(255,255,255,0.04) 50%, var(--card2) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer { to { background-position: -400% 0; } }
+
+/* ── شريط التحديث ── */
+.update-bar {
+  background: linear-gradient(135deg, rgba(0,201,177,0.12), rgba(108,47,160,0.12));
+  border: 1px solid rgba(0,201,177,0.25);
+  border-radius: var(--radius);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+.update-bar-icon { font-size: 1.1rem; }
+.update-bar-text strong { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ══ شريط التنقل ══ -->
+<nav class="topnav" id="mainNav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-brand-dot"></div>
+    مبادئ الشبكات
+  </a>
+  <div class="nav-links">
+    <a href="index.html"    class="nav-link">🏠 الرئيسية</a>
+    <a href="networks.html" class="nav-link">📡 شبكات الحاسب</a>
+    <a href="security.html" class="nav-link">🔒 الأمان</a>
+    <a href="osi.html"      class="nav-link">🔁 نموذج OSI</a>
+    <a href="cables.html"   class="nav-link">🔌 الكيابل</a>
+    <a href="ip.html"       class="nav-link">🌍 بروتوكول IP</a>
+  </div>
+  <div class="nav-actions">
+    <a href="login.html" class="btn-login">🔐 تسجيل الدخول</a>
+  </div>
+</nav>
+
+<!-- ══ Hero ══ -->
+<section class="page-hero">
+  <div class="hero-tag">📶 الوحدة السادسة</div>
+  <h1 class="hero-title">📶 <span>الشبكات اللاسلكية</span></h1>
+  <p class="hero-desc">مكونات الشبكة اللاسلكية وأجهزتها — معايير Wi-Fi وبروتوكولاتها وأمانها</p>
+</section>
+
+<!-- ══ Layout ══ -->
+<div class="page-layout">
+
+  <!-- الشريط الجانبي (فهرس) -->
+  <aside class="page-sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-title">📑 محتويات الصفحة</div>
+      <div id="tocList">
+        <!-- يُملأ ديناميكياً -->
+        <div class="skeleton" style="height:32px;margin-bottom:6px;"></div>
+        <div class="skeleton" style="height:32px;margin-bottom:6px;width:85%;"></div>
+        <div class="skeleton" style="height:32px;margin-bottom:6px;width:90%;"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="page-main">
+
+    <!-- شريط تحديثات المدرّب (يظهر فقط إن وُجد محتوى) -->
+    <div id="updateBar" style="display:none;" class="update-bar">
+      <span class="update-bar-icon">✨</span>
+      <span class="update-bar-text"><strong>تحديث من المدرّب:</strong> تم إضافة محتوى تعليمي جديد إلى هذه الصفحة</span>
+    </div>
+
+    <!-- حالة التحميل -->
+    <div id="pageLoading">
+      <div class="content-section" style="margin-bottom:1.5rem;">
+        <div class="section-header" style="cursor:default;">
+          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
+          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;"></div>
+        </div>
+      </div>
+      <div class="content-section" style="margin-bottom:1.5rem;">
+        <div class="section-header" style="cursor:default;">
+          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
+          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;width:75%;"></div>
+        </div>
+      </div>
+      <div class="content-section">
+        <div class="section-header" style="cursor:default;">
+          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
+          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;width:60%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- الأقسام (تُحقن هنا) -->
+    <div id="sectionsContainer"></div>
+
+    <!-- رسالة فارغ -->
+    <div id="emptyState" style="display:none;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">📭</div>
+      <div style="font-weight:700;">لا يوجد محتوى بعد</div>
+      <div style="font-size:0.85rem;margin-top:0.5rem;">يمكن للمشرف إضافة المحتوى من لوحة التحكم</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══ JavaScript ══ -->
+<script type="module">
+import { initializeApp, getApps }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, query, orderBy, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
+  authDomain:        "networkacademy-795c8.firebaseapp.com",
+  projectId:         "networkacademy-795c8",
+  storageBucket:     "networkacademy-795c8.firebasestorage.app",
+  messagingSenderId: "458132238000",
+  appId:             "1:458132238000:web:bffd7321407b094bb21575",
+};
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const PAGE_ID = "wireless"; /* ← هذا الوحيد الذي يتغير بين الصفحات */
+
+async function loadPage() {
+  const loadingEl   = document.getElementById("pageLoading");
+  const container   = document.getElementById("sectionsContainer");
+  const emptyEl     = document.getElementById("emptyState");
+  const tocList     = document.getElementById("tocList");
+  const updateBar   = document.getElementById("updateBar");
+
+  try {
+    const q    = query(collection(db, "siteContent", PAGE_ID, "sections"), orderBy("order"));
+    const snap = await getDocs(q);
+
+    loadingEl.style.display = "none";
+
+    if (snap.empty) {
+      emptyEl.style.display = "block";
+      tocList.innerHTML = '<div style="color:var(--text-faint);font-size:0.82rem;padding:0.5rem 0;">لا يوجد محتوى</div>';
+      return;
+    }
+
+    /* إظهار شريط التحديث */
+    updateBar.style.display = "flex";
+
+    const sections = [];
+    snap.forEach(d => sections.push({ id: d.id, ...d.data() }));
+
+    /* بناء الفهرس */
+    tocList.innerHTML = sections.map((sec, i) => `
+      <a class="toc-item ${i===0?'active':''}" id="toc_${sec.id}" href="#sec_${sec.id}">
+        <span class="toc-icon">${sec.icon || "📄"}</span>
+        ${_esc(sec.title || "قسم")}
+      </a>
+    `).join("");
+
+    /* بناء الأقسام */
+    container.innerHTML = sections.map((sec, i) => `
+      <div class="content-section ${i===0?'open':''}" id="sec_${sec.id}">
+        <div class="section-header" onclick="toggleSection('${sec.id}')">
+          <span class="section-header-icon">${sec.icon || "📄"}</span>
+          <h2 class="section-header-title">${_esc(sec.title || "قسم")}</h2>
+          <span class="section-toggle-arrow">▼</span>
+        </div>
+        <div class="section-body">${sec.content || ""}</div>
+      </div>
+    `).join("");
+
+    /* تحديث الفهرس عند التمرير */
+    _initScrollSpy(sections);
+
+  } catch(err) {
+    console.error("loadPage:", err);
+    loadingEl.style.display = "none";
+    container.innerHTML = `
+      <div style="padding:1.5rem;background:rgba(244,67,54,0.08);border:1px solid rgba(244,67,54,0.3);border-radius:10px;color:#ff6b6b;">
+        ⚠️ تعذّر تحميل المحتوى. تأكد من اتصالك بالإنترنت وأعد المحاولة.
+      </div>`;
+  }
+}
+
+/* ── فتح/إغلاق القسم ── */
+window.toggleSection = function(secId) {
+  const sec = document.getElementById(`sec_${secId}`);
+  if (!sec) return;
+  sec.classList.toggle("open");
+  /* تحديث الفهرس */
+  document.querySelectorAll(".toc-item").forEach(t => t.classList.remove("active"));
+  document.getElementById(`toc_${secId}`)?.classList.add("active");
+};
+
+/* ── ScrollSpy خفيف ── */
+function _initScrollSpy(sections) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id.replace("sec_", "");
+        document.querySelectorAll(".toc-item").forEach(t => t.classList.remove("active"));
+        document.getElementById(`toc_${id}`)?.classList.add("active");
+      }
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
+
+  sections.forEach(sec => {
+    const el = document.getElementById(`sec_${sec.id}`);
+    if (el) observer.observe(el);
+  });
+}
+
+function _esc(str) {
+  return String(str)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+loadPage();
+</script>
+
+</body>
+</html>
