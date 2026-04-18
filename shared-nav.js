@@ -1,10 +1,10 @@
-/* shared-nav.js — يُحقن في كل صفحة لتوليد nav ديناميكياً + يدعم الصفحات الجديدة من Firestore */
+/* shared-nav.js — شريط التنقل المشترك + تحميل الصفحات الديناميكية (بدون وميض) */
 (function () {
 
   const FB_PROJECT = "networkacademy-795c8";
 
   /* الصفحات الثابتة الأصلية */
-  const pages = [
+  const staticPages = [
     { href: 'index.html',    label: 'الرئيسية',       icon: '🏠', num: ''   },
     { href: 'networks.html', label: 'شبكات الحاسب',   icon: '📡', num: '01' },
     { href: 'security.html', label: 'الأمان',          icon: '🔒', num: '02' },
@@ -13,66 +13,117 @@
     { href: 'ip.html',       label: 'بروتوكول IP',     icon: '🌍', num: '05' },
   ];
 
-  /* الصفحة الحالية */
   const current = window.location.pathname.split('/').pop() || 'index.html';
   const urlId   = new URLSearchParams(location.search).get("id");
-  /* هل نحن على صفحة ديناميكية (page.html?id=xxx)؟ */
   const isDynamicPage = current === "page.html" && urlId;
 
-  /* بناء روابط الـ nav */
-  const buildLinks = (list) => list.map(p => {
-    let active = '';
-    if (isDynamicPage) {
-      active = (p.href === `page.html?id=${urlId}`) ? 'active' : '';
-    } else {
-      active = (p.href === current || (current === '' && p.href === 'index.html')) ? 'active' : '';
+  /* ── جلب الصفحات الديناميكية من Firestore (قبل بناء الشريط) ── */
+  async function fetchDynamicPages() {
+    try {
+      const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/sitePages`;
+      const resp = await fetch(url);
+      if (!resp.ok) return [];
+      const data = await resp.json();
+      if (!data.documents?.length) return [];
+
+      const STATIC_IDS = new Set(["networks","security","osi","cables","ip"]);
+      const sorted = data.documents.slice().sort((a,b) => {
+        const oa = Number(a.fields?.order?.integerValue || a.fields?.order?.doubleValue || 99);
+        const ob = Number(b.fields?.order?.integerValue || b.fields?.order?.doubleValue || 99);
+        return oa - ob;
+      });
+
+      const dynamic = [];
+      sorted.forEach((docRef, idx) => {
+        const pageId = docRef.name.split("/").pop();
+        if (STATIC_IDS.has(pageId)) return;
+        const f = docRef.fields || {};
+        dynamic.push({
+          href: `page.html?id=${pageId}`,
+          label: f.name?.stringValue || pageId,
+          icon:  f.icon?.stringValue || "📄",
+          num:   String(staticPages.length + idx).padStart(2, '0')
+        });
+      });
+      return dynamic;
+    } catch (e) {
+      console.warn("shared-nav dynamic:", e.message);
+      return [];
     }
-    const numSpan = p.num ? `<span class="nav-num">${p.num}</span>` : '';
-    return `<li><a href="${p.href}" class="${active}">${numSpan}${p.icon} ${p.label}</a></li>`;
-  }).join('');
+  }
 
-  const buildDrawerLinks = (list) => list.map(p => {
-    let active = '';
-    if (isDynamicPage) {
-      active = (p.href === `page.html?id=${urlId}`) ? 'active' : '';
-    } else {
-      active = (p.href === current) ? 'active' : '';
-    }
-    return `<a href="${p.href}" class="${active}">${p.icon} ${p.label}</a>`;
-  }).join('');
+  /* ── بناء روابط الـ nav ── */
+  function buildLinks(list) {
+    return list.map(p => {
+      let active = '';
+      if (isDynamicPage) {
+        active = (p.href === `page.html?id=${urlId}`) ? 'active' : '';
+      } else {
+        active = (p.href === current || (current === '' && p.href === 'index.html')) ? 'active' : '';
+      }
+      const numSpan = p.num ? `<span class="nav-num">${p.num}</span>` : '';
+      return `<li><a href="${p.href}" class="${active}">${numSpan}${p.icon} ${p.label}</a></li>`;
+    }).join('');
+  }
 
-  const loginActive = current === 'login.html' ? 'active' : '';
+  function buildDrawerLinks(list) {
+    return list.map(p => {
+      let active = '';
+      if (isDynamicPage) {
+        active = (p.href === `page.html?id=${urlId}`) ? 'active' : '';
+      } else {
+        active = (p.href === current) ? 'active' : '';
+      }
+      return `<a href="${p.href}" class="${active}">${p.icon} ${p.label}</a>`;
+    }).join('');
+  }
 
-  /* إنشاء الـ nav مع الصفحات الثابتة فقط (أولاً) */
-  const nav = document.createElement('nav');
-  nav.className = 'main-nav';
-  nav.innerHTML = `
-    <div class="nav-inner">
-      <a href="index.html" class="nav-logo">
-        <div class="logo-icon">🌐</div>
-        مبادئ الشبكات
-      </a>
-      <ul class="nav-links" id="navLinksList">${buildLinks(pages)}</ul>
-      <a href="login.html" class="nav-login-btn ${loginActive}" aria-label="تسجيل الدخول">
-        <span class="nav-login-icon">🔐</span>
-        <span class="nav-login-text">تسجيل الدخول</span>
-      </a>
-      <button class="nav-hamburger" id="navHamburger" aria-label="القائمة">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  `;
-  document.body.prepend(nav);
+  /* ── بناء الشريط بعد الحصول على كل الصفحات ── */
+  async function buildNav() {
+    /* انتظر الصفحات الديناميكية أولاً (بحدّ أقصى 1500ms للسرعة) */
+    const dynamicPages = await Promise.race([
+      fetchDynamicPages(),
+      new Promise(resolve => setTimeout(() => resolve([]), 1500))
+    ]);
 
-  /* Drawer */
-  const drawer = document.createElement('div');
-  drawer.className = 'nav-drawer';
-  drawer.id = 'navDrawer';
-  drawer.innerHTML = buildDrawerLinks(pages)
-    + `<a href="login.html" class="nav-drawer-login ${loginActive}">🔐تسجيل الدخول</a>`;
-  document.body.insertBefore(drawer, nav.nextSibling);
+    const allPages = [...staticPages, ...dynamicPages];
+    const loginActive = current === 'login.html' ? 'active' : '';
 
-  /* CSS خاص بزر الدخول */
+    /* إنشاء الـ nav مرة واحدة بكل الصفحات */
+    const nav = document.createElement('nav');
+    nav.className = 'main-nav';
+    nav.innerHTML = `
+      <div class="nav-inner">
+        <a href="index.html" class="nav-logo">
+          <div class="logo-icon">🌐</div>
+          مبادئ الشبكات
+        </a>
+        <ul class="nav-links">${buildLinks(allPages)}</ul>
+        <a href="login.html" class="nav-login-btn ${loginActive}" aria-label="تسجيل الدخول">
+          <span class="nav-login-icon">🔐</span>
+          <span class="nav-login-text">تسجيل الدخول</span>
+        </a>
+        <button class="nav-hamburger" id="navHamburger" aria-label="القائمة">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    `;
+    document.body.prepend(nav);
+
+    /* Drawer */
+    const drawer = document.createElement('div');
+    drawer.className = 'nav-drawer';
+    drawer.id = 'navDrawer';
+    drawer.innerHTML = buildDrawerLinks(allPages)
+      + `<a href="login.html" class="nav-drawer-login ${loginActive}">🔐تسجيل الدخول</a>`;
+    document.body.insertBefore(drawer, nav.nextSibling);
+
+    document.getElementById('navHamburger').addEventListener('click', () => {
+      drawer.classList.toggle('open');
+    });
+  }
+
+  /* ── CSS خاص بزر الدخول — يُحقن فوراً ── */
   if (!document.getElementById('nav-login-style')) {
     const style = document.createElement('style');
     style.id = 'nav-login-style';
@@ -101,65 +152,14 @@
         margin-top: 0.25rem;
       }
       .nav-drawer-login:hover, .nav-drawer-login.active { background: rgba(0,201,177,0.12); }
+      /* حافظ على مساحة للشريط قبل ظهوره لتجنب انتقال مفاجئ */
+      body { padding-top: 0; }
     `;
     document.head.appendChild(style);
   }
 
-  document.getElementById('navHamburger').addEventListener('click', () => {
-    drawer.classList.toggle('open');
-  });
-
-  /* ══ جلب الصفحات الديناميكية من Firestore وإضافتها ══ */
-  (async function addDynamicPages() {
-    try {
-      const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/sitePages`;
-      const resp = await fetch(url);
-      if (!resp.ok) return;
-      const data = await resp.json();
-      if (!data.documents?.length) return;
-
-      const STATIC_IDS = new Set(["networks","security","osi","cables","ip"]);
-      const sorted = data.documents.slice().sort((a,b) => {
-        const oa = Number(a.fields?.order?.integerValue || a.fields?.order?.doubleValue || 99);
-        const ob = Number(b.fields?.order?.integerValue || b.fields?.order?.doubleValue || 99);
-        return oa - ob;
-      });
-
-      const dynamicPages = [];
-      sorted.forEach((docRef, idx) => {
-        const pageId = docRef.name.split("/").pop();
-        if (STATIC_IDS.has(pageId)) return;
-        const fields = docRef.fields || {};
-        const name   = fields.name?.stringValue || pageId;
-        const icon   = fields.icon?.stringValue || "📄";
-        const num    = String(pages.length + idx + 1).padStart(2, '0');
-        dynamicPages.push({
-          href: `page.html?id=${pageId}`,
-          label: name,
-          icon: icon,
-          num: num
-        });
-      });
-
-      if (dynamicPages.length === 0) return;
-
-      /* أضف للـ nav الرئيسي */
-      const navList = document.getElementById('navLinksList');
-      if (navList) navList.innerHTML += buildLinks(dynamicPages);
-
-      /* أضف للـ drawer */
-      const loginLink = drawer.querySelector('.nav-drawer-login');
-      const drawerExtra = buildDrawerLinks(dynamicPages);
-      if (loginLink) {
-        loginLink.insertAdjacentHTML('beforebegin', drawerExtra);
-      } else {
-        drawer.insertAdjacentHTML('beforeend', drawerExtra);
-      }
-
-    } catch (e) {
-      console.warn("shared-nav dynamic pages:", e.message);
-    }
-  })();
+  /* بناء الشريط فوراً */
+  buildNav();
 
   /* ══ scroll-to-top ══ */
   const btn = document.createElement('button');
