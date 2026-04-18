@@ -3,528 +3,592 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بروتوكول IP — أكاديمية الشبكات</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<title>بروتوكول IP — مبادئ الشبكات</title>
+<link rel="stylesheet" href="style.css">
 <style>
-/* ═══════════════════════════════════════
-   VARIABLES & RESET
-═══════════════════════════════════════ */
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-:root {
-  --primary:    #6c2fa0;
-  --primary-l:  #8b46c8;
-  --accent:     #00c9b1;
-  --bg:         #080a14;
-  --bg2:        #0e1022;
-  --bg3:        #131629;
-  --card:       #161929;
-  --card2:      #1c2038;
-  --border:     rgba(108,47,160,0.22);
-  --border2:    rgba(255,255,255,0.07);
-  --text:       #e8eaf6;
-  --text-muted: #7a7f9e;
-  --text-faint: #4a4f6b;
-  --radius:     14px;
-  --nav-h:      64px;
-}
-
-html, body {
-  background: var(--bg);
+/* ─── IP PAGE EXTRA STYLES ─── */
+.training-table input {
+  background: rgba(0,201,177,0.08);
+  border: 1px solid rgba(0,201,177,0.25);
+  border-radius: 6px;
   color: var(--text);
-  font-family: 'Cairo', sans-serif;
-  min-height: 100%;
-  direction: rtl;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.83rem;
+  font-family: 'Cairo', monospace;
+  width: 100%;
+  text-align: center;
+  transition: all 0.2s;
 }
+.training-table input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(0,201,177,0.14);
+}
+.training-table input.correct  { border-color: #4CAF50; background: rgba(76,175,80,0.12); color: #a5d6a7; }
+.training-table input.wrong    { border-color: #f44336; background: rgba(244,67,54,0.1);  color: #ef9a9a; }
+.training-table .td-net { font-weight: 700; color: var(--text); white-space: nowrap; }
+.training-table tbody td { vertical-align: middle; padding: 0.7rem 0.9rem; }
 
-/* ── شريط التنقل ── */
-.topnav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  height: var(--nav-h);
-  background: rgba(8,10,20,0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 0 1.5rem;
-}
-.nav-brand {
-  font-weight: 900;
-  font-size: 1rem;
-  color: var(--text);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: 2rem;
-  white-space: nowrap;
-}
-.nav-brand-dot {
-  width: 8px; height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-}
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  flex: 1;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.nav-links::-webkit-scrollbar { display:none; }
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: 0.2s;
-}
-.nav-link:hover { background: rgba(255,255,255,0.05); color: var(--text); }
-.nav-link.active {
-  background: rgba(108,47,160,0.2);
-  color: var(--text);
-}
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-right: auto;
-}
-.btn-login {
-  padding: 0.45rem 1.1rem;
+.check-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.65rem 1.75rem;
   background: var(--primary);
   border: none;
-  border-radius: 8px;
+  border-radius: 22px;
   color: #fff;
+  font-size: 0.9rem; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
   font-family: 'Cairo', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
-  transition: 0.2s;
+  margin-top: 1.25rem;
 }
-.btn-login:hover { background: var(--primary-l); }
+.check-btn:hover { background: var(--accent); transform: translateY(-2px); }
 
-/* ── Hero ── */
-.page-hero {
-  background: linear-gradient(135deg, rgba(108,47,160,0.15) 0%, rgba(0,201,177,0.06) 100%);
-  border-bottom: 1px solid var(--border);
-  padding: 3rem 2rem 2.5rem;
-  text-align: center;
-}
-.hero-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(108,47,160,0.15);
-  border: 1px solid rgba(108,47,160,0.3);
-  color: var(--primary-l);
-  padding: 0.3rem 0.9rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-.hero-title {
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
-  font-weight: 900;
-  margin-bottom: 0.75rem;
-  line-height: 1.3;
-}
-.hero-title span { color: var(--accent); }
-.hero-desc {
+.reset-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 22px;
   color: var(--text-muted);
-  font-size: 1rem;
-  max-width: 560px;
-  margin: 0 auto;
-  line-height: 1.7;
-}
-
-/* ── Layout ── */
-.page-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
-}
-@media (max-width: 768px) {
-  .page-layout { grid-template-columns: 1fr; }
-  .page-sidebar { display: none; }
-}
-
-/* ── الشريط الجانبي (فهرس المحتوى) ── */
-.page-sidebar {
-  position: sticky;
-  top: calc(var(--nav-h) + 1rem);
-  height: fit-content;
-  max-height: calc(100vh - var(--nav-h) - 2rem);
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-.sidebar-card {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-}
-.sidebar-title {
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
-}
-.toc-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.6rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.88rem; font-weight: 600;
   cursor: pointer;
-  transition: 0.18s;
-  text-decoration: none;
-  margin-bottom: 0.2rem;
+  transition: all 0.25s;
+  font-family: 'Cairo', sans-serif;
+  margin-top: 1.25rem;
+  margin-right: 0.5rem;
 }
-.toc-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
-.toc-item.active { background: rgba(108,47,160,0.15); color: var(--accent); }
-.toc-icon { font-size: 0.95rem; flex-shrink:0; }
+.reset-btn:hover { border-color: var(--primary); color: var(--text); }
 
-/* ── المحتوى الرئيسي ── */
-.page-main {}
-
-/* بطاقة القسم */
-.content-section {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  scroll-margin-top: calc(var(--nav-h) + 1rem);
-}
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.1rem 1.5rem;
-  background: var(--card2);
-  border-bottom: 1px solid var(--border2);
-  cursor: pointer;
-  user-select: none;
-  transition: 0.18s;
-}
-.section-header:hover { background: rgba(28,32,56,0.9); }
-.section-header-icon { font-size: 1.2rem; }
-.section-header-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--text);
-  flex: 1;
-}
-.section-toggle-arrow {
-  color: var(--text-faint);
-  font-size: 0.8rem;
-  transition: transform 0.25s;
-}
-.content-section.open .section-toggle-arrow {
-  transform: rotate(180deg);
-}
-.section-body {
-  padding: 1.5rem;
+#trainingScore {
   display: none;
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: #c8cce8;
-}
-.content-section.open .section-body {
-  display: block;
-  animation: fadeSlide 0.25s ease;
-}
-@keyframes fadeSlide {
-  from { opacity:0; transform:translateY(-6px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-
-/* تنسيق محتوى body */
-.section-body h2 {
-  font-size: 1.05rem; font-weight: 800; color: #fff;
-  margin: 1.2rem 0 0.6rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid rgba(108,47,160,0.25);
-}
-.section-body h3 {
-  font-size: 0.95rem; font-weight: 700; color: var(--accent);
-  margin: 1rem 0 0.5rem;
-}
-.section-body p  { margin-bottom: 0.85rem; }
-.section-body ul, .section-body ol { padding-right:1.5rem; margin-bottom:0.85rem; }
-.section-body li { margin-bottom: 0.4rem; }
-.section-body strong { color: #fff; font-weight: 700; }
-.section-body a  { color: var(--accent); }
-.section-body table {
-  width:100%; border-collapse:collapse; margin:1rem 0; font-size:0.88rem;
-}
-.section-body td, .section-body th {
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 0.5rem 0.75rem; text-align:right;
-}
-.section-body th { background:rgba(108,47,160,0.2); color:#fff; font-weight:700; }
-.section-body tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
-.section-body img { max-width:100%; border-radius:8px; margin:0.75rem 0; display:block; }
-.section-body blockquote {
-  border-right: 4px solid var(--accent); padding: 0.5rem 1rem;
-  margin:1rem 0; color:#9fa3c0; background:rgba(0,201,177,0.05);
-  border-radius: 0 8px 8px 0;
-}
-.section-body code {
-  background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;
-  font-family:monospace; font-size:0.88em; color:#a5d6a7;
-  direction:ltr; display:inline-block;
-}
-
-/* ── حالة التحميل ── */
-.skeleton {
-  background: linear-gradient(90deg, var(--card2) 25%, rgba(255,255,255,0.04) 50%, var(--card2) 75%);
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease infinite;
-  border-radius: 8px;
-}
-@keyframes shimmer { to { background-position: -400% 0; } }
-
-/* ── شريط التحديث ── */
-.update-bar {
-  background: linear-gradient(135deg, rgba(0,201,177,0.12), rgba(108,47,160,0.12));
-  border: 1px solid rgba(0,201,177,0.25);
-  border-radius: var(--radius);
+  margin-top: 1rem;
   padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.88rem;
-  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.95rem;
 }
-.update-bar-icon { font-size: 1.1rem; }
-.update-bar-text strong { color: var(--accent); }
+.score-good { background: rgba(76,175,80,0.15); border: 1px solid rgba(76,175,80,0.3); color: #a5d6a7; }
+.score-bad  { background: rgba(244,67,54,0.12); border: 1px solid rgba(244,67,54,0.25); color: #ef9a9a; }
 </style>
 </head>
 <body>
 
-<!-- ══ شريط التنقل ══ -->
-<nav class="topnav" id="mainNav">
-  <a href="index.html" class="nav-brand">
-    <div class="nav-brand-dot"></div>
-    مبادئ الشبكات
-  </a>
-  <div class="nav-links">
-    <a href="index.html"    class="nav-link">🏠 الرئيسية</a>
-    <a href="ip.html" class="nav-link active">📡 شبكات الحاسب</a>
-    <a href="security.html" class="nav-link">🔒 الأمان</a>
-    <a href="osi.html"      class="nav-link">🔁 نموذج OSI</a>
-    <a href="cables.html"   class="nav-link">🔌 الكيابل</a>
-    <a href="ip.html"       class="nav-link">🌍 بروتوكول IP</a>
+<header class="page-hero">
+  <div class="breadcrumb anim-1">
+    <a href="index.html">الرئيسية</a><span class="sep">›</span>
+    <span>بروتوكول IP</span>
   </div>
-  <div class="nav-actions">
-    <a href="login.html" class="btn-login">🔐 تسجيل الدخول</a>
+  <div class="page-hero-tag anim-1">🌍 القسم الخامس</div>
+  <h1 class="anim-2">بروتوكول <span>IP</span><br>Internet Protocol Address</h1>
+  <p class="anim-3">تعريف بروتوكول IP — إصداراته — بنية IPv4 وIPv6 — تدريبات عملية تفاعلية</p>
+  <nav class="sub-nav anim-4">
+    <a href="#definition">التعريف</a>
+    <a href="#versions">الإصدارات</a>
+    <a href="#ipv4">بروتوكول IPv4</a>
+    <a href="#training4">تدريبات IPv4</a>
+    <a href="#ipv6">بروتوكول IPv6</a>
+    <a href="#training6">تدريبات IPv6</a>
+  </nav>
+</header>
+
+<main class="page-content">
+
+  <!-- ── 1. تعريف بروتوكول IP ── -->
+  <div class="sec-block" id="definition">
+    <div class="sec-block-header">
+      <div class="sec-icon">📖</div>
+      <h2>تعريف بروتوكول <span>IP</span></h2>
+    </div>
+    <div class="content-block">
+      <h3><span class="dot"></span>ما هو عنوان بروتوكول الإنترنت؟</h3>
+      <div class="highlight-box">
+        <p>عنوان بروتوكول الإنترنت (IP address) هو المعرف الرقمي لأي جهاز حاسوب، هاتف، آلة طابعة، موجّه،...( مرتبط بشبكة معلوماتية ) تعمل ببروتوكولات الإنترنت، سواء أكانت شبكة محلية أو شبكة الشبكات الإنترنت. يقابل عنوان IP مثلاً في شبكات الهاتف رقم الهاتف.</p>
+      </div>
+    </div>
   </div>
-</nav>
 
-<!-- ══ Hero ══ -->
-<section class="page-hero">
-  <div class="hero-tag">🌍 الوحدة الخامسة</div>
-  <h1 class="hero-title">🌍 <span>بروتوكول IP</span></h1>
-  <p class="hero-desc">عناوين IP وكيفية عمل بروتوكول الإنترنت</p>
-</section>
+  <div class="sec-divider"></div>
 
-<!-- ══ Layout ══ -->
-<div class="page-layout">
-
-  <!-- الشريط الجانبي (فهرس) -->
-  <aside class="page-sidebar">
-    <div class="sidebar-card">
-      <div class="sidebar-title">📑 محتويات الصفحة</div>
-      <div id="tocList">
-        <!-- يُملأ ديناميكياً -->
-        <div class="skeleton" style="height:32px;margin-bottom:6px;"></div>
-        <div class="skeleton" style="height:32px;margin-bottom:6px;width:85%;"></div>
-        <div class="skeleton" style="height:32px;margin-bottom:6px;width:90%;"></div>
-      </div>
+  <!-- ── 2. إصدارات بروتوكول IP ── -->
+  <div class="sec-block" id="versions">
+    <div class="sec-block-header">
+      <div class="sec-icon">📋</div>
+      <h2>إصدارات عناوين الشبكة</h2>
     </div>
-  </aside>
-
-  <!-- المحتوى الرئيسي -->
-  <main class="page-main">
-
-    <!-- شريط تحديثات المدرّب (يظهر فقط إن وُجد محتوى) -->
-    <div id="updateBar" style="display:none;" class="update-bar">
-      <span class="update-bar-icon">✨</span>
-      <span class="update-bar-text"><strong>تحديث من المدرّب:</strong> تم إضافة محتوى تعليمي جديد إلى هذه الصفحة</span>
-    </div>
-
-    <!-- حالة التحميل -->
-    <div id="pageLoading">
-      <div class="content-section" style="margin-bottom:1.5rem;">
-        <div class="section-header" style="cursor:default;">
-          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
-          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;"></div>
+    <div class="content-block">
+      <h3><span class="dot"></span>الإصداران الرئيسيان</h3>
+      <div class="two-col">
+        <div class="info-card">
+          <div class="card-icon" style="background:linear-gradient(135deg,#2196F3,#0d47a1); font-size:1.8rem; font-weight:900;">4</div>
+          <h3>عنوان الإصدار الرابع — IPv4</h3>
+          <p>هو الإصدار الرابع من بروتوكول الانترنت. يدعم فقط 4.2 مليار عنوان (4.2 billion IP addresses) في حين أن عدد سكان العالم يبلغ 7 مليار شخص — مما أدى إلى نقص في العناوين المتاحة.</p>
         </div>
-      </div>
-      <div class="content-section" style="margin-bottom:1.5rem;">
-        <div class="section-header" style="cursor:default;">
-          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
-          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;width:75%;"></div>
-        </div>
-      </div>
-      <div class="content-section">
-        <div class="section-header" style="cursor:default;">
-          <div class="skeleton" style="width:32px;height:32px;border-radius:6px;"></div>
-          <div class="skeleton" style="flex:1;height:20px;border-radius:6px;width:60%;"></div>
+        <div class="info-card">
+          <div class="card-icon" style="background:linear-gradient(135deg,#4CAF50,#1b5e20); font-size:1.8rem; font-weight:900;">6</div>
+          <h3>عنوان الإصدار السادس — IPv6</h3>
+          <p>طُوِّر للتغلب على محدودية IPv4. يدعم عدداً هائلاً من العناوين (340 undecillion) مما يكفي الاحتياجات الحالية والمستقبلية بما فيها إنترنت الأشياء (IoT).</p>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- الأقسام (تُحقن هنا) -->
-    <div id="sectionsContainer"></div>
+  <div class="sec-divider"></div>
 
-    <!-- رسالة فارغ -->
-    <div id="emptyState" style="display:none;text-align:center;padding:3rem 1rem;color:var(--text-muted);">
-      <div style="font-size:2.5rem;margin-bottom:1rem;">📭</div>
-      <div style="font-weight:700;">لا يوجد محتوى بعد</div>
-      <div style="font-size:0.85rem;margin-top:0.5rem;">يمكن للمشرف إضافة المحتوى من لوحة التحكم</div>
+  <!-- ── 3. بروتوكول IPv4 ── -->
+  <div class="sec-block" id="ipv4">
+    <div class="sec-block-header">
+      <div class="sec-icon">4️⃣</div>
+      <h2>بروتوكول <span>IPv4</span></h2>
     </div>
 
-  </main>
-</div>
-
-<!-- ══ JavaScript ══ -->
-<script type="module">
-import { initializeApp, getApps }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore, collection, query, orderBy, getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey:            "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
-  authDomain:        "networkacademy-795c8.firebaseapp.com",
-  projectId:         "networkacademy-795c8",
-  storageBucket:     "networkacademy-795c8.firebasestorage.app",
-  messagingSenderId: "458132238000",
-  appId:             "1:458132238000:web:bffd7321407b094bb21575",
-};
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-const PAGE_ID = "ip"; /* ← هذا الوحيد الذي يتغير بين الصفحات */
-
-async function loadPage() {
-  const loadingEl   = document.getElementById("pageLoading");
-  const container   = document.getElementById("sectionsContainer");
-  const emptyEl     = document.getElementById("emptyState");
-  const tocList     = document.getElementById("tocList");
-  const updateBar   = document.getElementById("updateBar");
-
-  try {
-    const q    = query(collection(db, "siteContent", PAGE_ID, "sections"), orderBy("order"));
-    const snap = await getDocs(q);
-
-    loadingEl.style.display = "none";
-
-    if (snap.empty) {
-      emptyEl.style.display = "block";
-      tocList.innerHTML = '<div style="color:var(--text-faint);font-size:0.82rem;padding:0.5rem 0;">لا يوجد محتوى</div>';
-      return;
-    }
-
-    /* إظهار شريط التحديث */
-    updateBar.style.display = "flex";
-
-    const sections = [];
-    snap.forEach(d => sections.push({ id: d.id, ...d.data() }));
-
-    /* بناء الفهرس */
-    tocList.innerHTML = sections.map((sec, i) => `
-      <a class="toc-item ${i===0?'active':''}" id="toc_${sec.id}" href="#sec_${sec.id}">
-        <span class="toc-icon">${sec.icon || "📄"}</span>
-        ${_esc(sec.title || "قسم")}
-      </a>
-    `).join("");
-
-    /* بناء الأقسام */
-    container.innerHTML = sections.map((sec, i) => `
-      <div class="content-section ${i===0?'open':''}" id="sec_${sec.id}">
-        <div class="section-header" onclick="toggleSection('${sec.id}')">
-          <span class="section-header-icon">${sec.icon || "📄"}</span>
-          <h2 class="section-header-title">${_esc(sec.title || "قسم")}</h2>
-          <span class="section-toggle-arrow">▼</span>
-        </div>
-        <div class="section-body">${sec.content || ""}</div>
+    <div class="content-block">
+      <h3><span class="dot"></span>عنوان الإصدار الرابع IPv4</h3>
+      <div class="highlight-box">
+        <p>هو الإصدار الرابع من بروتوكول الانترنت. عنوان بروتوكول الإنترنت (IP address) هو المعرف الرقمي لأي جهاز حاسوب، هاتف، آلة طابعة، موجّه، مرتبط بشبكة معلوماتية. طول العنوان (IP) <strong>32 بت</strong>. مقسم إلى أربع خانات (Octets) وكل خانة تحتوي على 8 بت. مدى الأرقام لكل خانة يبدا من 0 إلى 255.</p>
       </div>
-    `).join("");
+      <div class="highlight-box" style="margin-top:1rem;">
+        <p>مثال على عنوان IPv4: <strong style="color:var(--accent); font-family:monospace;">192.168.10.2</strong><br>
+        التمثيل الثنائي: <strong style="color:var(--primary-light); font-family:monospace;">11000000.10101000.00001010.00000010</strong><br>
+        (Octet = 8 bits) — (192 → N) · (168 → N) · (10 → H) · (2 → H)</p>
+      </div>
+    </div>
 
-    /* تحديث الفهرس عند التمرير */
-    _initScrollSpy(sections);
+    <div class="content-block">
+      <h3><span class="dot"></span>نظام الترقيم في الحاسب الآلي</h3>
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon">🔟</div>
+          <h3>النظام العشري (Decimal System)</h3>
+          <p>كل رقم في هذا النظام يكون من إحدى القيم التالية، من 0 إلى 9. أمثلة: 8723، 1209</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">💻</div>
+          <h3>النظام الثنائي (Binary System)</h3>
+          <p>كل رقم في هذا النظام يمثل بإحدى القيمتين الوحيدتين وهما 1 أو 0. أمثلة: 1111، 1101</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">🔡</div>
+          <h3>النظام السادس عشري (Hexadecimal)</h3>
+          <p>يحتوي على 16 رمزاً: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, F. يُستخدم في تمثيل عناوين IPv6 وMAC.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">⚡</div>
+          <h3>البت (Bit) والبايت (Byte)</h3>
+          <p><strong>البت (Bit):</strong> هو عبارة عن رقم واحد بمعنى رقم ثنائي واحد، يكون 0 أو 1 وهذه القيمة تعتبر أصغر وحدة قياس بالحاسب الآلي.<br>
+          <strong>البايت (Byte):</strong> هو عبارة عن مجموع ثمانية أرقام من البت ليصبح بايت — 10001111 = 1 Byte</p>
+        </div>
+      </div>
+    </div>
 
-  } catch(err) {
-    console.error("loadPage:", err);
-    loadingEl.style.display = "none";
-    container.innerHTML = `
-      <div style="padding:1.5rem;background:rgba(244,67,54,0.08);border:1px solid rgba(244,67,54,0.3);border-radius:10px;color:#ff6b6b;">
-        ⚠️ تعذّر تحميل المحتوى. تأكد من اتصالك بالإنترنت وأعد المحاولة.
-      </div>`;
+    <div class="content-block">
+      <h3><span class="dot"></span>العناوين الخاصة والعامة في IPv4</h3>
+      <div class="highlight-box">
+        <p>نظراً لكثرة مستخدمي الانترنت في العالم فقد تم تجزئة IPv4 إلى جزئيين: عناوين عامة (Public addresses) وعناوين خاصة (Private addresses).</p>
+      </div>
+      <div class="two-col">
+        <div class="info-card">
+          <div class="card-icon">🏠</div>
+          <h3>العنوان الخاص (Private address)</h3>
+          <p>يستخدم العنوان الخاص للاتصال في الشبكات المحلية. يتم تحويله إلى عنوان عام والعكس عن طريق بروتوكول NAT (Network Address Translation).</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">🌐</div>
+          <h3>العنوان العام (Public address)</h3>
+          <p>يستخدم العنوان العام للاتصال بشبكة الانترنت. العنوان المحجوز: يستخدم الآبي 127.0.0.0 لـ Loopback (اختبار الجهاز على نفسه).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>فئات العناوين (Classful Networking)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>الفئة (Class)</th><th>المدى (Range)</th><th>جزء الشبكة والمضيف</th><th>قناع الشبكة (Subnet Mask)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-class">A</td>
+              <td>1.0.0.0 – 126.255.255.255</td>
+              <td>N.H.H.H</td>
+              <td>255.0.0.0</td>
+            </tr>
+            <tr>
+              <td class="td-class">B</td>
+              <td>128.0.0.0 – 191.255.255.255</td>
+              <td>N.N.H.H</td>
+              <td>255.255.0.0</td>
+            </tr>
+            <tr>
+              <td class="td-class">C</td>
+              <td>192.0.0.0 – 223.255.255.255</td>
+              <td>N.N.N.H</td>
+              <td>255.255.255.0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.6rem;"><strong style="color:var(--accent);">N</strong> يُرمز للجزء الخاص بالشبكة &nbsp;|&nbsp; <strong style="color:var(--accent2);">H</strong> يُرمز للجزء الخاص بالأجهزة</p>
+    </div>
+  </div>
+
+  <div class="sec-divider"></div>
+
+  <!-- ── 4. تدريبات IPv4 (تفاعلية) ── -->
+  <div class="sec-block" id="training4">
+    <div class="sec-block-header">
+      <div class="sec-icon">📝</div>
+      <h2>تدريبات على <span>IPv4</span></h2>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>تمرين — أكمل الجدول التالي</h3>
+      <p style="color:var(--text-muted); margin-bottom:1.25rem; font-size:0.9rem;">اكتب إجاباتك في الخلايا الفارغة ثم اضغط "تحقق من الإجابات" لمعرفة صحة إجاباتك.</p>
+      <div class="table-wrap">
+        <table class="training-table" id="trainingTable4">
+          <thead>
+            <tr>
+              <th>عنوان الشبكة (Network ID)</th>
+              <th>الفئة (Class)</th>
+              <th>قناع الشبكة (Subnet Mask)</th>
+              <th>عنوان أول مضيف</th>
+              <th>عنوان آخر مضيف</th>
+              <th>عنوان البث (Broadcast)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-net">13.0.0.0/8</td>
+              <td><input type="text" placeholder="؟" data-answer="A" id="r1c1"></td>
+              <td><input type="text" placeholder="؟" data-answer="255.0.0.0" id="r1c2"></td>
+              <td><input type="text" placeholder="؟" data-answer="13.0.0.1" id="r1c3"></td>
+              <td><input type="text" placeholder="؟" data-answer="13.255.255.254" id="r1c4"></td>
+              <td><input type="text" placeholder="؟" data-answer="13.255.255.255" id="r1c5"></td>
+            </tr>
+            <tr>
+              <td class="td-net">192.168.8.0/24</td>
+              <td><input type="text" placeholder="؟" data-answer="C" id="r2c1"></td>
+              <td><input type="text" placeholder="؟" data-answer="255.255.255.0" id="r2c2"></td>
+              <td><input type="text" placeholder="؟" data-answer="192.168.8.1" id="r2c3"></td>
+              <td><input type="text" placeholder="؟" data-answer="192.168.8.254" id="r2c4"></td>
+              <td><input type="text" placeholder="؟" data-answer="192.168.8.255" id="r2c5"></td>
+            </tr>
+            <tr>
+              <td class="td-net">120.0.0.0/8</td>
+              <td><input type="text" placeholder="؟" data-answer="A" id="r3c1"></td>
+              <td><input type="text" placeholder="؟" data-answer="255.0.0.0" id="r3c2"></td>
+              <td><input type="text" placeholder="؟" data-answer="120.0.0.1" id="r3c3"></td>
+              <td><input type="text" placeholder="؟" data-answer="120.255.255.254" id="r3c4"></td>
+              <td><input type="text" placeholder="؟" data-answer="120.255.255.255" id="r3c5"></td>
+            </tr>
+            <tr>
+              <td class="td-net">130.168.0.0/16</td>
+              <td><input type="text" placeholder="؟" data-answer="B" id="r4c1"></td>
+              <td><input type="text" placeholder="؟" data-answer="255.255.0.0" id="r4c2"></td>
+              <td><input type="text" placeholder="؟" data-answer="130.168.0.1" id="r4c3"></td>
+              <td><input type="text" placeholder="؟" data-answer="130.168.255.254" id="r4c4"></td>
+              <td><input type="text" placeholder="؟" data-answer="130.168.255.255" id="r4c5"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <button class="check-btn" onclick="checkAnswers4()">✅ تحقق من الإجابات</button>
+        <button class="reset-btn" onclick="resetAnswers4()">🔄 إعادة التهيئة</button>
+      </div>
+      <div id="trainingScore"></div>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>الإجابات الصحيحة للمرجع</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>عنوان الشبكة</th>
+              <th>الفئة</th>
+              <th>قناع الشبكة</th>
+              <th>أول مضيف</th>
+              <th>آخر مضيف</th>
+              <th>البث (Broadcast)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>13.0.0.0/8</td>
+              <td class="td-class">A</td>
+              <td class="td-green">255.0.0.0</td>
+              <td class="td-green">13.0.0.1</td>
+              <td class="td-green">13.255.255.254</td>
+              <td class="td-green">13.255.255.255</td>
+            </tr>
+            <tr>
+              <td>192.168.8.0/24</td>
+              <td class="td-class">C</td>
+              <td class="td-green">255.255.255.0</td>
+              <td class="td-green">192.168.8.1</td>
+              <td class="td-green">192.168.8.254</td>
+              <td class="td-green">192.168.8.255</td>
+            </tr>
+            <tr>
+              <td>120.0.0.0/8</td>
+              <td class="td-class">A</td>
+              <td class="td-green">255.0.0.0</td>
+              <td class="td-green">120.0.0.1</td>
+              <td class="td-green">120.255.255.254</td>
+              <td class="td-green">120.255.255.255</td>
+            </tr>
+            <tr>
+              <td>130.168.0.0/16</td>
+              <td class="td-class">B</td>
+              <td class="td-green">255.255.0.0</td>
+              <td class="td-green">130.168.0.1</td>
+              <td class="td-green">130.168.255.254</td>
+              <td class="td-green">130.168.255.255</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-divider"></div>
+
+  <!-- ── 5. بروتوكول IPv6 ── -->
+  <div class="sec-block" id="ipv6">
+    <div class="sec-block-header">
+      <div class="sec-icon">6️⃣</div>
+      <h2>بروتوكول <span>IPv6</span></h2>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>لماذا تم تطوير IPv6؟</h3>
+      <div class="highlight-box">
+        <p>نظراً لكثرة مستخدمي الانترنت في العالم وأن IPv4 يدعم فقط 4.2 مليار عنوان (4.2 billion) في حين أن عدد سكان العالم يتجاوز 7 مليار شخص — تم تطوير IPv6 ليدعم عدداً هائلاً تقريباً لا محدوداً من العناوين.</p>
+      </div>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>خصائص بروتوكول IPv6</h3>
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon">📏</div>
+          <h3>طول العنوان</h3>
+          <p><strong>128 بت</strong> مقارنةً بـ 32 بت في IPv4. يُمثَّل بالنظام السادس عشري (Hexadecimal) ومقسم على 8 مجموعات مفصولة بنقطتين.<br>مثال: <span style="font-family:monospace; color:var(--accent); font-size:0.85rem;">2001:0db8:85a3:0000:0000:8a2e:0370:7334</span></p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">♾️</div>
+          <h3>سعة العناوين الهائلة</h3>
+          <p>يدعم <strong>340 undecillion</strong> عنوان (3.4 × 10³⁸). هذا يعني وجود مليارات العناوين لكل شخص على وجه الأرض وما يكفي إنترنت الأشياء (IoT) للمستقبل.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">⚡</div>
+          <h3>مزايا IPv6</h3>
+          <ul>
+            <li>لا حاجة لـ NAT (عناوين مباشرة)</li>
+            <li>أمان مدمج (IPSec مدمج)</li>
+            <li>تكوين تلقائي (Auto-configuration)</li>
+            <li>رؤوس أبسط وأسرع في المعالجة</li>
+            <li>دعم أفضل لنوعية الخدمة (QoS)</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">✂️</div>
+          <h3>قواعد اختصار IPv6</h3>
+          <ul>
+            <li>حذف الأصفار البادئة في كل مجموعة: 0db8 → db8</li>
+            <li>اختصار مجموعات الأصفار المتتالية بـ :: مرة واحدة فقط</li>
+            <li>:: يمكن استخدامها مرة واحدة فقط في العنوان</li>
+            <li>مثال: 2001:0000:0000:0001 → 2001::1</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-divider"></div>
+
+  <!-- ── 6. تدريبات IPv6 ── -->
+  <div class="sec-block" id="training6">
+    <div class="sec-block-header">
+      <div class="sec-icon">📝</div>
+      <h2>تدريبات على <span>IPv6</span></h2>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>جدول مقارنة بين IPv4 وIPv6</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>الخاصية</th><th>IPv4</th><th>IPv6</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>طول العنوان</td><td>32 بت</td><td>128 بت</td></tr>
+            <tr><td>نظام التمثيل</td><td>عشري (Decimal) — 0 إلى 255</td><td>سادس عشري (Hexadecimal)</td></tr>
+            <tr><td>عدد العناوين</td><td>~4.2 مليار</td><td>~340 undecillion</td></tr>
+            <tr><td>الفصل بين الأجزاء</td><td>نقطة (.)</td><td>نقطتان (:)</td></tr>
+            <tr><td>عدد الأجزاء</td><td>4 أجزاء (Octets)</td><td>8 مجموعات</td></tr>
+            <tr><td>حجم كل جزء</td><td>8 بت</td><td>16 بت</td></tr>
+            <tr><td>NAT مطلوب؟</td><td>نعم (بسبب نقص العناوين)</td><td>لا (عناوين كافية)</td></tr>
+            <tr><td>IPSec مدمج؟</td><td>اختياري</td><td>مدمج إجبارياً</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>تدريب — اختصار عناوين IPv6</h3>
+      <p style="color:var(--text-muted); margin-bottom:1.25rem; font-size:0.9rem;">اكتب الصورة المختصرة الصحيحة لكل عنوان IPv6 أدناه.</p>
+      <div class="table-wrap">
+        <table class="training-table" id="trainingTable6">
+          <thead>
+            <tr>
+              <th>العنوان الكامل IPv6</th>
+              <th>الاختصار الصحيح (اكتب هنا)</th>
+              <th>ملاحظة</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem;">2001:0db8:0000:0000:0000:0000:0000:0001</td>
+              <td><input type="text" placeholder="اكتب الاختصار..." data-answer="2001:db8::1" id="ipv6_r1"></td>
+              <td style="font-size:0.8rem; color:var(--text-muted);">حذف الأصفار البادئة + اختصار الأصفار المتتالية</td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem;">0000:0000:0000:0000:0000:0000:0000:0001</td>
+              <td><input type="text" placeholder="اكتب الاختصار..." data-answer="::1" id="ipv6_r2"></td>
+              <td style="font-size:0.8rem; color:var(--text-muted);">عنوان Loopback في IPv6</td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem;">2001:0db8:85a3:0000:0000:8a2e:0370:7334</td>
+              <td><input type="text" placeholder="اكتب الاختصار..." data-answer="2001:db8:85a3::8a2e:370:7334" id="ipv6_r3"></td>
+              <td style="font-size:0.8rem; color:var(--text-muted);">عنوان توثيقي نموذجي</td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem;">fe80:0000:0000:0000:0202:b3ff:fe1e:8329</td>
+              <td><input type="text" placeholder="اكتب الاختصار..." data-answer="fe80::202:b3ff:fe1e:8329" id="ipv6_r4"></td>
+              <td style="font-size:0.8rem; color:var(--text-muted);">Link-local address</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <button class="check-btn" onclick="checkAnswers6()">✅ تحقق من الإجابات</button>
+        <button class="reset-btn" onclick="resetAnswers6()">🔄 إعادة التهيئة</button>
+      </div>
+      <div id="trainingScore6"></div>
+    </div>
+
+    <div class="content-block">
+      <h3><span class="dot"></span>الإجابات الصحيحة لتدريب IPv6</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>العنوان الكامل</th><th>الاختصار الصحيح</th><th>التفسير</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem;">2001:0db8:0000:0000:0000:0000:0000:0001</td>
+              <td class="td-green" style="font-family:monospace;">2001:db8::1</td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">حذف الصفر البادئ في db8 ← واستبدال الأصفار المتتالية بـ ::</td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem;">0000:0000:0000:0000:0000:0000:0000:0001</td>
+              <td class="td-green" style="font-family:monospace;">::1</td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">جميع المجموعات أصفار ماعدا الأخيرة تُختصر بـ ::</td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem;">2001:0db8:85a3:0000:0000:8a2e:0370:7334</td>
+              <td class="td-green" style="font-family:monospace;">2001:db8:85a3::8a2e:370:7334</td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">حذف الأصفار البادئة في كل مجموعة + اختصار مجموعتي الأصفار</td>
+            </tr>
+            <tr>
+              <td style="font-family:monospace; font-size:0.8rem;">fe80:0000:0000:0000:0202:b3ff:fe1e:8329</td>
+              <td class="td-green" style="font-family:monospace;">fe80::202:b3ff:fe1e:8329</td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">ثلاث مجموعات من الأصفار تُختصر بـ ::</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>إعداد: <strong>الكلية التقنية بالمندق</strong> | المدرب: <strong>منصور الزهراني</strong></p>
+  <div class="footer-links">
+    <a href="index.html">الرئيسية</a>
+    <a href="cables.html">→ الكيابل</a>
+    <a href="networks.html">شبكات الحاسب</a>
+    <a href="osi.html">نموذج OSI</a>
+    <a href="security.html">الأمان</a>
+  </div>
+</footer>
+
+<script type="module" src="articles-loader.js" data-page="ip"></script>
+<script src="shared-nav.js"></script>
+<script>
+/* ── IPv4 Training ── */
+function checkAnswers4() {
+  const inputs = document.querySelectorAll('#trainingTable4 input');
+  let correct = 0, total = inputs.length;
+  inputs.forEach(inp => {
+    const ans = inp.dataset.answer.trim().toUpperCase();
+    const val = inp.value.trim().toUpperCase();
+    if (val === ans) { inp.classList.remove('wrong'); inp.classList.add('correct'); correct++; }
+    else             { inp.classList.remove('correct'); inp.classList.add('wrong'); }
+  });
+  const scoreEl = document.getElementById('trainingScore');
+  scoreEl.style.display = 'block';
+  const pct = Math.round(correct / total * 100);
+  if (pct >= 80) {
+    scoreEl.className = 'score-good';
+    scoreEl.innerHTML = `🎉 ممتاز! إجاباتك الصحيحة: ${correct} من ${total} (${pct}%)`;
+  } else {
+    scoreEl.className = 'score-bad';
+    scoreEl.innerHTML = `📚 إجاباتك الصحيحة: ${correct} من ${total} (${pct}%) — راجع الإجابات الصحيحة في الجدول أدناه.`;
   }
 }
 
-/* ── فتح/إغلاق القسم ── */
-window.toggleSection = function(secId) {
-  const sec = document.getElementById(`sec_${secId}`);
-  if (!sec) return;
-  sec.classList.toggle("open");
-  /* تحديث الفهرس */
-  document.querySelectorAll(".toc-item").forEach(t => t.classList.remove("active"));
-  document.getElementById(`toc_${secId}`)?.classList.add("active");
-};
-
-/* ── ScrollSpy خفيف ── */
-function _initScrollSpy(sections) {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id.replace("sec_", "");
-        document.querySelectorAll(".toc-item").forEach(t => t.classList.remove("active"));
-        document.getElementById(`toc_${id}`)?.classList.add("active");
-      }
-    });
-  }, { rootMargin: "-30% 0px -60% 0px" });
-
-  sections.forEach(sec => {
-    const el = document.getElementById(`sec_${sec.id}`);
-    if (el) observer.observe(el);
+function resetAnswers4() {
+  document.querySelectorAll('#trainingTable4 input').forEach(inp => {
+    inp.value = ''; inp.classList.remove('correct','wrong');
   });
+  const scoreEl = document.getElementById('trainingScore');
+  scoreEl.style.display = 'none';
 }
 
-function _esc(str) {
-  return String(str)
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+/* ── IPv6 Training ── */
+function checkAnswers6() {
+  const inputs = document.querySelectorAll('#trainingTable6 input');
+  let correct = 0, total = inputs.length;
+  inputs.forEach(inp => {
+    const ans = inp.dataset.answer.trim().toLowerCase();
+    const val = inp.value.trim().toLowerCase();
+    if (val === ans) { inp.classList.remove('wrong'); inp.classList.add('correct'); correct++; }
+    else             { inp.classList.remove('correct'); inp.classList.add('wrong'); }
+  });
+  const scoreEl = document.getElementById('trainingScore6');
+  scoreEl.style.display = 'block';
+  const pct = Math.round(correct / total * 100);
+  if (pct >= 75) {
+    scoreEl.className = 'score-good';
+    scoreEl.innerHTML = `🎉 أحسنت! إجاباتك الصحيحة: ${correct} من ${total} (${pct}%)`;
+  } else {
+    scoreEl.className = 'score-bad';
+    scoreEl.innerHTML = `📚 إجاباتك الصحيحة: ${correct} من ${total} (${pct}%) — تحقق من جدول الإجابات الصحيحة أدناه.`;
+  }
 }
 
-loadPage();
+function resetAnswers6() {
+  document.querySelectorAll('#trainingTable6 input').forEach(inp => {
+    inp.value = ''; inp.classList.remove('correct','wrong');
+  });
+  const scoreEl = document.getElementById('trainingScore6');
+  scoreEl.style.display = 'none';
+}
 </script>
-
 </body>
 </html>
