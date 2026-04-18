@@ -1,15 +1,13 @@
 /**
  * index-cms-loader.js
- * يُضاف في index.html ليجلب الصفحات الجديدة من Firestore ويعرضها كبطاقات
- * أضف هذا السطر في آخر index.html قبل </body>:
- * <script src="index-cms-loader.js"></script>
+ * يُضيف بطاقات الصفحات الجديدة في index.html بنفس تنسيق البطاقات الأصلية
  */
-
 (function () {
 
   const FB_PROJECT = "networkacademy-795c8";
+  const STATIC_IDS = new Set(["networks","security","osi","cables","ip"]);
 
-  async function loadNewPageCards() {
+  async function loadNewCards() {
     try {
       const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/sitePages`;
       const resp = await fetch(url);
@@ -17,24 +15,17 @@
       const data = await resp.json();
       if (!data.documents?.length) return;
 
-      const STATIC_IDS = new Set(["networks","security","osi","cables","ip"]);
+      const grid = document.getElementById("pagesGrid");
+      if (!grid) return;
 
-      /* ابحث عن حاوية البطاقات في index.html */
-      const cardsContainer =
-        document.querySelector(".sections-grid") ||
-        document.querySelector(".cards-grid")    ||
-        document.querySelector(".courses-grid")  ||
-        document.querySelector("[data-cms-cards]");
-
-      if (!cardsContainer) return;
-
+      /* رتّب حسب order */
       const sorted = data.documents.slice().sort((a,b) => {
         const oa = Number(a.fields?.order?.integerValue || a.fields?.order?.doubleValue || 99);
         const ob = Number(b.fields?.order?.integerValue || b.fields?.order?.doubleValue || 99);
         return oa - ob;
       });
 
-      sorted.forEach((docRef, i) => {
+      sorted.forEach(docRef => {
         const pageId = docRef.name.split("/").pop();
         if (STATIC_IDS.has(pageId)) return;
 
@@ -45,21 +36,20 @@
         const href   = `page.html?id=${pageId}`;
 
         /* تجنب التكرار */
-        if (document.querySelector(`[href="${href}"]`)) return;
+        if (grid.querySelector(`[href="${href}"]`)) return;
 
-        /* بطاقة بنفس تنسيق البطاقات الأصلية */
-        const card = document.createElement("div");
-        card.className = "section-card";
-        card.style.cssText = "animation: fadeUp 0.4s ease both; animation-delay:" + (i * 0.1) + "s";
+        /* بطاقة بنفس تنسيق page-card الأصلية */
+        const card = document.createElement("a");
+        card.href = href;
+        card.className = "page-card";
         card.innerHTML = `
-          <div class="card-icon-wrap">
-            <span style="font-size:2.5rem;line-height:1;">${icon}</span>
-          </div>
-          <h3>${_esc(name)}</h3>
-          <p>${_esc(desc)}</p>
-          <a href="${href}" class="card-link">ابدأ التعلم ←</a>
+          <span class="pc-icon">${_esc(icon)}</span>
+          <div class="pc-title">${_esc(name)}</div>
+          <div class="pc-en">New Section</div>
+          <p class="pc-desc">${_esc(desc)}</p>
+          <div class="pc-arrow">ابدأ التعلم ←</div>
         `;
-        cardsContainer.appendChild(card);
+        grid.appendChild(card);
       });
 
     } catch (e) {
@@ -68,13 +58,15 @@
   }
 
   function _esc(s) {
-    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    return String(s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadNewPageCards);
+    document.addEventListener("DOMContentLoaded", loadNewCards);
   } else {
-    loadNewPageCards();
+    loadNewCards();
   }
 
 })();
