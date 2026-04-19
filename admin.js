@@ -959,6 +959,154 @@ window._getFullEditorConfig = function (selector, options = {}) {
     image_advtab:      false,
     automatic_uploads: false,
 
+    /* ── محوّل رابط Google Drive التلقائي ── */
+    file_picker_types: "image",
+    file_picker_callback: (callback, _value, _meta) => {
+      // نافذة إدخال الرابط مع دعم تحويل Google Drive تلقائياً
+      const overlay = document.createElement("div");
+      overlay.style.cssText = `
+        position:fixed;inset:0;z-index:999999;
+        background:rgba(8,10,20,0.85);backdrop-filter:blur(6px);
+        display:flex;align-items:center;justify-content:center;
+      `;
+      overlay.innerHTML = `
+        <div style="
+          background:linear-gradient(135deg,#161929,#1a1d30);
+          border:1px solid rgba(108,47,160,0.4);
+          border-radius:16px;padding:1.75rem 2rem;
+          width:min(520px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.6);
+          font-family:'Cairo',sans-serif;direction:rtl;
+        ">
+          <div style="font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:0.35rem;">🖼️ إدراج صورة</div>
+          <div style="font-size:0.8rem;color:#8c90b5;margin-bottom:1.25rem;">
+            يمكنك لصق رابط من: Google Drive · Google Images · Imgur · أو أي رابط صورة مباشر
+          </div>
+
+          <label style="font-size:0.82rem;color:#a0a4c4;display:block;margin-bottom:0.4rem;">رابط الصورة:</label>
+          <input id="_imgPickerInput" type="text" placeholder="https://..." style="
+            width:100%;box-sizing:border-box;
+            padding:0.7rem 0.9rem;
+            background:rgba(255,255,255,0.05);
+            border:1px solid rgba(108,47,160,0.4);
+            border-radius:9px;color:#e8eaf6;
+            font-family:'Cairo',sans-serif;font-size:0.9rem;
+            outline:none;transition:border-color 0.2s;
+          " />
+
+          <div id="_imgPickerMsg" style="
+            display:none;margin-top:0.6rem;
+            padding:0.5rem 0.75rem;border-radius:8px;
+            font-size:0.78rem;font-weight:600;
+          "></div>
+
+          <div id="_imgPickerPreview" style="
+            display:none;margin-top:0.85rem;
+            text-align:center;
+          ">
+            <img id="_imgPickerThumb" style="
+              max-height:140px;max-width:100%;
+              border-radius:8px;border:2px solid rgba(0,201,177,0.4);
+            " alt="معاينة">
+          </div>
+
+          <div style="display:flex;gap:0.75rem;margin-top:1.25rem;justify-content:flex-end;">
+            <button id="_imgPickerCancel" style="
+              padding:0.6rem 1.25rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+              background:rgba(255,255,255,0.06);color:#8c90b5;
+              font-family:'Cairo',sans-serif;font-size:0.88rem;cursor:pointer;
+            ">إلغاء</button>
+            <button id="_imgPickerConfirm" style="
+              padding:0.6rem 1.4rem;border-radius:8px;border:none;
+              background:linear-gradient(135deg,#6c2fa0,#8b46c8);color:#fff;
+              font-family:'Cairo',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;
+              box-shadow:0 4px 14px rgba(108,47,160,0.4);
+            ">✅ إدراج الصورة</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const input   = overlay.querySelector("#_imgPickerInput");
+      const msg     = overlay.querySelector("#_imgPickerMsg");
+      const preview = overlay.querySelector("#_imgPickerPreview");
+      const thumb   = overlay.querySelector("#_imgPickerThumb");
+
+      // دالة تحويل رابط Google Drive
+      const convertDriveUrl = (url) => {
+        // نمط 1: /file/d/FILE_ID/view
+        const m1 = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (m1) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+        // نمط 2: id=FILE_ID
+        const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (m2) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+        // نمط 3: open?id=FILE_ID
+        const m3 = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+        if (m3) return `https://drive.google.com/uc?export=view&id=${m3[1]}`;
+        return url; // ليس Drive — أعد الرابط كما هو
+      };
+
+      const showMsg = (text, type = "info") => {
+        msg.style.display = "block";
+        msg.style.background = type === "success"
+          ? "rgba(0,201,177,0.12)" : type === "warn"
+          ? "rgba(255,152,0,0.12)" : "rgba(108,47,160,0.12)";
+        msg.style.color = type === "success" ? "#00c9b1"
+          : type === "warn" ? "#ffb74d" : "#a78bfa";
+        msg.style.border = `1px solid ${type === "success"
+          ? "rgba(0,201,177,0.3)" : type === "warn"
+          ? "rgba(255,152,0,0.3)" : "rgba(108,47,160,0.3)"}`;
+        msg.textContent = text;
+      };
+
+      let finalUrl = "";
+
+      input.addEventListener("input", () => {
+        const raw = input.value.trim();
+        if (!raw) { msg.style.display="none"; preview.style.display="none"; return; }
+
+        const converted = convertDriveUrl(raw);
+        finalUrl = converted;
+
+        if (converted !== raw) {
+          showMsg("✅ تم تحويل رابط Google Drive تلقائياً إلى رابط مباشر!", "success");
+        } else if (raw.includes("drive.google.com")) {
+          showMsg("⚠️ تعذّر تحويل الرابط — تأكد أنه رابط مشاركة Google Drive صحيح", "warn");
+        } else {
+          msg.style.display = "none";
+        }
+
+        // معاينة الصورة
+        thumb.src = converted;
+        thumb.onload = () => { preview.style.display = "block"; };
+        thumb.onerror = () => { preview.style.display = "none"; };
+      });
+
+      input.addEventListener("focus", () => {
+        input.style.borderColor = "rgba(108,47,160,0.8)";
+      });
+      input.addEventListener("blur", () => {
+        input.style.borderColor = "rgba(108,47,160,0.4)";
+      });
+
+      overlay.querySelector("#_imgPickerConfirm").onclick = () => {
+        const raw = input.value.trim();
+        if (!raw) { showMsg("⚠️ يرجى إدخال رابط الصورة أولاً", "warn"); return; }
+        const url = convertDriveUrl(raw);
+        document.body.removeChild(overlay);
+        callback(url, { alt: "" });
+      };
+
+      overlay.querySelector("#_imgPickerCancel").onclick = () => {
+        document.body.removeChild(overlay);
+      };
+
+      overlay.onclick = (e) => {
+        if (e.target === overlay) document.body.removeChild(overlay);
+      };
+
+      setTimeout(() => input.focus(), 100);
+    },
+
     setup: (editor) => {
       editor.on("init", () => {
         editor.execCommand("fontName", false, "Cairo,sans-serif");
