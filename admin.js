@@ -866,6 +866,25 @@ window._getFullEditorConfig = function (selector, options = {}) {
 
       pre { background:rgba(0,0,0,0.3); padding:0.75rem; border-radius:6px; overflow-x:auto; }
 
+      /* ── 🏷️ الأيقونات النصية (مثل [Router] [TCP/IP]) ── */
+      .net-tag {
+        display: inline-block;
+        background: linear-gradient(135deg, rgba(108,47,160,0.25), rgba(0,201,177,0.15));
+        border: 1px solid rgba(0,201,177,0.4);
+        color: #00c9b1;
+        font-family: 'Cairo', 'Consolas', monospace;
+        font-weight: 700;
+        font-size: 0.85em;
+        padding: 0.1em 0.55em;
+        border-radius: 6px;
+        margin: 0 0.15em;
+        vertical-align: baseline;
+        white-space: nowrap;
+        line-height: 1.5;
+        direction: ltr;
+        unicode-bidi: isolate;
+      }
+
       /* ══ التخطيطات الجاهزة (Layouts) ══ */
       .layout-2col {
         display: grid;
@@ -962,7 +981,7 @@ window._getFullEditorConfig = function (selector, options = {}) {
               text: "🖼️ ➕ 📝  صورة (يمين) + نص",
               onAction: () => editor.insertContent(`
                 <div class="layout-img-text">
-                  <img src="https://via.placeholder.com/280x180/6c2fa0/ffffff?text=ضع+الصورة+هنا" alt="">
+                  <img src="data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%236c2fa0"/><stop offset="100%" stop-color="%2300c9b1"/></linearGradient></defs><rect width="320" height="200" fill="url(%23g)" rx="8"/><circle cx="100" cy="80" r="20" fill="rgba(255,255,255,0.3)"/><polygon points="60,150 130,90 180,130 260,60 260,170 60,170" fill="rgba(255,255,255,0.25)"/><text x="160" y="190" text-anchor="middle" fill="white" font-family="Cairo,Arial" font-size="13" font-weight="700">انقر على الصورة لتغييرها</text></svg>')}" alt="استبدل بصورتك">
                   <div>
                     <h3>عنوان فرعي</h3>
                     <p>اكتب النص هنا. هذا التخطيط يضع الصورة على اليمين والنص على اليسار. على الجوال يصبح النص تحت الصورة تلقائياً.</p>
@@ -980,7 +999,7 @@ window._getFullEditorConfig = function (selector, options = {}) {
                     <h3>عنوان فرعي</h3>
                     <p>اكتب النص هنا. هذا التخطيط يضع النص على اليمين والصورة على اليسار. على الجوال يصبح النص فوق الصورة تلقائياً.</p>
                   </div>
-                  <img src="https://via.placeholder.com/280x180/00c9b1/ffffff?text=ضع+الصورة+هنا" alt="">
+                  <img src="data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%2300c9b1"/><stop offset="100%" stop-color="%236c2fa0"/></linearGradient></defs><rect width="320" height="200" fill="url(%23g)" rx="8"/><circle cx="100" cy="80" r="20" fill="rgba(255,255,255,0.3)"/><polygon points="60,150 130,90 180,130 260,60 260,170 60,170" fill="rgba(255,255,255,0.25)"/><text x="160" y="190" text-anchor="middle" fill="white" font-family="Cairo,Arial" font-size="13" font-weight="700">انقر على الصورة لتغييرها</text></svg>')}" alt="استبدل بصورتك">
                 </div>
                 <p>&nbsp;</p>
               `),
@@ -1074,16 +1093,88 @@ window._initTinyMCE = function () {
    نافذة اختيار الأيقونات (تُستخدم من زر customIcons في TinyMCE)
 ══════════════════════════════════════════════════════ */
 const ICON_LIBRARY = {
-  "شبكات وإنترنت": ["🌐","📡","📶","🛰️","📻","📺","📱","💻","🖥️","⌨️","🖱️","🖨️","💾","💿","📀","🔌","🔋","📞","☎️","📠","📟"],
-  "أمان وحماية":   ["🔒","🔓","🔐","🔑","🗝️","🛡️","🔏","🚨","⚠️","❗","❓","✅","❌","⛔","🚫","👁️","👤","👥","🕵️","🔍","🔎"],
-  "ملفات وبيانات": ["📁","📂","🗂️","📄","📃","📑","📊","📈","📉","📋","📌","📍","📎","🖇️","📐","📏","✂️","📝","✏️","🖊️","🖋️","📔","📕","📗","📘","📙","📚","📖","🔖"],
-  "أجهزة ومكونات": ["⚙️","🔧","🔨","🛠️","⚡","💡","🔦","🎛️","🎚️","🎮","🕹️","💎","🧲","🧰","🧪","🧬","🔬","🔭","📸","📷","🎥","📹"],
-  "تواصل ورسائل":  ["📧","📨","📩","📤","📥","📬","📭","📮","💬","💭","🗨️","🗯️","📣","📢","🔔","🔕","📯","📡"],
-  "علامات وأسهم":  ["➡️","⬅️","⬆️","⬇️","↗️","↘️","↙️","↖️","↔️","↕️","🔄","🔁","🔂","⤴️","⤵️","🔼","🔽","⏫","⏬","▶️","◀️","⏸️","⏹️","⏺️","⏭️","⏮️","⏩","⏪"],
-  "أرقام ونقاط":   ["①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟","•","◦","▪","▫","■","□","●","○"],
-  "تعليم وعلوم":   ["🎓","📚","📖","🏫","🎒","📝","🧮","🔬","🧪","🧬","⚗️","🧫","💊","🩺","🧠","🫀","🔢","🔡","🔤","📐","📏"],
-  "حالات وتقييم":  ["⭐","🌟","✨","💫","⚡","🔥","💯","👍","👎","👌","👏","🙌","💪","🎯","🏆","🥇","🥈","🥉","🏅","🎖️","✔️","☑️","✖️"],
-  "وقت ومؤقّت":    ["⏰","⏱️","⏲️","🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛","📅","📆","🗓️","⌚","⏳","⌛"],
+  /* ══ تخصص الشبكات والإنترنت (المحور الرئيسي) ══ */
+  "شبكات وإنترنت": [
+    "🌐","🌍","🌎","🌏","📡","📶","🛰️","📻","📺","📱","💻","🖥️","⌨️","🖱️","🖨️","💾","💿","📀","🔌","🔋","📞","☎️","📠","📟","📲","🖧","🖶","🌀","💽","🧿"
+  ],
+  "أجهزة شبكات (نصية)": [
+    "[Router]","[Switch]","[Hub]","[Modem]","[Bridge]","[Gateway]","[AP]","[Firewall]","[Server]","[Client]","[NIC]","[Repeater]","[PoE]","[ISP]","[Proxy]","[Load Balancer]","[VPN]","[NAT]","[DHCP]","[DNS]"
+  ],
+  "بروتوكولات وعناوين": [
+    "[TCP/IP]","[UDP]","[HTTP]","[HTTPS]","[FTP]","[SFTP]","[SSH]","[Telnet]","[SMTP]","[POP3]","[IMAP]","[ICMP]","[ARP]","[RARP]","[OSPF]","[BGP]","[RIP]","[STP]","[VLAN]","[MAC]","[IPv4]","[IPv6]","[CIDR]","[Subnet]","[Port]","[Socket]"
+  ],
+  "نماذج الشبكات": [
+    "[OSI]","[TCP/IP Model]","[L1: Physical]","[L2: Data Link]","[L3: Network]","[L4: Transport]","[L5: Session]","[L6: Presentation]","[L7: Application]","[Frame]","[Packet]","[Segment]","[Datagram]","[PDU]","[Header]","[Payload]","[Trailer]"
+  ],
+  "طبولوجيا الشبكات": [
+    "🌟","🔄","🔗","➰","⬢","⬡","🔘","◉","◎","○","●","━","┃","╋","╬","┳","┻","┣","┫","╔","╗","╚","╝","║","═","╠","╣","╦","╩","╤","╧","╪","╫","╳","✕","✚","✦","✧","◈","◇","◆"
+  ],
+  "كابلات ووسائط": [
+    "🔌","[UTP]","[STP]","[Coaxial]","[Fiber Optic]","[RJ45]","[RJ11]","[BNC]","[SC]","[LC]","[ST]","[Cat5]","[Cat5e]","[Cat6]","[Cat6a]","[Cat7]","[Cat8]","[100m]","[1Gbps]","[10Gbps]","[Singlemode]","[Multimode]","[Crossover]","[Straight]"
+  ],
+  "أنواع الشبكات": [
+    "[LAN]","[WAN]","[MAN]","[PAN]","[CAN]","[SAN]","[VLAN]","[VPN]","[WLAN]","[WMAN]","[WWAN]","[Intranet]","[Extranet]","[Internet]","[Cloud]","[Edge]","[Mesh]","[Star]","[Bus]","[Ring]","[Tree]","[Hybrid]","[P2P]","[Client/Server]"
+  ],
+  "اتصال لاسلكي": [
+    "📶","📡","🛰️","[Wi-Fi]","[Bluetooth]","[NFC]","[5G]","[4G]","[3G]","[LTE]","[2.4GHz]","[5GHz]","[6GHz]","[802.11a]","[802.11b]","[802.11g]","[802.11n]","[802.11ac]","[802.11ax]","[Wi-Fi 6]","[Wi-Fi 7]","[SSID]","[WPA]","[WPA2]","[WPA3]","[WEP]","[WPS]"
+  ],
+
+  /* ══ الأمان (محور رئيسي ثانٍ) ══ */
+  "أمان وحماية": [
+    "🔒","🔓","🔐","🔑","🗝️","🛡️","🔏","🚨","⚠️","❗","❓","✅","❌","⛔","🚫","👁️","👤","👥","🕵️","🔍","🔎","🛂","🛃","🛅","🆔"
+  ],
+  "تهديدات سيبرانية": [
+    "[Malware]","[Virus]","[Worm]","[Trojan]","[Ransomware]","[Spyware]","[Adware]","[Rootkit]","[Phishing]","[Spear Phishing]","[DDoS]","[DoS]","[MITM]","[SQL Injection]","[XSS]","[CSRF]","[Brute Force]","[Zero-Day]","[Backdoor]","[Botnet]","[Exploit]","[Sniffing]","[Spoofing]","[Social Engineering]"
+  ],
+  "حماية وتشفير": [
+    "[Firewall]","[IDS]","[IPS]","[Antivirus]","[Encryption]","[Decryption]","[AES]","[RSA]","[SHA-256]","[MD5]","[SSL]","[TLS]","[PGP]","[2FA]","[MFA]","[Hash]","[Digital Signature]","[Certificate]","[CA]","[PKI]","[Token]","[Biometric]","[OAuth]","[JWT]","[SSO]"
+  ],
+
+  /* ══ القياسات والوحدات ══ */
+  "وحدات قياس وسرعات": [
+    "[bps]","[Kbps]","[Mbps]","[Gbps]","[Tbps]","[Bytes]","[KB]","[MB]","[GB]","[TB]","[PB]","[Hz]","[KHz]","[MHz]","[GHz]","[ms]","[μs]","[ns]","[Latency]","[Throughput]","[Bandwidth]","[Jitter]","[Packet Loss]","[RTT]","[Ping]","[QoS]"
+  ],
+  "أرقام ومنافذ شائعة": [
+    "[:20-21]","[:22]","[:23]","[:25]","[:53]","[:67-68]","[:80]","[:110]","[:143]","[:161-162]","[:443]","[:465]","[:587]","[:993]","[:995]","[:3306]","[:3389]","[:5432]","[:8080]","[:8443]","[Well-Known]","[Registered]","[Dynamic]"
+  ],
+
+  /* ══ ملفات وتنظيم ══ */
+  "ملفات وبيانات": [
+    "📁","📂","🗂️","📄","📃","📑","📊","📈","📉","📋","📌","📍","📎","🖇️","📐","📏","✂️","📝","✏️","🖊️","🖋️","📔","📕","📗","📘","📙","📚","📖","🔖","🗃️","🗄️","🗑️"
+  ],
+  "أجهزة ومكونات": [
+    "⚙️","🔧","🔨","🛠️","⚡","💡","🔦","🎛️","🎚️","🎮","🕹️","💎","🧲","🧰","🧪","🧬","🔬","🔭","📸","📷","🎥","📹","🔩","⛓️","🪛","🪚"
+  ],
+  "تواصل ورسائل": [
+    "📧","📨","📩","📤","📥","📬","📭","📮","💬","💭","🗨️","🗯️","📣","📢","🔔","🔕","📯","📡","💌","📜","📰","🗞️"
+  ],
+
+  /* ══ علامات وأسهم (مهمة للمخططات) ══ */
+  "علامات وأسهم": [
+    "➡️","⬅️","⬆️","⬇️","↗️","↘️","↙️","↖️","↔️","↕️","🔄","🔁","🔂","⤴️","⤵️","🔼","🔽","⏫","⏬","▶️","◀️","⏸️","⏹️","⏺️","⏭️","⏮️","⏩","⏪","→","←","↑","↓","↔","↕","⇒","⇐","⇑","⇓","⇔","⇕","⟶","⟵","⟷","↳","↲","↱","↰"
+  ],
+  "أشكال هندسية": [
+    "■","□","▣","▤","▥","▦","▧","▨","▩","◆","◇","◈","●","○","◉","◎","◐","◑","◒","◓","◔","◕","△","▲","▽","▼","◁","◀","▷","▶","◢","◣","◤","◥","★","☆","✦","✧","✩","✪","✫","✬","✭","✮"
+  ],
+  "أرقام ونقاط": [
+    "①","②","③","④","⑤","⑥","⑦","⑧","⑨","⑩","⑪","⑫","⑬","⑭","⑮","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟","•","◦","▪","▫","‣","⁃","⁌","⁍","◘","◙","Ⓐ","Ⓑ","Ⓒ","Ⓓ","Ⓔ","Ⓕ"
+  ],
+
+  /* ══ تعليم وعلوم ══ */
+  "تعليم وعلوم": [
+    "🎓","📚","📖","🏫","🎒","📝","🧮","🔬","🧪","🧬","⚗️","🧫","💊","🩺","🧠","🫀","🔢","🔡","🔤","📐","📏","🔭","🌡️","🌋","🌌"
+  ],
+  "حالات وتقييم": [
+    "⭐","🌟","✨","💫","⚡","🔥","💯","👍","👎","👌","👏","🙌","💪","🎯","🏆","🥇","🥈","🥉","🏅","🎖️","✔️","☑️","✖️","☒","☐","☑"
+  ],
+  "وقت ومؤقّت": [
+    "⏰","⏱️","⏲️","🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛","📅","📆","🗓️","⌚","⏳","⌛","🌅","🌄","🌇","🌆","🌃","🌉"
+  ],
+
+  /* ══ رياضيات ومنطق ══ */
+  "رياضيات ومنطق": [
+    "+","−","×","÷","=","≠","≈","±","∞","√","∛","∜","∑","∏","∫","∂","∇","∆","∈","∉","⊂","⊃","⊆","⊇","∪","∩","∅","¬","∧","∨","⊕","⊗","≤","≥","<",">","≪","≫","∝","°"
+  ],
 };
 
 function openIconsPicker(editor) {
@@ -1134,16 +1225,23 @@ function openIconsPicker(editor) {
     const f = filter.trim().toLowerCase();
 
     Object.entries(ICON_LIBRARY).forEach(([cat, icons]) => {
+      // البحث: في اسم الفئة أو في الأيقونة نفسها
       const filteredIcons = f
-        ? icons.filter(ic => cat.toLowerCase().includes(f))
+        ? icons.filter(ic => cat.toLowerCase().includes(f) || String(ic).toLowerCase().includes(f))
         : icons;
       if (!filteredIcons.length) return;
 
+      // اكتشاف نوع الفئة: emoji صغيرة أم نصوص طويلة
+      const isTextCategory = filteredIcons.some(ic => String(ic).length > 3);
+
       const group = document.createElement("div");
       group.style.marginBottom = "1.5rem";
+      const gridStyle = isTextCategory
+        ? "display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px;"
+        : "display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px;";
       group.innerHTML = `
-        <div style="font-weight: 800; color: #00c9b1; margin-bottom: 0.6rem; font-size: 0.88rem;">${cat}</div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px;"></div>
+        <div style="font-weight: 800; color: #00c9b1; margin-bottom: 0.6rem; font-size: 0.88rem;">${cat} <span style="color:#6b6f85;font-weight:500;font-size:0.75rem;">(${filteredIcons.length})</span></div>
+        <div style="${gridStyle}"></div>
       `;
       const grid = group.querySelector("div:last-child");
 
@@ -1152,24 +1250,44 @@ function openIconsPicker(editor) {
         btn.type = "button";
         btn.textContent = icon;
         btn.title = icon;
-        btn.style.cssText = `
+        const isText = String(icon).length > 3;
+        btn.style.cssText = isText ? `
+          background: linear-gradient(135deg, rgba(108,47,160,0.18), rgba(0,201,177,0.08));
+          border: 1px solid rgba(108,47,160,0.4); border-radius: 8px;
+          font-family: 'Cairo', monospace; font-size: 0.78rem; font-weight: 700;
+          color: #00c9b1; cursor: pointer; transition: all 0.15s;
+          padding: 0.5rem 0.6rem; display: flex; align-items: center; justify-content: center;
+          min-height: 36px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        ` : `
           aspect-ratio: 1; background: rgba(255,255,255,0.04);
           border: 1px solid rgba(108,47,160,0.25); border-radius: 8px;
           font-size: 1.6rem; cursor: pointer; transition: all 0.15s;
           padding: 0; display: flex; align-items: center; justify-content: center;
         `;
         btn.onmouseenter = () => {
-          btn.style.background = "rgba(0,201,177,0.15)";
-          btn.style.borderColor = "rgba(0,201,177,0.5)";
-          btn.style.transform = "scale(1.1)";
+          btn.style.background = isText
+            ? "linear-gradient(135deg, rgba(0,201,177,0.3), rgba(108,47,160,0.18))"
+            : "rgba(0,201,177,0.15)";
+          btn.style.borderColor = "rgba(0,201,177,0.6)";
+          btn.style.transform = "scale(1.05)";
+          if (isText) btn.style.color = "#fff";
         };
         btn.onmouseleave = () => {
-          btn.style.background = "rgba(255,255,255,0.04)";
-          btn.style.borderColor = "rgba(108,47,160,0.25)";
+          btn.style.background = isText
+            ? "linear-gradient(135deg, rgba(108,47,160,0.18), rgba(0,201,177,0.08))"
+            : "rgba(255,255,255,0.04)";
+          btn.style.borderColor = isText ? "rgba(108,47,160,0.4)" : "rgba(108,47,160,0.25)";
           btn.style.transform = "scale(1)";
+          if (isText) btn.style.color = "#00c9b1";
         };
         btn.onclick = () => {
-          editor.insertContent(icon);
+          // الأيقونات النصية تُدرج بداخل span مميّز لينطبق عليها تنسيق
+          if (isText) {
+            const safe = String(icon).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+            editor.insertContent(`<span class="net-tag">${safe}</span>`);
+          } else {
+            editor.insertContent(icon);
+          }
           overlay.remove();
         };
         grid.appendChild(btn);

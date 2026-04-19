@@ -1226,3 +1226,30 @@ footer .footer-links a:hover { background: var(--primary); color: #fff; }
   .site-search-kbd { display: none; }
   .site-search-footer { font-size: 0.65rem; flex-wrap: wrap; gap: 0.5rem; }
 }
+
+/* 🏷️ الأيقونات النصية للشبكات (مثل [Router] [TCP/IP]) */
+.net-tag {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(108,47,160,0.25), rgba(0,201,177,0.15));
+  border: 1px solid rgba(0,201,177,0.4);
+  color: var(--accent);
+  font-family: 'Cairo', 'Consolas', monospace;
+  font-weight: 700;
+  font-size: 0.85em;
+  padding: 0.1em 0.6em;
+  border-radius: 6px;
+  margin: 0 0.15em;
+  vertical-align: baseline;
+  white-space: nowrap;
+  line-height: 1.6;
+  direction: ltr;
+  unicode-bidi: isolate;
+  box-shadow: 0 2px 6px rgba(0, 201, 177, 0.1);
+  transition: all 0.2s;
+}
+.net-tag:hover {
+  background: linear-gradient(135deg, rgba(0,201,177,0.3), rgba(108,47,160,0.18));
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 201, 177, 0.25);
+}
