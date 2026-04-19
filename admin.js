@@ -774,7 +774,7 @@ window._getFullEditorConfig = function (selector, options = {}) {
     toolbar: [
       "fontfamily fontsize | styles | bold italic underline strikethrough |",
       "forecolor backcolor | alignright aligncenter alignleft alignjustify |",
-      "bullist numlist outdent indent | table | link image emoticons customIcons charmap |",
+      "bullist numlist outdent indent | table | link image emoticons customIcons customLayouts charmap |",
       "blockquote codesample | removeformat | fullscreen preview code | help",
     ].join(" "),
 
@@ -835,8 +835,91 @@ window._getFullEditorConfig = function (selector, options = {}) {
         padding: 6px 10px;
       }
       table th { background: rgba(108,47,160,0.15); font-weight: 700; }
-      img { max-width:100%; border-radius:8px; }
+
+      /* ── 🖼️ إطار وظل تلقائي لكل صورة ── */
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        border: 3px solid rgba(108,47,160,0.35);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 2px 6px rgba(108,47,160,0.2);
+        padding: 4px;
+        background: linear-gradient(135deg, rgba(108,47,160,0.08), rgba(0,201,177,0.08));
+        margin: 8px 0;
+        transition: transform 0.25s, box-shadow 0.25s;
+      }
+      img:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.45), 0 4px 10px rgba(0,201,177,0.25);
+      }
+
+      /* ── محاذاة الصور (TinyMCE يضيف هذه الكلاسات تلقائياً عند الضغط على align) ── */
+      img.align-right, img[style*="float: right"] {
+        float: right; margin: 8px 0 12px 16px; max-width: 50%;
+      }
+      img.align-left, img[style*="float: left"] {
+        float: left; margin: 8px 16px 12px 0; max-width: 50%;
+      }
+      img.align-center, img[style*="display: block"][style*="margin-left: auto"] {
+        display: block; margin: 16px auto; max-width: 80%;
+      }
+
       pre { background:rgba(0,0,0,0.3); padding:0.75rem; border-radius:6px; overflow-x:auto; }
+
+      /* ══ التخطيطات الجاهزة (Layouts) ══ */
+      .layout-2col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin: 1rem 0;
+        align-items: start;
+        clear: both;
+      }
+      .layout-2col > * { min-width: 0; }
+      .layout-2col img { margin: 0; max-width: 100%; }
+
+      .layout-img-text {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1.25rem;
+        margin: 1rem 0;
+        align-items: center;
+        clear: both;
+      }
+      .layout-img-text.reverse { grid-template-columns: 1fr 280px; }
+      .layout-img-text img { margin: 0; max-width: 100%; }
+
+      .text-card {
+        background: linear-gradient(135deg, rgba(108,47,160,0.12), rgba(0,201,177,0.06));
+        border: 1px solid rgba(108,47,160,0.3);
+        border-right: 4px solid #00c9b1;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin: 1rem 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        clear: both;
+      }
+      .text-card h3 { margin-top: 0; color: #00c9b1; }
+      .text-card p:last-child { margin-bottom: 0; }
+
+      .info-box {
+        background: rgba(0,201,177,0.08);
+        border: 1px solid rgba(0,201,177,0.3);
+        border-right: 4px solid #00c9b1;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin: 1rem 0;
+        clear: both;
+      }
+      .warn-box {
+        background: rgba(255,152,0,0.08);
+        border: 1px solid rgba(255,152,0,0.3);
+        border-right: 4px solid #ff9800;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin: 1rem 0;
+        clear: both;
+      }
     `,
 
     height:      opts.height      || 450,
@@ -867,6 +950,95 @@ window._getFullEditorConfig = function (selector, options = {}) {
         tooltip: "إدراج أيقونة",
         onAction: () => openIconsPicker(editor),
       });
+
+      // ── زر التخطيطات الجاهزة (📐 Layouts) ──
+      editor.ui.registry.addMenuButton("customLayouts", {
+        text: "📐 تخطيطات",
+        tooltip: "إدراج تخطيط جاهز",
+        fetch: (callback) => {
+          const items = [
+            {
+              type: "menuitem",
+              text: "🖼️ ➕ 📝  صورة (يمين) + نص",
+              onAction: () => editor.insertContent(`
+                <div class="layout-img-text">
+                  <img src="https://via.placeholder.com/280x180/6c2fa0/ffffff?text=ضع+الصورة+هنا" alt="">
+                  <div>
+                    <h3>عنوان فرعي</h3>
+                    <p>اكتب النص هنا. هذا التخطيط يضع الصورة على اليمين والنص على اليسار. على الجوال يصبح النص تحت الصورة تلقائياً.</p>
+                  </div>
+                </div>
+                <p>&nbsp;</p>
+              `),
+            },
+            {
+              type: "menuitem",
+              text: "📝 ➕ 🖼️  نص + صورة (يسار)",
+              onAction: () => editor.insertContent(`
+                <div class="layout-img-text reverse">
+                  <div>
+                    <h3>عنوان فرعي</h3>
+                    <p>اكتب النص هنا. هذا التخطيط يضع النص على اليمين والصورة على اليسار. على الجوال يصبح النص فوق الصورة تلقائياً.</p>
+                  </div>
+                  <img src="https://via.placeholder.com/280x180/00c9b1/ffffff?text=ضع+الصورة+هنا" alt="">
+                </div>
+                <p>&nbsp;</p>
+              `),
+            },
+            {
+              type: "menuitem",
+              text: "📰 ➕ 📰  عمودان متساويان",
+              onAction: () => editor.insertContent(`
+                <div class="layout-2col">
+                  <div>
+                    <h3>العمود الأول</h3>
+                    <p>محتوى العمود الأول هنا.</p>
+                  </div>
+                  <div>
+                    <h3>العمود الثاني</h3>
+                    <p>محتوى العمود الثاني هنا.</p>
+                  </div>
+                </div>
+                <p>&nbsp;</p>
+              `),
+            },
+            { type: "separator" },
+            {
+              type: "menuitem",
+              text: "🃏 مربع نص بإطار",
+              onAction: () => editor.insertContent(`
+                <div class="text-card">
+                  <h3>عنوان البطاقة</h3>
+                  <p>اكتب محتوى البطاقة هنا. يمكنك تنسيق النص بحرية.</p>
+                </div>
+                <p>&nbsp;</p>
+              `),
+            },
+            {
+              type: "menuitem",
+              text: "💡 صندوق معلومة (فيروزي)",
+              onAction: () => editor.insertContent(`
+                <div class="info-box">
+                  <strong>💡 معلومة:</strong> اكتب المعلومة المهمة هنا.
+                </div>
+                <p>&nbsp;</p>
+              `),
+            },
+            {
+              type: "menuitem",
+              text: "⚠️ صندوق تحذير (برتقالي)",
+              onAction: () => editor.insertContent(`
+                <div class="warn-box">
+                  <strong>⚠️ تنبيه:</strong> اكتب التحذير هنا.
+                </div>
+                <p>&nbsp;</p>
+              `),
+            },
+          ];
+          callback(items);
+        },
+      });
+
       // setup إضافي خاص بكل محرر
       if (typeof opts.extraSetup === "function") {
         opts.extraSetup(editor);

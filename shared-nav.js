@@ -107,6 +107,7 @@
           <span class="nav-current-sep">›</span>
           <span class="nav-current-label">${currentLabel}</span>
         </div>
+        <button class="nav-search-btn" id="navSearchBtn" aria-label="بحث في الموقع" title="بحث (Ctrl+K)">🔍</button>
         <a href="login.html" class="nav-login-btn ${loginActive}" aria-label="تسجيل الدخول">
           <span class="nav-login-icon">🔐</span>
           <span class="nav-login-text">تسجيل الدخول</span>
@@ -480,8 +481,316 @@
     document.head.appendChild(style);
   }
 
+  /* ════════════════════════════════════════════════════
+     🔍 نظام البحث الموحّد في الموقع
+     يبحث في: الصفحات، المقالات، محتوى الصفحات (overrides)
+     يفتح بضغطة 🔍 أو Ctrl+K
+  ════════════════════════════════════════════════════ */
+  let _searchData = null;       // البيانات المحفوظة (cache)
+  let _searchLoading = false;
+  let _searchSelectedIdx = -1;
+  let _searchOpen = false;
+
+  async function _fetchSearchData() {
+    if (_searchData || _searchLoading) return _searchData;
+    _searchLoading = true;
+    try {
+      const items = [];
+
+      // 1. الصفحات الثابتة (موجودة دائماً)
+      staticPages.forEach(p => {
+        if (p.href === 'index.html') return; // تخطّ الرئيسية
+        items.push({
+          type: 'page',
+          typeLabel: 'صفحة',
+          icon: p.icon,
+          title: p.label,
+          snippet: 'صفحة تعليمية أساسية',
+          href: p.href,
+        });
+      });
+
+      // 2. الصفحات الديناميكية + المقالات + المحتوى — جلب متوازي
+      const [sitePagesRes, articlesRes] = await Promise.all([
+        fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/sitePages`).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/articles`).then(r => r.ok ? r.json() : null).catch(() => null),
+      ]);
+
+      if (sitePagesRes?.documents?.length) {
+        const STATIC_IDS = new Set(["networks","security","osi","cables","ip"]);
+        sitePagesRes.documents.forEach(docRef => {
+          const pageId = docRef.name.split("/").pop();
+          if (STATIC_IDS.has(pageId)) return;
+          const f = docRef.fields || {};
+          const name = f.name?.stringValue;
+          if (!name) return;
+          items.push({
+            type: 'page',
+            typeLabel: 'صفحة',
+            icon: f.icon?.stringValue || '📄',
+            title: name,
+            snippet: f.description?.stringValue || 'صفحة جديدة',
+            href: `page.html?id=${pageId}`,
+          });
+        });
+      }
+
+      if (articlesRes?.documents?.length) {
+        articlesRes.documents.forEach(docRef => {
+          const id = docRef.name.split("/").pop();
+          const f = docRef.fields || {};
+          const title = f.title?.stringValue;
+          const content = f.content?.stringValue || '';
+          if (!title) return;
+          // إزالة HTML للحصول على snippet نظيف
+          const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          items.push({
+            type: 'article',
+            typeLabel: 'مقال',
+            icon: '📝',
+            title,
+            snippet: text.substring(0, 180) + (text.length > 180 ? '…' : ''),
+            href: `article.html?id=${id}`,
+            // كامل النص للبحث (لا يُعرض)
+            _searchText: text.toLowerCase(),
+          });
+        });
+      }
+
+      _searchData = items;
+      return items;
+    } finally {
+      _searchLoading = false;
+    }
+  }
+
+  /* ── إنشاء overlay البحث (مرة واحدة) ── */
+  function _ensureSearchOverlay() {
+    if (document.getElementById('siteSearchOverlay')) return;
+
+    const ov = document.createElement('div');
+    ov.id = 'siteSearchOverlay';
+    ov.className = 'site-search-overlay';
+    ov.innerHTML = `
+      <div class="site-search-box" role="dialog" aria-label="بحث في الموقع">
+        <div class="site-search-input-wrap">
+          <span class="site-search-icon">🔍</span>
+          <input type="search" class="site-search-input" id="siteSearchInput"
+                 placeholder="ابحث في الموقع — صفحات، مقالات، محتوى..."
+                 autocomplete="off" spellcheck="false">
+          <span class="site-search-kbd">ESC</span>
+          <button class="site-search-close" id="siteSearchClose" aria-label="إغلاق">✕</button>
+        </div>
+        <div class="site-search-results" id="siteSearchResults">
+          <div class="site-search-empty">
+            <div class="icon">⌨️</div>
+            <div class="msg">ابدأ الكتابة للبحث</div>
+            <div class="hint">يمكنك البحث في كل صفحات الموقع والمقالات</div>
+          </div>
+        </div>
+        <div class="site-search-footer">
+          <span><kbd>↑↓</kbd> تنقّل</span>
+          <span><kbd>↵</kbd> فتح</span>
+          <span><kbd>ESC</kbd> إغلاق</span>
+          <span style="margin-right:auto;">Ctrl+K للفتح السريع</span>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(ov);
+
+    const input = document.getElementById('siteSearchInput');
+    const closeBtn = document.getElementById('siteSearchClose');
+
+    // إغلاق بالضغط خارج الصندوق
+    ov.addEventListener('click', (e) => { if (e.target === ov) closeSiteSearch(); });
+    closeBtn.addEventListener('click', closeSiteSearch);
+
+    // البحث المباشر مع debounce بسيط
+    let debounceTimer;
+    input.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => _runSearch(e.target.value), 80);
+    });
+
+    // تنقّل بالأسهم
+    input.addEventListener('keydown', (e) => {
+      const items = ov.querySelectorAll('.site-search-result');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        _searchSelectedIdx = Math.min(_searchSelectedIdx + 1, items.length - 1);
+        _updateSearchSelection();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        _searchSelectedIdx = Math.max(_searchSelectedIdx - 1, 0);
+        _updateSearchSelection();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (_searchSelectedIdx >= 0 && items[_searchSelectedIdx]) {
+          items[_searchSelectedIdx].click();
+        } else if (items.length > 0) {
+          items[0].click();
+        }
+      }
+    });
+  }
+
+  function _updateSearchSelection() {
+    const items = document.querySelectorAll('#siteSearchResults .site-search-result');
+    items.forEach((it, i) => it.classList.toggle('selected', i === _searchSelectedIdx));
+    if (items[_searchSelectedIdx]) {
+      items[_searchSelectedIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+
+  function _highlight(text, query) {
+    if (!query || !text) return text;
+    const safe = String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    try {
+      const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return safe.replace(re, '<mark>$1</mark>');
+    } catch(e) { return safe; }
+  }
+
+  async function _runSearch(query) {
+    const resultsEl = document.getElementById('siteSearchResults');
+    if (!resultsEl) return;
+    _searchSelectedIdx = -1;
+    query = (query || '').trim();
+
+    if (!query) {
+      resultsEl.innerHTML = `
+        <div class="site-search-empty">
+          <div class="icon">⌨️</div>
+          <div class="msg">ابدأ الكتابة للبحث</div>
+          <div class="hint">يمكنك البحث في كل صفحات الموقع والمقالات</div>
+        </div>`;
+      return;
+    }
+
+    // لو البيانات لم تُحمّل بعد
+    if (!_searchData) {
+      resultsEl.innerHTML = `
+        <div class="site-search-loading">
+          <div class="spinner"></div>
+          <div class="msg">جاري تحميل بيانات البحث...</div>
+        </div>`;
+      await _fetchSearchData();
+    }
+
+    if (!_searchData || _searchData.length === 0) {
+      resultsEl.innerHTML = `
+        <div class="site-search-empty">
+          <div class="icon">😕</div>
+          <div class="msg">لا توجد بيانات للبحث</div>
+        </div>`;
+      return;
+    }
+
+    const q = query.toLowerCase();
+    // ترتيب: العنوان (أعلى)، ثم النص
+    const matches = _searchData
+      .map(item => {
+        const titleHit = item.title.toLowerCase().includes(q);
+        const snippetHit = (item.snippet || '').toLowerCase().includes(q);
+        const fullHit = item._searchText && item._searchText.includes(q);
+        if (!titleHit && !snippetHit && !fullHit) return null;
+        let score = 0;
+        if (titleHit) score += 10;
+        if (snippetHit) score += 5;
+        if (fullHit) score += 1;
+        return { ...item, _score: score };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b._score - a._score)
+      .slice(0, 30);
+
+    if (matches.length === 0) {
+      resultsEl.innerHTML = `
+        <div class="site-search-empty">
+          <div class="icon">🔍</div>
+          <div class="msg">لا توجد نتائج لـ "${_highlight(query, '')}"</div>
+          <div class="hint">جرّب كلمات أخرى أو تحقق من الإملاء</div>
+        </div>`;
+      return;
+    }
+
+    // تجميع حسب النوع
+    const grouped = { page: [], article: [] };
+    matches.forEach(m => grouped[m.type]?.push(m));
+
+    let html = '';
+    if (grouped.page.length) {
+      html += `<div class="site-search-section">📚 الصفحات (${grouped.page.length})</div>`;
+      grouped.page.forEach(m => {
+        html += `
+          <a href="${m.href}" class="site-search-result">
+            <div class="site-search-result-icon">${m.icon}</div>
+            <div class="site-search-result-body">
+              <div class="site-search-result-title">${_highlight(m.title, query)}</div>
+              <div class="site-search-result-snippet">${_highlight(m.snippet, query)}</div>
+            </div>
+            <div class="site-search-result-arrow">←</div>
+          </a>`;
+      });
+    }
+    if (grouped.article.length) {
+      html += `<div class="site-search-section">📝 المقالات (${grouped.article.length})</div>`;
+      grouped.article.forEach(m => {
+        html += `
+          <a href="${m.href}" class="site-search-result">
+            <div class="site-search-result-icon">${m.icon}</div>
+            <div class="site-search-result-body">
+              <div class="site-search-result-title">${_highlight(m.title, query)}</div>
+              <div class="site-search-result-snippet">${_highlight(m.snippet, query)}</div>
+            </div>
+            <div class="site-search-result-arrow">←</div>
+          </a>`;
+      });
+    }
+    resultsEl.innerHTML = html;
+  }
+
+  window.openSiteSearch = function() {
+    _ensureSearchOverlay();
+    const ov = document.getElementById('siteSearchOverlay');
+    const input = document.getElementById('siteSearchInput');
+    ov.classList.add('open');
+    _searchOpen = true;
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => input?.focus(), 50);
+    // تحميل البيانات في الخلفية لو لم تُحمّل بعد
+    if (!_searchData) _fetchSearchData();
+  };
+
+  window.closeSiteSearch = function() {
+    const ov = document.getElementById('siteSearchOverlay');
+    if (!ov) return;
+    ov.classList.remove('open');
+    _searchOpen = false;
+    document.body.style.overflow = '';
+    const input = document.getElementById('siteSearchInput');
+    if (input) input.value = '';
+    _runSearch('');
+  };
+
+  // اختصار Ctrl+K / Cmd+K
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      _searchOpen ? closeSiteSearch() : openSiteSearch();
+    } else if (e.key === 'Escape' && _searchOpen) {
+      closeSiteSearch();
+    }
+  });
+
   /* بناء الشريط فوراً */
   buildNav();
+
+  // ربط زر البحث بعد بناء الشريط (التأخير ضمان)
+  setTimeout(() => {
+    const searchBtn = document.getElementById('navSearchBtn');
+    if (searchBtn) searchBtn.addEventListener('click', openSiteSearch);
+  }, 100);
 
   /* ══ scroll-to-top ══ */
   const btn = document.createElement('button');
