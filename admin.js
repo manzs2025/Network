@@ -1391,6 +1391,9 @@ async function _htmlToPDF(htmlContent, filename = "report.pdf") {
     width: 794px; background: #ffffff; color: #222;
     font-family: 'Cairo', sans-serif; direction: rtl;
     padding: 40px; box-sizing: border-box;
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   `;
   temp.innerHTML = htmlContent;
   document.body.appendChild(temp);
@@ -1399,12 +1402,19 @@ async function _htmlToPDF(htmlContent, filename = "report.pdf") {
     // انتظار تحميل الخط
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
 
+    // انتظار إضافي لضمان تطبيق text-shaping للعربية
+    // (html2canvas قد يلتقط قبل أن يطبّق المتصفح ربط الحروف)
+    await new Promise(r => setTimeout(r, 250));
+
     // التقاط صورة بجودة عالية
     const canvas = await html2canvas(temp, {
       scale: 2,
       useCORS: true,
       backgroundColor: "#ffffff",
       logging: false,
+      letterRendering: true,
+      allowTaint: true,
+      foreignObjectRendering: false, // أهم: يمنع كسر العربية الكبيرة
     });
 
     // إنشاء PDF
@@ -2096,8 +2106,32 @@ async function _qrBuildPDFHtml(data, withCharts) {
         border-radius:20px; font-size:0.75rem; font-weight:700; margin-bottom:0.9rem;
         border:1px solid rgba(255,255,255,0.3);
       }
-      .qr-hero-title { font-size:1.9rem; font-weight:900; margin-bottom:0.4rem; letter-spacing:-0.5px; position:relative; z-index:2; }
-      .qr-hero-sub { font-size:1rem; opacity:0.92; font-weight:500; position:relative; z-index:2; }
+      .qr-hero-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin-bottom: 0.4rem;
+        letter-spacing: 0;
+        position: relative;
+        z-index: 2;
+        font-family: 'Cairo', 'Tajawal', 'Arial', sans-serif;
+        /* حل مشكلة html2canvas مع العربية الكبيرة */
+        line-height: 1.4;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        direction: rtl;
+        unicode-bidi: embed;
+      }
+      .qr-hero-sub {
+        font-size: 1.05rem;
+        opacity: 0.95;
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+        font-family: 'Cairo', 'Tajawal', 'Arial', sans-serif;
+        line-height: 1.5;
+        direction: rtl;
+        unicode-bidi: embed;
+      }
       .qr-hero-meta {
         margin-top:1.2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.2);
         display:flex; gap:2rem; flex-wrap:wrap; font-size:0.82rem; position:relative; z-index:2;
@@ -2311,7 +2345,9 @@ async function _qrBuildPDFHtml(data, withCharts) {
       <!-- Hero -->
       <div class="qr-hero">
         <div class="qr-hero-badge">🎓 أكاديمية الشبكات — الكلية التقنية بالمندق</div>
-        <div class="qr-hero-title">📊 تقرير الاختبار</div>
+        <div class="qr-hero-title">
+          <span style="display:inline-block;margin-left:0.5rem;font-size:1.4rem;vertical-align:middle;">📊</span><span style="display:inline-block;vertical-align:middle;">تقرير الاختبار</span>
+        </div>
         <div class="qr-hero-sub">${_escHtml(quiz.title || "—")}</div>
         <div class="qr-hero-meta">
           <span>📅 <strong>تاريخ التوليد:</strong> ${dateStr}</span>
