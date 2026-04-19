@@ -515,6 +515,7 @@ window.loadQuizzes = async function() {
           </td>
           <td><span class="qz-date">${dateStr}</span></td>
           <td style="white-space:nowrap">
+            <button class="art-edit-btn" style="background:rgba(255,193,7,0.12);color:#ffc107;border-color:rgba(255,193,7,0.3)" onclick="openQuizReportModal('${s.id}','${d.title.replace(/'/g,"\\'")}')" title="تقرير الاختبار">📊 تقرير</button>
             <button class="art-edit-btn" onclick="editQuiz('${s.id}')">✏️ تعديل</button>
             <button class="qz-del-btn" onclick="deleteQuiz('${s.id}','${d.title.replace(/'/g,"\\'")}')">🗑️</button>
           </td>
@@ -1648,6 +1649,896 @@ window.exportResultsToPDF = async function () {
     console.error(e);
   }
 };
+
+/* ══════════════════════════════════════════════════════
+   📊 نظام تقارير الاختبارات (Quiz Reports System)
+   ═══════════════════════════════════════════════════════
+   - زر "📊 تقرير" في جدول الاختبارات
+   - Modal بثلاثة خيارات: مختصر / شامل / Excel
+   - Cache 5 دقائق لمنع القراءات المكررة
+   - تحذير لو > 500 متدرب
+   - تصميم PDF مميّز بهوية الأكاديمية
+══════════════════════════════════════════════════════ */
+
+window._quizReportCache = window._quizReportCache || {};
+const QUIZ_REPORT_CACHE_TTL = 5 * 60 * 1000; // 5 دقائق
+const QUIZ_REPORT_WARN_THRESHOLD = 500;      // تحذير فوق هذا العدد
+
+/* ── فتح مودال التقرير ── */
+window.openQuizReportModal = function(quizId, quizTitle) {
+  // إنشاء المودال لو غير موجود
+  let modal = document.getElementById("quizReportModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "quizReportModal";
+    modal.className = "tr-modal-overlay";
+    modal.style.cssText = "display:none;";
+    modal.innerHTML = `
+      <div class="tr-modal" style="max-width:560px;">
+        <div class="tr-modal-header">
+          <div class="tr-modal-title">📊 تقرير الاختبار</div>
+          <button class="tr-modal-close" onclick="closeQuizReportModal()">✕</button>
+        </div>
+
+        <div id="quizReportQuizInfo" style="padding:0.9rem 1rem;background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.25);border-radius:10px;margin-bottom:1.1rem;font-size:0.88rem;">
+          <div style="color:var(--text-muted);font-size:0.75rem;margin-bottom:3px;">الاختبار المختار:</div>
+          <div id="quizReportTitle" style="color:var(--text);font-weight:800;"></div>
+          <div id="quizReportStats" style="color:var(--text-muted);font-size:0.78rem;margin-top:6px;"></div>
+        </div>
+
+        <div id="quizReportWarning" style="display:none;padding:0.75rem 1rem;background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.3);border-radius:10px;margin-bottom:1rem;color:#ffb74d;font-size:0.82rem;line-height:1.6;"></div>
+
+        <div style="display:grid;gap:0.65rem;">
+          <button class="qr-option-btn" data-type="short" onclick="generateQuizReport('short')">
+            <div class="qr-opt-icon">📄</div>
+            <div class="qr-opt-body">
+              <div class="qr-opt-title">تقرير مختصر (PDF)</div>
+              <div class="qr-opt-desc">جداول النتائج والإحصائيات — سريع وخفيف</div>
+            </div>
+            <div class="qr-opt-arrow">←</div>
+          </button>
+
+          <button class="qr-option-btn" data-type="full" onclick="generateQuizReport('full')">
+            <div class="qr-opt-icon">📊</div>
+            <div class="qr-opt-body">
+              <div class="qr-opt-title">تقرير شامل (PDF)</div>
+              <div class="qr-opt-desc">مع رسوم بيانية وتحليل مفصّل للأسئلة</div>
+            </div>
+            <div class="qr-opt-arrow">←</div>
+          </button>
+
+          <button class="qr-option-btn" data-type="excel" onclick="generateQuizReport('excel')">
+            <div class="qr-opt-icon">📗</div>
+            <div class="qr-opt-body">
+              <div class="qr-opt-title">تصدير Excel</div>
+              <div class="qr-opt-desc">3 أوراق: النتائج، المتخلّفون، الإحصائيات</div>
+            </div>
+            <div class="qr-opt-arrow">←</div>
+          </button>
+        </div>
+
+        <div id="quizReportProgress" style="display:none;padding:1.25rem;text-align:center;margin-top:1rem;">
+          <div style="width:48px;height:48px;margin:0 auto 0.75rem;border:3px solid rgba(108,47,160,0.2);border-top-color:var(--accent);border-radius:50%;animation:qrSpin 0.85s linear infinite;"></div>
+          <div id="quizReportProgressMsg" style="color:var(--text);font-weight:700;font-size:0.92rem;">جاري التحضير...</div>
+          <div id="quizReportProgressSub" style="color:var(--text-muted);font-size:0.78rem;margin-top:4px;"></div>
+        </div>
+
+        <div id="quizReportMsg" class="tr-modal-msg" style="display:none;"></div>
+
+        <input type="hidden" id="quizReportQuizId" value="">
+      </div>
+    `;
+    document.body.appendChild(modal);
+    _injectQuizReportStyles();
+  }
+
+  // ملء البيانات
+  document.getElementById("quizReportQuizId").value = quizId;
+  document.getElementById("quizReportTitle").textContent = quizTitle;
+  document.getElementById("quizReportStats").innerHTML = "⏳ جارِ فحص البيانات...";
+  document.getElementById("quizReportWarning").style.display = "none";
+  document.getElementById("quizReportProgress").style.display = "none";
+  document.getElementById("quizReportMsg").style.display = "none";
+  _qrSetButtonsEnabled(true);
+
+  modal.style.display = "flex";
+  modal.classList.add("open");
+
+  // استعلام سريع لمعرفة عدد النتائج (قراءة واحدة عبر getCountFromServer)
+  _qrFetchCount(quizId);
+};
+
+window.closeQuizReportModal = function() {
+  const modal = document.getElementById("quizReportModal");
+  if (!modal) return;
+  modal.style.display = "none";
+  modal.classList.remove("open");
+};
+
+/* ── فحص عدد النتائج + عرض التحذير إن لزم ── */
+async function _qrFetchCount(quizId) {
+  try {
+    const cnt = await getCountFromServer(query(collection(db,"results"), where("quizId","==",quizId)));
+    const n = cnt.data().count;
+    const statsEl = document.getElementById("quizReportStats");
+    if (statsEl) statsEl.innerHTML = `📝 عدد النتائج المسجّلة: <strong style="color:var(--accent);">${n}</strong>`;
+
+    if (n > QUIZ_REPORT_WARN_THRESHOLD) {
+      const warnEl = document.getElementById("quizReportWarning");
+      warnEl.style.display = "block";
+      warnEl.innerHTML = `⚠️ <strong>تنبيه:</strong> هذا التقرير سيقرأ ${n} نتيجة + قائمة المتدربين. التوليد قد يستغرق 10-20 ثانية. هل تريد المتابعة؟`;
+    }
+  } catch(e) {
+    // fallback: نجلب العدد بـ getDocs (أغلى)
+    try {
+      const snap = await getDocs(query(collection(db,"results"), where("quizId","==",quizId)));
+      const statsEl = document.getElementById("quizReportStats");
+      if (statsEl) statsEl.innerHTML = `📝 عدد النتائج المسجّلة: <strong style="color:var(--accent);">${snap.size}</strong>`;
+    } catch(e2) {
+      const statsEl = document.getElementById("quizReportStats");
+      if (statsEl) statsEl.innerHTML = `<span style="color:#ff9999;">⚠️ تعذّر قراءة العدد: ${e2.message}</span>`;
+    }
+  }
+}
+
+/* ── تعطيل/تفعيل أزرار المودال ── */
+function _qrSetButtonsEnabled(enabled) {
+  document.querySelectorAll(".qr-option-btn").forEach(b => {
+    b.disabled = !enabled;
+    b.style.opacity = enabled ? "1" : "0.5";
+    b.style.pointerEvents = enabled ? "auto" : "none";
+  });
+}
+
+function _qrProgress(msg, sub = "") {
+  document.getElementById("quizReportProgress").style.display = "block";
+  document.getElementById("quizReportProgressMsg").textContent = msg;
+  document.getElementById("quizReportProgressSub").textContent = sub;
+}
+
+function _qrMsg(text, type = "error") {
+  document.getElementById("quizReportProgress").style.display = "none";
+  const msg = document.getElementById("quizReportMsg");
+  msg.className = `tr-modal-msg ${type}`;
+  msg.innerHTML = text;
+  msg.style.display = "block";
+}
+
+/* ── الدالة الرئيسية: تجميع بيانات التقرير ── */
+async function _qrGatherData(quizId) {
+  // cache
+  const cached = window._quizReportCache[quizId];
+  if (cached && (Date.now() - cached.ts < QUIZ_REPORT_CACHE_TTL)) {
+    return cached.data;
+  }
+
+  _qrProgress("📥 جلب بيانات الاختبار...", "1/3");
+  const qzSnap = await getDoc(doc(db, "quizzes", quizId));
+  if (!qzSnap.exists()) throw new Error("الاختبار غير موجود");
+  const quiz = { id: qzSnap.id, ...qzSnap.data() };
+
+  _qrProgress("👥 جلب قائمة المتدربين...", "2/3");
+  const trSnap = await getDocs(query(collection(db,"users"), where("role","==","trainee")));
+  const trainees = [];
+  trSnap.forEach(s => {
+    const d = s.data();
+    trainees.push({ uid: s.id, name: d.displayName || "—", studentId: d.studentId || "—", email: d.email || "" });
+  });
+
+  _qrProgress("📝 جلب نتائج الاختبار...", "3/3");
+  const rsSnap = await getDocs(query(collection(db,"results"), where("quizId","==",quizId)));
+  const results = [];
+  rsSnap.forEach(s => {
+    const d = s.data();
+    let dateStr = "—";
+    if (d.submittedAt?.toDate) {
+      const dt = d.submittedAt.toDate();
+      dateStr = dt.toLocaleDateString("ar-SA") + " " + dt.toLocaleTimeString("ar-SA");
+    }
+    results.push({
+      id: s.id,
+      userId: d.userId,
+      name: d.displayName || "—",
+      studentId: d.studentId || "—",
+      score: Number(d.score || 0),
+      percentage: Number(d.percentage || 0),
+      passed: !!d.passed,
+      attempt: d.attempt || 1,
+      date: dateStr,
+      // بنية الإجابات (قد تختلف حسب trainee.js)
+      answers: d.answers || d.userAnswers || d.questionResults || null,
+    });
+  });
+
+  // المتدربون الذين لم يحلّوا
+  const solvedIds = new Set(results.map(r => r.userId));
+  const unsolved = trainees.filter(t => !solvedIds.has(t.uid));
+
+  // الإحصائيات
+  const stats = _qrComputeStats(quiz, results);
+
+  const data = { quiz, trainees, results, unsolved, stats, timestamp: Date.now() };
+
+  // حفظ في cache
+  window._quizReportCache[quizId] = { ts: Date.now(), data };
+
+  return data;
+}
+
+/* ── حساب الإحصائيات ── */
+function _qrComputeStats(quiz, results) {
+  const total = results.length;
+  const passed = results.filter(r => r.passed).length;
+  const failed = total - passed;
+  const passRate = total ? Math.round((passed/total)*100) : 0;
+  const failRate = total ? 100 - passRate : 0;
+
+  const scores = results.map(r => r.score);
+  const percentages = results.map(r => r.percentage);
+
+  const avgScore = total ? Math.round(scores.reduce((a,b)=>a+b,0)/total * 10)/10 : 0;
+  const avgPercentage = total ? Math.round(percentages.reduce((a,b)=>a+b,0)/total) : 0;
+  const maxScore = total ? Math.max(...scores) : 0;
+  const minScore = total ? Math.min(...scores) : 0;
+
+  // أفضل/أسوأ متدربين
+  const sorted = [...results].sort((a,b) => b.percentage - a.percentage);
+  const topPerformers  = sorted.slice(0, 3);
+  const lowPerformers  = sorted.slice(-3).reverse();
+
+  // تحليل أسئلة الأخطاء (لو answers متوفرة)
+  const questionStats = _qrAnalyzeQuestions(quiz, results);
+
+  return {
+    total, passed, failed, passRate, failRate,
+    avgScore, avgPercentage, maxScore, minScore,
+    topPerformers, lowPerformers,
+    questionStats,
+    quizTotalScore: quiz.totalScore || 0,
+    quizQuestionCount: quiz.questionCount || quiz.questions?.length || 0
+  };
+}
+
+/* ── تحليل الأسئلة (أيّها أكثر خطأً) ── */
+function _qrAnalyzeQuestions(quiz, results) {
+  if (!quiz.questions?.length || !results.length) return { available: false, items: [] };
+
+  // محاولة اكتشاف بنية الإجابات
+  const sample = results.find(r => r.answers);
+  if (!sample) return { available: false, items: [] };
+
+  const qStats = {};
+  quiz.questions.forEach(q => {
+    qStats[q.id] = {
+      id: q.id,
+      text: q.text || q.question || "—",
+      type: q.type || "—",
+      attempts: 0,
+      correct: 0,
+      wrong: 0,
+    };
+  });
+
+  results.forEach(r => {
+    const ans = r.answers;
+    if (!ans) return;
+
+    // Case 1: answers = array من { questionId, isCorrect } أو { id, correct }
+    if (Array.isArray(ans)) {
+      ans.forEach(a => {
+        const qid = a.questionId || a.id || a.qid;
+        if (!qid || !qStats[qid]) return;
+        qStats[qid].attempts++;
+        const isOk = a.isCorrect === true || a.correct === true || a.right === true;
+        if (isOk) qStats[qid].correct++; else qStats[qid].wrong++;
+      });
+    }
+    // Case 2: answers = object { questionId: { correct: true/false, ... } }
+    else if (typeof ans === "object") {
+      Object.entries(ans).forEach(([qid, v]) => {
+        if (!qStats[qid]) return;
+        qStats[qid].attempts++;
+        const isOk = v?.isCorrect === true || v?.correct === true || v === true;
+        if (isOk) qStats[qid].correct++; else qStats[qid].wrong++;
+      });
+    }
+  });
+
+  const items = Object.values(qStats)
+    .filter(q => q.attempts > 0)
+    .sort((a,b) => b.wrong - a.wrong);
+
+  return {
+    available: items.length > 0,
+    items,
+    // الأسئلة الأكثر خطأً (top 5)
+    worst: items.filter(q => q.wrong > 0).slice(0, 5)
+  };
+}
+
+/* ══ الدخول الرئيسي: توليد التقرير حسب النوع ══ */
+window.generateQuizReport = async function(type) {
+  const quizId = document.getElementById("quizReportQuizId").value;
+  if (!quizId) return;
+
+  _qrSetButtonsEnabled(false);
+  document.getElementById("quizReportMsg").style.display = "none";
+
+  try {
+    const data = await _qrGatherData(quizId);
+
+    _qrProgress("🎨 جاري توليد الملف...", "قد يستغرق بضع ثوانٍ");
+
+    if (type === "excel")       await _qrBuildExcel(data);
+    else if (type === "full")   await _qrBuildPDF(data, true);
+    else                        await _qrBuildPDF(data, false);
+
+    _qrMsg("✅ تم توليد الملف بنجاح. تحقّق من مجلد التنزيلات.", "success");
+    setTimeout(() => closeQuizReportModal(), 2000);
+  } catch(e) {
+    console.error("Quiz report error:", e);
+    _qrMsg("❌ فشل توليد التقرير: " + e.message, "error");
+  } finally {
+    _qrSetButtonsEnabled(true);
+  }
+};
+
+/* ══ Excel — 3 أوراق ══ */
+async function _qrBuildExcel(data) {
+  if (typeof XLSX === "undefined") throw new Error("مكتبة Excel غير متوفرة");
+
+  const { quiz, results, unsolved, stats } = data;
+  const wb = XLSX.utils.book_new();
+
+  // ورقة 1: النتائج
+  const resultsRows = results.map((r, i) => ({
+    "#": i+1,
+    "الاسم": r.name,
+    "الرقم التدريبي": r.studentId,
+    "الدرجة": r.score,
+    "الدرجة الكلية": stats.quizTotalScore,
+    "النسبة %": r.percentage,
+    "النتيجة": r.passed ? "ناجح" : "راسب",
+    "المحاولة": r.attempt,
+    "تاريخ التقديم": r.date,
+  }));
+  const ws1 = XLSX.utils.json_to_sheet(resultsRows);
+  ws1['!cols'] = [{wch:5},{wch:25},{wch:15},{wch:10},{wch:12},{wch:10},{wch:10},{wch:10},{wch:22}];
+  XLSX.utils.book_append_sheet(wb, ws1, "نتائج المتدربين");
+
+  // ورقة 2: المتخلفون
+  const unsolvedRows = unsolved.map((t, i) => ({
+    "#": i+1,
+    "الاسم": t.name,
+    "الرقم التدريبي": t.studentId,
+    "البريد": t.email,
+    "الحالة": "لم يحل الاختبار",
+  }));
+  const ws2 = XLSX.utils.json_to_sheet(unsolvedRows.length ? unsolvedRows : [{"ملاحظة":"جميع المتدربين حلّوا الاختبار 🎉"}]);
+  ws2['!cols'] = [{wch:5},{wch:25},{wch:15},{wch:28},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws2, "لم يحلّوا الاختبار");
+
+  // ورقة 3: الإحصائيات
+  const statsRows = [
+    { "البيان":"عنوان الاختبار", "القيمة": quiz.title || "—" },
+    { "البيان":"عدد الأسئلة", "القيمة": stats.quizQuestionCount },
+    { "البيان":"الدرجة الكلية للاختبار", "القيمة": stats.quizTotalScore },
+    { "البيان":"مدة الاختبار (دقيقة)", "القيمة": quiz.duration || "غير محدد" },
+    { "البيان":"", "القيمة":"" },
+    { "البيان":"عدد المتدربين الذين حلّوا", "القيمة": stats.total },
+    { "البيان":"عدد المتدربين الذين لم يحلّوا", "القيمة": unsolved.length },
+    { "البيان":"", "القيمة":"" },
+    { "البيان":"عدد الناجحين", "القيمة": stats.passed },
+    { "البيان":"عدد الراسبين", "القيمة": stats.failed },
+    { "البيان":"نسبة النجاح %", "القيمة": stats.passRate },
+    { "البيان":"نسبة الرسوب %", "القيمة": stats.failRate },
+    { "البيان":"", "القيمة":"" },
+    { "البيان":"متوسط الدرجات", "القيمة": stats.avgScore },
+    { "البيان":"متوسط النسبة %", "القيمة": stats.avgPercentage },
+    { "البيان":"أعلى درجة", "القيمة": stats.maxScore },
+    { "البيان":"أقل درجة", "القيمة": stats.minScore },
+  ];
+
+  // إضافة تحليل الأسئلة لو متاح
+  if (stats.questionStats.available && stats.questionStats.worst.length) {
+    statsRows.push({ "البيان":"", "القيمة":"" });
+    statsRows.push({ "البيان":"الأسئلة الأكثر خطأً:", "القيمة":"" });
+    stats.questionStats.worst.forEach((q, i) => {
+      const errorRate = q.attempts ? Math.round((q.wrong/q.attempts)*100) : 0;
+      statsRows.push({
+        "البيان": `${i+1}. ${q.text.substring(0, 80)}${q.text.length>80?'…':''}`,
+        "القيمة": `${q.wrong} خطأ من ${q.attempts} (${errorRate}%)`
+      });
+    });
+  }
+
+  const ws3 = XLSX.utils.json_to_sheet(statsRows);
+  ws3['!cols'] = [{wch:45},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, ws3, "الإحصائيات");
+
+  const fname = `تقرير_${(quiz.title||"اختبار").replace(/[\\\/:*?"<>|]/g,"_")}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, fname);
+}
+
+/* ══ PDF ══ */
+async function _qrBuildPDF(data, withCharts) {
+  if (typeof window.jspdf === "undefined" || typeof html2canvas === "undefined") {
+    throw new Error("مكتبات PDF غير متوفرة");
+  }
+
+  const html = await _qrBuildPDFHtml(data, withCharts);
+  const fname = `تقرير_${(data.quiz.title||"اختبار").replace(/[\\\/:*?"<>|]/g,"_")}_${new Date().toISOString().slice(0,10)}.pdf`;
+  await _htmlToPDF(html, fname);
+}
+
+/* ══ بناء HTML للـ PDF (مميّز بهوية الأكاديمية) ══ */
+async function _qrBuildPDFHtml(data, withCharts) {
+  const { quiz, results, unsolved, stats } = data;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("ar-SA", { year:"numeric", month:"long", day:"numeric" });
+
+  // ── CSS مشترك للتقرير (ألوان الأكاديمية على خلفية بيضاء للطباعة) ──
+  const css = `
+    <style>
+      .qr-report { font-family:'Cairo',sans-serif; color:#1a1d30; direction:rtl; background:#fff; }
+      .qr-report * { box-sizing:border-box; }
+      .qr-hero {
+        background: linear-gradient(135deg,#6c2fa0 0%,#8b46c8 50%,#00c9b1 100%);
+        color:#fff; padding:2.5rem 2rem; border-radius:16px; margin-bottom:1.5rem;
+        position:relative; overflow:hidden;
+      }
+      .qr-hero::before { content:""; position:absolute; top:-40px; right:-40px;
+        width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,0.08); }
+      .qr-hero::after { content:""; position:absolute; bottom:-60px; left:-60px;
+        width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,0.06); }
+      .qr-hero-badge {
+        display:inline-block; padding:0.3rem 0.9rem; background:rgba(255,255,255,0.18);
+        border-radius:20px; font-size:0.75rem; font-weight:700; margin-bottom:0.9rem;
+        border:1px solid rgba(255,255,255,0.3);
+      }
+      .qr-hero-title { font-size:1.9rem; font-weight:900; margin-bottom:0.4rem; letter-spacing:-0.5px; position:relative; z-index:2; }
+      .qr-hero-sub { font-size:1rem; opacity:0.92; font-weight:500; position:relative; z-index:2; }
+      .qr-hero-meta {
+        margin-top:1.2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.2);
+        display:flex; gap:2rem; flex-wrap:wrap; font-size:0.82rem; position:relative; z-index:2;
+      }
+      .qr-hero-meta strong { font-weight:800; margin-right:0.3rem; }
+
+      .qr-section { margin-bottom:1.8rem; }
+      .qr-section-title {
+        display:flex; align-items:center; gap:0.5rem;
+        font-size:1.1rem; font-weight:800; color:#1a1d30;
+        padding-bottom:0.5rem; margin-bottom:0.9rem;
+        border-bottom:2px solid transparent;
+        border-image: linear-gradient(90deg,#6c2fa0,#00c9b1) 1;
+      }
+      .qr-section-title .icon { font-size:1.3rem; }
+
+      /* Stat cards */
+      .qr-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:0.7rem; margin-bottom:1rem; }
+      .qr-stat {
+        background:#f8f9fc; border:1px solid #e8eaf6; border-radius:12px;
+        padding:0.9rem; position:relative; overflow:hidden;
+      }
+      .qr-stat::before { content:""; position:absolute; top:0; right:0; bottom:0; width:4px; background:#6c2fa0; }
+      .qr-stat.teal::before { background:#00c9b1; }
+      .qr-stat.green::before { background:#2e7d32; }
+      .qr-stat.red::before { background:#c62828; }
+      .qr-stat.amber::before { background:#f57c00; }
+      .qr-stat-lbl { font-size:0.72rem; color:#666; font-weight:600; margin-bottom:0.3rem; }
+      .qr-stat-val { font-size:1.55rem; font-weight:900; color:#1a1d30; }
+      .qr-stat-sub { font-size:0.7rem; color:#888; margin-top:2px; }
+
+      /* Summary row */
+      .qr-summary {
+        display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;
+      }
+      .qr-summary-card {
+        background:linear-gradient(135deg,#f8f9fc 0%,#eef0f8 100%);
+        border:1px solid #e0e4f0; border-radius:12px; padding:1rem;
+      }
+      .qr-summary-card.pass { border-right:4px solid #2e7d32; }
+      .qr-summary-card.fail { border-right:4px solid #c62828; }
+      .qr-summary-lbl { font-size:0.82rem; color:#555; font-weight:700; margin-bottom:0.5rem; }
+      .qr-summary-big { font-size:2.2rem; font-weight:900; line-height:1; }
+      .qr-summary-big.g { color:#2e7d32; }
+      .qr-summary-big.r { color:#c62828; }
+      .qr-summary-pct { font-size:0.82rem; color:#666; margin-top:0.3rem; }
+
+      /* Progress bar */
+      .qr-bar-wrap { margin-top:0.6rem; background:#eee; border-radius:10px; overflow:hidden; height:8px; }
+      .qr-bar { height:100%; background:linear-gradient(90deg,#6c2fa0,#00c9b1); transition:all 0.4s; }
+
+      /* Tables */
+      .qr-table { width:100%; border-collapse:collapse; font-size:0.8rem; margin-top:0.5rem; border-radius:8px; overflow:hidden; }
+      .qr-table thead { background:linear-gradient(90deg,#6c2fa0 0%,#8b46c8 100%); color:#fff; }
+      .qr-table th { padding:0.6rem 0.7rem; text-align:right; font-weight:800; font-size:0.78rem; }
+      .qr-table td { padding:0.5rem 0.7rem; border-bottom:1px solid #eef0f8; }
+      .qr-table tbody tr:nth-child(even) td { background:#fafbfd; }
+      .qr-table tbody tr:hover td { background:#f0f2fa; }
+      .qr-badge { display:inline-block; padding:0.2rem 0.6rem; border-radius:20px; font-size:0.7rem; font-weight:800; }
+      .qr-badge.pass { background:rgba(46,125,50,0.12); color:#2e7d32; }
+      .qr-badge.fail { background:rgba(198,40,40,0.12); color:#c62828; }
+      .qr-rank {
+        display:inline-flex; width:22px; height:22px; border-radius:50%;
+        background:#6c2fa0; color:#fff; font-weight:900; font-size:0.72rem;
+        align-items:center; justify-content:center;
+      }
+      .qr-rank.gold { background:linear-gradient(135deg,#ffd700,#f9a825); color:#3e2723; }
+      .qr-rank.silver { background:linear-gradient(135deg,#c0c0c0,#9e9e9e); color:#212121; }
+      .qr-rank.bronze { background:linear-gradient(135deg,#cd7f32,#8d5524); color:#fff; }
+
+      .qr-empty { padding:1.5rem; text-align:center; color:#666; font-size:0.85rem;
+        background:#f8f9fc; border-radius:10px; border:1px dashed #c5c9d6; }
+      .qr-empty.success { color:#2e7d32; background:#e8f5e9; border-color:#81c784; }
+
+      /* Question error analysis */
+      .qr-q-item {
+        background:#fff7f0; border:1px solid #ffd4a8; border-right:4px solid #f57c00;
+        border-radius:10px; padding:0.8rem 0.9rem; margin-bottom:0.55rem;
+      }
+      .qr-q-text { font-size:0.84rem; font-weight:700; color:#1a1d30; margin-bottom:0.4rem; line-height:1.55; }
+      .qr-q-stats { display:flex; gap:1rem; font-size:0.75rem; color:#555; }
+      .qr-q-stats b { color:#c62828; font-weight:900; }
+
+      /* Chart card */
+      .qr-chart-wrap {
+        display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;
+      }
+      .qr-chart-card {
+        background:#fff; border:1px solid #e8eaf6; border-radius:12px; padding:1rem;
+        text-align:center;
+      }
+      .qr-chart-title { font-size:0.88rem; font-weight:800; color:#1a1d30; margin-bottom:0.5rem; }
+
+      /* Footer */
+      .qr-footer {
+        margin-top:2rem; padding-top:1rem; border-top:2px dashed #e0e4f0;
+        text-align:center; color:#888; font-size:0.72rem;
+      }
+      .qr-footer strong { color:#6c2fa0; }
+    </style>
+  `;
+
+  // ── رسوم بيانية (لو withCharts) ──
+  let chartsHTML = "";
+  if (withCharts) {
+    chartsHTML = await _qrBuildChartsHTML(stats);
+  }
+
+  // ── جدول النتائج ──
+  const resultsRowsHTML = results.length ? results.map((r, i) => `
+    <tr>
+      <td style="text-align:center;color:#888;">${i+1}</td>
+      <td style="font-weight:700;">${_escHtml(r.name)}</td>
+      <td style="text-align:center;direction:ltr;color:#555;">${_escHtml(r.studentId)}</td>
+      <td style="text-align:center;font-weight:800;color:#6c2fa0;">${r.score} / ${stats.quizTotalScore}</td>
+      <td style="text-align:center;font-weight:700;">${r.percentage}%</td>
+      <td style="text-align:center;"><span class="qr-badge ${r.passed?'pass':'fail'}">${r.passed?'✓ ناجح':'✗ راسب'}</span></td>
+      <td style="text-align:center;color:#888;font-size:0.74rem;">${_escHtml(r.date)}</td>
+    </tr>
+  `).join("") : `<tr><td colspan="7"><div class="qr-empty">لم يحلّ أحد هذا الاختبار بعد</div></td></tr>`;
+
+  // ── أفضل 3 متدربين ──
+  const topHTML = stats.topPerformers.length ? `
+    <table class="qr-table">
+      <thead><tr><th style="width:50px;">الترتيب</th><th>الاسم</th><th style="width:120px;">الرقم التدريبي</th><th style="width:90px;text-align:center;">الدرجة</th><th style="width:90px;text-align:center;">النسبة</th></tr></thead>
+      <tbody>
+        ${stats.topPerformers.map((r, i) => `
+          <tr>
+            <td style="text-align:center;"><span class="qr-rank ${i===0?'gold':i===1?'silver':'bronze'}">${i+1}</span></td>
+            <td style="font-weight:800;">${_escHtml(r.name)}</td>
+            <td style="direction:ltr;color:#555;">${_escHtml(r.studentId)}</td>
+            <td style="text-align:center;font-weight:800;color:#2e7d32;">${r.score}</td>
+            <td style="text-align:center;font-weight:800;">${r.percentage}%</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  ` : `<div class="qr-empty">لا توجد نتائج</div>`;
+
+  // ── أقل 3 متدربين (درجات منخفضة) ──
+  const lowHTML = stats.lowPerformers.length ? `
+    <table class="qr-table">
+      <thead><tr><th style="width:50px;">#</th><th>الاسم</th><th style="width:120px;">الرقم التدريبي</th><th style="width:90px;text-align:center;">الدرجة</th><th style="width:90px;text-align:center;">النسبة</th></tr></thead>
+      <tbody>
+        ${stats.lowPerformers.map((r, i) => `
+          <tr>
+            <td style="text-align:center;color:#888;">${i+1}</td>
+            <td style="font-weight:700;">${_escHtml(r.name)}</td>
+            <td style="direction:ltr;color:#555;">${_escHtml(r.studentId)}</td>
+            <td style="text-align:center;font-weight:800;color:#c62828;">${r.score}</td>
+            <td style="text-align:center;font-weight:800;">${r.percentage}%</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  ` : `<div class="qr-empty">لا توجد نتائج</div>`;
+
+  // ── غير المحلّين ──
+  const unsolvedHTML = unsolved.length ? `
+    <table class="qr-table">
+      <thead><tr><th style="width:40px;">#</th><th>الاسم</th><th style="width:140px;">الرقم التدريبي</th><th style="width:180px;">البريد</th></tr></thead>
+      <tbody>
+        ${unsolved.map((t, i) => `
+          <tr>
+            <td style="text-align:center;color:#888;">${i+1}</td>
+            <td style="font-weight:700;">${_escHtml(t.name)}</td>
+            <td style="direction:ltr;color:#555;">${_escHtml(t.studentId)}</td>
+            <td style="direction:ltr;color:#888;font-size:0.74rem;">${_escHtml(t.email)}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  ` : `<div class="qr-empty success">🎉 جميع المتدربين حلّوا الاختبار!</div>`;
+
+  // ── الأسئلة الأكثر خطأً (لو متاحة) ──
+  let worstQHTML = "";
+  if (stats.questionStats.available && stats.questionStats.worst.length) {
+    worstQHTML = `
+      <div class="qr-section">
+        <div class="qr-section-title"><span class="icon">❓</span> الأسئلة الأكثر خطأً</div>
+        ${stats.questionStats.worst.map((q, i) => {
+          const errRate = q.attempts ? Math.round((q.wrong/q.attempts)*100) : 0;
+          return `
+            <div class="qr-q-item">
+              <div class="qr-q-text">${i+1}. ${_escHtml(q.text)}</div>
+              <div class="qr-q-stats">
+                <span>📝 <b>${q.wrong}</b> إجابة خاطئة من أصل ${q.attempts}</span>
+                <span>❌ نسبة الخطأ: <b>${errRate}%</b></span>
+                <span>✅ ${q.correct} إجابة صحيحة</span>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  } else if (withCharts) {
+    worstQHTML = `
+      <div class="qr-section">
+        <div class="qr-section-title"><span class="icon">❓</span> تحليل الأسئلة</div>
+        <div class="qr-empty">
+          تحليل الأسئلة غير متاح — قد تكون صفحة الاختبار لا تحفظ تفاصيل الإجابات،
+          أو لم تُحلّ أي نتيجة بعد.
+        </div>
+      </div>
+    `;
+  }
+
+  // ── التجميع النهائي ──
+  return `${css}
+    <div class="qr-report">
+      <!-- Hero -->
+      <div class="qr-hero">
+        <div class="qr-hero-badge">🎓 أكاديمية الشبكات — الكلية التقنية بالمندق</div>
+        <div class="qr-hero-title">📊 تقرير الاختبار</div>
+        <div class="qr-hero-sub">${_escHtml(quiz.title || "—")}</div>
+        <div class="qr-hero-meta">
+          <span>📅 <strong>تاريخ التوليد:</strong> ${dateStr}</span>
+          <span>📝 <strong>عدد الأسئلة:</strong> ${stats.quizQuestionCount}</span>
+          <span>⭐ <strong>الدرجة الكلية:</strong> ${stats.quizTotalScore}</span>
+          ${quiz.duration ? `<span>⏱️ <strong>المدة:</strong> ${quiz.duration} دقيقة</span>` : ""}
+        </div>
+      </div>
+
+      <!-- الإحصائيات السريعة -->
+      <div class="qr-section">
+        <div class="qr-section-title"><span class="icon">📈</span> نظرة عامة</div>
+        <div class="qr-stats">
+          <div class="qr-stat"><div class="qr-stat-lbl">محاولات مكتملة</div><div class="qr-stat-val">${stats.total}</div><div class="qr-stat-sub">متدرب حلّ الاختبار</div></div>
+          <div class="qr-stat amber"><div class="qr-stat-lbl">لم يحلّوا</div><div class="qr-stat-val">${unsolved.length}</div><div class="qr-stat-sub">متدرب متخلّف</div></div>
+          <div class="qr-stat teal"><div class="qr-stat-lbl">متوسط الدرجات</div><div class="qr-stat-val">${stats.avgScore}</div><div class="qr-stat-sub">من ${stats.quizTotalScore}</div></div>
+          <div class="qr-stat"><div class="qr-stat-lbl">متوسط النسبة</div><div class="qr-stat-val">${stats.avgPercentage}%</div><div class="qr-stat-sub">من إجمالي الدرجة</div></div>
+        </div>
+
+        <div class="qr-summary">
+          <div class="qr-summary-card pass">
+            <div class="qr-summary-lbl">✓ الناجحون</div>
+            <div class="qr-summary-big g">${stats.passed}</div>
+            <div class="qr-summary-pct">نسبة النجاح: ${stats.passRate}%</div>
+            <div class="qr-bar-wrap"><div class="qr-bar" style="width:${stats.passRate}%;background:linear-gradient(90deg,#2e7d32,#66bb6a);"></div></div>
+          </div>
+          <div class="qr-summary-card fail">
+            <div class="qr-summary-lbl">✗ الراسبون</div>
+            <div class="qr-summary-big r">${stats.failed}</div>
+            <div class="qr-summary-pct">نسبة الرسوب: ${stats.failRate}%</div>
+            <div class="qr-bar-wrap"><div class="qr-bar" style="width:${stats.failRate}%;background:linear-gradient(90deg,#c62828,#e57373);"></div></div>
+          </div>
+        </div>
+
+        <div class="qr-stats" style="grid-template-columns:repeat(2,1fr);">
+          <div class="qr-stat green"><div class="qr-stat-lbl">أعلى درجة</div><div class="qr-stat-val" style="color:#2e7d32;">${stats.maxScore}</div></div>
+          <div class="qr-stat red"><div class="qr-stat-lbl">أقل درجة</div><div class="qr-stat-val" style="color:#c62828;">${stats.minScore}</div></div>
+        </div>
+      </div>
+
+      ${chartsHTML}
+
+      <!-- المتفوقون -->
+      <div class="qr-section">
+        <div class="qr-section-title"><span class="icon">🏆</span> أفضل 3 متدربين</div>
+        ${topHTML}
+      </div>
+
+      <!-- الأقل أداءً -->
+      <div class="qr-section">
+        <div class="qr-section-title"><span class="icon">📉</span> أقل 3 درجات</div>
+        ${lowHTML}
+      </div>
+
+      ${worstQHTML}
+
+      <!-- قائمة كاملة بالنتائج -->
+      <div class="qr-section">
+        <div class="qr-section-title"><span class="icon">📋</span> قائمة جميع النتائج (${stats.total})</div>
+        <table class="qr-table">
+          <thead><tr>
+            <th style="width:35px;">#</th>
+            <th>الاسم</th>
+            <th style="width:115px;">الرقم التدريبي</th>
+            <th style="width:90px;text-align:center;">الدرجة</th>
+            <th style="width:75px;text-align:center;">النسبة</th>
+            <th style="width:85px;text-align:center;">الحالة</th>
+            <th style="width:140px;text-align:center;">التاريخ</th>
+          </tr></thead>
+          <tbody>${resultsRowsHTML}</tbody>
+        </table>
+      </div>
+
+      <!-- غير المحلين -->
+      <div class="qr-section">
+        <div class="qr-section-title"><span class="icon">👥</span> المتدربون الذين لم يحلّوا الاختبار (${unsolved.length})</div>
+        ${unsolvedHTML}
+      </div>
+
+      <!-- Footer -->
+      <div class="qr-footer">
+        تقرير مولّد تلقائياً من <strong>أكاديمية الشبكات</strong> — الكلية التقنية بالمندق
+        <br>
+        <span style="direction:ltr;">Generated on ${now.toISOString().slice(0,19).replace('T',' ')}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ══ بناء الرسوم البيانية (للتقرير الشامل) ══ */
+async function _qrBuildChartsHTML(stats) {
+  // Chart.js ليس متوفراً افتراضياً — نرسم SVG بسيط بدلاً منه
+  // (أخف + لا يحتاج مكتبة + يُحوَّل لصورة تلقائياً في html2canvas)
+
+  const passPct = stats.passRate;
+  const failPct = stats.failRate;
+
+  // Donut chart بالـ SVG
+  const donutSVG = `
+    <svg viewBox="0 0 120 120" width="180" height="180" style="margin:0 auto;display:block;">
+      <circle cx="60" cy="60" r="45" fill="none" stroke="#eee" stroke-width="18"/>
+      ${passPct > 0 ? `
+        <circle cx="60" cy="60" r="45" fill="none" stroke="#2e7d32" stroke-width="18"
+          stroke-dasharray="${(passPct/100)*282.74} 282.74"
+          stroke-dashoffset="0"
+          transform="rotate(-90 60 60)" stroke-linecap="round"/>
+      ` : ""}
+      <text x="60" y="58" text-anchor="middle" font-size="22" font-weight="900" fill="#1a1d30" font-family="Cairo,sans-serif">${passPct}%</text>
+      <text x="60" y="76" text-anchor="middle" font-size="10" fill="#666" font-family="Cairo,sans-serif">نسبة النجاح</text>
+    </svg>
+  `;
+
+  // Score distribution bar chart (range buckets: 0-20, 21-40, 41-60, 61-80, 81-100)
+  // نحتاج النتائج لحسابها - نعيد استخدامها من stats
+  // لكن لا نملك النسب المفصلة لكل متدرب هنا - نحسبها من topPerformers/lowPerformers غير كاف
+  // لذا نعرض مقارنة بسيطة: top vs low
+  const distSVG = (() => {
+    const top = stats.topPerformers[0]?.percentage || 0;
+    const avg = stats.avgPercentage || 0;
+    const low = stats.lowPerformers[0]?.percentage || 0;
+
+    // 3 bars (top, avg, low) — كل bar عرضه يمثل النسبة
+    const maxH = 100;
+    const bH = v => Math.max(5, (v/100)*maxH);
+
+    return `
+      <svg viewBox="0 0 220 140" width="100%" height="150" style="display:block;" font-family="Cairo,sans-serif">
+        <!-- bars -->
+        <g>
+          <rect x="20"  y="${120-bH(top)}" width="40" height="${bH(top)}" fill="#2e7d32" rx="4"/>
+          <rect x="90"  y="${120-bH(avg)}" width="40" height="${bH(avg)}" fill="#6c2fa0" rx="4"/>
+          <rect x="160" y="${120-bH(low)}" width="40" height="${bH(low)}" fill="#c62828" rx="4"/>
+        </g>
+        <!-- values -->
+        <text x="40"  y="${118-bH(top)}" text-anchor="middle" font-size="11" font-weight="900" fill="#2e7d32">${top}%</text>
+        <text x="110" y="${118-bH(avg)}" text-anchor="middle" font-size="11" font-weight="900" fill="#6c2fa0">${avg}%</text>
+        <text x="180" y="${118-bH(low)}" text-anchor="middle" font-size="11" font-weight="900" fill="#c62828">${low}%</text>
+        <!-- labels -->
+        <text x="40"  y="135" text-anchor="middle" font-size="10" fill="#555">الأعلى</text>
+        <text x="110" y="135" text-anchor="middle" font-size="10" fill="#555">المتوسط</text>
+        <text x="180" y="135" text-anchor="middle" font-size="10" fill="#555">الأدنى</text>
+        <!-- baseline -->
+        <line x1="10" y1="120" x2="210" y2="120" stroke="#ddd" stroke-width="1"/>
+      </svg>
+    `;
+  })();
+
+  return `
+    <div class="qr-section">
+      <div class="qr-section-title"><span class="icon">📊</span> التحليل البصري</div>
+      <div class="qr-chart-wrap">
+        <div class="qr-chart-card">
+          <div class="qr-chart-title">نسبة النجاح الإجمالية</div>
+          ${donutSVG}
+          <div style="margin-top:0.3rem;font-size:0.78rem;color:#666;">${stats.passed} ناجح من ${stats.total}</div>
+        </div>
+        <div class="qr-chart-card">
+          <div class="qr-chart-title">توزيع الأداء</div>
+          ${distSVG}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ══ حقن CSS للمودال ══ */
+function _injectQuizReportStyles() {
+  if (document.getElementById("qrModalStyles")) return;
+  const s = document.createElement("style");
+  s.id = "qrModalStyles";
+  s.textContent = `
+    @keyframes qrSpin { to { transform: rotate(360deg); } }
+    .qr-option-btn {
+      display: flex; align-items: center; gap: 0.9rem;
+      width: 100%; padding: 0.9rem 1.1rem;
+      background: rgba(108,47,160,0.06);
+      border: 1px solid rgba(108,47,160,0.22);
+      border-radius: 12px;
+      color: var(--text, #e8eaf6);
+      font-family: 'Cairo', sans-serif;
+      cursor: pointer;
+      transition: all 0.22s;
+      text-align: right;
+    }
+    .qr-option-btn:hover {
+      background: rgba(108,47,160,0.14);
+      border-color: rgba(108,47,160,0.5);
+      transform: translateY(-1px);
+    }
+    .qr-opt-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: linear-gradient(135deg, #6c2fa0, #8b46c8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .qr-option-btn[data-type="excel"] .qr-opt-icon {
+      background: linear-gradient(135deg, #1e8449, #27ae60);
+    }
+    .qr-option-btn[data-type="full"] .qr-opt-icon {
+      background: linear-gradient(135deg, #00a08c, #00c9b1);
+    }
+    .qr-opt-body { flex: 1; }
+    .qr-opt-title {
+      font-weight: 800; font-size: 0.93rem;
+      color: var(--text, #e8eaf6); margin-bottom: 2px;
+    }
+    .qr-opt-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted, #a0a0b0);
+      line-height: 1.5;
+    }
+    .qr-opt-arrow {
+      font-size: 1.3rem;
+      color: var(--text-muted, #a0a0b0);
+      transition: all 0.2s;
+    }
+    .qr-option-btn:hover .qr-opt-arrow {
+      color: var(--accent, #00c9b1);
+      transform: translateX(-4px);
+    }
+  `;
+  document.head.appendChild(s);
+}
+
+/* ══════════════════════════════════════════════════════
+   نهاية نظام تقارير الاختبارات
+══════════════════════════════════════════════════════ */
 
 /**
  * تصدير تقرير الإحصائيات الشامل إلى PDF
