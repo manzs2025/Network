@@ -847,4 +847,174 @@
     if (e.target.tagName === 'IMG') { e.preventDefault(); return false; }
   });
 
+
+  /* ════════════════════════════════════════════════════
+     🎯 حقن quiz-widget.js تلقائياً في صفحات المحتوى
+  ════════════════════════════════════════════════════ */
+  (function _injectQuizWidget() {
+    const _c = window.location.pathname.split('/').pop() || '';
+    const _pages = ['networks.html','security.html','osi.html','cables.html','ip.html'];
+    const _dyn = _c === 'page.html' && new URLSearchParams(location.search).get('id');
+    if (!_pages.includes(_c) && !_dyn) return;
+    if (document.querySelector('script[src*="quiz-widget"]')) return;
+    const s = document.createElement('script');
+    s.src = 'quiz-widget.js';
+    s.defer = true;
+    document.body.appendChild(s);
+  })();
+
+  /* ════/* ════════════════════════════════════════════════════
+     📖 شريط تقدم القراءة + زر "تم الإطلاع"
+     — يظهر فقط في صفحات المحتوى (ليس الرئيسية)
+     — يحفظ حالة الإطلاع في localStorage (لا يحتاج Firebase)
+  ════════════════════════════════════════════════════ */
+  (function _initReadingProgress() {
+    // يعمل فقط في صفحات المحتوى (ليس الرئيسية وليس admin)
+    const _cur = window.location.pathname.split('/').pop() || 'index.html';
+    const _isContentPage = ['networks.html','security.html','osi.html','cables.html','ip.html'].includes(_cur)
+                        || (_cur === 'page.html' && location.search.includes('id='));
+    if (!_isContentPage) return;
+
+    // معرّف الصفحة الحالية للـ storage
+    const _pageKey = _cur === 'page.html'
+      ? 'read_page_' + (new URLSearchParams(location.search).get('id') || 'unknown')
+      : 'read_' + _cur.replace('.html','');
+
+    // ── إنشاء شريط التقدم ──
+    const progressBar = document.createElement('div');
+    progressBar.id = 'readProgressBar';
+    progressBar.style.cssText = `
+      position: fixed; top: 64px; right: 0; left: 0;
+      height: 3px; background: transparent;
+      z-index: 900; transition: none; pointer-events: none;
+    `;
+    const fill = document.createElement('div');
+    fill.id = 'readProgressFill';
+    fill.style.cssText = `
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #6c2fa0, #00c9b1);
+      transition: width 0.15s ease; border-radius: 0 2px 2px 0;
+    `;
+    progressBar.appendChild(fill);
+    document.body.appendChild(progressBar);
+
+    // ── تحديث التقدم عند التمرير ──
+    let _pct = 0;
+    function _updateProgress() {
+      const scrollTop  = window.scrollY;
+      const docHeight  = document.documentElement.scrollHeight - window.innerHeight;
+      _pct = docHeight > 0 ? Math.min(100, Math.round((scrollTop / docHeight) * 100)) : 0;
+      fill.style.width = _pct + '%';
+
+      // لون التعبئة يتغيّر عند الاكتمال
+      if (_pct >= 90) {
+        fill.style.background = 'linear-gradient(90deg, #00c9b1, #00e5cf)';
+        _showMarkBtn();
+      }
+    }
+
+    window.addEventListener('scroll', _updateProgress, { passive: true });
+    _updateProgress();
+
+    // ── زر "تم الإطلاع" ──
+    let _markBtnShown = false;
+    const _isRead = localStorage.getItem(_pageKey) === '1';
+
+    const markBtn = document.createElement('div');
+    markBtn.id = 'readMarkBtn';
+    markBtn.style.cssText = `
+      position: fixed; bottom: 5rem; left: 1.5rem;
+      display: none; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 1.1rem;
+      background: linear-gradient(135deg, #6c2fa0, #8b46c8);
+      border: 1px solid rgba(108,47,160,0.6);
+      border-radius: 30px;
+      color: #fff; font-family: 'Cairo',sans-serif; font-weight: 700; font-size: 0.85rem;
+      cursor: pointer; z-index: 900;
+      box-shadow: 0 6px 20px rgba(108,47,160,0.4);
+      transition: all 0.25s; animation: readBtnIn 0.4s cubic-bezier(0.22,1,0.36,1);
+      user-select: none;
+    `;
+
+    if (_isRead) {
+      markBtn.innerHTML = '✅ تمت القراءة';
+      markBtn.style.background = 'linear-gradient(135deg, #1e8449, #27ae60)';
+      markBtn.style.display = 'flex';
+    } else {
+      markBtn.innerHTML = '📖 تم الإطلاع';
+    }
+
+    markBtn.onclick = function() {
+      const alreadyRead = localStorage.getItem(_pageKey) === '1';
+      if (alreadyRead) {
+        // إلغاء الإطلاع
+        localStorage.removeItem(_pageKey);
+        markBtn.innerHTML = '📖 تم الإطلاع';
+        markBtn.style.background = 'linear-gradient(135deg, #6c2fa0, #8b46c8)';
+      } else {
+        // تأكيد الإطلاع
+        localStorage.setItem(_pageKey, '1');
+        markBtn.innerHTML = '✅ تمت القراءة';
+        markBtn.style.background = 'linear-gradient(135deg, #1e8449, #27ae60)';
+        // نثار بسيط
+        _confetti(markBtn);
+      }
+    };
+
+    document.body.appendChild(markBtn);
+
+    // أضف animation CSS
+    if (!document.getElementById('readBtnStyle')) {
+      const s = document.createElement('style');
+      s.id = 'readBtnStyle';
+      s.textContent = `
+        @keyframes readBtnIn {
+          from { opacity:0; transform: translateY(20px) scale(0.9); }
+          to   { opacity:1; transform: translateY(0) scale(1); }
+        }
+        #readMarkBtn:hover {
+          transform: translateY(-2px) scale(1.04);
+          box-shadow: 0 10px 28px rgba(108,47,160,0.55);
+        }
+      `;
+      document.head.appendChild(s);
+    }
+
+    // اظهر الزر لو الصفحة مقروءة مسبقاً
+    if (_isRead) markBtn.style.display = 'flex';
+
+    function _showMarkBtn() {
+      if (_markBtnShown) return;
+      _markBtnShown = true;
+      markBtn.style.display = 'flex';
+    }
+
+    // نثار بسيط عند الضغط
+    function _confetti(anchor) {
+      const colors = ['#6c2fa0','#00c9b1','#fff','#ffd700','#ff6b6b'];
+      for (let i = 0; i < 18; i++) {
+        const dot = document.createElement('div');
+        const size = 6 + Math.random() * 8;
+        dot.style.cssText = `
+          position: fixed;
+          width: ${size}px; height: ${size}px;
+          border-radius: 50%;
+          background: ${colors[Math.floor(Math.random()*colors.length)]};
+          pointer-events: none; z-index: 9999;
+          left: ${anchor.getBoundingClientRect().left + 40 + (Math.random()-0.5)*60}px;
+          top:  ${anchor.getBoundingClientRect().top  + 10}px;
+          transition: all 0.8s ease-out;
+          opacity: 1;
+        `;
+        document.body.appendChild(dot);
+        setTimeout(() => {
+          dot.style.transform = `translate(${(Math.random()-0.5)*100}px, ${-60-Math.random()*80}px)`;
+          dot.style.opacity = '0';
+        }, 10);
+        setTimeout(() => dot.remove(), 900);
+      }
+    }
+  })();
+
 })();
+
