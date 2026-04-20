@@ -1494,33 +1494,56 @@ window.loadSectionArticlesForOrder = async function () {
       return (a.createdAt?.toDate?.()?.getTime() ?? 0) - (b.createdAt?.toDate?.()?.getTime() ?? 0);
     });
 
-    // بناء خيارات القائمة
-    select.innerHTML = `<option value="end">➕ في النهاية (بعد آخر مقال)</option>`;
+    // المقالات بدون المقال الذي نعدّله
+    const arts = _sectionArticlesCache.filter(a => a.id !== _editingArticleId);
 
-    _sectionArticlesCache.forEach((art, i) => {
-      // تخطّي المقال الذي نعدّله حالياً
-      if (art.id === _editingArticleId) return;
+    select.innerHTML = "";
+
+    if (arts.length === 0) {
+      // القسم فارغ أو المقال الوحيد — خيار واحد
       const opt = document.createElement("option");
-      opt.value = i; // سيوضع المقال الجديد قبل هذا الفهرس
-      opt.textContent = `قبل: ${art.title || "بدون عنوان"}`;
+      opt.value = "0";
+      opt.textContent = "📍 المقال الأول في القسم";
       select.appendChild(opt);
-    });
+    } else {
+      // الخيار الأول: في المقدمة (قبل الجميع)
+      const firstOpt = document.createElement("option");
+      firstOpt.value = "0";
+      firstOpt.textContent = `⬆️ في المقدمة (قبل: ${arts[0].title || "المقال الأول"})`;
+      select.appendChild(firstOpt);
+
+      // بعد كل مقال
+      arts.forEach((art, i) => {
+        const opt = document.createElement("option");
+        opt.value = String(i + 1);
+        const isLast = (i === arts.length - 1);
+        opt.textContent = isLast
+          ? `⬇️ في النهاية (بعد: ${art.title || "المقال الأخير"})`
+          : `↕️ بعد: ${art.title || `مقال ${i + 1}`}`;
+        if (isLast) opt.selected = true; // الافتراضي: في النهاية
+        select.appendChild(opt);
+      });
+    }
 
     loading.style.display = "none";
     select.style.display  = "block";
 
-    // عرض الترتيب الحالي إن كنا في وضع التعديل
+    // معاينة الموضع الحالي عند التعديل
     if (_editingArticleId) {
-      const curr = _sectionArticlesCache.find(a => a.id === _editingArticleId);
-      if (curr?.order !== undefined) {
-        preview.textContent = `📌 ترتيبه الحالي: ${curr.order + 1} من ${_sectionArticlesCache.length}`;
+      const currIdx = _sectionArticlesCache.findIndex(a => a.id === _editingArticleId);
+      if (currIdx >= 0) {
+        preview.textContent = `📌 موضعه الحالي: ${currIdx + 1} من ${_sectionArticlesCache.length} في هذا القسم`;
         preview.style.display = "block";
+        // تحديد الخيار المناسب: بعد المقال السابق له
+        // في المصفوفة بدون نفسه، سيكون في نفس الموضع
+        select.value = String(currIdx); // الموضع الحالي
       }
     }
 
   } catch (e) {
     loading.style.display = "none";
     select.style.display  = "block";
+    select.innerHTML = `<option value="0">📍 الموضع الأول في القسم</option>`;
     console.warn("loadSectionArticlesForOrder:", e.message);
   }
 };
