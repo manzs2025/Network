@@ -58,16 +58,18 @@ async function loadPageArticles() {
 
     if (snap.empty) return;
 
-    // ترتيب محلّياً (الأحدث أولاً)
+    // ترتيب حسب حقل order أولاً، ثم createdAt كاحتياط للمقالات القديمة
     const articles = [];
     snap.forEach(d => articles.push({ id: d.id, ...d.data() }));
     articles.sort((a, b) => {
+      const oa = a.order ?? 9999, ob = b.order ?? 9999;
+      if (oa !== ob) return oa - ob;
       const ta = a.createdAt?.toDate?.()?.getTime() ?? 0;
       const tb = b.createdAt?.toDate?.()?.getTime() ?? 0;
-      return tb - ta;
+      return ta - tb; // الأقدم أولاً عند تساوي order
     });
 
-    // بناء قسم المقالات
+    // بناء قسم المقالات — بدون عنوان ثابت، مباشرةً مثل باقي أقسام الصفحة
     const section = document.createElement('section');
     section.className = 'dynamic-articles-section';
     section.id = 'dynamicArticles';
@@ -183,14 +185,6 @@ async function loadPageArticles() {
           color: var(--text-muted, #7a7f9e);
         }
       </style>
-
-      <div class="dyn-art-header">
-        <div class="dyn-art-header-icon">📚</div>
-        <div>
-          <h2>مقالات وإضافات</h2>
-          <p>محتوى إضافي منشور من قِبل المشرف</p>
-        </div>
-      </div>
 
       <div id="dynArtList"></div>
     `;

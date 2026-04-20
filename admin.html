@@ -2359,7 +2359,7 @@ html, body {
               </div>
               <div class="qz-field-group">
                 <label class="qz-label" for="articlePage">القسم التابع له * <button type="button" onclick="openSectionsManager()" style="background:rgba(0,201,177,0.12);color:#00c9b1;border:1px solid rgba(0,201,177,0.35);border-radius:6px;padding:2px 10px;font-size:0.75rem;font-family:'Cairo',sans-serif;cursor:pointer;margin-right:0.5rem;">⚙️ إدارة الأقسام</button></label>
-                <select id="articlePage" class="qz-input qz-select">
+                <select id="articlePage" class="qz-input qz-select" onchange="loadSectionArticlesForOrder()">
                   <option value="">— اختر القسم —</option>
                   <option value="home">🏠 الرئيسية</option>
                   <option value="networks">📡 شبكات الحاسب الآلي</option>
@@ -2370,6 +2370,19 @@ html, body {
                   <!-- الأقسام المخصّصة تُحقن هنا ديناميكياً -->
                 </select>
               </div>
+            </div>
+
+            <!-- حقل الترتيب — يظهر بعد اختيار القسم -->
+            <div id="articleOrderWrap" style="display:none;margin-bottom:1.25rem;">
+              <label class="qz-label" for="articleOrderSelect">
+                📌 ترتيب المقال في القسم
+                <span style="font-size:0.75rem;color:#7a7f9e;font-weight:400;margin-right:0.4rem;">(اختياري — الافتراضي: في النهاية)</span>
+              </label>
+              <div id="articleOrderLoading" style="display:none;font-size:0.82rem;color:#7a7f9e;padding:0.4rem 0;">⏳ جارٍ تحميل مقالات القسم…</div>
+              <select id="articleOrderSelect" class="qz-input qz-select" style="display:none;">
+                <option value="end">➕ في النهاية (بعد آخر مقال)</option>
+              </select>
+              <div id="articleOrderPreview" style="display:none;margin-top:0.6rem;padding:0.6rem 0.9rem;background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.25);border-radius:8px;font-size:0.78rem;color:#a0a5c9;"></div>
             </div>
 
             <!-- TinyMCE Editor -->

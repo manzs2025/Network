@@ -1454,33 +1454,272 @@ function openIconsPicker(editor) {
   modal.querySelector("#iconsPickerClose").onclick = () => overlay.remove();
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 }
-window.saveArticle = async function () {
-  const title = document.getElementById("articleTitle").value.trim(), pageId = document.getElementById("articlePage").value, content = tinymce.get("tinyEditor")?.getContent() || "";
-  if (!title || !pageId || !content) return alert("يرجى إكمال جميع البيانات.");
+/* ══════════════════════════════════════════════════
+   إدارة المقالات — مع دعم الترتيب المخصّص (order)
+══════════════════════════════════════════════════ */
+
+// مصفوفة مؤقتة لمقالات القسم المحدد (لعرض خيارات الترتيب)
+let _sectionArticlesCache = [];
+
+/**
+ * يُشغَّل عند تغيير القسم — يجلب مقالاته ويعرض قائمة الترتيب
+ */
+window.loadSectionArticlesForOrder = async function () {
+  const pageId = document.getElementById("articlePage").value;
+  const wrap    = document.getElementById("articleOrderWrap");
+  const loading = document.getElementById("articleOrderLoading");
+  const select  = document.getElementById("articleOrderSelect");
+  const preview = document.getElementById("articleOrderPreview");
+
+  if (!pageId) { wrap.style.display = "none"; return; }
+
+  wrap.style.display = "block";
+  loading.style.display = "block";
+  select.style.display  = "none";
+  preview.style.display = "none";
+  _sectionArticlesCache = [];
+
   try {
-    if (_editingArticleId) await updateDoc(doc(db, "articles", _editingArticleId), { title, pageId, content, updatedAt: serverTimestamp() });
-    else await addDoc(collection(db, "articles"), { title, pageId, content, createdAt: serverTimestamp() });
-    resetArticleForm(); loadArticles(); alert("✅ تم الحفظ بنجاح");
-  } catch (e) { alert("❌ حدث خطأ."); }
+    const snap = await getDocs(query(
+      collection(db, "articles"),
+      where("pageId", "==", pageId)
+    ));
+
+    snap.forEach(d => _sectionArticlesCache.push({ id: d.id, ...d.data() }));
+
+    // ترتيب حسب order ثم createdAt
+    _sectionArticlesCache.sort((a, b) => {
+      const oa = a.order ?? 9999, ob = b.order ?? 9999;
+      if (oa !== ob) return oa - ob;
+      return (a.createdAt?.toDate?.()?.getTime() ?? 0) - (b.createdAt?.toDate?.()?.getTime() ?? 0);
+    });
+
+    // بناء خيارات القائمة
+    select.innerHTML = `<option value="end">➕ في النهاية (بعد آخر مقال)</option>`;
+
+    _sectionArticlesCache.forEach((art, i) => {
+      // تخطّي المقال الذي نعدّله حالياً
+      if (art.id === _editingArticleId) return;
+      const opt = document.createElement("option");
+      opt.value = i; // سيوضع المقال الجديد قبل هذا الفهرس
+      opt.textContent = `قبل: ${art.title || "بدون عنوان"}`;
+      select.appendChild(opt);
+    });
+
+    loading.style.display = "none";
+    select.style.display  = "block";
+
+    // عرض الترتيب الحالي إن كنا في وضع التعديل
+    if (_editingArticleId) {
+      const curr = _sectionArticlesCache.find(a => a.id === _editingArticleId);
+      if (curr?.order !== undefined) {
+        preview.textContent = `📌 ترتيبه الحالي: ${curr.order + 1} من ${_sectionArticlesCache.length}`;
+        preview.style.display = "block";
+      }
+    }
+
+  } catch (e) {
+    loading.style.display = "none";
+    select.style.display  = "block";
+    console.warn("loadSectionArticlesForOrder:", e.message);
+  }
 };
+
+window.saveArticle = async function () {
+  const title   = document.getElementById("articleTitle").value.trim();
+  const pageId  = document.getElementById("articlePage").value;
+  const content = tinymce.get("tinyEditor")?.getContent() || "";
+
+  if (!title || !pageId || !content) return alert("يرجى إكمال جميع البيانات.");
+
+  const btn     = document.getElementById("btnSaveArticle");
+  const btnText = btn.querySelector(".art-btn-text");
+  const spinner = btn.querySelector(".art-btn-spinner");
+  btn.disabled = true; btnText.style.display = "none"; spinner.style.display = "inline";
+
+  try {
+    // ── حساب الترتيب ──
+    const orderSel = document.getElementById("articleOrderSelect");
+    const orderVal = orderSel?.value ?? "end";
+
+    // جلب أحدث نسخة من مقالات القسم (إن لم تكن محمّلة بعد)
+    let arts = _sectionArticlesCache.slice();
+    if (!arts.length && pageId) {
+      const snap = await getDocs(query(collection(db, "articles"), where("pageId", "==", pageId)));
+      snap.forEach(d => arts.push({ id: d.id, ...d.data() }));
+      arts.sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999));
+    }
+
+    // إزالة المقال الحالي من المصفوفة (لإعادة ترتيبه)
+    if (_editingArticleId) {
+      arts = arts.filter(a => a.id !== _editingArticleId);
+    }
+
+    let insertAt; // الموضع الذي سيُدرج فيه المقال الجديد
+    if (orderVal === "end") {
+      insertAt = arts.length; // في النهاية
+    } else {
+      insertAt = parseInt(orderVal); // قبل المقال المحدد
+    }
+
+    // بناء ترتيب جديد: نُدرج المقال الجديد في الموضع المطلوب
+    const reordered = [
+      ...arts.slice(0, insertAt),
+      { id: _editingArticleId || "__new__" }, // placeholder
+      ...arts.slice(insertAt),
+    ];
+
+    // كتابة الحقل order لكل المقالات المتأثرة بـ batch
+    const batch = writeBatch(db);
+
+    let newDocRef = null;
+    if (!_editingArticleId) {
+      // مقال جديد — ننشئه أولاً بدون order لنحصل على ID
+      newDocRef = doc(collection(db, "articles"));
+      batch.set(newDocRef, { title, pageId, content, createdAt: serverTimestamp(), order: insertAt });
+    } else {
+      batch.update(doc(db, "articles", _editingArticleId), {
+        title, pageId, content, updatedAt: serverTimestamp(), order: insertAt
+      });
+    }
+
+    // إعادة ترقيم باقي المقالات
+    reordered.forEach((a, idx) => {
+      if (!a.id || a.id === "__new__" || a.id === _editingArticleId) return;
+      batch.update(doc(db, "articles", a.id), { order: idx });
+    });
+
+    await batch.commit();
+
+    resetArticleForm();
+    loadArticles();
+    _sectionArticlesCache = [];
+
+    const msg = document.getElementById("articleFormMsg");
+    msg.style.display = "block";
+    msg.style.background = "rgba(0,201,177,0.1)";
+    msg.style.color = "#00c9b1";
+    msg.style.border = "1px solid rgba(0,201,177,0.3)";
+    msg.style.borderRadius = "8px";
+    msg.style.padding = "0.6rem 1rem";
+    msg.style.marginTop = "0.75rem";
+    msg.textContent = "✅ تم حفظ المقال بنجاح وتحديث الترتيب";
+    setTimeout(() => { msg.style.display = "none"; }, 3500);
+
+  } catch (e) {
+    alert("❌ حدث خطأ: " + e.message);
+  } finally {
+    btn.disabled = false; btnText.style.display = "inline"; spinner.style.display = "none";
+  }
+};
+
 window.loadArticles = async function () {
-  const tbody = document.getElementById("articlesTableBody"); if (!tbody) return;
+  const tbody = document.getElementById("articlesTableBody");
+  if (!tbody) return;
   try {
     const snap = await getDocs(query(collection(db, "articles"), orderBy("createdAt", "desc")));
-    document.getElementById("articlesLoading").style.display="none"; document.getElementById("articlesTableWrap").style.display="block"; tbody.innerHTML = "";
-    snap.forEach(s => { const d = s.data(); tbody.innerHTML += `<tr><td>${d.title}</td><td>${d.pageId}</td><td style="text-align:center">—</td><td><button class="art-edit-btn" onclick="editArticle('${s.id}')">✏️</button> <button class="qz-del-btn" onclick="deleteArticle('${s.id}')">🗑️</button></td></tr>`; });
+    document.getElementById("articlesLoading").style.display = "none";
+    document.getElementById("articlesTableWrap").style.display = "block";
+
+    // تجميع وترتيب: حسب القسم ثم order
+    const all = [];
+    snap.forEach(s => all.push({ id: s.id, ...s.data() }));
+
+    // ترتيب: حسب pageId أبجدياً ثم order ثم createdAt
+    all.sort((a, b) => {
+      if (a.pageId < b.pageId) return -1;
+      if (a.pageId > b.pageId) return 1;
+      const oa = a.order ?? 9999, ob = b.order ?? 9999;
+      if (oa !== ob) return oa - ob;
+      return (a.createdAt?.toDate?.()?.getTime() ?? 0) - (b.createdAt?.toDate?.()?.getTime() ?? 0);
+    });
+
+    tbody.innerHTML = "";
+    all.forEach((d, globalIdx) => {
+      // حساب الترتيب داخل القسم
+      const sameSection = all.filter(a => a.pageId === d.pageId);
+      const posInSection = sameSection.findIndex(a => a.id === d.id) + 1;
+      const orderBadge = `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;background:rgba(108,47,160,0.18);border-radius:6px;font-size:0.78rem;font-weight:700;color:#a07ee0;">${posInSection}</span>`;
+
+      tbody.innerHTML += `<tr>
+        <td>${_escHtml(d.title)}</td>
+        <td>${_escHtml(d.pageId)}</td>
+        <td style="text-align:center">${orderBadge}</td>
+        <td>
+          <button class="art-edit-btn" onclick="editArticle('${d.id}')">✏️</button>
+          <button class="qz-del-btn" onclick="deleteArticle('${d.id}')">🗑️</button>
+        </td>
+      </tr>`;
+    });
+
+    if (!all.length) {
+      document.getElementById("articlesEmpty").style.display = "block";
+      document.getElementById("articlesTableWrap").style.display = "none";
+    }
   } catch(e) { console.error(e); }
 };
+
 window.editArticle = async function(id) {
   const s = await getDoc(doc(db, "articles", id));
   if (s.exists()) {
-    const d = s.data(); document.getElementById("articleTitle").value = d.title; document.getElementById("articlePage").value = d.pageId;
-    if(tinymce.get("tinyEditor")) tinymce.get("tinyEditor").setContent(d.content);
-    _editingArticleId = id; document.getElementById("articleEditBadge")?.style.setProperty('display', 'inline'); document.getElementById("panel-articles").scrollIntoView();
+    const d = s.data();
+    document.getElementById("articleTitle").value  = d.title  || "";
+    document.getElementById("articlePage").value   = d.pageId || "";
+    if (tinymce.get("tinyEditor")) tinymce.get("tinyEditor").setContent(d.content || "");
+    _editingArticleId = id;
+    document.getElementById("articleEditBadge")?.style.setProperty('display', 'inline');
+    document.getElementById("btnCancelEdit").style.display = "inline-flex";
+    // تحميل الترتيب
+    await loadSectionArticlesForOrder();
+    // تحديد الترتيب الحالي في القائمة
+    const orderSel = document.getElementById("articleOrderSelect");
+    if (orderSel && d.order !== undefined) {
+      // إيجاد الخيار المناسب
+      const arts = _sectionArticlesCache.filter(a => a.id !== id);
+      // الموضع الحالي
+      const allSorted = [..._sectionArticlesCache].sort((a,b) => (a.order??9999)-(b.order??9999));
+      const currIdx   = allSorted.findIndex(a => a.id === id);
+      // اختر "قبل المقال التالي" أو "في النهاية"
+      const nextArt = allSorted[currIdx + 1];
+      if (nextArt) {
+        const artsNoSelf = _sectionArticlesCache.filter(a => a.id !== id);
+        const nextIdx    = artsNoSelf.findIndex(a => a.id === nextArt.id);
+        if (nextIdx >= 0) orderSel.value = String(nextIdx);
+      } else {
+        orderSel.value = "end";
+      }
+    }
+    document.getElementById("panel-articles").scrollIntoView({ behavior: "smooth" });
   }
 };
-window.deleteArticle = async (id) => { if(confirm("حذف المقال؟")) { await deleteDoc(doc(db, "articles", id)); loadArticles(); } };
-window.resetArticleForm = () => { _editingArticleId = null; document.getElementById("articleTitle").value = ""; if(tinymce.get("tinyEditor")) tinymce.get("tinyEditor").setContent(""); document.getElementById("articleEditBadge")?.style.setProperty('display', 'none'); };
+
+window.deleteArticle = async function(id) {
+  if (!confirm("حذف المقال؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+  try {
+    await deleteDoc(doc(db, "articles", id));
+    loadArticles();
+  } catch (e) { alert("❌ فشل الحذف: " + e.message); }
+};
+
+window.cancelEditArticle = function() {
+  resetArticleForm();
+  document.getElementById("articleOrderWrap").style.display = "none";
+  _sectionArticlesCache = [];
+};
+
+window.resetArticleForm = () => {
+  _editingArticleId = null;
+  document.getElementById("articleTitle").value = "";
+  document.getElementById("articlePage").value  = "";
+  if (tinymce.get("tinyEditor")) tinymce.get("tinyEditor").setContent("");
+  document.getElementById("articleEditBadge")?.style.setProperty("display", "none");
+  const cancelBtn = document.getElementById("btnCancelEdit");
+  if (cancelBtn) cancelBtn.style.display = "none";
+  document.getElementById("articleOrderWrap").style.display   = "none";
+  document.getElementById("articleOrderSelect").style.display = "none";
+  document.getElementById("articleOrderPreview").style.display = "none";
+  _sectionArticlesCache = [];
+};
 
 window.handleLogout = () => confirm("خروج؟") && signOut(auth).then(() => location.replace("login.html"));
 window.toggleSidebar = () => { document.getElementById("sidebar").classList.toggle("hidden"); document.getElementById("sidebarOverlay").classList.toggle("visible"); };
