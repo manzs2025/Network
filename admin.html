@@ -13,6 +13,8 @@
 <!-- jsPDF + html2canvas — لإنشاء تقارير PDF بدعم العربية -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Sortable.js — لإعادة ترتيب المقالات بالسحب والإفلات -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <style>
 /* ════════════════════════════════════════════════
    RESET & VARIABLES
@@ -2406,6 +2408,146 @@ html, body {
 
           </div><!-- /art-form-body -->
         </div><!-- /art-form-card -->
+
+        <!-- ════════════════════════════════════════════════
+             🎯 إعادة ترتيب مواضيع قسم محدد (سحب وإفلات)
+        ════════════════════════════════════════════════ -->
+        <div class="qz-table-section" id="reorderSection" style="margin-top:1.5rem;">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">🎯 إعادة ترتيب مواضيع قسم</h3>
+            <button class="qz-refresh-btn" onclick="reorderRefresh()" title="إعادة تحميل">↻ تحديث</button>
+          </div>
+
+          <div style="padding:1rem 1.25rem;">
+            <!-- اختيار القسم -->
+            <div class="qz-field-group" style="margin-bottom:0.85rem;">
+              <label class="qz-label" for="reorderPageSelect">
+                📂 اختر القسم لعرض مواضيعه
+              </label>
+              <select id="reorderPageSelect" class="qz-input qz-select" onchange="reorderLoadArticles()">
+                <option value="">— اختر القسم —</option>
+                <option value="home">🏠 الرئيسية</option>
+                <option value="networks">📡 شبكات الحاسب الآلي</option>
+                <option value="security">🔒 الأمان في الشبكات</option>
+                <option value="osi">🔁 نموذج OSI</option>
+                <option value="cables">🔌 كيابل الشبكات</option>
+                <option value="ip">🌍 بروتوكول IP</option>
+                <!-- الأقسام المخصّصة تُحقن هنا ديناميكياً -->
+              </select>
+            </div>
+
+            <!-- شريط تعليمات -->
+            <div id="reorderHint" style="display:none;background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.25);border-radius:8px;padding:0.6rem 0.9rem;font-size:0.8rem;color:#a0a5c9;margin-bottom:0.85rem;">
+              💡 <strong style="color:#00c9b1;">اسحب</strong> أيّ موضوع لأعلى أو لأسفل لتغيير ترتيبه، ثم اضغط <strong style="color:#00c9b1;">حفظ الترتيب</strong>.
+            </div>
+
+            <!-- حالة التحميل -->
+            <div id="reorderLoading" style="display:none;text-align:center;padding:1.5rem;color:#7a7f9e;font-size:0.9rem;">
+              <div class="loading-ring" style="width:32px;height:32px;border-width:2px;margin:0 auto 0.6rem;"></div>
+              جارٍ تحميل مواضيع القسم…
+            </div>
+
+            <!-- حالة فارغة -->
+            <div id="reorderEmpty" style="display:none;text-align:center;padding:1.5rem;color:#7a7f9e;font-size:0.9rem;">
+              لا توجد مواضيع في هذا القسم بعد.
+            </div>
+
+            <!-- قائمة المواضيع القابلة للسحب -->
+            <ul id="reorderList" style="list-style:none;padding:0;margin:0;display:none;"></ul>
+
+            <!-- أزرار الحفظ -->
+            <div id="reorderActions" style="display:none;margin-top:1rem;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+              <button class="qz-save-btn" id="reorderSaveBtn" onclick="reorderSave()" disabled style="opacity:0.5;cursor:not-allowed;">
+                <span class="reorder-btn-text">💾 حفظ الترتيب</span>
+                <span class="reorder-btn-spinner" style="display:none;">⏳</span>
+              </button>
+              <button class="qz-reset-btn" id="reorderCancelBtn" onclick="reorderCancel()" disabled style="opacity:0.5;cursor:not-allowed;">
+                ↺ إلغاء التغييرات
+              </button>
+              <span id="reorderStatus" style="font-size:0.78rem;color:#7a7f9e;"></span>
+            </div>
+            <!-- ملاحظة flexbox للأزرار -->
+            <style>
+              #reorderActions { display: none; }
+              #reorderActions[data-show="1"] { display: flex !important; }
+              .reorder-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 0.9rem;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid var(--border, rgba(255,255,255,0.08));
+                border-radius: 10px;
+                margin-bottom: 0.55rem;
+                transition: background 0.18s, border-color 0.18s, transform 0.12s;
+                cursor: grab;
+                user-select: none;
+              }
+              .reorder-item:hover {
+                background: rgba(108,47,160,0.08);
+                border-color: rgba(108,47,160,0.4);
+              }
+              .reorder-item.sortable-ghost {
+                opacity: 0.35;
+                background: rgba(0,201,177,0.12) !important;
+                border: 1px dashed #00c9b1 !important;
+              }
+              .reorder-item.sortable-chosen {
+                cursor: grabbing;
+              }
+              .reorder-item.sortable-drag {
+                cursor: grabbing;
+                box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+              }
+              .reorder-handle {
+                color: #6c2fa0;
+                font-size: 1.25rem;
+                line-height: 1;
+                opacity: 0.6;
+                flex-shrink: 0;
+              }
+              .reorder-pos {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 28px;
+                height: 28px;
+                background: rgba(108,47,160,0.18);
+                border-radius: 7px;
+                font-size: 0.8rem;
+                font-weight: 800;
+                color: #a07ee0;
+                flex-shrink: 0;
+              }
+              .reorder-pos.changed {
+                background: rgba(0,201,177,0.18);
+                color: #00c9b1;
+              }
+              .reorder-title {
+                flex: 1;
+                font-size: 0.88rem;
+                color: var(--text, #e8eaf6);
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              .reorder-old-pos {
+                font-size: 0.72rem;
+                color: #7a7f9e;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 6px;
+                flex-shrink: 0;
+              }
+              /* تحسين على الجوال: زرّان مساعدان للسحب */
+              @media (max-width: 600px) {
+                .reorder-handle { font-size: 1.4rem; }
+                .reorder-title { font-size: 0.82rem; }
+              }
+            </style>
+          </div>
+        </div>
 
         <!-- ── جدول المقالات ── -->
         <div class="qz-table-section">

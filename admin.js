@@ -1750,6 +1750,328 @@ window.cancelEditArticle = function() {
   _sectionArticlesCache = [];
 };
 
+/* ══════════════════════════════════════════════════
+   🎯 إعادة ترتيب مواضيع قسم محدد (سحب وإفلات)
+   - يستخدم Sortable.js (مُحمّل من CDN في admin.html)
+   - يحفظ كل التغييرات بـ batch واحد عند الضغط على "حفظ"
+   - يعالج المقالات القديمة بدون حقل order تلقائياً
+══════════════════════════════════════════════════ */
+
+let _reorderState = {
+  pageId: "",         // القسم المختار حالياً
+  original: [],       // الترتيب الأصلي [{id, title, order}, ...]
+  current: [],        // الترتيب الحالي بعد السحب
+  sortable: null,     // كائن Sortable
+  dirty: false,       // هل توجد تغييرات غير محفوظة؟
+};
+
+/** تشغيل عند تغيير القسم في القائمة المنسدلة */
+window.reorderLoadArticles = async function() {
+  const sel = document.getElementById("reorderPageSelect");
+  const pageId = sel?.value || "";
+
+  // عناصر الواجهة
+  const hint    = document.getElementById("reorderHint");
+  const loading = document.getElementById("reorderLoading");
+  const empty   = document.getElementById("reorderEmpty");
+  const list    = document.getElementById("reorderList");
+  const actions = document.getElementById("reorderActions");
+
+  // إعادة ضبط الحالة
+  _reorderResetUI();
+
+  if (!pageId) {
+    _reorderState = { pageId: "", original: [], current: [], sortable: null, dirty: false };
+    return;
+  }
+
+  _reorderState.pageId = pageId;
+  loading.style.display = "block";
+
+  try {
+    const snap = await getDocs(query(
+      collection(db, "articles"),
+      where("pageId", "==", pageId)
+    ));
+
+    const arts = [];
+    snap.forEach(d => arts.push({ id: d.id, ...d.data() }));
+
+    // ترتيب حسب order ثم createdAt (نفس منطق articles-loader)
+    arts.sort((a, b) => {
+      const oa = a.order ?? 9999, ob = b.order ?? 9999;
+      if (oa !== ob) return oa - ob;
+      const ta = a.createdAt?.toDate?.()?.getTime() ?? 0;
+      const tb = b.createdAt?.toDate?.()?.getTime() ?? 0;
+      return ta - tb;
+    });
+
+    loading.style.display = "none";
+
+    if (arts.length === 0) {
+      empty.style.display = "block";
+      return;
+    }
+
+    // حفظ نسخة أصلية (للإلغاء) ونسخة عمل
+    _reorderState.original = arts.map((a, i) => ({
+      id: a.id,
+      title: a.title || "بدون عنوان",
+      order: i,                                  // الترتيب المعروض الحالي
+      hadOrder: typeof a.order === "number",     // هل كان عنده order أصلاً؟
+    }));
+    _reorderState.current = _reorderState.original.map(a => ({ ...a }));
+    _reorderState.dirty = false;
+
+    _reorderRenderList();
+    hint.style.display = "block";
+    list.style.display = "block";
+    actions.setAttribute("data-show", "1");
+
+    // تهيئة Sortable
+    if (_reorderState.sortable) {
+      try { _reorderState.sortable.destroy(); } catch(e) {}
+    }
+    if (typeof Sortable !== "undefined") {
+      _reorderState.sortable = Sortable.create(list, {
+        animation: 180,
+        handle: ".reorder-item",       // يمكن السحب من أي مكان في الصف
+        ghostClass: "sortable-ghost",
+        chosenClass: "sortable-chosen",
+        dragClass: "sortable-drag",
+        forceFallback: true,           // أداء أفضل + يعمل على الجوال
+        fallbackTolerance: 5,
+        onEnd: (evt) => {
+          if (evt.oldIndex === evt.newIndex) return;
+          // تحديث المصفوفة بناءً على الترتيب الجديد للـ DOM
+          const newOrder = [];
+          list.querySelectorAll("li[data-art-id]").forEach((li, idx) => {
+            const id = li.dataset.artId;
+            const item = _reorderState.current.find(a => a.id === id);
+            if (item) {
+              item.order = idx;
+              newOrder.push(item);
+            }
+          });
+          _reorderState.current = newOrder;
+          _reorderState.dirty = _reorderHasChanges();
+          _reorderUpdateButtons();
+          _reorderUpdatePositions();
+        },
+      });
+    } else {
+      console.warn("[reorder] Sortable.js غير محمّل");
+    }
+
+  } catch (e) {
+    loading.style.display = "none";
+    console.error("[reorderLoadArticles] error:", e);
+    _reorderShowStatus("❌ فشل التحميل: " + e.message, "error");
+  }
+};
+
+/** يعرض القائمة الحالية في DOM */
+function _reorderRenderList() {
+  const list = document.getElementById("reorderList");
+  if (!list) return;
+
+  list.innerHTML = _reorderState.current.map((a, idx) => {
+    const origIdx = _reorderState.original.findIndex(o => o.id === a.id);
+    const moved = origIdx !== idx;
+    return `
+      <li class="reorder-item" data-art-id="${a.id}" data-orig-idx="${origIdx}">
+        <span class="reorder-handle" title="اسحب لإعادة الترتيب">⋮⋮</span>
+        <span class="reorder-pos ${moved ? 'changed' : ''}" data-pos>${idx + 1}</span>
+        <span class="reorder-title">${_escHtml(a.title)}</span>
+        ${moved ? `<span class="reorder-old-pos" data-old>كان: ${origIdx + 1}</span>` : ''}
+      </li>
+    `;
+  }).join("");
+}
+
+/** تحديث أرقام المواضع بعد السحب (بدون إعادة بناء الـ DOM كاملاً) */
+function _reorderUpdatePositions() {
+  const list = document.getElementById("reorderList");
+  if (!list) return;
+  list.querySelectorAll("li[data-art-id]").forEach((li, idx) => {
+    const origIdx = parseInt(li.dataset.origIdx, 10);
+    const moved = origIdx !== idx;
+    const posEl = li.querySelector("[data-pos]");
+    if (posEl) {
+      posEl.textContent = idx + 1;
+      posEl.classList.toggle("changed", moved);
+    }
+    // تحديث/إضافة/حذف وسم "كان"
+    let oldEl = li.querySelector("[data-old]");
+    if (moved) {
+      if (!oldEl) {
+        oldEl = document.createElement("span");
+        oldEl.className = "reorder-old-pos";
+        oldEl.setAttribute("data-old", "");
+        li.appendChild(oldEl);
+      }
+      oldEl.textContent = `كان: ${origIdx + 1}`;
+    } else if (oldEl) {
+      oldEl.remove();
+    }
+  });
+}
+
+/** هل توجد تغييرات؟ */
+function _reorderHasChanges() {
+  if (_reorderState.original.length !== _reorderState.current.length) return true;
+  // أيضاً لو المقالات القديمة لم يكن لها order — نعتبر هذا "تغيير" حتى نُرسّخ القيم
+  const allHadOrder = _reorderState.original.every(o => o.hadOrder);
+  if (!allHadOrder) return true;
+  for (let i = 0; i < _reorderState.current.length; i++) {
+    if (_reorderState.current[i].id !== _reorderState.original[i].id) return true;
+  }
+  return false;
+}
+
+/** تحديث حالة الأزرار (تفعيل/تعطيل) */
+function _reorderUpdateButtons() {
+  const saveBtn   = document.getElementById("reorderSaveBtn");
+  const cancelBtn = document.getElementById("reorderCancelBtn");
+  if (!saveBtn || !cancelBtn) return;
+
+  if (_reorderState.dirty) {
+    saveBtn.disabled = false;
+    saveBtn.style.opacity = "1";
+    saveBtn.style.cursor = "pointer";
+    cancelBtn.disabled = false;
+    cancelBtn.style.opacity = "1";
+    cancelBtn.style.cursor = "pointer";
+    _reorderShowStatus(`⚠️ توجد تغييرات غير محفوظة`, "warn");
+  } else {
+    saveBtn.disabled = true;
+    saveBtn.style.opacity = "0.5";
+    saveBtn.style.cursor = "not-allowed";
+    cancelBtn.disabled = true;
+    cancelBtn.style.opacity = "0.5";
+    cancelBtn.style.cursor = "not-allowed";
+    _reorderShowStatus("", "");
+  }
+}
+
+/** عرض رسالة حالة بسيطة */
+function _reorderShowStatus(text, type) {
+  const el = document.getElementById("reorderStatus");
+  if (!el) return;
+  el.textContent = text || "";
+  if (type === "error")   el.style.color = "#ff6b6b";
+  else if (type === "ok") el.style.color = "#00c9b1";
+  else if (type === "warn") el.style.color = "#f5a623";
+  else el.style.color = "#7a7f9e";
+}
+
+/** إعادة ضبط الواجهة */
+function _reorderResetUI() {
+  document.getElementById("reorderHint").style.display    = "none";
+  document.getElementById("reorderLoading").style.display = "none";
+  document.getElementById("reorderEmpty").style.display   = "none";
+  const list = document.getElementById("reorderList");
+  list.style.display = "none";
+  list.innerHTML = "";
+  document.getElementById("reorderActions").removeAttribute("data-show");
+  _reorderShowStatus("", "");
+}
+
+/** زر "إلغاء التغييرات" — استعادة الترتيب الأصلي */
+window.reorderCancel = function() {
+  if (!_reorderState.dirty) return;
+  if (!confirm("التراجع عن جميع التغييرات والعودة للترتيب الأصلي؟")) return;
+  _reorderState.current = _reorderState.original.map(a => ({ ...a }));
+  _reorderState.dirty = false;
+  _reorderRenderList();
+  _reorderUpdateButtons();
+};
+
+/** زر "تحديث" — إعادة تحميل من Firestore */
+window.reorderRefresh = function() {
+  if (_reorderState.dirty) {
+    if (!confirm("توجد تغييرات غير محفوظة سيتم فقدها. متابعة؟")) return;
+  }
+  reorderLoadArticles();
+};
+
+/** زر "حفظ الترتيب" — كتابة كل القيم في batch واحد */
+window.reorderSave = async function() {
+  if (!_reorderState.dirty) return;
+  if (!_reorderState.pageId) return;
+  if (!_reorderState.current.length) return;
+
+  const saveBtn  = document.getElementById("reorderSaveBtn");
+  const btnText  = saveBtn?.querySelector(".reorder-btn-text");
+  const btnSpin  = saveBtn?.querySelector(".reorder-btn-spinner");
+
+  saveBtn.disabled = true;
+  if (btnText) btnText.style.display = "none";
+  if (btnSpin) btnSpin.style.display = "inline";
+  _reorderShowStatus("⏳ جارٍ الحفظ…", "");
+
+  try {
+    const batch = writeBatch(db);
+
+    // نكتب فقط على المقالات التي تغيّر ترتيبها أو لم يكن لها order
+    let writeCount = 0;
+    _reorderState.current.forEach((a, idx) => {
+      const orig = _reorderState.original.find(o => o.id === a.id);
+      const needsWrite = !orig?.hadOrder || (orig.order !== idx);
+      if (needsWrite) {
+        batch.update(doc(db, "articles", a.id), {
+          order: idx,
+          updatedAt: serverTimestamp()
+        });
+        writeCount++;
+      }
+    });
+
+    if (writeCount === 0) {
+      _reorderShowStatus("لا توجد تغييرات فعلية للحفظ", "");
+    } else {
+      await batch.commit();
+      _reorderShowStatus(`✅ تم حفظ الترتيب الجديد (${writeCount} تحديث)`, "ok");
+    }
+
+    // تحديث الحالة الأصلية
+    _reorderState.original = _reorderState.current.map((a, i) => ({
+      id: a.id,
+      title: a.title,
+      order: i,
+      hadOrder: true,
+    }));
+    _reorderState.current = _reorderState.original.map(a => ({ ...a }));
+    _reorderState.dirty = false;
+    _reorderRenderList();
+    _reorderUpdateButtons();
+
+    // تحديث الجدول السفلي إن كان معروضاً
+    if (typeof loadArticles === "function") {
+      try { loadArticles(); } catch(e) {}
+    }
+    // تنظيف الكاش الخاص بنموذج الإضافة/التعديل
+    _sectionArticlesCache = [];
+
+  } catch(e) {
+    console.error("[reorderSave] error:", e);
+    _reorderShowStatus("❌ فشل الحفظ: " + e.message, "error");
+    saveBtn.disabled = false;
+  } finally {
+    if (btnText) btnText.style.display = "inline";
+    if (btnSpin) btnSpin.style.display = "none";
+  }
+};
+
+/** تحذير عند مغادرة الصفحة لو فيه تغييرات غير محفوظة */
+window.addEventListener("beforeunload", (e) => {
+  if (_reorderState.dirty) {
+    e.preventDefault();
+    e.returnValue = "توجد تغييرات غير محفوظة في ترتيب المواضيع.";
+    return e.returnValue;
+  }
+});
+
 window.resetArticleForm = () => {
   _editingArticleId = null;
   document.getElementById("articleTitle").value = "";
@@ -2020,6 +2342,14 @@ function refreshSectionsDropdown(customSections) {
 
   select.innerHTML = staticOpts + customOpts;
   if (currentValue) select.value = currentValue;
+
+  // ── تحديث قائمة "إعادة الترتيب" بنفس الأقسام ──
+  const reorderSel = document.getElementById("reorderPageSelect");
+  if (reorderSel) {
+    const curReorder = reorderSel.value;
+    reorderSel.innerHTML = staticOpts + customOpts;
+    if (curReorder) reorderSel.value = curReorder;
+  }
 }
 
 window.addCustomSection = async function () {
