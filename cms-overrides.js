@@ -21,6 +21,79 @@
 
   const PAGE_ID = detectPageId();
 
+  /**
+   * إعادة ترتيب مواضيع الصفحة (sec-block) حسب الترتيب المحفوظ
+   * يقرأ من: siteOverrides/{pageId}/_meta/topicsOrder
+   * البنية: { order: ["topic1", "topic2", ...] }
+   */
+  async function applyTopicsOrder() {
+    try {
+      const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/siteOverrides/${PAGE_ID}/_meta/topicsOrder`;
+      const resp = await fetch(url);
+      if (!resp.ok) return; // لا يوجد ترتيب مخصّص — اتركه كما هو في الملف
+
+      const data = await resp.json();
+      const orderField = data.fields?.order?.arrayValue?.values;
+      if (!Array.isArray(orderField) || !orderField.length) return;
+
+      // استخراج معرّفات المواضيع بالترتيب المطلوب
+      const desiredOrder = orderField
+        .map(v => v.stringValue)
+        .filter(Boolean);
+      if (!desiredOrder.length) return;
+
+      // اجلب كل sec-block وحفّظهم بـ id
+      const blocks = document.querySelectorAll('div.sec-block[id]');
+      if (blocks.length < 2) return;
+
+      const blocksMap = new Map();
+      blocks.forEach(b => blocksMap.set(b.id, b));
+
+      // الحاوية المشتركة (نفترض أن كلهم أخوة في نفس الـ parent)
+      const firstBlock = blocks[0];
+      const parent = firstBlock.parentNode;
+      if (!parent) return;
+
+      // تأكّد أن كل المواضيع المطلوبة فعلاً أبناء لنفس الحاوية
+      // (لو في موضوع داخل حاوية أخرى — نتجاهله لتجنّب كسر التخطيط)
+      const validIds = desiredOrder.filter(id => {
+        const el = blocksMap.get(id);
+        return el && el.parentNode === parent;
+      });
+      if (validIds.length < 2) return;
+
+      // اجمع كل sec-divider التي بين المواضيع لإعادة استخدامها
+      // (نحذفها ونعيد بناءها بنفس العدد)
+      const dividers = parent.querySelectorAll(':scope > div.sec-divider');
+      const dividerTemplate = dividers.length
+        ? dividers[0].cloneNode(true)
+        : null;
+
+      // أي مواضيع موجودة في DOM لكن ليست في الترتيب المحفوظ → تُضاف في النهاية
+      // (مفيد لو أُضيف موضوع جديد في HTML بعد حفظ الترتيب)
+      const allBlockIds = Array.from(blocks).map(b => b.id);
+      const missingIds = allBlockIds.filter(id => !validIds.includes(id) && blocksMap.get(id)?.parentNode === parent);
+      const finalOrder = [...validIds, ...missingIds];
+
+      // احذف الفواصل القديمة (ستُعاد بناؤها)
+      dividers.forEach(d => d.remove());
+
+      // أعد ترتيب المواضيع بإعادة إلحاقها بالترتيب الجديد
+      // مع إدراج فاصل بينها
+      finalOrder.forEach((id, idx) => {
+        const block = blocksMap.get(id);
+        if (!block) return;
+        if (idx > 0 && dividerTemplate) {
+          parent.appendChild(dividerTemplate.cloneNode(true));
+        }
+        parent.appendChild(block);
+      });
+
+    } catch (e) {
+      console.warn('cms-overrides topicsOrder:', e.message);
+    }
+  }
+
   async function loadOverrides() {
     try {
       const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/siteOverrides/${PAGE_ID}/elements`;
@@ -58,11 +131,16 @@
     }
   }
 
-  /* شغّل بعد تحميل DOM */
+  /* شغّل بعد تحميل DOM — أولاً الترتيب، ثم التعديلات */
+  async function init() {
+    await applyTopicsOrder();   // 1) أعد ترتيب المواضيع
+    await loadOverrides();       // 2) طبّق التعديلات النصية
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadOverrides);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    loadOverrides();
+    init();
   }
 
 })();

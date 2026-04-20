@@ -2741,6 +2741,134 @@ html, body {
           جارٍ جلب محتوى الصفحة...
         </div>
 
+        <!-- ════════════════════════════════════════════════
+             🎯 إعادة ترتيب مواضيع الصفحة (سحب وإفلات)
+        ════════════════════════════════════════════════ -->
+        <div id="legacyTopicsBox" style="display:none;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+            <div>
+              <div style="font-weight:800;color:var(--text);font-size:1rem;">🎯 ترتيب مواضيع الصفحة</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">اسحب أي موضوع لتغيير ترتيبه على الموقع</div>
+            </div>
+            <button id="legacyTopicsToggleBtn" onclick="legacyTopicsToggle()" style="background:rgba(108,47,160,0.15);border:1px solid rgba(108,47,160,0.35);color:var(--primary-l);cursor:pointer;padding:6px 14px;border-radius:8px;font-size:0.82rem;font-family:inherit;font-weight:700;">
+              ▼ إظهار قائمة الترتيب
+            </button>
+          </div>
+
+          <div id="legacyTopicsBody" style="display:none;">
+            <div id="legacyTopicsHint" style="background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.25);border-radius:8px;padding:0.6rem 0.9rem;font-size:0.8rem;color:#a0a5c9;margin-bottom:0.85rem;">
+              💡 <strong style="color:#00c9b1;">اسحب</strong> أي موضوع لأعلى أو لأسفل، ثم اضغط <strong style="color:#00c9b1;">حفظ الترتيب</strong>. التغييرات تظهر للزوار فور إعادة تحميل الصفحة.
+            </div>
+
+            <ul id="legacyTopicsList" style="list-style:none;padding:0;margin:0;"></ul>
+
+            <div id="legacyTopicsActions" style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-top:1rem;">
+              <button class="qz-save-btn" id="legacyTopicsSaveBtn" onclick="legacyTopicsSave()" disabled style="opacity:0.5;cursor:not-allowed;">
+                <span class="lt-btn-text">💾 حفظ الترتيب</span>
+                <span class="lt-btn-spinner" style="display:none;">⏳</span>
+              </button>
+              <button class="qz-reset-btn" id="legacyTopicsCancelBtn" onclick="legacyTopicsCancel()" disabled style="opacity:0.5;cursor:not-allowed;">
+                ↺ إلغاء التغييرات
+              </button>
+              <button class="qz-reset-btn" id="legacyTopicsResetBtn" onclick="legacyTopicsResetToOriginal()" style="color:#ff6b6b;border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.08);">
+                🔄 العودة للترتيب الأصلي
+              </button>
+              <span id="legacyTopicsStatus" style="font-size:0.78rem;color:#7a7f9e;"></span>
+            </div>
+
+            <style>
+              .lt-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 0.9rem;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid var(--border, rgba(255,255,255,0.08));
+                border-radius: 10px;
+                margin-bottom: 0.55rem;
+                transition: background 0.18s, border-color 0.18s;
+                cursor: grab;
+                user-select: none;
+              }
+              .lt-item:hover {
+                background: rgba(108,47,160,0.08);
+                border-color: rgba(108,47,160,0.4);
+              }
+              .lt-item.sortable-ghost {
+                opacity: 0.35;
+                background: rgba(0,201,177,0.12) !important;
+                border: 1px dashed #00c9b1 !important;
+              }
+              .lt-item.sortable-chosen { cursor: grabbing; }
+              .lt-item.sortable-drag {
+                cursor: grabbing;
+                box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+              }
+              .lt-handle {
+                color: #6c2fa0;
+                font-size: 1.25rem;
+                line-height: 1;
+                opacity: 0.6;
+                flex-shrink: 0;
+              }
+              .lt-pos {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 28px;
+                height: 28px;
+                background: rgba(108,47,160,0.18);
+                border-radius: 7px;
+                font-size: 0.8rem;
+                font-weight: 800;
+                color: #a07ee0;
+                flex-shrink: 0;
+              }
+              .lt-pos.changed {
+                background: rgba(0,201,177,0.18);
+                color: #00c9b1;
+              }
+              .lt-icon {
+                font-size: 1.2rem;
+                line-height: 1;
+                flex-shrink: 0;
+              }
+              .lt-title {
+                flex: 1;
+                font-size: 0.88rem;
+                color: var(--text, #e8eaf6);
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              .lt-old-pos {
+                font-size: 0.72rem;
+                color: #7a7f9e;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 6px;
+                flex-shrink: 0;
+              }
+              .lt-id {
+                font-size: 0.7rem;
+                color: #7a7f9e;
+                background: rgba(255,255,255,0.04);
+                padding: 2px 8px;
+                border-radius: 5px;
+                direction: ltr;
+                font-family: monospace;
+                flex-shrink: 0;
+              }
+              @media (max-width: 600px) {
+                .lt-id { display: none; }
+                .lt-handle { font-size: 1.4rem; }
+                .lt-title { font-size: 0.82rem; }
+              }
+            </style>
+          </div>
+        </div>
+
         <!-- حاوية العناصر -->
         <div id="legacyElements" style="display:none;"></div>
 

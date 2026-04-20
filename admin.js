@@ -4338,6 +4338,9 @@ window.legacyLoadPage = async function() {
     loadingEl.style.display = "none";
     if (btnPreview) btnPreview.style.display = "none";
     if (btnReset)   btnReset.style.display   = "none";
+    // إخفاء صندوق ترتيب المواضيع
+    const topicsBox = document.getElementById("legacyTopicsBox");
+    if (topicsBox) topicsBox.style.display = "none";
     return;
   }
 
@@ -4381,6 +4384,11 @@ window.legacyLoadPage = async function() {
     loadingEl.style.display = "none";
     elementsEl.style.display = "block";
     _legacyRenderElements();
+
+    // ── بناء قائمة ترتيب المواضيع ──
+    try {
+      await _legacyTopicsBuild(pageId, htmlText);
+    } catch(e) { console.warn("[_legacyTopicsBuild]", e); }
 
   } catch(e) {
     loadingEl.style.display = "none";
@@ -4597,6 +4605,340 @@ window.legacyPreview = function() {
   if (!_legacyCurrentPage) return;
   window.open(`${_legacyCurrentPage}.html`, "_blank");
 };
+
+/* ══════════════════════════════════════════════════════════
+   🎯 إعادة ترتيب مواضيع الصفحة الأصلية (Legacy Topics)
+   - يحلل HTML الصفحة لاستخراج كل <div class="sec-block" id="...">
+   - يعرضها قابلة للسحب
+   - يحفظ الترتيب في: siteOverrides/{pageId}/_meta/topicsOrder
+   - cms-overrides.js يقرأ هذا الترتيب ويعيد ترتيب sec-block في DOM
+══════════════════════════════════════════════════════════ */
+
+let _legacyTopicsState = {
+  pageId: "",
+  rawHtml: "",          // نسخة الـ HTML المُحمّل
+  original: [],         // الترتيب الأصلي في الملف [{id, title, icon}, ...]
+  current: [],          // الترتيب الحالي بعد السحب
+  savedOrder: null,     // الترتيب المحفوظ في Firestore (إن وجد)
+  sortable: null,
+  dirty: false,
+};
+
+/** يُستدعى من legacyLoadPage بعد جلب HTML — يبني قائمة المواضيع */
+async function _legacyTopicsBuild(pageId, htmlText) {
+  const box   = document.getElementById("legacyTopicsBox");
+  const body  = document.getElementById("legacyTopicsBody");
+  const list  = document.getElementById("legacyTopicsList");
+  const btn   = document.getElementById("legacyTopicsToggleBtn");
+
+  if (!box || !list) return;
+
+  // إعادة ضبط
+  _legacyTopicsState = {
+    pageId, rawHtml: htmlText,
+    original: [], current: [], savedOrder: null,
+    sortable: null, dirty: false,
+  };
+
+  // تحليل الـ HTML واستخراج sec-block
+  const parser = new DOMParser();
+  const doc_ = parser.parseFromString(htmlText, "text/html");
+  const blocks = doc_.querySelectorAll("div.sec-block[id]");
+
+  if (blocks.length < 2) {
+    // أقل من موضوعين → لا فائدة من الترتيب
+    box.style.display = "none";
+    return;
+  }
+
+  const topics = [];
+  blocks.forEach(b => {
+    const id = b.getAttribute("id");
+    if (!id) return;
+    // استخراج الأيقونة والعنوان من sec-block-header
+    const iconEl  = b.querySelector(".sec-block-header .sec-icon");
+    const titleEl = b.querySelector(".sec-block-header h2, .sec-block-header h1, .sec-block-header h3");
+    const icon    = iconEl ? iconEl.textContent.trim() : "📄";
+    let title     = titleEl ? titleEl.textContent.trim() : id;
+    // تنظيف عناوين متعددة الأسطر
+    title = title.replace(/\s+/g, " ").trim();
+    if (title.length > 80) title = title.slice(0, 80) + "…";
+    topics.push({ id, title, icon });
+  });
+
+  if (topics.length < 2) {
+    box.style.display = "none";
+    return;
+  }
+
+  _legacyTopicsState.original = topics.slice();
+
+  // محاولة جلب الترتيب المحفوظ من Firestore
+  try {
+    const metaSnap = await getDoc(doc(db, "siteOverrides", pageId, "_meta", "topicsOrder"));
+    if (metaSnap.exists()) {
+      const data = metaSnap.data();
+      const savedOrder = Array.isArray(data.order) ? data.order : null;
+      if (savedOrder && savedOrder.length) {
+        _legacyTopicsState.savedOrder = savedOrder;
+        // أعِد ترتيب topics حسب الترتيب المحفوظ
+        const map = new Map(topics.map(t => [t.id, t]));
+        const ordered = [];
+        savedOrder.forEach(id => {
+          if (map.has(id)) {
+            ordered.push(map.get(id));
+            map.delete(id);
+          }
+        });
+        // أي مواضيع جديدة لم تكن في الترتيب المحفوظ تُضاف في النهاية
+        map.forEach(t => ordered.push(t));
+        _legacyTopicsState.current = ordered;
+      } else {
+        _legacyTopicsState.current = topics.slice();
+      }
+    } else {
+      _legacyTopicsState.current = topics.slice();
+    }
+  } catch(e) {
+    console.warn("[legacyTopics] meta fetch:", e);
+    _legacyTopicsState.current = topics.slice();
+  }
+
+  _legacyTopicsRender();
+  box.style.display = "block";
+  body.style.display = "none"; // مطوي افتراضياً
+  if (btn) btn.textContent = "▼ إظهار قائمة الترتيب";
+  _legacyTopicsUpdateButtons();
+}
+
+/** فتح/إغلاق قائمة الترتيب */
+window.legacyTopicsToggle = function() {
+  const body = document.getElementById("legacyTopicsBody");
+  const btn  = document.getElementById("legacyTopicsToggleBtn");
+  if (!body || !btn) return;
+  const isOpen = body.style.display !== "none";
+  body.style.display = isOpen ? "none" : "block";
+  btn.textContent = isOpen ? "▼ إظهار قائمة الترتيب" : "▲ إخفاء قائمة الترتيب";
+
+  // تهيئة Sortable عند أول فتح
+  if (!isOpen && !_legacyTopicsState.sortable) {
+    _legacyTopicsInitSortable();
+  }
+};
+
+/** تهيئة Sortable على القائمة */
+function _legacyTopicsInitSortable() {
+  const list = document.getElementById("legacyTopicsList");
+  if (!list || typeof Sortable === "undefined") {
+    if (typeof Sortable === "undefined") console.warn("[legacyTopics] Sortable.js غير محمّل");
+    return;
+  }
+  _legacyTopicsState.sortable = Sortable.create(list, {
+    animation: 180,
+    handle: ".lt-item",
+    ghostClass: "sortable-ghost",
+    chosenClass: "sortable-chosen",
+    dragClass: "sortable-drag",
+    forceFallback: true,
+    fallbackTolerance: 5,
+    onEnd: (evt) => {
+      if (evt.oldIndex === evt.newIndex) return;
+      // إعادة بناء current من ترتيب DOM
+      const newOrder = [];
+      list.querySelectorAll("li[data-topic-id]").forEach(li => {
+        const id = li.dataset.topicId;
+        const item = _legacyTopicsState.current.find(t => t.id === id);
+        if (item) newOrder.push(item);
+      });
+      _legacyTopicsState.current = newOrder;
+      _legacyTopicsState.dirty = _legacyTopicsHasChanges();
+      _legacyTopicsUpdateButtons();
+      _legacyTopicsUpdatePositions();
+    },
+  });
+}
+
+/** عرض القائمة */
+function _legacyTopicsRender() {
+  const list = document.getElementById("legacyTopicsList");
+  if (!list) return;
+  list.innerHTML = _legacyTopicsState.current.map((t, idx) => {
+    const origIdx = _legacyTopicsState.original.findIndex(o => o.id === t.id);
+    const moved = origIdx !== idx;
+    return `
+      <li class="lt-item" data-topic-id="${t.id}" data-orig-idx="${origIdx}">
+        <span class="lt-handle" title="اسحب لإعادة الترتيب">⋮⋮</span>
+        <span class="lt-pos ${moved ? 'changed' : ''}" data-pos>${idx + 1}</span>
+        <span class="lt-icon">${_escHtml(t.icon)}</span>
+        <span class="lt-title">${_escHtml(t.title)}</span>
+        <span class="lt-id">${_escHtml(t.id)}</span>
+        ${moved ? `<span class="lt-old-pos" data-old>كان: ${origIdx + 1}</span>` : ''}
+      </li>
+    `;
+  }).join("");
+  // إعادة تهيئة Sortable إذا كانت القائمة معروضة
+  if (_legacyTopicsState.sortable) {
+    try { _legacyTopicsState.sortable.destroy(); } catch(e) {}
+    _legacyTopicsState.sortable = null;
+  }
+  const body = document.getElementById("legacyTopicsBody");
+  if (body && body.style.display !== "none") {
+    _legacyTopicsInitSortable();
+  }
+}
+
+/** تحديث أرقام المواضع بعد السحب */
+function _legacyTopicsUpdatePositions() {
+  const list = document.getElementById("legacyTopicsList");
+  if (!list) return;
+  list.querySelectorAll("li[data-topic-id]").forEach((li, idx) => {
+    const origIdx = parseInt(li.dataset.origIdx, 10);
+    const moved = origIdx !== idx;
+    const posEl = li.querySelector("[data-pos]");
+    if (posEl) {
+      posEl.textContent = idx + 1;
+      posEl.classList.toggle("changed", moved);
+    }
+    let oldEl = li.querySelector("[data-old]");
+    if (moved) {
+      if (!oldEl) {
+        oldEl = document.createElement("span");
+        oldEl.className = "lt-old-pos";
+        oldEl.setAttribute("data-old", "");
+        li.appendChild(oldEl);
+      }
+      oldEl.textContent = `كان: ${origIdx + 1}`;
+    } else if (oldEl) {
+      oldEl.remove();
+    }
+  });
+}
+
+/** هل توجد تغييرات؟ */
+function _legacyTopicsHasChanges() {
+  const cur = _legacyTopicsState.current;
+  const saved = _legacyTopicsState.savedOrder;
+  // قارن مع المحفوظ إن وجد، وإلا قارن مع الأصلي
+  const baseline = saved && saved.length ? saved : _legacyTopicsState.original.map(t => t.id);
+  if (cur.length !== baseline.length) return true;
+  for (let i = 0; i < cur.length; i++) {
+    if (cur[i].id !== baseline[i]) return true;
+  }
+  return false;
+}
+
+/** تحديث حالة الأزرار */
+function _legacyTopicsUpdateButtons() {
+  const saveBtn   = document.getElementById("legacyTopicsSaveBtn");
+  const cancelBtn = document.getElementById("legacyTopicsCancelBtn");
+  if (!saveBtn || !cancelBtn) return;
+  const dirty = _legacyTopicsState.dirty;
+  saveBtn.disabled = !dirty;
+  saveBtn.style.opacity = dirty ? "1" : "0.5";
+  saveBtn.style.cursor = dirty ? "pointer" : "not-allowed";
+  cancelBtn.disabled = !dirty;
+  cancelBtn.style.opacity = dirty ? "1" : "0.5";
+  cancelBtn.style.cursor = dirty ? "pointer" : "not-allowed";
+  _legacyTopicsStatus(dirty ? "⚠️ توجد تغييرات غير محفوظة" : "", dirty ? "warn" : "");
+}
+
+function _legacyTopicsStatus(text, type) {
+  const el = document.getElementById("legacyTopicsStatus");
+  if (!el) return;
+  el.textContent = text || "";
+  if (type === "error")    el.style.color = "#ff6b6b";
+  else if (type === "ok")  el.style.color = "#00c9b1";
+  else if (type === "warn") el.style.color = "#f5a623";
+  else el.style.color = "#7a7f9e";
+}
+
+/** زر "إلغاء التغييرات" — استعادة الترتيب المحفوظ (أو الأصلي) */
+window.legacyTopicsCancel = function() {
+  if (!_legacyTopicsState.dirty) return;
+  if (!confirm("التراجع عن التغييرات والعودة للترتيب المحفوظ؟")) return;
+  const saved = _legacyTopicsState.savedOrder;
+  if (saved && saved.length) {
+    const map = new Map(_legacyTopicsState.original.map(t => [t.id, t]));
+    const ordered = [];
+    saved.forEach(id => { if (map.has(id)) { ordered.push(map.get(id)); map.delete(id); } });
+    map.forEach(t => ordered.push(t));
+    _legacyTopicsState.current = ordered;
+  } else {
+    _legacyTopicsState.current = _legacyTopicsState.original.slice();
+  }
+  _legacyTopicsState.dirty = false;
+  _legacyTopicsRender();
+  _legacyTopicsUpdateButtons();
+};
+
+/** زر "العودة للترتيب الأصلي" — حذف الترتيب المخصّص نهائياً */
+window.legacyTopicsResetToOriginal = async function() {
+  if (!_legacyTopicsState.pageId) return;
+  if (!_legacyTopicsState.savedOrder && !_legacyTopicsState.dirty) {
+    _legacyTopicsStatus("الترتيب أصلاً هو الأصلي", "");
+    return;
+  }
+  if (!confirm("حذف الترتيب المخصّص نهائياً والعودة لترتيب الملف الأصلي؟\n(الزوار سيرون الترتيب الأصلي فوراً عند إعادة تحميل الصفحة)")) return;
+
+  try {
+    await deleteDoc(doc(db, "siteOverrides", _legacyTopicsState.pageId, "_meta", "topicsOrder"));
+    _legacyTopicsState.savedOrder = null;
+    _legacyTopicsState.current = _legacyTopicsState.original.slice();
+    _legacyTopicsState.dirty = false;
+    _legacyTopicsRender();
+    _legacyTopicsUpdateButtons();
+    _legacyTopicsStatus("✅ تم استعادة الترتيب الأصلي", "ok");
+    setTimeout(() => _legacyTopicsStatus("", ""), 3500);
+  } catch(e) {
+    _legacyTopicsStatus("❌ فشل الحذف: " + e.message, "error");
+  }
+};
+
+/** زر "حفظ الترتيب" */
+window.legacyTopicsSave = async function() {
+  if (!_legacyTopicsState.dirty) return;
+  if (!_legacyTopicsState.pageId) return;
+  if (!_legacyTopicsState.current.length) return;
+
+  const saveBtn = document.getElementById("legacyTopicsSaveBtn");
+  const btnText = saveBtn?.querySelector(".lt-btn-text");
+  const btnSpin = saveBtn?.querySelector(".lt-btn-spinner");
+
+  saveBtn.disabled = true;
+  if (btnText) btnText.style.display = "none";
+  if (btnSpin) btnSpin.style.display = "inline";
+  _legacyTopicsStatus("⏳ جارٍ الحفظ…", "");
+
+  try {
+    const orderIds = _legacyTopicsState.current.map(t => t.id);
+    await setDoc(
+      doc(db, "siteOverrides", _legacyTopicsState.pageId, "_meta", "topicsOrder"),
+      { order: orderIds, updatedAt: serverTimestamp() }
+    );
+    _legacyTopicsState.savedOrder = orderIds.slice();
+    _legacyTopicsState.dirty = false;
+    _legacyTopicsRender();
+    _legacyTopicsUpdateButtons();
+    _legacyTopicsStatus("✅ تم حفظ الترتيب الجديد — سيظهر للزوار عند إعادة تحميل الصفحة", "ok");
+    setTimeout(() => _legacyTopicsStatus("", ""), 5000);
+  } catch(e) {
+    console.error("[legacyTopicsSave]", e);
+    _legacyTopicsStatus("❌ فشل الحفظ: " + e.message, "error");
+    saveBtn.disabled = false;
+  } finally {
+    if (btnText) btnText.style.display = "inline";
+    if (btnSpin) btnSpin.style.display = "none";
+  }
+};
+
+/** تحذير عند المغادرة */
+window.addEventListener("beforeunload", (e) => {
+  if (_legacyTopicsState.dirty) {
+    e.preventDefault();
+    e.returnValue = "توجد تغييرات غير محفوظة في ترتيب المواضيع.";
+    return e.returnValue;
+  }
+});
 
 /* ══ ربط باللوحات — بانتظار تحميل الصفحة ══ */
 window.addEventListener("load", () => {
