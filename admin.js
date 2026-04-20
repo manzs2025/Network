@@ -1474,7 +1474,9 @@ window.loadSectionArticlesForOrder = async function () {
   if (!pageId) { wrap.style.display = "none"; return; }
 
   wrap.style.display = "block";
+  // إخفاء كل العناصر الفرعية أثناء التحميل
   loading.style.display = "block";
+  loading.textContent = "⏳ جارٍ تحميل مقالات القسم…";
   select.style.display  = "none";
   preview.style.display = "none";
   _sectionArticlesCache = [];
@@ -1487,6 +1489,8 @@ window.loadSectionArticlesForOrder = async function () {
 
     snap.forEach(d => _sectionArticlesCache.push({ id: d.id, ...d.data() }));
 
+    console.log(`[loadSectionArticlesForOrder] القسم "${pageId}" يحتوي على ${_sectionArticlesCache.length} مقال`);
+
     // ترتيب حسب order ثم createdAt
     _sectionArticlesCache.sort((a, b) => {
       const oa = a.order ?? 9999, ob = b.order ?? 9999;
@@ -1494,22 +1498,26 @@ window.loadSectionArticlesForOrder = async function () {
       return (a.createdAt?.toDate?.()?.getTime() ?? 0) - (b.createdAt?.toDate?.()?.getTime() ?? 0);
     });
 
-    // المقالات بدون المقال الذي نعدّله
+    // المقالات بدون المقال الذي نعدّله حالياً
     const arts = _sectionArticlesCache.filter(a => a.id !== _editingArticleId);
+    const totalInSection = _sectionArticlesCache.length;
+    const editingFlag = _editingArticleId ? " (يستثني المقال الحالي)" : "";
 
     select.innerHTML = "";
 
     if (arts.length === 0) {
-      // القسم فارغ أو المقال الوحيد — خيار واحد
+      // القسم فارغ فعلاً (أو فيه فقط المقال المُعدَّل)
       const opt = document.createElement("option");
       opt.value = "0";
-      opt.textContent = "📍 المقال الأول في القسم";
+      opt.textContent = totalInSection === 0
+        ? "📍 المقال الأول في القسم (القسم فارغ حالياً)"
+        : "📍 يبقى في موضعه (لا توجد مقالات أخرى)";
       select.appendChild(opt);
     } else {
-      // الخيار الأول: في المقدمة (قبل الجميع)
+      // الخيار الأول: في المقدمة (قبل أول مقال)
       const firstOpt = document.createElement("option");
       firstOpt.value = "0";
-      firstOpt.textContent = `⬆️ في المقدمة (قبل: ${arts[0].title || "المقال الأول"})`;
+      firstOpt.textContent = `⬆️ في المقدمة — قبل: «${_truncate(arts[0].title)}»`;
       select.appendChild(firstOpt);
 
       // بعد كل مقال
@@ -1518,35 +1526,47 @@ window.loadSectionArticlesForOrder = async function () {
         opt.value = String(i + 1);
         const isLast = (i === arts.length - 1);
         opt.textContent = isLast
-          ? `⬇️ في النهاية (بعد: ${art.title || "المقال الأخير"})`
-          : `↕️ بعد: ${art.title || `مقال ${i + 1}`}`;
-        if (isLast) opt.selected = true; // الافتراضي: في النهاية
+          ? `⬇️ في النهاية — بعد: «${_truncate(art.title)}»`
+          : `↕️ بعد: «${_truncate(art.title)}»`;
+        if (isLast && !_editingArticleId) opt.selected = true; // الافتراضي للجديد: في النهاية
         select.appendChild(opt);
       });
     }
 
+    // إخفاء رسالة التحميل وإظهار القائمة
     loading.style.display = "none";
     select.style.display  = "block";
 
-    // معاينة الموضع الحالي عند التعديل
+    // معاينة موضع المقال الحالي عند التعديل
     if (_editingArticleId) {
       const currIdx = _sectionArticlesCache.findIndex(a => a.id === _editingArticleId);
       if (currIdx >= 0) {
-        preview.textContent = `📌 موضعه الحالي: ${currIdx + 1} من ${_sectionArticlesCache.length} في هذا القسم`;
+        preview.innerHTML = `📌 الموضع الحالي: <strong style="color:#00c9b1">${currIdx + 1}</strong> من <strong>${totalInSection}</strong> في قسم «${pageId}»`;
         preview.style.display = "block";
-        // تحديد الخيار المناسب: بعد المقال السابق له
-        // في المصفوفة بدون نفسه، سيكون في نفس الموضع
-        select.value = String(currIdx); // الموضع الحالي
+        // تحديد الموضع الحالي في القائمة (بدون نفسه = نفس المؤشر)
+        if (arts.length > 0) {
+          select.value = String(Math.min(currIdx, arts.length));
+        }
       }
+    } else {
+      // عرض إحصائية بسيطة للمستخدم
+      preview.innerHTML = `ℹ️ يحتوي القسم حالياً على <strong style="color:#00c9b1">${totalInSection}</strong> مقال${totalInSection === 1 ? "" : (totalInSection === 2 ? "ان" : "ات")}`;
+      preview.style.display = "block";
     }
 
   } catch (e) {
     loading.style.display = "none";
     select.style.display  = "block";
     select.innerHTML = `<option value="0">📍 الموضع الأول في القسم</option>`;
-    console.warn("loadSectionArticlesForOrder:", e.message);
+    console.error("loadSectionArticlesForOrder error:", e);
   }
 };
+
+// مساعد: قص العناوين الطويلة
+function _truncate(str, max = 45) {
+  if (!str) return "بدون عنوان";
+  return str.length > max ? str.substr(0, max) + "…" : str;
+}
 
 window.saveArticle = async function () {
   const title   = document.getElementById("articleTitle").value.trim();
