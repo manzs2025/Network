@@ -1835,13 +1835,17 @@ window.reorderLoadArticles = async function() {
     if (typeof Sortable !== "undefined") {
       _reorderState.sortable = Sortable.create(list, {
         animation: 180,
-        handle: ".reorder-item",       // يمكن السحب من أي مكان في الصف
+        draggable: ".reorder-item",
         ghostClass: "sortable-ghost",
         chosenClass: "sortable-chosen",
         dragClass: "sortable-drag",
-        forceFallback: true,           // أداء أفضل + يعمل على الجوال
-        fallbackTolerance: 5,
+        forceFallback: false,
+        delayOnTouchOnly: true,
+        delay: 100,
+        touchStartThreshold: 5,
+        onStart: () => { document.body.style.cursor = "grabbing"; },
         onEnd: (evt) => {
+          document.body.style.cursor = "";
           if (evt.oldIndex === evt.newIndex) return;
           // تحديث المصفوفة بناءً على الترتيب الجديد للـ DOM
           const newOrder = [];
@@ -4729,33 +4733,66 @@ window.legacyTopicsToggle = function() {
 /** تهيئة Sortable على القائمة */
 function _legacyTopicsInitSortable() {
   const list = document.getElementById("legacyTopicsList");
-  if (!list || typeof Sortable === "undefined") {
-    if (typeof Sortable === "undefined") console.warn("[legacyTopics] Sortable.js غير محمّل");
+  if (!list) {
+    console.warn("[legacyTopics] list element not found");
     return;
   }
+  if (typeof Sortable === "undefined") {
+    console.error("[legacyTopics] ❌ Sortable.js غير محمّل! تأكد من وجود <script src='...Sortable.min.js'> في admin.html");
+    _legacyTopicsStatus("❌ مكتبة السحب غير محمّلة — أعد تحميل الصفحة", "error");
+    return;
+  }
+
+  // تنظيف instance سابق إن وجد
+  if (_legacyTopicsState.sortable) {
+    try { _legacyTopicsState.sortable.destroy(); } catch(e) {}
+    _legacyTopicsState.sortable = null;
+  }
+
   _legacyTopicsState.sortable = Sortable.create(list, {
     animation: 180,
-    handle: ".lt-item",
+    // ❌ لا نستخدم handle محدّد — يجعل السحب يلتقط كل العنصر (أكثر موثوقية مع RTL)
+    // handle: ".lt-item",
+    draggable: ".lt-item",
     ghostClass: "sortable-ghost",
     chosenClass: "sortable-chosen",
     dragClass: "sortable-drag",
-    forceFallback: true,
-    fallbackTolerance: 5,
+    // ✅ نستخدم HTML5 native drag بدل forceFallback — يعمل مع RTL بشكل صحيح
+    forceFallback: false,
+    // delay صغير على اللمس لتجنب تعارض مع scroll على الجوال
+    delayOnTouchOnly: true,
+    delay: 100,
+    touchStartThreshold: 5,
+    onStart: (evt) => {
+      // علامة بصرية أثناء السحب
+      document.body.style.cursor = "grabbing";
+    },
     onEnd: (evt) => {
+      document.body.style.cursor = "";
+      console.log(`[legacyTopics] drag: ${evt.oldIndex} → ${evt.newIndex}`);
       if (evt.oldIndex === evt.newIndex) return;
-      // إعادة بناء current من ترتيب DOM
+
+      // إعادة بناء current من ترتيب DOM الفعلي بعد السحب
       const newOrder = [];
       list.querySelectorAll("li[data-topic-id]").forEach(li => {
         const id = li.dataset.topicId;
         const item = _legacyTopicsState.current.find(t => t.id === id);
         if (item) newOrder.push(item);
       });
+
+      if (newOrder.length !== _legacyTopicsState.current.length) {
+        console.warn("[legacyTopics] mismatch after drag, ignoring");
+        return;
+      }
+
       _legacyTopicsState.current = newOrder;
       _legacyTopicsState.dirty = _legacyTopicsHasChanges();
       _legacyTopicsUpdateButtons();
       _legacyTopicsUpdatePositions();
     },
   });
+
+  console.log("[legacyTopics] ✅ Sortable initialized on", list.children.length, "items");
 }
 
 /** عرض القائمة */

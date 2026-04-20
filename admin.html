@@ -2482,6 +2482,11 @@ html, body {
                 transition: background 0.18s, border-color 0.18s, transform 0.12s;
                 cursor: grab;
                 user-select: none;
+                -webkit-user-select: none;
+                touch-action: none;
+              }
+              .reorder-item > * {
+                pointer-events: none;
               }
               .reorder-item:hover {
                 background: rgba(108,47,160,0.08);
@@ -2789,6 +2794,12 @@ html, body {
                 transition: background 0.18s, border-color 0.18s;
                 cursor: grab;
                 user-select: none;
+                -webkit-user-select: none;
+                touch-action: none;
+              }
+              /* العناصر الداخلية لا تلتقط أحداث السحب */
+              .lt-item > * {
+                pointer-events: none;
               }
               .lt-item:hover {
                 background: rgba(108,47,160,0.08);
