@@ -159,8 +159,26 @@ import {
 /* ══════════════════════════════════════════════════════════
    🎨 تطبيق الثيم مباشرةً داخل admin.js
    (ضمان احتياطي — يعمل حتى لو لم يُحمَّل shared-theme.js)
+   VERSION: 2024-10-06-v3 (TinyMCE + modals + cms-sec-item)
 ══════════════════════════════════════════════════════════ */
 (function applyAdminTheme() {
+  const VERSION = 'v3-modals-editor';
+  console.log('%c[Admin Theme]', 'background:#6c2fa0;color:#fff;padding:2px 8px;border-radius:4px', 'Loaded version:', VERSION);
+
+  // أضف شارة مرئية صغيرة تختفي بعد 3 ثوانٍ (للتأكد من التحديث)
+  setTimeout(() => {
+    if (document.body && !document.getElementById('_theme_version_badge')) {
+      const badge = document.createElement('div');
+      badge.id = '_theme_version_badge';
+      badge.style.cssText = 'position:fixed;top:10px;right:10px;background:#6c2fa0;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:11px;z-index:999999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+      badge.textContent = '✓ Theme ' + VERSION;
+      document.body.appendChild(badge);
+      setTimeout(() => badge.style.transition = 'opacity 1s', 100);
+      setTimeout(() => { badge.style.opacity = '0'; }, 3000);
+      setTimeout(() => badge.remove(), 4500);
+    }
+  }, 500);
+
   const FB_PROJECT = 'networkacademy-795c8';
   const CACHE_KEY = 'nk_theme_cache_v1';
 
