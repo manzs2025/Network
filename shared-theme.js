@@ -17,6 +17,32 @@
   const CACHE_KEY = 'nk_theme_cache_v1';
   const CACHE_TTL = 10 * 60 * 1000; // 10 دقائق
 
+  // ── وضع التشخيص: أضف ?debug-theme=1 للرابط لرؤية ماذا يحدث ──
+  const DEBUG = (() => {
+    try {
+      return new URLSearchParams(location.search).get('debug-theme') === '1';
+    } catch { return false; }
+  })();
+
+  function dbg(msg, data) {
+    if (!DEBUG) return;
+    console.log('%c[Theme]', 'background:#6c2fa0;color:#fff;padding:2px 8px;border-radius:4px', msg, data || '');
+    // أضف شارة مرئية أيضاً
+    let badge = document.getElementById('_theme_debug_badge');
+    if (!badge && document.body) {
+      badge = document.createElement('div');
+      badge.id = '_theme_debug_badge';
+      badge.style.cssText = 'position:fixed;top:10px;left:10px;background:#6c2fa0;color:#fff;padding:8px 12px;border-radius:6px;font-family:monospace;font-size:11px;z-index:999999;max-width:300px;white-space:pre-wrap;';
+      document.body.appendChild(badge);
+    }
+    if (badge) {
+      badge.textContent += `\n${msg}${data ? ' → ' + JSON.stringify(data).slice(0, 80) : ''}`;
+    }
+  }
+
+  dbg('shared-theme.js LOADED ✓');
+  dbg('URL: ' + location.href);
+
   // ── 1) طبّق الثيم المخزّن في localStorage فوراً (بدون انتظار) ──
   // هذا يمنع "وميض" الألوان الافتراضية قبل وصول البيانات من Firestore
   try {
@@ -34,10 +60,17 @@
 
   function fetchAndApply() {
     const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/settings/general`;
+    dbg('Fetching from Firestore...');
     fetch(url)
-      .then(r => r.ok ? r.json() : null)
+      .then(r => {
+        dbg('Firestore response', { ok: r.ok, status: r.status });
+        return r.ok ? r.json() : null;
+      })
       .then(data => {
-        if (!data || !data.fields) return;
+        if (!data || !data.fields) {
+          dbg('⚠️ No data.fields returned');
+          return;
+        }
         const f = data.fields;
         const theme = {
           bg:      f.bgColor?.stringValue      || null,
@@ -48,20 +81,24 @@
           h1Size:  f.h1Size?.doubleValue ?? f.h1Size?.integerValue ?? null,
           pSize:   f.pSize?.doubleValue  ?? f.pSize?.integerValue  ?? null,
         };
+        dbg('Theme from Firestore', theme);
         applyTheme(theme);
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ theme, ts: Date.now() }));
         } catch (_) {}
       })
-      .catch(() => { /* فشل صامت — تبقى الألوان الافتراضية */ });
+      .catch(e => {
+        dbg('❌ Fetch error: ' + e.message);
+      });
   }
 
   function applyTheme(theme) {
-    if (!theme) return;
+    if (!theme) { dbg('⚠️ applyTheme called with null'); return; }
     const r = document.documentElement.style;
 
     // اكتشف: هل هذا قالب فاتح أم داكن؟
     const isLight = theme.bg ? isLightColor(theme.bg) : false;
+    dbg('Applying theme. isLight=' + isLight, { bg: theme.bg });
 
     if (theme.bg)      r.setProperty('--bg', theme.bg);
     if (theme.sidebar) r.setProperty('--bg2', theme.sidebar);
