@@ -2542,7 +2542,8 @@ function _themeApplyToDocument(t) {
   r.setProperty("--text", t.text);
 }
 
-
+/** يجمع بيانات بطاقات الصفحة الرئيسية من حقول الإدخال */
+function collectHomeCards() {
   const ids = ["networks", "security", "osi", "cables", "ip"];
   return ids.map(id => ({
     id,
