@@ -144,41 +144,57 @@
 
   /**
    * يحقن CSS قوي للقوالب الفاتحة — يُغلّب تعريفات style.css المحلية
-   * يُحقن في <body> (وليس في <head>) ليأتي بعد كل CSS خارجي
+   * الإستراتيجية: نحقن عنصرين <style>
+   *  1. في <head> مبكراً (عبر document.head) — لمنع الوميض
+   *  2. في <body> لاحقاً (نفس المحتوى) — لضمان الأولوية فوق style.css
    */
   function injectLightOverrides(theme) {
-    // إن كان DOM لم يجهز بعد، انتظر
-    if (!document.body) {
-      document.addEventListener('DOMContentLoaded', () => injectLightOverrides(theme), { once: true });
-      return;
-    }
+    const css = buildLightCSS(theme);
 
-    let styleEl = document.getElementById('shared-theme-light-overrides');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'shared-theme-light-overrides';
-      // ⚠️ مهم: نضعه في نهاية <body> حتى يأتي بعد كل <link rel="stylesheet">
-      // هذا يضمن أن قواعدنا تتغلّب على style.css
-      document.body.appendChild(styleEl);
-    } else {
-      // تأكد أنه في نهاية body (قد يكون في head من نداء سابق)
-      if (styleEl.parentElement !== document.body) {
-        document.body.appendChild(styleEl);
+    // ── 1) في <head> — يُحقن فوراً لمنع الوميض ──
+    let headEl = document.getElementById('shared-theme-light-head');
+    if (!headEl) {
+      headEl = document.createElement('style');
+      headEl.id = 'shared-theme-light-head';
+      (document.head || document.documentElement).appendChild(headEl);
+    }
+    headEl.textContent = css;
+
+    // ── 2) في <body> — يُحقن بعد DOM (أولوية أعلى من style.css) ──
+    function injectBody() {
+      if (!document.body) {
+        document.addEventListener('DOMContentLoaded', injectBody, { once: true });
+        return;
       }
+      let bodyEl = document.getElementById('shared-theme-light-body');
+      if (!bodyEl) {
+        bodyEl = document.createElement('style');
+        bodyEl.id = 'shared-theme-light-body';
+        document.body.appendChild(bodyEl);
+      } else if (bodyEl.parentElement !== document.body) {
+        document.body.appendChild(bodyEl);
+      }
+      bodyEl.textContent = css;
     }
+    injectBody();
 
+    dbg('✅ Light overrides injected (' + css.length + ' chars)');
+  }
+
+  function buildLightCSS(theme) {
     const bg = theme.bg;
     const card = theme.sidebar;
     const text = theme.text;
     const primary = theme.primary;
     const accent = theme.accent;
 
-    // نستخدم :root[data-theme-mode="light"] بدلاً من html لزيادة الخصوصية
-    styleEl.textContent = `
+    return `
       /* ═══ قالب فاتح — CSS overrides ═══ */
-      :root[data-theme-mode="light"] {
+      :root[data-theme-mode="light"],
+      html[data-theme-mode="light"]:root {
         --bg: ${bg} !important;
         --bg2: ${card} !important;
+        --bg3: ${lighten2(bg, -5)} !important;
         --card: ${card} !important;
         --text: ${text} !important;
         --text-muted: rgba(0,0,0,0.6) !important;
@@ -195,7 +211,7 @@
         color: ${text} !important;
       }
 
-      /* ═══ بطاقات المحتوى (في style.css #161928, #1a1d2e إلخ) ═══ */
+      /* ═══ بطاقات المحتوى ═══ */
       html[data-theme-mode="light"] .content-block,
       html[data-theme-mode="light"] .sec-block,
       html[data-theme-mode="light"] .info-card,
@@ -204,7 +220,7 @@
       html[data-theme-mode="light"] .qz-stat-card,
       html[data-theme-mode="light"] .panel,
       html[data-theme-mode="light"] .card,
-      html[data-theme-mode="light"] [class*="-card"]:not([class*="theme-"]),
+      html[data-theme-mode="light"] [class*="-card"]:not([class*="theme-"]):not([class*="-card-editor"]),
       html[data-theme-mode="light"] [class*="-block"] {
         background: ${card} !important;
         color: ${text} !important;
@@ -217,7 +233,7 @@
         background: radial-gradient(circle, ${primary}15 0%, transparent 70%) !important;
       }
 
-      /* ═══ النصوص والفقرات ═══ */
+      /* ═══ النصوص ═══ */
       html[data-theme-mode="light"] p,
       html[data-theme-mode="light"] li,
       html[data-theme-mode="light"] td,
@@ -228,7 +244,7 @@
         color: ${text} !important;
       }
 
-      /* ═══ العناوين داخل البطاقات ═══ */
+      /* ═══ العناوين ═══ */
       html[data-theme-mode="light"] .content-block h1,
       html[data-theme-mode="light"] .content-block h2,
       html[data-theme-mode="light"] .content-block h3,
@@ -256,7 +272,7 @@
         opacity: 0.85;
       }
 
-      /* ═══ Topic nav (الأزرار في الـ hero) ═══ */
+      /* ═══ Topic nav ═══ */
       html[data-theme-mode="light"] .topic-link,
       html[data-theme-mode="light"] .topic-btn {
         background: ${card} !important;
@@ -269,18 +285,15 @@
         color: #fff !important;
       }
 
-      /* ═══ Section headers (ثانياً، ثالثاً...) ═══ */
       html[data-theme-mode="light"] .sec-block-header,
       html[data-theme-mode="light"] .sec-block-header h2 {
         color: ${primary} !important;
       }
 
-      /* ═══ القوائم داخل البطاقات ═══ */
       html[data-theme-mode="light"] .content-block ul li {
         border-bottom-color: rgba(0,0,0,0.08) !important;
       }
 
-      /* ═══ الروابط ═══ */
       html[data-theme-mode="light"] a:not(.btn):not([class*="qz-"]):not([class*="tr-"]) {
         color: ${primary} !important;
       }
@@ -289,13 +302,9 @@
       }
 
       /* ═══ الجداول ═══ */
-      html[data-theme-mode="light"] table {
-        color: ${text} !important;
-      }
+      html[data-theme-mode="light"] table { color: ${text} !important; }
       html[data-theme-mode="light"] th,
-      html[data-theme-mode="light"] td {
-        border-color: rgba(0,0,0,0.1) !important;
-      }
+      html[data-theme-mode="light"] td { border-color: rgba(0,0,0,0.1) !important; }
       html[data-theme-mode="light"] thead th {
         background: ${primary}15 !important;
         color: ${primary} !important;
@@ -304,7 +313,6 @@
         background: ${primary}05 !important;
       }
 
-      /* ═══ الشريط العلوي / site-header ═══ */
       html[data-theme-mode="light"] .site-header,
       html[data-theme-mode="light"] .top-nav,
       html[data-theme-mode="light"] .navbar {
@@ -316,12 +324,10 @@
         color: ${primary} !important;
       }
 
-      /* ═══ أزرار عامة ═══ */
       html[data-theme-mode="light"] button:not([class*="theme-"]):not([id^="dbg"]):not([id^="_theme"]) {
         color: ${text} !important;
       }
 
-      /* ═══ scroll-to-top و floating buttons ═══ */
       html[data-theme-mode="light"] .scroll-top,
       html[data-theme-mode="light"] .float-btn {
         background: ${primary} !important;
@@ -329,7 +335,6 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
       }
 
-      /* ═══ شبكات الصفحة الرئيسية (الكروت في index) ═══ */
       html[data-theme-mode="light"] .home-card,
       html[data-theme-mode="light"] .section-card {
         background: ${card} !important;
@@ -345,7 +350,6 @@
          🎛️ لوحة التحكم (admin.html) — overrides مخصصة
       ═══════════════════════════════════════════════════════════ */
 
-      /* الشريط الجانبي */
       html[data-theme-mode="light"] .sidebar,
       html[data-theme-mode="light"] #sidebar,
       html[data-theme-mode="light"] .app-sidebar {
@@ -368,7 +372,6 @@
         background: ${primary}10 !important;
       }
 
-      /* منطقة المحتوى الرئيسية */
       html[data-theme-mode="light"] .main-content,
       html[data-theme-mode="light"] #dashboardShell,
       html[data-theme-mode="light"] .app-shell,
@@ -376,7 +379,6 @@
         background: ${bg} !important;
       }
 
-      /* اللوحات (panels) — أكبر مشكلة في الصورة */
       html[data-theme-mode="light"] .panel,
       html[data-theme-mode="light"] [id^="panel-"],
       html[data-theme-mode="light"] .admin-panel {
@@ -385,7 +387,7 @@
         border-color: rgba(0,0,0,0.1) !important;
       }
 
-      /* بطاقات الإعدادات */
+      /* ═══ قسم الإعدادات ═══ */
       html[data-theme-mode="light"] .settings-section,
       html[data-theme-mode="light"] .settings-card {
         background: ${card} !important;
@@ -397,7 +399,29 @@
         color: ${primary} !important;
       }
 
-      /* حقول الإدخال داخل الإعدادات */
+      /* ═══ بطاقات homeCards (هذه المشكلة في الصورة!) ═══ */
+      html[data-theme-mode="light"] .hc-card-editor {
+        background: ${lighten2(bg, -4)} !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
+      }
+      html[data-theme-mode="light"] .hc-card-header {
+        background: ${accent}12 !important;
+        border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+      }
+      html[data-theme-mode="light"] .hc-card-header:hover {
+        background: ${accent}20 !important;
+      }
+      html[data-theme-mode="light"] .hc-card-header-title {
+        color: ${text} !important;
+      }
+      html[data-theme-mode="light"] .hc-card-header-toggle {
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .hc-card-body {
+        background: ${card} !important;
+      }
+
+      /* ═══ حقول الإدخال ═══ */
       html[data-theme-mode="light"] .sett-field label,
       html[data-theme-mode="light"] .qz-label {
         color: ${text} !important;
@@ -426,7 +450,6 @@
         color: ${text} !important;
       }
 
-      /* البطاقات الكبيرة في لوحة التحكم (admin dashboard cards) */
       html[data-theme-mode="light"] .qz-card,
       html[data-theme-mode="light"] .qz-stat-card,
       html[data-theme-mode="light"] .dashboard-card,
@@ -438,7 +461,6 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
       }
 
-      /* أزرار التنقل بين الصفحات في لوحة التحكم (الأقسام الخمسة) */
       html[data-theme-mode="light"] .page-selector,
       html[data-theme-mode="light"] .page-tab,
       html[data-theme-mode="light"] .legacy-page-btn,
@@ -460,22 +482,13 @@
         color: ${primary} !important;
       }
 
-      /* رأس لوحة التحكم (breadcrumb) */
       html[data-theme-mode="light"] .breadcrumb,
-      html[data-theme-mode="light"] .page-header {
-        color: ${text} !important;
-      }
-      html[data-theme-mode="light"] .breadcrumb a {
-        color: ${primary} !important;
-      }
+      html[data-theme-mode="light"] .page-header { color: ${text} !important; }
+      html[data-theme-mode="light"] .breadcrumb a { color: ${primary} !important; }
 
-      /* أزرار الحفظ / الإضافة الرئيسية (gradients الخضراء/البرتقالية) */
       html[data-theme-mode="light"] .qz-save-btn,
-      html[data-theme-mode="light"] .btn-primary {
-        color: #fff !important;
-      }
+      html[data-theme-mode="light"] .btn-primary { color: #fff !important; }
 
-      /* modals / popups */
       html[data-theme-mode="light"] .qm-modal-content,
       html[data-theme-mode="light"] .tr-modal-content,
       html[data-theme-mode="light"] .modal-content,
@@ -485,15 +498,10 @@
       }
       html[data-theme-mode="light"] .qm-modal-title,
       html[data-theme-mode="light"] .tr-modal-title,
-      html[data-theme-mode="light"] .modal-title {
-        color: ${primary} !important;
-      }
+      html[data-theme-mode="light"] .modal-title { color: ${primary} !important; }
 
-      /* جدول المقالات / المستخدمين */
       html[data-theme-mode="light"] .qz-table,
-      html[data-theme-mode="light"] .admin-table {
-        background: ${card} !important;
-      }
+      html[data-theme-mode="light"] .admin-table { background: ${card} !important; }
       html[data-theme-mode="light"] .qz-table th,
       html[data-theme-mode="light"] .admin-table th {
         background: ${primary}15 !important;
@@ -505,18 +513,14 @@
         color: ${text} !important;
         border-color: rgba(0,0,0,0.08) !important;
       }
-      html[data-theme-mode="light"] .qz-table tr:hover {
-        background: ${primary}05 !important;
-      }
+      html[data-theme-mode="light"] .qz-table tr:hover { background: ${primary}05 !important; }
 
-      /* شارة "متصل" */
       html[data-theme-mode="light"] .connection-badge,
       html[data-theme-mode="light"] .status-online {
         background: ${accent}20 !important;
         color: ${accent} !important;
       }
 
-      /* معلومات المستخدم في أسفل الشريط الجانبي */
       html[data-theme-mode="light"] .sidebar-user,
       html[data-theme-mode="light"] .user-info {
         background: rgba(0,0,0,0.03) !important;
@@ -529,14 +533,28 @@
         opacity: 0.7;
       }
     `;
+  }
 
-    dbg('✅ Light overrides injected (' + styleEl.textContent.length + ' chars)');
+  /** تعديل إضاءة لون (سالب = تغميق، موجب = تفتيح) */
+  function lighten2(hex, pct) {
+    try {
+      const h = hex.replace('#', '');
+      if (h.length !== 6) return hex;
+      const amount = Math.round(255 * pct / 100);
+      let r = parseInt(h.substring(0, 2), 16) + amount;
+      let g = parseInt(h.substring(2, 4), 16) + amount;
+      let b = parseInt(h.substring(4, 6), 16) + amount;
+      r = Math.max(0, Math.min(255, r));
+      g = Math.max(0, Math.min(255, g));
+      b = Math.max(0, Math.min(255, b));
+      return '#' + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
+    } catch { return hex; }
   }
 
   /** يُزيل الـ overrides عند العودة لقالب داكن */
   function removeLightOverrides() {
-    const styleEl = document.getElementById('shared-theme-light-overrides');
-    if (styleEl) styleEl.remove();
+    document.getElementById('shared-theme-light-head')?.remove();
+    document.getElementById('shared-theme-light-body')?.remove();
   }
 
   /** يحدّد ما إذا كان اللون فاتحاً (إضاءته > 50%) */
