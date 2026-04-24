@@ -144,15 +144,27 @@
 
   /**
    * يحقن CSS قوي للقوالب الفاتحة — يُغلّب تعريفات style.css المحلية
-   * الفكرة: بعض العناصر في style.css لها ألوان داكنة ثابتة (#161928, #1a1d2e إلخ)
-   * لا تأخذ من CSS variables، فنحقن قواعد أقوى تستبدلها
+   * يُحقن في <body> (وليس في <head>) ليأتي بعد كل CSS خارجي
    */
   function injectLightOverrides(theme) {
+    // إن كان DOM لم يجهز بعد، انتظر
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', () => injectLightOverrides(theme), { once: true });
+      return;
+    }
+
     let styleEl = document.getElementById('shared-theme-light-overrides');
     if (!styleEl) {
       styleEl = document.createElement('style');
       styleEl.id = 'shared-theme-light-overrides';
-      document.head.appendChild(styleEl);
+      // ⚠️ مهم: نضعه في نهاية <body> حتى يأتي بعد كل <link rel="stylesheet">
+      // هذا يضمن أن قواعدنا تتغلّب على style.css
+      document.body.appendChild(styleEl);
+    } else {
+      // تأكد أنه في نهاية body (قد يكون في head من نداء سابق)
+      if (styleEl.parentElement !== document.body) {
+        document.body.appendChild(styleEl);
+      }
     }
 
     const bg = theme.bg;
@@ -161,38 +173,62 @@
     const primary = theme.primary;
     const accent = theme.accent;
 
+    // نستخدم :root[data-theme-mode="light"] بدلاً من html لزيادة الخصوصية
     styleEl.textContent = `
       /* ═══ قالب فاتح — CSS overrides ═══ */
-      html[data-theme-mode="light"] body { background: ${bg} !important; color: ${text} !important; }
+      :root[data-theme-mode="light"] {
+        --bg: ${bg} !important;
+        --bg2: ${card} !important;
+        --card: ${card} !important;
+        --text: ${text} !important;
+        --text-muted: rgba(0,0,0,0.6) !important;
+        --text-faint: rgba(0,0,0,0.45) !important;
+        --border: rgba(0,0,0,0.12) !important;
+        --border2: rgba(0,0,0,0.18) !important;
+        --primary: ${primary} !important;
+        --accent: ${accent} !important;
+      }
 
-      /* بطاقات المحتوى — اللون الداكن المثبت #161928 و #1a1d2e */
+      html[data-theme-mode="light"],
+      html[data-theme-mode="light"] body {
+        background: ${bg} !important;
+        color: ${text} !important;
+      }
+
+      /* ═══ بطاقات المحتوى (في style.css #161928, #1a1d2e إلخ) ═══ */
       html[data-theme-mode="light"] .content-block,
       html[data-theme-mode="light"] .sec-block,
       html[data-theme-mode="light"] .info-card,
       html[data-theme-mode="light"] .article-card,
+      html[data-theme-mode="light"] .qz-card,
+      html[data-theme-mode="light"] .qz-stat-card,
+      html[data-theme-mode="light"] .panel,
       html[data-theme-mode="light"] .card,
-      html[data-theme-mode="light"] [class*="-card"],
+      html[data-theme-mode="light"] [class*="-card"]:not([class*="theme-"]),
       html[data-theme-mode="light"] [class*="-block"] {
         background: ${card} !important;
         color: ${text} !important;
         border-color: rgba(0,0,0,0.1) !important;
       }
-      /* تحسين الحواف على الخلفيات الفاتحة */
       html[data-theme-mode="light"] .content-block {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+      }
+      html[data-theme-mode="light"] .content-block::before {
+        background: radial-gradient(circle, ${primary}15 0%, transparent 70%) !important;
       }
 
-      /* النصوص داخل البطاقات */
-      html[data-theme-mode="light"] .content-block p,
-      html[data-theme-mode="light"] .sec-block p,
-      html[data-theme-mode="light"] .content-block li,
-      html[data-theme-mode="light"] .content-block span:not([class*="badge"]):not([class*="tag"]),
+      /* ═══ النصوص والفقرات ═══ */
       html[data-theme-mode="light"] p,
-      html[data-theme-mode="light"] li {
+      html[data-theme-mode="light"] li,
+      html[data-theme-mode="light"] td,
+      html[data-theme-mode="light"] span:not([class*="badge"]):not([class*="tag"]):not([class*="icon"]),
+      html[data-theme-mode="light"] .content-block p,
+      html[data-theme-mode="light"] .content-block li,
+      html[data-theme-mode="light"] .sec-block p {
         color: ${text} !important;
       }
 
-      /* العناوين داخل البطاقات */
+      /* ═══ العناوين داخل البطاقات ═══ */
       html[data-theme-mode="light"] .content-block h1,
       html[data-theme-mode="light"] .content-block h2,
       html[data-theme-mode="light"] .content-block h3,
@@ -202,56 +238,111 @@
         color: ${primary} !important;
       }
 
-      /* الـ hero / page-hero */
+      /* ═══ Hero section ═══ */
       html[data-theme-mode="light"] .page-hero,
       html[data-theme-mode="light"] .hero {
-        background: linear-gradient(135deg, ${primary}15 0%, ${accent}10 100%) !important;
+        background: linear-gradient(135deg, ${primary}20 0%, ${accent}15 100%) !important;
       }
       html[data-theme-mode="light"] .page-hero h1,
-      html[data-theme-mode="light"] .hero h1 {
+      html[data-theme-mode="light"] .hero h1,
+      html[data-theme-mode="light"] .page-hero .part-badge,
+      html[data-theme-mode="light"] h1 {
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .page-hero p,
+      html[data-theme-mode="light"] .hero p,
+      html[data-theme-mode="light"] .page-hero .part-sub {
+        color: ${text} !important;
+        opacity: 0.85;
+      }
+
+      /* ═══ Topic nav (الأزرار في الـ hero) ═══ */
+      html[data-theme-mode="light"] .topic-link,
+      html[data-theme-mode="light"] .topic-btn {
+        background: ${card} !important;
+        color: ${primary} !important;
+        border: 1px solid ${primary}40 !important;
+      }
+      html[data-theme-mode="light"] .topic-link:hover,
+      html[data-theme-mode="light"] .topic-btn:hover {
+        background: ${primary} !important;
+        color: #fff !important;
+      }
+
+      /* ═══ Section headers (ثانياً، ثالثاً...) ═══ */
+      html[data-theme-mode="light"] .sec-block-header,
+      html[data-theme-mode="light"] .sec-block-header h2 {
         color: ${primary} !important;
       }
 
-      /* الخلفية العامة */
-      html[data-theme-mode="light"] {
-        background: ${bg} !important;
+      /* ═══ القوائم داخل البطاقات ═══ */
+      html[data-theme-mode="light"] .content-block ul li {
+        border-bottom-color: rgba(0,0,0,0.08) !important;
       }
 
-      /* الجداول */
-      html[data-theme-mode="light"] table,
+      /* ═══ الروابط ═══ */
+      html[data-theme-mode="light"] a:not(.btn):not([class*="qz-"]):not([class*="tr-"]) {
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] a:not(.btn):hover {
+        color: ${accent} !important;
+      }
+
+      /* ═══ الجداول ═══ */
+      html[data-theme-mode="light"] table {
+        color: ${text} !important;
+      }
       html[data-theme-mode="light"] th,
       html[data-theme-mode="light"] td {
-        color: ${text} !important;
         border-color: rgba(0,0,0,0.1) !important;
       }
       html[data-theme-mode="light"] thead th {
-        background: ${card} !important;
-      }
-
-      /* الأزرار الثانوية والروابط */
-      html[data-theme-mode="light"] a:not(.btn):not(.qz-btn) {
+        background: ${primary}15 !important;
         color: ${primary} !important;
       }
+      html[data-theme-mode="light"] tbody tr:nth-child(even) {
+        background: ${primary}05 !important;
+      }
 
-      /* شريط التنقل والهيدر */
+      /* ═══ الشريط العلوي / site-header ═══ */
+      html[data-theme-mode="light"] .site-header,
       html[data-theme-mode="light"] .top-nav,
-      html[data-theme-mode="light"] .navbar,
-      html[data-theme-mode="light"] header.site-header {
+      html[data-theme-mode="light"] .navbar {
         background: ${card} !important;
         border-bottom: 1px solid rgba(0,0,0,0.08) !important;
       }
-
-      /* الأيقونات داخل البطاقات */
-      html[data-theme-mode="light"] .sec-icon,
-      html[data-theme-mode="light"] .card-icon {
-        filter: brightness(0.95);
+      html[data-theme-mode="light"] .site-header a,
+      html[data-theme-mode="light"] .site-header .logo {
+        color: ${primary} !important;
       }
 
-      /* SVG / أشكال داكنة */
-      html[data-theme-mode="light"] .overlay-dark {
-        background: rgba(0,0,0,0.3) !important;
+      /* ═══ أزرار عامة ═══ */
+      html[data-theme-mode="light"] button:not([class*="theme-"]):not([id^="dbg"]):not([id^="_theme"]) {
+        color: ${text} !important;
+      }
+
+      /* ═══ scroll-to-top و floating buttons ═══ */
+      html[data-theme-mode="light"] .scroll-top,
+      html[data-theme-mode="light"] .float-btn {
+        background: ${primary} !important;
+        color: #fff !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+      }
+
+      /* ═══ شبكات الصفحة الرئيسية (الكروت في index) ═══ */
+      html[data-theme-mode="light"] .home-card,
+      html[data-theme-mode="light"] .section-card {
+        background: ${card} !important;
+        color: ${text} !important;
+        border: 1px solid rgba(0,0,0,0.08) !important;
+      }
+      html[data-theme-mode="light"] .home-card h3,
+      html[data-theme-mode="light"] .section-card h3 {
+        color: ${primary} !important;
       }
     `;
+
+    dbg('✅ Light overrides injected (' + styleEl.textContent.length + ' chars)');
   }
 
   /** يُزيل الـ overrides عند العودة لقالب داكن */
