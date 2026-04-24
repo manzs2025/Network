@@ -156,6 +156,255 @@ import {
   }
 })();
 
+/* ══════════════════════════════════════════════════════════
+   🎨 تطبيق الثيم مباشرةً داخل admin.js
+   (ضمان احتياطي — يعمل حتى لو لم يُحمَّل shared-theme.js)
+══════════════════════════════════════════════════════════ */
+(function applyAdminTheme() {
+  const FB_PROJECT = 'networkacademy-795c8';
+  const CACHE_KEY = 'nk_theme_cache_v1';
+
+  // طبّق من الـ cache فوراً (لمنع الوميض)
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const { theme } = JSON.parse(cached);
+      if (theme) applyTheme(theme);
+    }
+  } catch (_) {}
+
+  // اجلب أحدث الإعدادات
+  fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/settings/general`)
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (!data || !data.fields) return;
+      const f = data.fields;
+      const theme = {
+        bg:      f.bgColor?.stringValue      || null,
+        sidebar: f.sidebarColor?.stringValue  || null,
+        primary: f.primaryColor?.stringValue  || null,
+        accent:  f.accentColor?.stringValue   || null,
+        text:    f.textColor?.stringValue     || null,
+      };
+      applyTheme(theme);
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ theme, ts: Date.now() })); } catch(_) {}
+    })
+    .catch(() => {});
+
+  function applyTheme(theme) {
+    if (!theme || !theme.bg) return;
+    const isLight = isLightColor(theme.bg);
+    const r = document.documentElement.style;
+
+    r.setProperty('--bg', theme.bg);
+    r.setProperty('--bg2', theme.sidebar || theme.bg);
+    r.setProperty('--primary', theme.primary || '#6c2fa0');
+    r.setProperty('--accent', theme.accent || '#00c9b1');
+    r.setProperty('--text', theme.text || '#e8eaf6');
+
+    if (isLight) {
+      r.setProperty('--bg3', darken(theme.bg, 5));
+      r.setProperty('--card', theme.sidebar || '#f5f5f7');
+      r.setProperty('--text-muted', 'rgba(0,0,0,0.6)');
+      r.setProperty('--text-faint', 'rgba(0,0,0,0.45)');
+      r.setProperty('--border', 'rgba(0,0,0,0.12)');
+      r.setProperty('--border2', 'rgba(0,0,0,0.18)');
+      document.documentElement.setAttribute('data-theme-mode', 'light');
+      injectLightCSS(theme);
+    } else {
+      r.setProperty('--text-muted', 'rgba(255,255,255,0.6)');
+      r.setProperty('--text-faint', 'rgba(255,255,255,0.4)');
+      r.setProperty('--border', 'rgba(255,255,255,0.08)');
+      r.setProperty('--border2', 'rgba(255,255,255,0.12)');
+      document.documentElement.setAttribute('data-theme-mode', 'dark');
+      document.getElementById('admin-light-override')?.remove();
+    }
+  }
+
+  function injectLightCSS(theme) {
+    const css = `
+      html[data-theme-mode="light"],
+      html[data-theme-mode="light"] body {
+        background: ${theme.bg} !important;
+        color: ${theme.text} !important;
+      }
+      /* الشريط الجانبي */
+      html[data-theme-mode="light"] .sidebar,
+      html[data-theme-mode="light"] #sidebar {
+        background: ${theme.sidebar} !important;
+      }
+      html[data-theme-mode="light"] .sidebar a,
+      html[data-theme-mode="light"] .sidebar .nav-item,
+      html[data-theme-mode="light"] .sidebar-link,
+      html[data-theme-mode="light"] .sb-item {
+        color: ${theme.text} !important;
+      }
+      html[data-theme-mode="light"] .sb-item.active,
+      html[data-theme-mode="light"] .sidebar-link.active {
+        background: ${theme.primary}20 !important;
+        color: ${theme.primary} !important;
+      }
+      /* منطقة المحتوى الرئيسية */
+      html[data-theme-mode="light"] .main,
+      html[data-theme-mode="light"] #main,
+      html[data-theme-mode="light"] .main-content,
+      html[data-theme-mode="light"] #dashboardShell {
+        background: ${theme.bg} !important;
+      }
+      /* كل البطاقات واللوحات */
+      html[data-theme-mode="light"] .panel,
+      html[data-theme-mode="light"] [id^="panel-"],
+      html[data-theme-mode="light"] .card,
+      html[data-theme-mode="light"] .qz-card,
+      html[data-theme-mode="light"] .qz-stat-card,
+      html[data-theme-mode="light"] .stat-card,
+      html[data-theme-mode="light"] .welcome-card,
+      html[data-theme-mode="light"] .info-card,
+      html[data-theme-mode="light"] .settings-section,
+      html[data-theme-mode="light"] [class*="-card"]:not(.theme-card) {
+        background: ${theme.sidebar} !important;
+        color: ${theme.text} !important;
+        border-color: rgba(0,0,0,0.1) !important;
+      }
+      html[data-theme-mode="light"] .stat-card,
+      html[data-theme-mode="light"] .qz-stat-card {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+      }
+      /* النصوص */
+      html[data-theme-mode="light"] p,
+      html[data-theme-mode="light"] li,
+      html[data-theme-mode="light"] label,
+      html[data-theme-mode="light"] .stat-label,
+      html[data-theme-mode="light"] .stat-value,
+      html[data-theme-mode="light"] span:not([class*="badge"]):not([class*="tag"]) {
+        color: ${theme.text} !important;
+      }
+      /* العناوين */
+      html[data-theme-mode="light"] h1,
+      html[data-theme-mode="light"] h2,
+      html[data-theme-mode="light"] h3,
+      html[data-theme-mode="light"] h4,
+      html[data-theme-mode="light"] .welcome-title,
+      html[data-theme-mode="light"] .settings-section-title {
+        color: ${theme.primary} !important;
+      }
+      /* breadcrumb */
+      html[data-theme-mode="light"] .breadcrumb,
+      html[data-theme-mode="light"] .breadcrumb-item,
+      html[data-theme-mode="light"] .bc-link {
+        color: ${theme.text} !important;
+      }
+      /* شارة "متصل" */
+      html[data-theme-mode="light"] .status-connected,
+      html[data-theme-mode="light"] .connection-status {
+        background: ${theme.accent}20 !important;
+        color: ${theme.accent} !important;
+      }
+      /* بطاقات homeCards */
+      html[data-theme-mode="light"] .hc-card-editor {
+        background: ${darken(theme.bg, 4)} !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
+      }
+      html[data-theme-mode="light"] .hc-card-header {
+        background: ${theme.accent}12 !important;
+        border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+      }
+      html[data-theme-mode="light"] .hc-card-header-title { color: ${theme.text} !important; }
+      html[data-theme-mode="light"] .hc-card-body { background: ${theme.sidebar} !important; }
+      /* حقول الإدخال */
+      html[data-theme-mode="light"] input[type="text"]:not([class*="color"]),
+      html[data-theme-mode="light"] input[type="number"],
+      html[data-theme-mode="light"] input[type="email"],
+      html[data-theme-mode="light"] input[type="password"],
+      html[data-theme-mode="light"] textarea,
+      html[data-theme-mode="light"] select,
+      html[data-theme-mode="light"] .qz-input {
+        background: ${theme.bg} !important;
+        color: ${theme.text} !important;
+        border: 1px solid rgba(0,0,0,0.15) !important;
+      }
+      html[data-theme-mode="light"] select option {
+        background: ${theme.bg} !important;
+        color: ${theme.text} !important;
+      }
+      /* جداول */
+      html[data-theme-mode="light"] table { color: ${theme.text} !important; }
+      html[data-theme-mode="light"] th, html[data-theme-mode="light"] td {
+        border-color: rgba(0,0,0,0.1) !important;
+      }
+      html[data-theme-mode="light"] thead th {
+        background: ${theme.primary}15 !important;
+        color: ${theme.primary} !important;
+      }
+      /* Modals */
+      html[data-theme-mode="light"] .qm-modal-content,
+      html[data-theme-mode="light"] .tr-modal-content,
+      html[data-theme-mode="light"] .modal-content {
+        background: ${theme.sidebar} !important;
+        color: ${theme.text} !important;
+      }
+      /* User info في أسفل الشريط */
+      html[data-theme-mode="light"] .sidebar-user,
+      html[data-theme-mode="light"] .sb-user {
+        background: rgba(0,0,0,0.03) !important;
+        border-top: 1px solid rgba(0,0,0,0.08) !important;
+      }
+      html[data-theme-mode="light"] .sb-user-name,
+      html[data-theme-mode="light"] .sb-user-email { color: ${theme.text} !important; }
+    `;
+
+    // نحقن في <head> لمنع الوميض + نحقن في <body> لأولوية CSS
+    let headEl = document.getElementById('admin-light-override-head');
+    if (!headEl) {
+      headEl = document.createElement('style');
+      headEl.id = 'admin-light-override-head';
+      document.head.appendChild(headEl);
+    }
+    headEl.textContent = css;
+
+    function injectBody() {
+      if (!document.body) {
+        document.addEventListener('DOMContentLoaded', injectBody, { once: true });
+        return;
+      }
+      let bodyEl = document.getElementById('admin-light-override');
+      if (!bodyEl) {
+        bodyEl = document.createElement('style');
+        bodyEl.id = 'admin-light-override';
+        document.body.appendChild(bodyEl);
+      } else if (bodyEl.parentElement !== document.body) {
+        document.body.appendChild(bodyEl);
+      }
+      bodyEl.textContent = css;
+    }
+    injectBody();
+  }
+
+  function isLightColor(hex) {
+    try {
+      const h = hex.replace('#', '');
+      if (h.length !== 6) return false;
+      const r = parseInt(h.substring(0, 2), 16);
+      const g = parseInt(h.substring(2, 4), 16);
+      const b = parseInt(h.substring(4, 6), 16);
+      return ((r * 299 + g * 587 + b * 114) / 1000) > 155;
+    } catch { return false; }
+  }
+
+  function darken(hex, pct) {
+    try {
+      const h = hex.replace('#', '');
+      if (h.length !== 6) return hex;
+      const amount = Math.round(255 * pct / 100);
+      let r = parseInt(h.substring(0, 2), 16) - amount;
+      let g = parseInt(h.substring(2, 4), 16) - amount;
+      let b = parseInt(h.substring(4, 6), 16) - amount;
+      r = Math.max(0, r); g = Math.max(0, g); b = Math.max(0, b);
+      return '#' + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
+    } catch { return hex; }
+  }
+})();
+
 
 /* ─── إعدادات Firebase ─── */
 const firebaseConfig = {
