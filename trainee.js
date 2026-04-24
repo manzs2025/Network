@@ -275,6 +275,9 @@ window.startQuiz = async function (quizId) {
   _submitted     = false;
   _startTime     = Date.now();
 
+  // تفريغ ذاكرة خلط أسئلة المطابقة (لضمان خلط جديد في كل محاولة)
+  for (const k in _matchShuffleCache) delete _matchShuffleCache[k];
+
   /* بناء شاشة الحل */
   _buildSolver(d.questions ?? []);
 
@@ -375,6 +378,20 @@ function _updateRunningScore() {
       const selectedText = typeof ans === "number" && ans >= 0 ? opts[ans] : null;
       const correctText = q.correctAnswer === "true" ? "صح" : "خطأ";
       isCorrect = selectedText === correctText;
+    } else if (qType === "match") {
+      // أسئلة المطابقة: درجة جزئية حسب عدد الإجابات الصحيحة
+      const pairs = Array.isArray(q.pairs) ? q.pairs.filter(p => p && p.left && p.right) : [];
+      if (pairs.length > 0 && ans && typeof ans === "object") {
+        let correctCount = 0;
+        pairs.forEach((p, pi) => {
+          if (ans[pi] === p.right) correctCount++;
+        });
+        // نقاط جزئية: (صحيحة / الكل) * points
+        const partial = (correctCount / pairs.length) * qPoints;
+        runScore += partial;
+      }
+      // لا نضع isCorrect = true لأن الدرجة جزئية (سبق جمعها)
+      return;
     } else {
       const opts = q.options ?? [];
       const selectedAnswer = typeof ans === "number" && ans >= 0 ? opts[ans] : null;
@@ -427,6 +444,7 @@ function _buildSolver(questions) {
   // احسب عدد الأسئلة القابلة للإجابة
   const answerableCount = questions.filter(q => {
     const qType = q.type || "mcq";
+    if (qType === "match") return Array.isArray(q.pairs) && q.pairs.length > 0;
     const opts = qType === "tf" ? ["صح","خطأ"] : (q.options ?? []);
     return opts.length > 0;
   }).length;
@@ -457,7 +475,45 @@ function _buildSolver(questions) {
     card.id = `qcard_${idx}`;
 
     let optsHTML = "";
-    if (opts.length === 0) {
+    // ── نوع المطابقة: عرض خاص (عمود يسار ثابت + dropdown لاختيار المطابق) ──
+    if (qType === "match") {
+      const pairs = Array.isArray(q.pairs) ? q.pairs.filter(p => p && p.left && p.right) : [];
+      if (pairs.length === 0) {
+        optsHTML = `<div style="padding:1rem;background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.4);border-radius:8px;color:#ff6b6b;text-align:center;">⚠️ سؤال المطابقة لا يحتوي على أزواج صحيحة. الرجاء التواصل مع المشرف.</div>`;
+      } else {
+        // خلط خيارات اليمين مرة واحدة وحفظها (حتى لا تتغير عند إعادة عرض الكارت)
+        if (!_matchShuffleCache[idx]) {
+          _matchShuffleCache[idx] = _shuffle(pairs.map(p => p.right));
+        }
+        const shuffledRights = _matchShuffleCache[idx];
+
+        optsHTML = `
+          <div style="display:flex;flex-direction:column;gap:0.7rem;">
+            ${pairs.map((p, pi) => `
+              <div class="match-row" style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;padding:0.7rem 0.85rem;background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.25);border-radius:10px;">
+                <div style="flex:1;min-width:160px;font-weight:700;color:#e8eaf6;font-size:0.95rem;">
+                  ${_esc(p.left)}
+                </div>
+                <span style="color:#a07ee0;font-size:1.1rem;">⬅️</span>
+                <select
+                  class="match-select qz-input qz-select"
+                  id="match_${idx}_${pi}"
+                  data-q-idx="${idx}"
+                  data-pair-idx="${pi}"
+                  onchange="selectMatch(${idx}, ${pi}, this.value)"
+                  style="flex:1;min-width:180px;max-width:100%;background:rgba(255,255,255,0.04);color:#e8eaf6;border:1px solid rgba(108,47,160,0.35);border-radius:8px;padding:0.5rem 0.7rem;font-family:inherit;">
+                  <option value="">— اختر المطابق —</option>
+                  ${shuffledRights.map(r => `<option value="${_esc(r)}">${_esc(r)}</option>`).join("")}
+                </select>
+              </div>
+            `).join("")}
+          </div>
+          <div style="margin-top:0.6rem;font-size:0.78rem;color:#7a7f9e;text-align:center;">
+            💡 اختر المطابق الصحيح لكل عنصر. الدرجة تُحسب نسبياً حسب عدد الإجابات الصحيحة.
+          </div>
+        `;
+      }
+    } else if (opts.length === 0) {
       optsHTML = `<div style="padding:1rem;background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.4);border-radius:8px;color:#ff6b6b;text-align:center;">⚠️ هذا السؤال لا يحتوي على خيارات إجابة. الرجاء التواصل مع المشرف.</div>`;
     } else {
       optsHTML = opts.map((opt, oi) => `
@@ -498,6 +554,31 @@ function _buildSolver(questions) {
 
   _refreshNav();
 }
+
+/* ─── اختيار مطابقة (لأسئلة match) ──── */
+window.selectMatch = function (qIdx, pairIdx, value) {
+  if (_submitted) return;
+  if (!_answers[qIdx] || typeof _answers[qIdx] !== "object" || Array.isArray(_answers[qIdx])) {
+    _answers[qIdx] = {};
+  }
+  if (value === "" || value == null) {
+    delete _answers[qIdx][pairIdx];
+    if (Object.keys(_answers[qIdx]).length === 0) delete _answers[qIdx];
+  } else {
+    _answers[qIdx][pairIdx] = value;
+  }
+
+  /* تحديث نقطة الإجابة — تُعتبر "مُجابة" إذا اختار أي مطابقة */
+  const dot = document.getElementById(`dot_${qIdx}`);
+  const hasAny = _answers[qIdx] && Object.keys(_answers[qIdx]).length > 0;
+  if (dot) {
+    dot.classList.toggle("answered", hasAny);
+  }
+
+  /* تحديث العدّاد الجاري */
+  if (typeof _updateRunningScore === "function") _updateRunningScore();
+  _refreshNav();
+};
 
 /* ─── اختيار خيار (يدعم اختيار فردي واختيار متعدد) ──── */
 window.selectOption = function (qIdx, optIdx, isMulti = false) {
@@ -649,6 +730,45 @@ window.submitQuiz = async function (isAutoSubmit = false) {
       selectedDisplay = selectedText ?? "لم يُجب";
       correctDisplay  = correctText;
       isCorrect = selectedText === correctText;
+    } else if (qType === "match") {
+      // أسئلة المطابقة: درجة جزئية حسب عدد الإجابات الصحيحة
+      const pairs = Array.isArray(q.pairs) ? q.pairs.filter(p => p && p.left && p.right) : [];
+      const userAns = (ans && typeof ans === "object" && !Array.isArray(ans)) ? ans : {};
+
+      let correctCount = 0;
+      const selectedParts = [];
+      const correctParts = [];
+      pairs.forEach((p, pi) => {
+        const userChoice = userAns[pi] || "—";
+        selectedParts.push(`${p.left} ⬅️ ${userChoice}`);
+        correctParts.push(`${p.left} ⬅️ ${p.right}`);
+        if (userAns[pi] === p.right) correctCount++;
+      });
+
+      const hasAnswer = Object.keys(userAns).length > 0;
+      selectedDisplay = hasAnswer ? selectedParts.join(" | ") : "لم يُجب";
+      correctDisplay  = correctParts.join(" | ");
+
+      // درجة جزئية: لا نستخدم isCorrect الثنائي
+      if (pairs.length > 0) {
+        const partial = (correctCount / pairs.length) * qPoints;
+        score += partial;
+        if (correctCount === pairs.length) {
+          correct++;         // يُعدّ "كامل" فقط عند المطابقة التامة
+          isCorrect = true;
+        }
+      }
+
+      answersMap[idx] = {
+        selected: selectedDisplay,
+        correct:  correctDisplay,
+        isCorrect,
+        points:   qPoints,
+        type:     qType,
+        partial:  correctCount,        // عدد الصحيح
+        total:    pairs.length,        // العدد الكلي
+      };
+      return; // نتجاوز الكتلة الموحّدة لأن match يُحتسب هنا
     } else {
       // mcq: الافتراضي
       const opts = q.options ?? [];
@@ -879,6 +999,45 @@ async function _showResult ({ questions, answersMap, correct, total, score, tota
         const card   = document.createElement("div");
         card.className = "review-card";
 
+        // ── عرض خاص لأسئلة المطابقة ──
+        if (q.type === "match") {
+          const pairs = Array.isArray(q.pairs) ? q.pairs.filter(p => p && p.left && p.right) : [];
+          const userAns = (_answers[idx] && typeof _answers[idx] === "object" && !Array.isArray(_answers[idx])) ? _answers[idx] : {};
+
+          const rowsHtml = pairs.map((p, pi) => {
+            const userChoice = userAns[pi] || null;
+            const isRight = userChoice === p.right;
+            const bg = isRight
+              ? "rgba(76,175,80,0.12);border:1px solid rgba(76,175,80,0.4);"
+              : (userChoice ? "rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.35);" : "rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.3);");
+            const icon = isRight ? "✅" : (userChoice ? "❌" : "⚠️");
+            return `
+              <div style="display:flex;gap:0.5rem;align-items:center;padding:0.55rem 0.75rem;background:${bg};border-radius:8px;margin-bottom:0.4rem;flex-wrap:wrap;">
+                <span style="font-size:1rem;flex-shrink:0;">${icon}</span>
+                <strong style="flex:1;min-width:120px;color:#e8eaf6;">${_esc(p.left)}</strong>
+                <span style="color:#a07ee0;">⬅️</span>
+                <span style="flex:1;min-width:120px;${isRight ? 'color:#a5d6a7' : 'color:#ef9a9a'}">
+                  ${_esc(userChoice || "لم يُجب")}
+                </span>
+                ${!isRight ? `<span style="font-size:0.75rem;color:#7a7f9e;">الصحيح: <span style="color:#a5d6a7">${_esc(p.right)}</span></span>` : ""}
+              </div>
+            `;
+          }).join("");
+
+          const partialInfo = (typeof ans.partial === "number" && typeof ans.total === "number")
+            ? `<div style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-faint);text-align:center;">📊 أصبت ${ans.partial} من ${ans.total} — درجتك في هذا السؤال: <strong style="color:#00c9b1">${((ans.partial/ans.total)*ans.points).toFixed(2)} / ${ans.points}</strong></div>`
+            : "";
+
+          card.innerHTML = `
+            <div class="q-num">السؤال ${idx + 1} <span style="font-size:0.75rem;background:rgba(255,152,0,0.15);color:#ffa726;padding:2px 8px;border-radius:8px;margin-right:6px;">🔗 مطابقة</span></div>
+            <div class="review-q">${_esc(q.text ?? "")}</div>
+            ${rowsHtml}
+            ${partialInfo}
+          `;
+          rc.appendChild(card);
+          return; // تجاوز المنطق العام
+        }
+
         const opts   = q.options ?? [];
         const optsHtml = opts.map(opt => {
           let cls = "neutral-opt";
@@ -1025,6 +1184,19 @@ function _esc(str) {
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
+
+/** خلط مصفوفة (Fisher-Yates) لخلط خيارات المطابقة */
+function _shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** ذاكرة خيارات أسئلة المطابقة (للحفاظ على ترتيب الـ dropdown بعد الخلط) */
+const _matchShuffleCache = {};
 
 /* ══════════════════════════════════════════════════════
    طبقة حماية الواجهة الأمامية (Client-side hardening)

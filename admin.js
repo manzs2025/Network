@@ -4678,8 +4678,9 @@ async function _legacyTopicsBuild(pageId, htmlText) {
   _legacyTopicsState.original = topics.slice();
 
   // محاولة جلب الترتيب المحفوظ من Firestore
+  // نخزّنه في elements/__topicsOrder__ للاستفادة من قواعد الأمان الموجودة
   try {
-    const metaSnap = await getDoc(doc(db, "siteOverrides", pageId, "_meta", "topicsOrder"));
+    const metaSnap = await getDoc(doc(db, "siteOverrides", pageId, "elements", "__topicsOrder__"));
     if (metaSnap.exists()) {
       const data = metaSnap.data();
       const savedOrder = Array.isArray(data.order) ? data.order : null;
@@ -4918,7 +4919,7 @@ window.legacyTopicsResetToOriginal = async function() {
   if (!confirm("حذف الترتيب المخصّص نهائياً والعودة لترتيب الملف الأصلي؟\n(الزوار سيرون الترتيب الأصلي فوراً عند إعادة تحميل الصفحة)")) return;
 
   try {
-    await deleteDoc(doc(db, "siteOverrides", _legacyTopicsState.pageId, "_meta", "topicsOrder"));
+    await deleteDoc(doc(db, "siteOverrides", _legacyTopicsState.pageId, "elements", "__topicsOrder__"));
     _legacyTopicsState.savedOrder = null;
     _legacyTopicsState.current = _legacyTopicsState.original.slice();
     _legacyTopicsState.dirty = false;
@@ -4949,7 +4950,7 @@ window.legacyTopicsSave = async function() {
   try {
     const orderIds = _legacyTopicsState.current.map(t => t.id);
     await setDoc(
-      doc(db, "siteOverrides", _legacyTopicsState.pageId, "_meta", "topicsOrder"),
+      doc(db, "siteOverrides", _legacyTopicsState.pageId, "elements", "__topicsOrder__"),
       { order: orderIds, updatedAt: serverTimestamp() }
     );
     _legacyTopicsState.savedOrder = orderIds.slice();
