@@ -4,8 +4,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>   
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- يطبّق ألوان الموقع من إعدادات لوحة التحكم — يجب أن يُوضع مبكراً لتجنّب وميض الألوان -->
-<script src="shared-theme.js"></script>
 <title>لوحة التحكم — أكاديمية الشبكات</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
 <!-- TinyMCE Rich Text Editor -->
@@ -1046,23 +1044,37 @@ html, body {
 .qz-select option { background: var(--bg2); color: var(--text); }
 
 /* ═══════════════════════════════════════════════════════
-   🎨 تنسيق عام لكل القوائم المنسدلة في لوحة التحكم
-   (يضمن خلفية داكنة متناسقة على كل المتصفحات)
+   🎨 تنسيق القوائم المنسدلة داخل لوحة التحكم
+   (يطبّق على القوائم داخل panels والـ modals فقط — لا يمس عناصر النظام)
 ═══════════════════════════════════════════════════════ */
-select {
+.panel select,
+.qm-modal select,
+.tr-modal select,
+.sett-field select,
+.settings-section select,
+select.qz-input,
+select.qz-select,
+select.qm-input {
   background-color: var(--bg2, #0e1022) !important;
   color: var(--text, #e8eaf6) !important;
 }
-select option {
+.panel select option,
+.qm-modal select option,
+.tr-modal select option,
+.sett-field select option,
+.settings-section select option,
+select.qz-input option,
+select.qz-select option,
+select.qm-input option {
   background-color: var(--bg2, #0e1022) !important;
   color: var(--text, #e8eaf6) !important;
   padding: 6px 10px !important;
 }
-select option:hover,
-select option:focus,
-select option:checked,
-select option[selected] {
-  background: linear-gradient(var(--primary, #6c2fa0), var(--primary, #6c2fa0)) !important;
+.panel select option:checked,
+.qm-modal select option:checked,
+.tr-modal select option:checked,
+select.qz-input option:checked,
+select.qz-select option:checked {
   background-color: var(--primary, #6c2fa0) !important;
   color: #fff !important;
 }

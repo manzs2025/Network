@@ -157,25 +157,69 @@ const CATEGORY_LABELS = { networks:"شبكات الحاسب", security:"الأم
 const TYPE_LABELS = { tf:"صح وخطأ", mcq:"اختيار من متعدد", multi:"إجابات متعددة", match:"مطابقة" };
 
 /* ─── حارس الصفحة ─── */
+// ─── حماية: إخفاء شاشة "جارٍ التحقق" قسراً بعد 10 ثوانٍ كحد أقصى ───
+// (في حال حدث خطأ غير متوقّع في onAuthStateChanged)
+const _loadingTimeout = setTimeout(() => {
+  const overlay = document.getElementById("loadingOverlay");
+  if (overlay && !overlay.classList.contains("hidden")) {
+    console.error("⚠️ شاشة التحميل لم تختفِ خلال 10 ثوانٍ — تفعيل الإخفاء القسري. افحص Console للأخطاء.");
+    overlay.classList.add("hidden");
+    setTimeout(() => { overlay.style.display = "none"; }, 420);
+    document.getElementById("dashboardShell")?.classList.add("visible");
+    document.getElementById("sidebar")?.classList.remove("hidden");
+  }
+}, 10000);
+
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.replace("login.html"); return; }
-  const snap = await getDoc(doc(db, "users", user.uid));
-  const profile = snap.exists() ? snap.data() : null;
-  if (!profile || profile.role !== "admin") { await signOut(auth); window.location.replace("login.html?reason=unauthorized"); return; }
-  
-  document.getElementById("welcomeName").textContent = profile.displayName || user.email;
-  document.getElementById("sbUserName").textContent = profile.displayName || user.email;
-  document.getElementById("sbAvatarInitial").textContent = (profile.displayName ? profile.displayName[0] : "م").toUpperCase();
-  
-  injectQuestionModal(); // زرع النافذة عند تحميل الصفحة
-  
-  document.getElementById("loadingOverlay").classList.add("hidden");
-  setTimeout(() => {
-    document.getElementById("loadingOverlay").style.display = "none";
-    document.getElementById("dashboardShell").classList.add("visible");
-    document.getElementById("sidebar").classList.remove("hidden");
-  }, 420);
-  loadStats();
+  try {
+    if (!user) { window.location.replace("login.html"); return; }
+    const snap = await getDoc(doc(db, "users", user.uid));
+    const profile = snap.exists() ? snap.data() : null;
+    if (!profile || profile.role !== "admin") {
+      await signOut(auth);
+      window.location.replace("login.html?reason=unauthorized");
+      return;
+    }
+
+    // تعبئة معلومات المستخدم (محمية من null)
+    try {
+      const wn = document.getElementById("welcomeName");
+      if (wn) wn.textContent = profile.displayName || user.email;
+      const sn = document.getElementById("sbUserName");
+      if (sn) sn.textContent = profile.displayName || user.email;
+      const av = document.getElementById("sbAvatarInitial");
+      if (av) av.textContent = (profile.displayName ? profile.displayName[0] : "م").toUpperCase();
+    } catch(e) { console.warn("user info:", e); }
+
+    // زرع نافذة الأسئلة (محمية)
+    try { injectQuestionModal(); } catch(e) { console.error("injectQuestionModal:", e); }
+
+    // إخفاء شاشة التحميل
+    clearTimeout(_loadingTimeout);
+    document.getElementById("loadingOverlay")?.classList.add("hidden");
+    setTimeout(() => {
+      const ov = document.getElementById("loadingOverlay");
+      if (ov) ov.style.display = "none";
+      document.getElementById("dashboardShell")?.classList.add("visible");
+      document.getElementById("sidebar")?.classList.remove("hidden");
+    }, 420);
+
+    // تحميل الإحصائيات (محمي)
+    try { loadStats(); } catch(e) { console.error("loadStats:", e); }
+
+  } catch (e) {
+    console.error("❌ خطأ فادح في تهيئة لوحة التحكم:", e);
+    // أخفِ شاشة التحميل على الأقل حتى يرى المستخدم الواجهة
+    clearTimeout(_loadingTimeout);
+    document.getElementById("loadingOverlay")?.classList.add("hidden");
+    setTimeout(() => {
+      const ov = document.getElementById("loadingOverlay");
+      if (ov) ov.style.display = "none";
+      document.getElementById("dashboardShell")?.classList.add("visible");
+      document.getElementById("sidebar")?.classList.remove("hidden");
+    }, 420);
+    alert("حدث خطأ أثناء تحميل لوحة التحكم. افحص Console (F12) لمعرفة السبب.\n" + (e.message || e));
+  }
 });
 
 /* ─── وظائف التنقل ─── */
