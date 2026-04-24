@@ -86,6 +86,7 @@
         r.setProperty('--card',       theme.sidebar || '#f5f5f7');
         r.setProperty('--overlay',    'rgba(0,0,0,0.45)');
         document.documentElement.setAttribute('data-theme-mode', 'light');
+        injectLightOverrides(theme);
       } else {
         // قالب داكن: إعدادات قياسية
         r.setProperty('--text-muted', 'rgba(255,255,255,0.6)');
@@ -95,12 +96,131 @@
         r.setProperty('--card',       theme.sidebar || '#0e1022');
         r.setProperty('--overlay',    'rgba(0,0,0,0.7)');
         document.documentElement.setAttribute('data-theme-mode', 'dark');
+        removeLightOverrides();
       }
     }
 
     // الخطوط
     if (theme.h1Size) r.setProperty('--h1-size', theme.h1Size + 'rem');
     if (theme.pSize)  r.setProperty('--p-size',  theme.pSize  + 'rem');
+  }
+
+  /**
+   * يحقن CSS قوي للقوالب الفاتحة — يُغلّب تعريفات style.css المحلية
+   * الفكرة: بعض العناصر في style.css لها ألوان داكنة ثابتة (#161928, #1a1d2e إلخ)
+   * لا تأخذ من CSS variables، فنحقن قواعد أقوى تستبدلها
+   */
+  function injectLightOverrides(theme) {
+    let styleEl = document.getElementById('shared-theme-light-overrides');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'shared-theme-light-overrides';
+      document.head.appendChild(styleEl);
+    }
+
+    const bg = theme.bg;
+    const card = theme.sidebar;
+    const text = theme.text;
+    const primary = theme.primary;
+    const accent = theme.accent;
+
+    styleEl.textContent = `
+      /* ═══ قالب فاتح — CSS overrides ═══ */
+      html[data-theme-mode="light"] body { background: ${bg} !important; color: ${text} !important; }
+
+      /* بطاقات المحتوى — اللون الداكن المثبت #161928 و #1a1d2e */
+      html[data-theme-mode="light"] .content-block,
+      html[data-theme-mode="light"] .sec-block,
+      html[data-theme-mode="light"] .info-card,
+      html[data-theme-mode="light"] .article-card,
+      html[data-theme-mode="light"] .card,
+      html[data-theme-mode="light"] [class*="-card"],
+      html[data-theme-mode="light"] [class*="-block"] {
+        background: ${card} !important;
+        color: ${text} !important;
+        border-color: rgba(0,0,0,0.1) !important;
+      }
+      /* تحسين الحواف على الخلفيات الفاتحة */
+      html[data-theme-mode="light"] .content-block {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      }
+
+      /* النصوص داخل البطاقات */
+      html[data-theme-mode="light"] .content-block p,
+      html[data-theme-mode="light"] .sec-block p,
+      html[data-theme-mode="light"] .content-block li,
+      html[data-theme-mode="light"] .content-block span:not([class*="badge"]):not([class*="tag"]),
+      html[data-theme-mode="light"] p,
+      html[data-theme-mode="light"] li {
+        color: ${text} !important;
+      }
+
+      /* العناوين داخل البطاقات */
+      html[data-theme-mode="light"] .content-block h1,
+      html[data-theme-mode="light"] .content-block h2,
+      html[data-theme-mode="light"] .content-block h3,
+      html[data-theme-mode="light"] .content-block h4,
+      html[data-theme-mode="light"] .sec-block h2,
+      html[data-theme-mode="light"] .sec-block h3 {
+        color: ${primary} !important;
+      }
+
+      /* الـ hero / page-hero */
+      html[data-theme-mode="light"] .page-hero,
+      html[data-theme-mode="light"] .hero {
+        background: linear-gradient(135deg, ${primary}15 0%, ${accent}10 100%) !important;
+      }
+      html[data-theme-mode="light"] .page-hero h1,
+      html[data-theme-mode="light"] .hero h1 {
+        color: ${primary} !important;
+      }
+
+      /* الخلفية العامة */
+      html[data-theme-mode="light"] {
+        background: ${bg} !important;
+      }
+
+      /* الجداول */
+      html[data-theme-mode="light"] table,
+      html[data-theme-mode="light"] th,
+      html[data-theme-mode="light"] td {
+        color: ${text} !important;
+        border-color: rgba(0,0,0,0.1) !important;
+      }
+      html[data-theme-mode="light"] thead th {
+        background: ${card} !important;
+      }
+
+      /* الأزرار الثانوية والروابط */
+      html[data-theme-mode="light"] a:not(.btn):not(.qz-btn) {
+        color: ${primary} !important;
+      }
+
+      /* شريط التنقل والهيدر */
+      html[data-theme-mode="light"] .top-nav,
+      html[data-theme-mode="light"] .navbar,
+      html[data-theme-mode="light"] header.site-header {
+        background: ${card} !important;
+        border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+      }
+
+      /* الأيقونات داخل البطاقات */
+      html[data-theme-mode="light"] .sec-icon,
+      html[data-theme-mode="light"] .card-icon {
+        filter: brightness(0.95);
+      }
+
+      /* SVG / أشكال داكنة */
+      html[data-theme-mode="light"] .overlay-dark {
+        background: rgba(0,0,0,0.3) !important;
+      }
+    `;
+  }
+
+  /** يُزيل الـ overrides عند العودة لقالب داكن */
+  function removeLightOverrides() {
+    const styleEl = document.getElementById('shared-theme-light-overrides');
+    if (styleEl) styleEl.remove();
   }
 
   /** يحدّد ما إذا كان اللون فاتحاً (إضاءته > 50%) */
