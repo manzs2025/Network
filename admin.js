@@ -2421,55 +2421,75 @@ window.loadSettings = async function () {
  */
 /* ══════════════════════════════════════════════════════
    🎨 قوالب الألوان الجاهزة (Theme Presets)
-   ملاحظة: خلفيات داكنة مع لمسة من اللون الأساسي لكل قالب
+   ملاحظة: مزيج من الداكن والفاتح — اختر ما يناسب عينيك
 ══════════════════════════════════════════════════════ */
 const THEME_PRESETS = [
+  // ═══ القوالب الفاتحة ═══
+  {
+    id: "light-pure",
+    name: "أبيض نقي",
+    desc: "☀️ فاتح كامل — مشرق ومريح",
+    bg: "#ffffff", sidebar: "#f5f5f7", primary: "#6c2fa0", accent: "#0891b2", text: "#1a1a2e"
+  },
+  {
+    id: "light-warm",
+    name: "أبيض دافئ",
+    desc: "☀️ فاتح بلمسة كريمية",
+    bg: "#fdfbf7", sidebar: "#f5f1ea", primary: "#d97706", accent: "#059669", text: "#292524"
+  },
+  {
+    id: "light-cool",
+    name: "أبيض بارد",
+    desc: "☀️ فاتح مع لمسة زرقاء",
+    bg: "#f8fafc", sidebar: "#e2e8f0", primary: "#2563eb", accent: "#0891b2", text: "#0f172a"
+  },
+  // ═══ القوالب الداكنة ═══
   {
     id: "purple-teal",
     name: "بنفسجي فيروزي",
-    desc: "القالب الأصلي — هادئ واحترافي",
+    desc: "🌙 القالب الأصلي — هادئ واحترافي",
     bg: "#141219", sidebar: "#18151d", primary: "#9d4edd", accent: "#00c9b1", text: "#f0ecf5"
   },
   {
     id: "ocean-blue",
     name: "أزرق المحيط",
-    desc: "أزرق عميق وهادئ",
+    desc: "🌙 أزرق عميق وهادئ",
     bg: "#121a23", sidebar: "#171f28", primary: "#3b82f6", accent: "#22d3ee", text: "#f0f9ff"
   },
   {
     id: "forest-green",
     name: "أخضر الغابة",
-    desc: "أخضر طبيعي ومريح للعين",
+    desc: "🌙 أخضر طبيعي ومريح للعين",
     bg: "#121b17", sidebar: "#17211c", primary: "#22c55e", accent: "#a3e635", text: "#f0fdf4"
   },
   {
     id: "sunset-orange",
     name: "برتقالي الغروب",
-    desc: "دافئ وجذاب",
+    desc: "🌙 دافئ وجذاب",
     bg: "#1b1512", sidebar: "#211a15", primary: "#f97316", accent: "#fbbf24", text: "#fffbeb"
   },
   {
     id: "royal-red",
     name: "أحمر ملكي",
-    desc: "قوي وجرئ",
+    desc: "🌙 قوي وجرئ",
     bg: "#1b1214", sidebar: "#211619", primary: "#ef4444", accent: "#fb7185", text: "#fef2f2"
   },
   {
     id: "midnight-indigo",
     name: "نيلي منتصف الليل",
-    desc: "فاخر ومتوازن",
+    desc: "🌙 فاخر ومتوازن",
     bg: "#14141f", sidebar: "#1a1926", primary: "#818cf8", accent: "#c084fc", text: "#f0efff"
   },
   {
     id: "graphite",
     name: "رمادي جرافيت",
-    desc: "محايد ومهني",
+    desc: "🌙 محايد ومهني",
     bg: "#151516", sidebar: "#1a1a1c", primary: "#94a3b8", accent: "#fcd34d", text: "#fafafa"
   },
   {
     id: "warm-taupe",
     name: "بيج دافئ",
-    desc: "دافئ ومريح للعين",
+    desc: "🌙 دافئ ومريح للعين",
     bg: "#211c19", sidebar: "#28231e", primary: "#c084fc", accent: "#fb923c", text: "#fefaf5"
   },
 ];
@@ -2541,6 +2561,35 @@ function _themeApplyToDocument(t) {
   r.setProperty("--primary", t.primary);
   r.setProperty("--accent", t.accent);
   r.setProperty("--text", t.text);
+
+  // تحقق فاتح أم داكن (YIQ brightness)
+  const isLight = _isLightColor(t.bg);
+  if (isLight) {
+    r.setProperty("--text-muted", "rgba(0,0,0,0.55)");
+    r.setProperty("--text-faint", "rgba(0,0,0,0.4)");
+    r.setProperty("--border",     "rgba(0,0,0,0.12)");
+    r.setProperty("--border2",    "rgba(0,0,0,0.18)");
+    r.setProperty("--card",       t.sidebar);
+    document.documentElement.setAttribute("data-theme-mode", "light");
+  } else {
+    r.setProperty("--text-muted", "rgba(255,255,255,0.6)");
+    r.setProperty("--text-faint", "rgba(255,255,255,0.4)");
+    r.setProperty("--border",     "rgba(255,255,255,0.08)");
+    r.setProperty("--border2",    "rgba(255,255,255,0.12)");
+    r.setProperty("--card",       t.sidebar);
+    document.documentElement.setAttribute("data-theme-mode", "dark");
+  }
+}
+
+function _isLightColor(hex) {
+  try {
+    const h = (hex || "").replace("#", "");
+    if (h.length !== 6) return false;
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return ((r * 299 + g * 587 + b * 114) / 1000) > 155;
+  } catch { return false; }
 }
 
 /** يجمع بيانات بطاقات الصفحة الرئيسية من حقول الإدخال */

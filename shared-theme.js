@@ -59,6 +59,10 @@
   function applyTheme(theme) {
     if (!theme) return;
     const r = document.documentElement.style;
+
+    // اكتشف: هل هذا قالب فاتح أم داكن؟
+    const isLight = theme.bg ? isLightColor(theme.bg) : false;
+
     if (theme.bg)      r.setProperty('--bg', theme.bg);
     if (theme.sidebar) r.setProperty('--bg2', theme.sidebar);
     if (theme.primary) {
@@ -71,9 +75,46 @@
     }
     if (theme.text) r.setProperty('--text', theme.text);
 
+    // ── ألوان فرعية تتكيّف مع نوع القالب (فاتح/داكن) ──
+    if (theme.text) {
+      if (isLight) {
+        // قالب فاتح: حدود داكنة خفيفة، نصوص ثانوية داكنة باهتة
+        r.setProperty('--text-muted', 'rgba(0,0,0,0.55)');
+        r.setProperty('--text-faint', 'rgba(0,0,0,0.4)');
+        r.setProperty('--border',     'rgba(0,0,0,0.12)');
+        r.setProperty('--border2',    'rgba(0,0,0,0.18)');
+        r.setProperty('--card',       theme.sidebar || '#f5f5f7');
+        r.setProperty('--overlay',    'rgba(0,0,0,0.45)');
+        document.documentElement.setAttribute('data-theme-mode', 'light');
+      } else {
+        // قالب داكن: إعدادات قياسية
+        r.setProperty('--text-muted', 'rgba(255,255,255,0.6)');
+        r.setProperty('--text-faint', 'rgba(255,255,255,0.4)');
+        r.setProperty('--border',     'rgba(255,255,255,0.08)');
+        r.setProperty('--border2',    'rgba(255,255,255,0.12)');
+        r.setProperty('--card',       theme.sidebar || '#0e1022');
+        r.setProperty('--overlay',    'rgba(0,0,0,0.7)');
+        document.documentElement.setAttribute('data-theme-mode', 'dark');
+      }
+    }
+
     // الخطوط
     if (theme.h1Size) r.setProperty('--h1-size', theme.h1Size + 'rem');
     if (theme.pSize)  r.setProperty('--p-size',  theme.pSize  + 'rem');
+  }
+
+  /** يحدّد ما إذا كان اللون فاتحاً (إضاءته > 50%) */
+  function isLightColor(hex) {
+    try {
+      const h = hex.replace('#', '');
+      if (h.length !== 6) return false;
+      const r = parseInt(h.substring(0, 2), 16);
+      const g = parseInt(h.substring(2, 4), 16);
+      const b = parseInt(h.substring(4, 6), 16);
+      // صيغة perceived brightness (YIQ)
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 155;
+    } catch (_) { return false; }
   }
 
   /** تفتيح لون hex بنسبة % */
