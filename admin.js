@@ -6,6 +6,157 @@ import {
   query, orderBy, where, serverTimestamp, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+/* ══════════════════════════════════════════════════════════
+   🪵 Visible Logger — يظهر على الصفحة (بديل F12 للصفحات المحمية)
+   يلتقط console.error وكل أخطاء JavaScript ويعرضها في لوحة قابلة للطي
+══════════════════════════════════════════════════════════ */
+(function setupVisibleLogger() {
+  const logs = [];
+  const MAX_LOGS = 50;
+
+  function addLog(type, args) {
+    const time = new Date().toLocaleTimeString("ar-SA", { hour12: false });
+    const msg = Array.from(args).map(a => {
+      if (a instanceof Error) return `${a.name}: ${a.message}\n${a.stack || ""}`;
+      if (typeof a === "object") {
+        try { return JSON.stringify(a, null, 2); } catch { return String(a); }
+      }
+      return String(a);
+    }).join(" ");
+    logs.push({ type, time, msg });
+    if (logs.length > MAX_LOGS) logs.shift();
+    renderLogs();
+    // auto-fly للوحة عند أول خطأ
+    if (type === "error" && !document.getElementById("dbgPanel")?.classList.contains("open")) {
+      document.getElementById("dbgBtn")?.classList.add("has-errors");
+    }
+  }
+
+  // اعترض console.error و console.warn
+  const origError = console.error;
+  const origWarn  = console.warn;
+  console.error = function(...args) { addLog("error", args); origError.apply(console, args); };
+  console.warn  = function(...args) { addLog("warn",  args); origWarn.apply(console,  args); };
+
+  // اعترض الأخطاء العامة غير الملتقطة
+  window.addEventListener("error", e => {
+    addLog("error", [`${e.message} (${e.filename}:${e.lineno}:${e.colno})`]);
+  });
+  window.addEventListener("unhandledrejection", e => {
+    addLog("error", [`Unhandled Promise: ${e.reason?.message || e.reason}`]);
+  });
+
+  function renderLogs() {
+    const body = document.getElementById("dbgBody");
+    if (!body) return;
+    body.innerHTML = logs.slice().reverse().map(l => `
+      <div class="dbg-line dbg-${l.type}">
+        <span class="dbg-time">${l.time}</span>
+        <span class="dbg-type">${l.type === "error" ? "🔴" : "⚠️"}</span>
+        <pre class="dbg-msg">${l.msg.replace(/[<>]/g, c => c === "<" ? "&lt;" : "&gt;")}</pre>
+      </div>
+    `).join("") || '<div style="color:#7a7f9e;font-size:0.8rem;text-align:center;padding:1rem;">لا توجد رسائل بعد</div>';
+  }
+
+  // بناء لوحة الـ Logger بعد تحميل الـ DOM
+  function buildPanel() {
+    if (document.getElementById("dbgBtn")) return;
+
+    const style = document.createElement("style");
+    style.textContent = `
+      #dbgBtn {
+        position: fixed; bottom: 16px; left: 16px; z-index: 999999;
+        background: #1a1d2e; color: #e8eaf6; border: 1px solid #6c2fa0;
+        border-radius: 20px; padding: 8px 14px; cursor: pointer;
+        font-family: system-ui, sans-serif; font-size: 0.78rem; font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4); transition: all 0.2s;
+        opacity: 0.75;
+      }
+      #dbgBtn:hover { opacity: 1; transform: translateY(-2px); }
+      #dbgBtn.has-errors {
+        background: #dc2626; border-color: #dc2626; color: #fff;
+        opacity: 1; animation: dbg-pulse 1.2s ease-in-out infinite;
+      }
+      @keyframes dbg-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.6);} 50% { box-shadow: 0 0 0 10px rgba(220,38,38,0);} }
+      #dbgPanel {
+        position: fixed; bottom: 60px; left: 16px; z-index: 999998;
+        width: min(90vw, 560px); max-height: 60vh;
+        background: #0e1022; border: 1px solid #6c2fa0;
+        border-radius: 10px; padding: 0; color: #e8eaf6;
+        font-family: ui-monospace, monospace; font-size: 0.75rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        display: none; flex-direction: column;
+      }
+      #dbgPanel.open { display: flex; }
+      #dbgHeader {
+        padding: 10px 14px; border-bottom: 1px solid #6c2fa0;
+        display: flex; justify-content: space-between; align-items: center;
+        font-weight: 700; flex-shrink: 0;
+      }
+      #dbgHeader button {
+        background: transparent; border: 1px solid #6c2fa0;
+        color: #e8eaf6; border-radius: 5px; padding: 3px 10px;
+        cursor: pointer; font-size: 0.72rem; margin-right: 6px;
+      }
+      #dbgBody { padding: 8px 10px; overflow-y: auto; flex: 1; }
+      .dbg-line {
+        padding: 6px 8px; margin-bottom: 6px; border-radius: 6px;
+        border-right: 3px solid;
+      }
+      .dbg-line.dbg-error { background: rgba(220,38,38,0.1); border-color: #dc2626; }
+      .dbg-line.dbg-warn  { background: rgba(245,158,11,0.1); border-color: #f59e0b; }
+      .dbg-time { color: #7a7f9e; font-size: 0.7rem; margin-left: 6px; }
+      .dbg-type { font-size: 0.8rem; margin-left: 4px; }
+      .dbg-msg {
+        white-space: pre-wrap; word-break: break-word; margin: 4px 0 0 0;
+        color: #e8eaf6; font-family: inherit; font-size: 0.72rem;
+      }
+    `;
+    document.head.appendChild(style);
+
+    const btn = document.createElement("button");
+    btn.id = "dbgBtn";
+    btn.innerHTML = "🐞 Logger <span id='dbgCount' style='background:#6c2fa0;color:#fff;border-radius:10px;padding:1px 7px;margin-right:5px;'>0</span>";
+    btn.onclick = () => {
+      const panel = document.getElementById("dbgPanel");
+      panel.classList.toggle("open");
+      btn.classList.remove("has-errors");
+    };
+    document.body.appendChild(btn);
+
+    const panel = document.createElement("div");
+    panel.id = "dbgPanel";
+    panel.innerHTML = `
+      <div id="dbgHeader">
+        <span>🪵 سجل الأخطاء والتحذيرات</span>
+        <div>
+          <button onclick="navigator.clipboard.writeText(document.getElementById('dbgBody').innerText); this.textContent='✓ نُسخ'; setTimeout(()=>this.textContent='📋 نسخ',1500);">📋 نسخ</button>
+          <button onclick="document.getElementById('dbgBody').innerHTML='';">🗑️ مسح</button>
+          <button onclick="document.getElementById('dbgPanel').classList.remove('open');">✕</button>
+        </div>
+      </div>
+      <div id="dbgBody"></div>
+    `;
+    document.body.appendChild(panel);
+
+    // حدّث العداد دورياً
+    setInterval(() => {
+      const count = logs.length;
+      const cEl = document.getElementById("dbgCount");
+      if (cEl) cEl.textContent = count;
+    }, 500);
+
+    renderLogs();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", buildPanel);
+  } else {
+    buildPanel();
+  }
+})();
+
+
 /* ─── إعدادات Firebase ─── */
 const firebaseConfig = {
   apiKey:            "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
@@ -5178,6 +5329,17 @@ window.addEventListener("load", () => {
    يجب ضبط قواعد Firebase بشكل صحيح من لوحة تحكم Firebase Console.
 ═══════════════════════════════════════ */
 (function enableClientSideProtection() {
+  // ── وضع المطوّر: ?debug=1 في URL يعطّل كل الحماية مؤقتاً ──
+  // يمكن للمشرف استخدامه للتشخيص عند الحاجة
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("debug") === "1") {
+      console.log("%c🛠️ DEBUG MODE ACTIVE", "background:#f59e0b;color:#000;padding:4px 10px;border-radius:4px;font-weight:bold;");
+      console.log("تم تعطيل حماية F12 والنسخ والقائمة السياقية. استخدم هذا الوضع فقط للتشخيص.");
+      return; // تخطّي كل الحماية
+    }
+  } catch (_) {}
+
   // 1) منع النسخ، القص، اللصق
   ["copy", "cut", "paste"].forEach(evt => {
     document.addEventListener(evt, e => {
