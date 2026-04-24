@@ -624,6 +624,68 @@ html, body {
 .sett-save-msg.success { color: var(--accent); display: inline; }
 .sett-save-msg.error   { color: #ff6b6b; display: inline; }
 
+/* ═══════════════════════════════════════════════════════
+   🎨 بطاقات قوالب الألوان
+═══════════════════════════════════════════════════════ */
+.theme-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.theme-card {
+  position: relative;
+  padding: 0.85rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+  overflow: hidden;
+}
+.theme-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+.theme-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,201,177,0.2);
+}
+.theme-card.active::after {
+  content: "✓";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--accent);
+  color: #000;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.85rem;
+}
+.theme-preview {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 0.6rem;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 48px;
+}
+.theme-preview-band { flex: 1; }
+.theme-name {
+  font-weight: 800;
+  color: var(--text);
+  font-size: 0.92rem;
+  margin-bottom: 0.2rem;
+}
+.theme-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
 /* ── Home card editor items ── */
 .hc-card-editor {
   background: var(--bg3);
@@ -980,6 +1042,34 @@ html, body {
   cursor: pointer;
 }
 .qz-select option { background: var(--bg2); color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════
+   🎨 تنسيق عام لكل القوائم المنسدلة في لوحة التحكم
+   (يضمن خلفية داكنة متناسقة على كل المتصفحات)
+═══════════════════════════════════════════════════════ */
+select {
+  background-color: var(--bg2, #0e1022) !important;
+  color: var(--text, #e8eaf6) !important;
+}
+select option {
+  background-color: var(--bg2, #0e1022) !important;
+  color: var(--text, #e8eaf6) !important;
+  padding: 6px 10px !important;
+}
+select option:hover,
+select option:focus,
+select option:checked,
+select option[selected] {
+  background: linear-gradient(var(--primary, #6c2fa0), var(--primary, #6c2fa0)) !important;
+  background-color: var(--primary, #6c2fa0) !important;
+  color: #fff !important;
+}
+select optgroup {
+  background-color: var(--bg, #080a14) !important;
+  color: var(--accent, #00c9b1) !important;
+  font-style: normal;
+  font-weight: 700;
+}
 
 /* ── منطقة الأسئلة ── */
 .qz-questions-area {
@@ -2300,16 +2390,6 @@ html, body {
           </p>
         </div>
 
-        <div class="info-card">
-          <h3>🗓️ الخطوات القادمة</h3>
-          <p>
-            الخطوة 3: بناء محرر المحتوى (CMS) لتعديل صفحات الموقع.<br>
-            الخطوة 4: بناء نظام الاختبارات (LMS) لإنشاء الأسئلة ومتابعة الدرجات.<br>
-            الخطوة 5: واجهة المتدرب لحل الاختبارات وعرض نتائجه.
-          </p>
-          <div class="coming-soon">⏳ قريباً — الخطوة 3</div>
-        </div>
-
       </section>
 
       <!-- ════════════ PANEL: ARTICLES ════════════ -->
@@ -3001,7 +3081,7 @@ html, body {
             <div class="qz-questions-area">
               <div class="qz-questions-header">
                 <span class="qz-questions-count" id="selectedQCount">0 سؤال محدد</span>
-                <button class="qz-add-btn" onclick="openQuestionModal()">➕ إضافة سؤال جديد إلى البنك</button>
+                <button class="qz-add-btn" onclick="openAddQuestionModal()">➕ إضافة سؤال جديد إلى البنك</button>
               </div>
 
               <!-- شريط الدرجة الإجمالية -->
@@ -3241,36 +3321,56 @@ html, body {
             <span class="settings-section-title">الهوية البصرية والألوان</span>
           </div>
           <div class="settings-section-body">
-            <div class="settings-row">
-              <div class="sett-field">
-                <label>لون الخلفية الأساسي</label>
-                <div class="sett-color-wrap">
-                  <input type="color" id="settBgColor" value="#080a14" onchange="document.getElementById('settBgColorHex').textContent=this.value">
-                  <span class="sett-color-hex" id="settBgColorHex">#080a14</span>
-                </div>
-              </div>
-              <div class="sett-field">
-                <label>لون القوائم / الشريط الجانبي</label>
-                <div class="sett-color-wrap">
-                  <input type="color" id="settSidebarColor" value="#0e1022" onchange="document.getElementById('settSidebarColorHex').textContent=this.value">
-                  <span class="sett-color-hex" id="settSidebarColorHex">#0e1022</span>
-                </div>
-              </div>
-              <div class="sett-field">
-                <label>اللون الأساسي (Primary) للأزرار</label>
-                <div class="sett-color-wrap">
-                  <input type="color" id="settPrimaryColor" value="#6c2fa0" onchange="document.getElementById('settPrimaryColorHex').textContent=this.value">
-                  <span class="sett-color-hex" id="settPrimaryColorHex">#6c2fa0</span>
-                </div>
-              </div>
-              <div class="sett-field">
-                <label>لون النصوص</label>
-                <div class="sett-color-wrap">
-                  <input type="color" id="settTextColor" value="#e8eaf6" onchange="document.getElementById('settTextColorHex').textContent=this.value">
-                  <span class="sett-color-hex" id="settTextColorHex">#e8eaf6</span>
-                </div>
-              </div>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.7;">
+              اختر قالب ألوان جاهز لموقعك. ستُطبَّق الألوان تلقائياً على كل الصفحات.
+            </p>
+
+            <div class="theme-presets" id="themePresets">
+              <!-- يُولَّد ديناميكياً من admin.js -->
             </div>
+
+            <details style="margin-top:1.2rem;">
+              <summary style="cursor:pointer;padding:0.6rem 0.85rem;background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.25);border-radius:8px;font-size:0.85rem;color:var(--text);font-weight:700;">
+                🎯 تخصيص ألوان يدوياً (متقدم)
+              </summary>
+              <div class="settings-row" style="margin-top:1rem;">
+                <div class="sett-field">
+                  <label>لون الخلفية الأساسي</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settBgColor" value="#080a14" onchange="document.getElementById('settBgColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settBgColorHex">#080a14</span>
+                  </div>
+                </div>
+                <div class="sett-field">
+                  <label>لون القوائم / الشريط الجانبي</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settSidebarColor" value="#0e1022" onchange="document.getElementById('settSidebarColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settSidebarColorHex">#0e1022</span>
+                  </div>
+                </div>
+                <div class="sett-field">
+                  <label>اللون الأساسي (Primary) للأزرار</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settPrimaryColor" value="#6c2fa0" onchange="document.getElementById('settPrimaryColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settPrimaryColorHex">#6c2fa0</span>
+                  </div>
+                </div>
+                <div class="sett-field">
+                  <label>اللون الثانوي (Accent)</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settAccentColor" value="#00c9b1" onchange="document.getElementById('settAccentColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settAccentColorHex">#00c9b1</span>
+                  </div>
+                </div>
+                <div class="sett-field">
+                  <label>لون النصوص</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settTextColor" value="#e8eaf6" onchange="document.getElementById('settTextColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settTextColorHex">#e8eaf6</span>
+                  </div>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
 

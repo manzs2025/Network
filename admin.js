@@ -200,12 +200,9 @@ let selectedQuestionIds = new Set();
 window.renderQuestionBankSelector = async function() {
   const container = document.getElementById("bankQuestionsContainer");
   if (!container) return;
-  
-  // إضافة زر "إضافة سؤال جديد" فوق البنك إذا لم يكن موجوداً
-  if(!document.getElementById("btnAddManualQuestion")) {
-    const btnHtml = `<button id="btnAddManualQuestion" class="qz-btn" style="margin-bottom:15px; background:var(--primary); width:auto;" onclick="openAddQuestionModal()">➕ إضافة سؤال جديد للبنك</button>`;
-    container.parentNode.insertBefore(document.createRange().createContextualFragment(btnHtml), container);
-  }
+
+  // ملاحظة: زر "إضافة سؤال جديد" موجود أصلاً في HTML (في qz-questions-header)
+  // لذا لا نحقن زراً آخر هنا — لتجنب التكرار.
 
   try {
     const snap = await getDocs(collection(db, "questionBank"));
@@ -2184,7 +2181,11 @@ window.loadSettings = async function () {
     if (d.bgColor) { document.getElementById("settBgColor").value = d.bgColor; document.getElementById("settBgColorHex").textContent = d.bgColor; }
     if (d.sidebarColor) { document.getElementById("settSidebarColor").value = d.sidebarColor; document.getElementById("settSidebarColorHex").textContent = d.sidebarColor; }
     if (d.primaryColor) { document.getElementById("settPrimaryColor").value = d.primaryColor; document.getElementById("settPrimaryColorHex").textContent = d.primaryColor; }
+    if (d.accentColor) { const a = document.getElementById("settAccentColor"); if (a) { a.value = d.accentColor; document.getElementById("settAccentColorHex").textContent = d.accentColor; } }
     if (d.textColor) { document.getElementById("settTextColor").value = d.textColor; document.getElementById("settTextColorHex").textContent = d.textColor; }
+
+    // ─ عرض قوالب الألوان مع تحديد القالب النشط
+    renderThemePresets(d.themeId || "");
 
     // ─ الخطوط
     if (d.h1Size) document.getElementById("settH1Size").value = d.h1Size;
@@ -2223,7 +2224,130 @@ window.loadSettings = async function () {
 /**
  * تجميع بيانات بطاقات الأقسام من الحقول
  */
-function collectHomeCards() {
+/* ══════════════════════════════════════════════════════
+   🎨 قوالب الألوان الجاهزة (Theme Presets)
+══════════════════════════════════════════════════════ */
+const THEME_PRESETS = [
+  {
+    id: "purple-teal",
+    name: "بنفسجي فيروزي",
+    desc: "القالب الأصلي — هادئ واحترافي",
+    bg: "#080a14", sidebar: "#0e1022", primary: "#6c2fa0", accent: "#00c9b1", text: "#e8eaf6"
+  },
+  {
+    id: "ocean-blue",
+    name: "أزرق المحيط",
+    desc: "أزرق عميق وهادئ",
+    bg: "#0a1420", sidebar: "#0f1c2e", primary: "#2563eb", accent: "#06b6d4", text: "#e0f2fe"
+  },
+  {
+    id: "forest-green",
+    name: "أخضر الغابة",
+    desc: "أخضر طبيعي ومريح للعين",
+    bg: "#0a1410", sidebar: "#0f1e18", primary: "#16a34a", accent: "#84cc16", text: "#ecfdf5"
+  },
+  {
+    id: "sunset-orange",
+    name: "برتقالي الغروب",
+    desc: "دافئ وجذاب",
+    bg: "#14100a", sidebar: "#1f1810", primary: "#ea580c", accent: "#f59e0b", text: "#fef3c7"
+  },
+  {
+    id: "royal-red",
+    name: "أحمر ملكي",
+    desc: "قوي وجرئ",
+    bg: "#140a0e", sidebar: "#1e1014", primary: "#dc2626", accent: "#f43f5e", text: "#fee2e2"
+  },
+  {
+    id: "midnight-indigo",
+    name: "نيلي منتصف الليل",
+    desc: "فاخر وعميق",
+    bg: "#0b0a1a", sidebar: "#14122a", primary: "#6366f1", accent: "#a855f7", text: "#e0e7ff"
+  },
+  {
+    id: "graphite",
+    name: "رمادي جرافيت",
+    desc: "محايد ومهني",
+    bg: "#0f0f10", sidebar: "#18181b", primary: "#71717a", accent: "#fbbf24", text: "#fafafa"
+  },
+  {
+    id: "light-minimal",
+    name: "فاتح بسيط",
+    desc: "خلفية فاتحة — مناسب للنهار",
+    bg: "#f8fafc", sidebar: "#e2e8f0", primary: "#6c2fa0", accent: "#0891b2", text: "#0f172a"
+  },
+];
+
+/** يرسم بطاقات القوالب ويُعلّم النشط */
+function renderThemePresets(activeId) {
+  const container = document.getElementById("themePresets");
+  if (!container) return;
+
+  container.innerHTML = THEME_PRESETS.map(t => `
+    <div class="theme-card ${t.id === activeId ? 'active' : ''}" data-theme-id="${t.id}" onclick="applyThemePreset('${t.id}')">
+      <div class="theme-preview">
+        <div class="theme-preview-band" style="background:${t.bg};"></div>
+        <div class="theme-preview-band" style="background:${t.sidebar};"></div>
+        <div class="theme-preview-band" style="background:${t.primary};"></div>
+        <div class="theme-preview-band" style="background:${t.accent};"></div>
+      </div>
+      <div class="theme-name">${t.name}</div>
+      <div class="theme-desc">${t.desc}</div>
+    </div>
+  `).join("");
+}
+
+/** يُطبّق قالب ألوان على الحقول اليدوية */
+window.applyThemePreset = function(themeId) {
+  const t = THEME_PRESETS.find(x => x.id === themeId);
+  if (!t) return;
+
+  // حدّث الحقول اليدوية
+  const set = (id, hex, hexLabel) => {
+    const el = document.getElementById(id);
+    if (el) el.value = hex;
+    const lbl = document.getElementById(hexLabel);
+    if (lbl) lbl.textContent = hex;
+  };
+  set("settBgColor", t.bg, "settBgColorHex");
+  set("settSidebarColor", t.sidebar, "settSidebarColorHex");
+  set("settPrimaryColor", t.primary, "settPrimaryColorHex");
+  set("settAccentColor", t.accent, "settAccentColorHex");
+  set("settTextColor", t.text, "settTextColorHex");
+
+  // علّم البطاقة النشطة
+  document.querySelectorAll(".theme-card").forEach(c => {
+    c.classList.toggle("active", c.dataset.themeId === themeId);
+  });
+
+  // معاينة فورية على لوحة التحكم (لن تُحفظ حتى يضغط المشرف "حفظ")
+  _themeApplyToDocument(t);
+};
+
+/** يُزيل تعليم القالب النشط (عند التعديل اليدوي) */
+window._themeClearActive = function() {
+  document.querySelectorAll(".theme-card.active").forEach(c => c.classList.remove("active"));
+  // معاينة فورية بالقيم اليدوية
+  _themeApplyToDocument({
+    bg: document.getElementById("settBgColor").value,
+    sidebar: document.getElementById("settSidebarColor").value,
+    primary: document.getElementById("settPrimaryColor").value,
+    accent: document.getElementById("settAccentColor")?.value || "#00c9b1",
+    text: document.getElementById("settTextColor").value,
+  });
+};
+
+/** يُطبّق الثيم على document الحالي (معاينة فورية) */
+function _themeApplyToDocument(t) {
+  const r = document.documentElement.style;
+  r.setProperty("--bg", t.bg);
+  r.setProperty("--bg2", t.sidebar);
+  r.setProperty("--primary", t.primary);
+  r.setProperty("--accent", t.accent);
+  r.setProperty("--text", t.text);
+}
+
+
   const ids = ["networks", "security", "osi", "cables", "ip"];
   return ids.map(id => ({
     id,
@@ -2252,7 +2376,9 @@ window.saveSettings = async function () {
     bgColor:      document.getElementById("settBgColor").value,
     sidebarColor: document.getElementById("settSidebarColor").value,
     primaryColor: document.getElementById("settPrimaryColor").value,
+    accentColor:  document.getElementById("settAccentColor")?.value || "#00c9b1",
     textColor:    document.getElementById("settTextColor").value,
+    themeId:      document.querySelector(".theme-card.active")?.dataset.themeId || "",
     h1Size: parseFloat(document.getElementById("settH1Size").value) || 2,
     pSize:  parseFloat(document.getElementById("settPSize").value)  || 1,
     heroTitle:      document.getElementById("settHeroTitle").value.trim(),
