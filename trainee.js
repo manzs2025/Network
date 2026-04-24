@@ -411,7 +411,7 @@ function _updateRunningScore() {
 }
 
 /* ─── بناء شاشة الحل ──────────────────────────── */
-function _buildSolver(questions) {
+async function _buildSolver(questions) {
   const container = document.getElementById("questionsContainer");
   const dotNav    = document.getElementById("dotNav");
   container.innerHTML = "";
@@ -420,13 +420,16 @@ function _buildSolver(questions) {
   document.getElementById("solverTitle").textContent =
     _currentQuiz.title ?? "الاختبار";
 
-  // ── الدرجة الجارية: مُخفاة عن المتدرب (لمنع استنتاج صحة الإجابات) ──
-  // المنطق الحسابي لا يزال يعمل داخلياً (_updateRunningScore تُحدّث القيمة في الذاكرة)،
-  // لكن عنصر العرض لا يُضاف للصفحة.
-  //
-  // 🔧 لإعادة الإظهار لاحقاً: احذف الـ return التالي، وسيظهر العنصر كالسابق.
-  const _HIDE_RUNNING_SCORE = true; // غيّر إلى false لإظهاره
-  if (!_HIDE_RUNNING_SCORE) {
+  // ── الدرجة الجارية: تعتمد على إعدادات الموقع (settings.showRunningScore) ──
+  // افتراضياً مُعطّلة (لمنع استنتاج صحة الإجابات).
+  // يمكن للمشرف تفعيلها من: لوحة التحكم → الإعدادات → "إظهار الدرجة الجارية"
+  let _showRunningScore = false;
+  try {
+    const settings = await _fetchSiteSettings();
+    _showRunningScore = settings.showRunningScore === true;
+  } catch(e) { /* ابقَ على القيمة الافتراضية (مخفي) */ }
+
+  if (_showRunningScore) {
     let runningEl = document.getElementById("runningScoreDisplay");
     if (!runningEl) {
       runningEl = document.createElement("div");

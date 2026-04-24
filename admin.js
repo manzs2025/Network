@@ -2198,6 +2198,9 @@ window.loadSettings = async function () {
     const allowReviewEl = document.getElementById("settAllowReview");
     if (allowReviewEl) allowReviewEl.checked = d.allowReview === true;
 
+    const showRunningScoreEl = document.getElementById("settShowRunningScore");
+    if (showRunningScoreEl) showRunningScoreEl.checked = d.showRunningScore === true;
+
     // ─ المقال الترحيبي (TinyMCE)
     if (d.welcomeContent) {
       const waitForEditor = setInterval(() => {
@@ -2256,6 +2259,7 @@ window.saveSettings = async function () {
     heroSubtitle:   document.getElementById("settHeroSubtitle").value.trim(),
     welcomeContent: tinymce.get("settingsTinyEditor")?.getContent() || "",
     allowReview:    document.getElementById("settAllowReview")?.checked ?? false,
+    showRunningScore: document.getElementById("settShowRunningScore")?.checked ?? false,
     homeCards:      collectHomeCards(),
     updatedAt:      serverTimestamp()
   };
