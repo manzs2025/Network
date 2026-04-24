@@ -487,21 +487,21 @@ function _buildSolver(questions) {
         }
         const shuffledRights = _matchShuffleCache[idx];
 
+        // حقن CSS مرة واحدة (لتنسيق select و option بشكل داكن)
+        _ensureMatchStyles();
+
         optsHTML = `
           <div style="display:flex;flex-direction:column;gap:0.7rem;">
             ${pairs.map((p, pi) => `
-              <div class="match-row" style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;padding:0.7rem 0.85rem;background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.25);border-radius:10px;">
-                <div style="flex:1;min-width:160px;font-weight:700;color:#e8eaf6;font-size:0.95rem;">
-                  ${_esc(p.left)}
-                </div>
-                <span style="color:#a07ee0;font-size:1.1rem;">⬅️</span>
+              <div class="match-row">
+                <div class="match-left">${_esc(p.left)}</div>
+                <span class="match-arrow">⬅️</span>
                 <select
-                  class="match-select qz-input qz-select"
+                  class="match-select"
                   id="match_${idx}_${pi}"
                   data-q-idx="${idx}"
                   data-pair-idx="${pi}"
-                  onchange="selectMatch(${idx}, ${pi}, this.value)"
-                  style="flex:1;min-width:180px;max-width:100%;background:rgba(255,255,255,0.04);color:#e8eaf6;border:1px solid rgba(108,47,160,0.35);border-radius:8px;padding:0.5rem 0.7rem;font-family:inherit;">
+                  onchange="selectMatch(${idx}, ${pi}, this.value); this.classList.toggle('has-value', !!this.value);">
                   <option value="">— اختر المطابق —</option>
                   ${shuffledRights.map(r => `<option value="${_esc(r)}">${_esc(r)}</option>`).join("")}
                 </select>
@@ -1197,6 +1197,102 @@ function _shuffle(arr) {
 
 /** ذاكرة خيارات أسئلة المطابقة (للحفاظ على ترتيب الـ dropdown بعد الخلط) */
 const _matchShuffleCache = {};
+
+/** حقن CSS لأسئلة المطابقة مرة واحدة فقط */
+function _ensureMatchStyles() {
+  if (document.getElementById("match-question-styles")) return;
+  const style = document.createElement("style");
+  style.id = "match-question-styles";
+  style.textContent = `
+    .match-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 0.8rem 0.95rem;
+      background: rgba(108,47,160,0.08);
+      border: 1px solid rgba(108,47,160,0.25);
+      border-radius: 10px;
+      transition: border-color 0.18s, background 0.18s;
+    }
+    .match-row:hover {
+      background: rgba(108,47,160,0.12);
+      border-color: rgba(108,47,160,0.4);
+    }
+    .match-left {
+      flex: 1;
+      min-width: 160px;
+      font-weight: 700;
+      color: #e8eaf6;
+      font-size: 0.95rem;
+    }
+    .match-arrow {
+      color: #a07ee0;
+      font-size: 1.15rem;
+    }
+    /* ═══ الـ SELECT — تنسيق داكن قوي يتغلب على ستايل المتصفح ═══ */
+    .match-select {
+      flex: 1;
+      min-width: 180px;
+      max-width: 100%;
+      background-color: #1a1d2e !important;
+      color: #e8eaf6 !important;
+      border: 1px solid rgba(108,47,160,0.4);
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.18s, background 0.18s;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      /* سهم مخصّص */
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23a07ee0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 0.75rem center;
+      padding-left: 2rem;
+    }
+    .match-select:hover {
+      border-color: rgba(108,47,160,0.7);
+      background-color: #22263d !important;
+    }
+    .match-select:focus {
+      border-color: #00c9b1;
+      box-shadow: 0 0 0 3px rgba(0,201,177,0.15);
+    }
+    .match-select.has-value {
+      background-color: rgba(0,201,177,0.08) !important;
+      border-color: rgba(0,201,177,0.4);
+      color: #e8eaf6 !important;
+    }
+    /* ═══ الـ OPTIONS — تنسيق داكن (يعمل على Chrome/Edge/Firefox) ═══ */
+    .match-select option {
+      background-color: #1a1d2e !important;
+      color: #e8eaf6 !important;
+      padding: 0.5rem;
+      font-family: inherit;
+    }
+    .match-select option:hover,
+    .match-select option:focus,
+    .match-select option:checked {
+      background-color: #6c2fa0 !important;
+      color: #fff !important;
+    }
+    .match-select option[value=""] {
+      color: #7a7f9e !important;
+      font-style: italic;
+    }
+    @media (max-width: 600px) {
+      .match-row { padding: 0.65rem 0.75rem; }
+      .match-left { font-size: 0.85rem; min-width: 100%; }
+      .match-select { min-width: 100%; font-size: 0.85rem; }
+      .match-arrow { display: none; }
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 /* ══════════════════════════════════════════════════════
    طبقة حماية الواجهة الأمامية (Client-side hardening)

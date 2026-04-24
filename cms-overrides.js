@@ -23,13 +23,13 @@
 
   /**
    * إعادة ترتيب مواضيع الصفحة (sec-block) حسب الترتيب المحفوظ
-   * يقرأ من: siteOverrides/{pageId}/elements/__topicsOrder__
+   * يقرأ من: siteOverrides/{pageId}/elements/zz_topicsOrder
    * البنية: { order: ["topic1", "topic2", ...] }
    * (مخزّن داخل elements للاستفادة من قواعد الأمان الموجودة)
    */
   async function applyTopicsOrder() {
     try {
-      const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/siteOverrides/${PAGE_ID}/elements/__topicsOrder__`;
+      const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/siteOverrides/${PAGE_ID}/elements/zz_topicsOrder`;
       const resp = await fetch(url);
       if (!resp.ok) return; // لا يوجد ترتيب مخصّص — اتركه كما هو في الملف
 
@@ -106,7 +106,7 @@
       data.documents.forEach(docRef => {
         const elementId = docRef.name.split('/').pop();
         // تجاهل وثيقة ترتيب المواضيع (ليست عنصر نصي)
-        if (elementId === '__topicsOrder__') return;
+        if (elementId === 'zz_topicsOrder') return;
         const f         = docRef.fields || {};
         const content   = f.content?.stringValue;
         const hidden    = f.hidden?.booleanValue === true;
