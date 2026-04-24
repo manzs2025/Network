@@ -2421,57 +2421,56 @@ window.loadSettings = async function () {
  */
 /* ══════════════════════════════════════════════════════
    🎨 قوالب الألوان الجاهزة (Theme Presets)
-   ملاحظة: تستخدم خلفيات متوسطة (ليست داكنة جداً ولا فاتحة)
-   مع لمسات من اللون الأساسي لكل قالب
+   ملاحظة: خلفيات داكنة مع لمسة من اللون الأساسي لكل قالب
 ══════════════════════════════════════════════════════ */
 const THEME_PRESETS = [
   {
     id: "purple-teal",
     name: "بنفسجي فيروزي",
     desc: "القالب الأصلي — هادئ واحترافي",
-    bg: "#2d2838", sidebar: "#363042", primary: "#9d4edd", accent: "#00c9b1", text: "#f0ecf5"
+    bg: "#141219", sidebar: "#18151d", primary: "#9d4edd", accent: "#00c9b1", text: "#f0ecf5"
   },
   {
     id: "ocean-blue",
     name: "أزرق المحيط",
-    desc: "أزرق متوسط وهادئ",
-    bg: "#2a3a4e", sidebar: "#35455a", primary: "#3b82f6", accent: "#22d3ee", text: "#f0f9ff"
+    desc: "أزرق عميق وهادئ",
+    bg: "#121a23", sidebar: "#171f28", primary: "#3b82f6", accent: "#22d3ee", text: "#f0f9ff"
   },
   {
     id: "forest-green",
     name: "أخضر الغابة",
     desc: "أخضر طبيعي ومريح للعين",
-    bg: "#2a3d35", sidebar: "#354a40", primary: "#22c55e", accent: "#a3e635", text: "#f0fdf4"
+    bg: "#121b17", sidebar: "#17211c", primary: "#22c55e", accent: "#a3e635", text: "#f0fdf4"
   },
   {
     id: "sunset-orange",
     name: "برتقالي الغروب",
     desc: "دافئ وجذاب",
-    bg: "#3d3028", sidebar: "#4a3a30", primary: "#f97316", accent: "#fbbf24", text: "#fffbeb"
+    bg: "#1b1512", sidebar: "#211a15", primary: "#f97316", accent: "#fbbf24", text: "#fffbeb"
   },
   {
     id: "royal-red",
     name: "أحمر ملكي",
     desc: "قوي وجرئ",
-    bg: "#3d2a2e", sidebar: "#4a3338", primary: "#ef4444", accent: "#fb7185", text: "#fef2f2"
+    bg: "#1b1214", sidebar: "#211619", primary: "#ef4444", accent: "#fb7185", text: "#fef2f2"
   },
   {
     id: "midnight-indigo",
     name: "نيلي منتصف الليل",
     desc: "فاخر ومتوازن",
-    bg: "#2e2d45", sidebar: "#3a3855", primary: "#818cf8", accent: "#c084fc", text: "#f0efff"
+    bg: "#14141f", sidebar: "#1a1926", primary: "#818cf8", accent: "#c084fc", text: "#f0efff"
   },
   {
     id: "graphite",
     name: "رمادي جرافيت",
     desc: "محايد ومهني",
-    bg: "#2f2f33", sidebar: "#3a3a40", primary: "#94a3b8", accent: "#fcd34d", text: "#fafafa"
+    bg: "#151516", sidebar: "#1a1a1c", primary: "#94a3b8", accent: "#fcd34d", text: "#fafafa"
   },
   {
     id: "warm-taupe",
     name: "بيج دافئ",
-    desc: "دافئ ومريح — متوسط فاتح",
-    bg: "#4a4038", sidebar: "#5a4e44", primary: "#c084fc", accent: "#fb923c", text: "#fefaf5"
+    desc: "دافئ ومريح للعين",
+    bg: "#211c19", sidebar: "#28231e", primary: "#c084fc", accent: "#fb923c", text: "#fefaf5"
   },
 ];
 
