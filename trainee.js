@@ -420,26 +420,36 @@ function _buildSolver(questions) {
   document.getElementById("solverTitle").textContent =
     _currentQuiz.title ?? "الاختبار";
 
-  // أضف عنصر عرض الدرجة المتراكمة إذا لم يكن موجوداً
-  let runningEl = document.getElementById("runningScoreDisplay");
-  if (!runningEl) {
-    runningEl = document.createElement("div");
-    runningEl.id = "runningScoreDisplay";
-    runningEl.style.cssText = `
-      text-align:center; padding:6px 16px; margin:8px auto;
-      background:rgba(0,201,177,0.1); border:1px solid rgba(0,201,177,0.3);
-      border-radius:20px; color:#00c9b1; font-weight:700; font-size:0.85rem;
-      display:inline-block; width:fit-content;
-    `;
-    const solverHeader = document.getElementById("solverHeader") || container.parentElement;
-    if (solverHeader) {
-      const wrapper = document.createElement("div");
-      wrapper.style.textAlign = "center";
-      wrapper.appendChild(runningEl);
-      solverHeader.insertAdjacentElement("afterend", wrapper);
+  // ── الدرجة الجارية: مُخفاة عن المتدرب (لمنع استنتاج صحة الإجابات) ──
+  // المنطق الحسابي لا يزال يعمل داخلياً (_updateRunningScore تُحدّث القيمة في الذاكرة)،
+  // لكن عنصر العرض لا يُضاف للصفحة.
+  //
+  // 🔧 لإعادة الإظهار لاحقاً: احذف الـ return التالي، وسيظهر العنصر كالسابق.
+  const _HIDE_RUNNING_SCORE = true; // غيّر إلى false لإظهاره
+  if (!_HIDE_RUNNING_SCORE) {
+    let runningEl = document.getElementById("runningScoreDisplay");
+    if (!runningEl) {
+      runningEl = document.createElement("div");
+      runningEl.id = "runningScoreDisplay";
+      runningEl.style.cssText = `
+        text-align:center; padding:6px 16px; margin:8px auto;
+        background:rgba(0,201,177,0.1); border:1px solid rgba(0,201,177,0.3);
+        border-radius:20px; color:#00c9b1; font-weight:700; font-size:0.85rem;
+        display:inline-block; width:fit-content;
+      `;
+      const solverHeader = document.getElementById("solverHeader") || container.parentElement;
+      if (solverHeader) {
+        const wrapper = document.createElement("div");
+        wrapper.style.textAlign = "center";
+        wrapper.appendChild(runningEl);
+        solverHeader.insertAdjacentElement("afterend", wrapper);
+      }
     }
+    runningEl.textContent = "✅ درجاتك حتى الآن: 0";
+  } else {
+    // إزالة أي عنصر قديم إن كان موجوداً من جلسة سابقة
+    document.getElementById("runningScoreDisplay")?.parentElement?.remove();
   }
-  runningEl.textContent = "✅ درجاتك حتى الآن: 0";
 
   // احسب عدد الأسئلة القابلة للإجابة
   const answerableCount = questions.filter(q => {
