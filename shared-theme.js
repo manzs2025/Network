@@ -340,6 +340,194 @@
       html[data-theme-mode="light"] .section-card h3 {
         color: ${primary} !important;
       }
+
+      /* ═══════════════════════════════════════════════════════════
+         🎛️ لوحة التحكم (admin.html) — overrides مخصصة
+      ═══════════════════════════════════════════════════════════ */
+
+      /* الشريط الجانبي */
+      html[data-theme-mode="light"] .sidebar,
+      html[data-theme-mode="light"] #sidebar,
+      html[data-theme-mode="light"] .app-sidebar {
+        background: ${card} !important;
+        border-color: rgba(0,0,0,0.1) !important;
+      }
+      html[data-theme-mode="light"] .sidebar a,
+      html[data-theme-mode="light"] .sidebar .nav-item,
+      html[data-theme-mode="light"] .sidebar-link {
+        color: ${text} !important;
+      }
+      html[data-theme-mode="light"] .sidebar .nav-item.active,
+      html[data-theme-mode="light"] .sidebar-link.active,
+      html[data-theme-mode="light"] .sidebar a.active {
+        background: ${primary}20 !important;
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .sidebar .nav-item:hover,
+      html[data-theme-mode="light"] .sidebar-link:hover {
+        background: ${primary}10 !important;
+      }
+
+      /* منطقة المحتوى الرئيسية */
+      html[data-theme-mode="light"] .main-content,
+      html[data-theme-mode="light"] #dashboardShell,
+      html[data-theme-mode="light"] .app-shell,
+      html[data-theme-mode="light"] .content-area {
+        background: ${bg} !important;
+      }
+
+      /* اللوحات (panels) — أكبر مشكلة في الصورة */
+      html[data-theme-mode="light"] .panel,
+      html[data-theme-mode="light"] [id^="panel-"],
+      html[data-theme-mode="light"] .admin-panel {
+        background: ${card} !important;
+        color: ${text} !important;
+        border-color: rgba(0,0,0,0.1) !important;
+      }
+
+      /* بطاقات الإعدادات */
+      html[data-theme-mode="light"] .settings-section,
+      html[data-theme-mode="light"] .settings-card {
+        background: ${card} !important;
+        border-color: rgba(0,0,0,0.1) !important;
+        color: ${text} !important;
+      }
+      html[data-theme-mode="light"] .settings-section-title,
+      html[data-theme-mode="light"] .settings-section-header {
+        color: ${primary} !important;
+      }
+
+      /* حقول الإدخال داخل الإعدادات */
+      html[data-theme-mode="light"] .sett-field label,
+      html[data-theme-mode="light"] .qz-label {
+        color: ${text} !important;
+        opacity: 0.85;
+      }
+      html[data-theme-mode="light"] .qz-input,
+      html[data-theme-mode="light"] input[type="text"]:not([class*="color"]),
+      html[data-theme-mode="light"] input[type="number"],
+      html[data-theme-mode="light"] input[type="email"],
+      html[data-theme-mode="light"] input[type="password"],
+      html[data-theme-mode="light"] textarea,
+      html[data-theme-mode="light"] select {
+        background: ${bg} !important;
+        color: ${text} !important;
+        border: 1px solid rgba(0,0,0,0.15) !important;
+      }
+      html[data-theme-mode="light"] .qz-input:focus,
+      html[data-theme-mode="light"] input:focus,
+      html[data-theme-mode="light"] textarea:focus,
+      html[data-theme-mode="light"] select:focus {
+        border-color: ${primary} !important;
+        box-shadow: 0 0 0 3px ${primary}20 !important;
+      }
+      html[data-theme-mode="light"] select option {
+        background: ${bg} !important;
+        color: ${text} !important;
+      }
+
+      /* البطاقات الكبيرة في لوحة التحكم (admin dashboard cards) */
+      html[data-theme-mode="light"] .qz-card,
+      html[data-theme-mode="light"] .qz-stat-card,
+      html[data-theme-mode="light"] .dashboard-card,
+      html[data-theme-mode="light"] .stat-card,
+      html[data-theme-mode="light"] [class*="dashboard"][class*="card"] {
+        background: ${card} !important;
+        color: ${text} !important;
+        border: 1px solid rgba(0,0,0,0.08) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+      }
+
+      /* أزرار التنقل بين الصفحات في لوحة التحكم (الأقسام الخمسة) */
+      html[data-theme-mode="light"] .page-selector,
+      html[data-theme-mode="light"] .page-tab,
+      html[data-theme-mode="light"] .legacy-page-btn,
+      html[data-theme-mode="light"] .page-list-item,
+      html[data-theme-mode="light"] .cms-page-item {
+        background: ${card} !important;
+        color: ${text} !important;
+        border: 1px solid rgba(0,0,0,0.1) !important;
+      }
+      html[data-theme-mode="light"] .page-selector:hover,
+      html[data-theme-mode="light"] .page-tab:hover,
+      html[data-theme-mode="light"] .legacy-page-btn:hover {
+        background: ${primary}10 !important;
+        border-color: ${primary}40 !important;
+      }
+      html[data-theme-mode="light"] .page-selector h3,
+      html[data-theme-mode="light"] .page-tab h3,
+      html[data-theme-mode="light"] .cms-page-item h3 {
+        color: ${primary} !important;
+      }
+
+      /* رأس لوحة التحكم (breadcrumb) */
+      html[data-theme-mode="light"] .breadcrumb,
+      html[data-theme-mode="light"] .page-header {
+        color: ${text} !important;
+      }
+      html[data-theme-mode="light"] .breadcrumb a {
+        color: ${primary} !important;
+      }
+
+      /* أزرار الحفظ / الإضافة الرئيسية (gradients الخضراء/البرتقالية) */
+      html[data-theme-mode="light"] .qz-save-btn,
+      html[data-theme-mode="light"] .btn-primary {
+        color: #fff !important;
+      }
+
+      /* modals / popups */
+      html[data-theme-mode="light"] .qm-modal-content,
+      html[data-theme-mode="light"] .tr-modal-content,
+      html[data-theme-mode="light"] .modal-content,
+      html[data-theme-mode="light"] .modal-body {
+        background: ${card} !important;
+        color: ${text} !important;
+      }
+      html[data-theme-mode="light"] .qm-modal-title,
+      html[data-theme-mode="light"] .tr-modal-title,
+      html[data-theme-mode="light"] .modal-title {
+        color: ${primary} !important;
+      }
+
+      /* جدول المقالات / المستخدمين */
+      html[data-theme-mode="light"] .qz-table,
+      html[data-theme-mode="light"] .admin-table {
+        background: ${card} !important;
+      }
+      html[data-theme-mode="light"] .qz-table th,
+      html[data-theme-mode="light"] .admin-table th {
+        background: ${primary}15 !important;
+        color: ${primary} !important;
+        border-color: rgba(0,0,0,0.1) !important;
+      }
+      html[data-theme-mode="light"] .qz-table td,
+      html[data-theme-mode="light"] .admin-table td {
+        color: ${text} !important;
+        border-color: rgba(0,0,0,0.08) !important;
+      }
+      html[data-theme-mode="light"] .qz-table tr:hover {
+        background: ${primary}05 !important;
+      }
+
+      /* شارة "متصل" */
+      html[data-theme-mode="light"] .connection-badge,
+      html[data-theme-mode="light"] .status-online {
+        background: ${accent}20 !important;
+        color: ${accent} !important;
+      }
+
+      /* معلومات المستخدم في أسفل الشريط الجانبي */
+      html[data-theme-mode="light"] .sidebar-user,
+      html[data-theme-mode="light"] .user-info {
+        background: rgba(0,0,0,0.03) !important;
+        color: ${text} !important;
+        border-top: 1px solid rgba(0,0,0,0.08) !important;
+      }
+      html[data-theme-mode="light"] .user-email,
+      html[data-theme-mode="light"] .sidebar-user-email {
+        color: ${text} !important;
+        opacity: 0.7;
+      }
     `;
 
     dbg('✅ Light overrides injected (' + styleEl.textContent.length + ' chars)');
