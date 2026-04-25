@@ -162,7 +162,7 @@ import {
    VERSION: 2024-10-06-v3 (TinyMCE + modals + cms-sec-item)
 ══════════════════════════════════════════════════════════ */
 (function applyAdminTheme() {
-  const VERSION = 'v5-tinymce-nav';
+  const VERSION = 'v6-two-themes';
   console.log('%c[Admin Theme]', 'background:#6c2fa0;color:#fff;padding:2px 8px;border-radius:4px', 'Loaded version:', VERSION);
 
   // أضف شارة مرئية صغيرة تختفي بعد 3 ثوانٍ (للتأكد من التحديث)
@@ -280,7 +280,7 @@ import {
       html[data-theme-mode="light"] .welcome-card,
       html[data-theme-mode="light"] .info-card,
       html[data-theme-mode="light"] .settings-section,
-      html[data-theme-mode="light"] [class*="-card"]:not(.theme-card) {
+      html[data-theme-mode="light"] [class*="-card"]:not(.theme-card-big) {
         background: ${theme.sidebar} !important;
         color: ${theme.text} !important;
         border-color: rgba(0,0,0,0.1) !important;
@@ -2785,77 +2785,21 @@ window.loadSettings = async function () {
  * تجميع بيانات بطاقات الأقسام من الحقول
  */
 /* ══════════════════════════════════════════════════════
-   🎨 قوالب الألوان الجاهزة (Theme Presets)
-   ملاحظة: مزيج من الداكن والفاتح — اختر ما يناسب عينيك
+   🎨 قالبا الألوان (Theme Presets) — مبسّط لقالبين فقط
+   نفس الهوية البصرية (بنفسجي + فيروزي) في كلا القالبين
 ══════════════════════════════════════════════════════ */
 const THEME_PRESETS = [
-  // ═══ القوالب الفاتحة ═══
   {
-    id: "light-pure",
-    name: "أبيض نقي",
-    desc: "☀️ فاتح كامل — مشرق ومريح",
+    id: "dark",
+    name: "🌙 الوضع الداكن",
+    desc: "القالب الافتراضي — مريح للعين في الإضاءة الخافتة",
+    bg: "#080a14", sidebar: "#0e1022", primary: "#6c2fa0", accent: "#00c9b1", text: "#e8eaf6"
+  },
+  {
+    id: "light",
+    name: "☀️ الوضع الفاتح",
+    desc: "خلفية بيضاء — مناسب للنهار والإضاءة العالية",
     bg: "#ffffff", sidebar: "#f5f5f7", primary: "#6c2fa0", accent: "#0891b2", text: "#1a1a2e"
-  },
-  {
-    id: "light-warm",
-    name: "أبيض دافئ",
-    desc: "☀️ فاتح بلمسة كريمية",
-    bg: "#fdfbf7", sidebar: "#f5f1ea", primary: "#d97706", accent: "#059669", text: "#292524"
-  },
-  {
-    id: "light-cool",
-    name: "أبيض بارد",
-    desc: "☀️ فاتح مع لمسة زرقاء",
-    bg: "#f8fafc", sidebar: "#e2e8f0", primary: "#2563eb", accent: "#0891b2", text: "#0f172a"
-  },
-  // ═══ القوالب الداكنة ═══
-  {
-    id: "purple-teal",
-    name: "بنفسجي فيروزي",
-    desc: "🌙 القالب الأصلي — هادئ واحترافي",
-    bg: "#141219", sidebar: "#18151d", primary: "#9d4edd", accent: "#00c9b1", text: "#f0ecf5"
-  },
-  {
-    id: "ocean-blue",
-    name: "أزرق المحيط",
-    desc: "🌙 أزرق عميق وهادئ",
-    bg: "#121a23", sidebar: "#171f28", primary: "#3b82f6", accent: "#22d3ee", text: "#f0f9ff"
-  },
-  {
-    id: "forest-green",
-    name: "أخضر الغابة",
-    desc: "🌙 أخضر طبيعي ومريح للعين",
-    bg: "#121b17", sidebar: "#17211c", primary: "#22c55e", accent: "#a3e635", text: "#f0fdf4"
-  },
-  {
-    id: "sunset-orange",
-    name: "برتقالي الغروب",
-    desc: "🌙 دافئ وجذاب",
-    bg: "#1b1512", sidebar: "#211a15", primary: "#f97316", accent: "#fbbf24", text: "#fffbeb"
-  },
-  {
-    id: "royal-red",
-    name: "أحمر ملكي",
-    desc: "🌙 قوي وجرئ",
-    bg: "#1b1214", sidebar: "#211619", primary: "#ef4444", accent: "#fb7185", text: "#fef2f2"
-  },
-  {
-    id: "midnight-indigo",
-    name: "نيلي منتصف الليل",
-    desc: "🌙 فاخر ومتوازن",
-    bg: "#14141f", sidebar: "#1a1926", primary: "#818cf8", accent: "#c084fc", text: "#f0efff"
-  },
-  {
-    id: "graphite",
-    name: "رمادي جرافيت",
-    desc: "🌙 محايد ومهني",
-    bg: "#151516", sidebar: "#1a1a1c", primary: "#94a3b8", accent: "#fcd34d", text: "#fafafa"
-  },
-  {
-    id: "warm-taupe",
-    name: "بيج دافئ",
-    desc: "🌙 دافئ ومريح للعين",
-    bg: "#211c19", sidebar: "#28231e", primary: "#c084fc", accent: "#fb923c", text: "#fefaf5"
   },
 ];
 
@@ -2864,18 +2808,38 @@ function renderThemePresets(activeId) {
   const container = document.getElementById("themePresets");
   if (!container) return;
 
-  container.innerHTML = THEME_PRESETS.map(t => `
-    <div class="theme-card ${t.id === activeId ? 'active' : ''}" data-theme-id="${t.id}" onclick="applyThemePreset('${t.id}')">
-      <div class="theme-preview">
-        <div class="theme-preview-band" style="background:${t.bg};"></div>
-        <div class="theme-preview-band" style="background:${t.sidebar};"></div>
-        <div class="theme-preview-band" style="background:${t.primary};"></div>
-        <div class="theme-preview-band" style="background:${t.accent};"></div>
+  // اختيار افتراضي = داكن (إن لم يكن هناك إعداد محفوظ)
+  const active = activeId || "dark";
+
+  container.innerHTML = THEME_PRESETS.map(t => {
+    const isActive = t.id === active;
+    return `
+      <div class="theme-card-big ${isActive ? 'active' : ''}" data-theme-id="${t.id}" onclick="applyThemePreset('${t.id}')">
+        <div class="theme-mockup" style="background:${t.bg};border:1px solid ${t.id === 'light' ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.08)'};">
+          <!-- محاكاة شريط علوي -->
+          <div style="height:14px;background:${t.sidebar};border-bottom:1px solid ${t.id === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'};display:flex;align-items:center;padding:0 6px;gap:4px;">
+            <div style="width:6px;height:6px;border-radius:50%;background:${t.primary};"></div>
+            <div style="width:24px;height:4px;border-radius:2px;background:${t.text};opacity:0.5;"></div>
+          </div>
+          <!-- محاكاة محتوى -->
+          <div style="padding:8px;display:flex;flex-direction:column;gap:5px;">
+            <div style="height:5px;background:${t.text};opacity:0.85;border-radius:2px;width:60%;"></div>
+            <div style="height:3px;background:${t.text};opacity:0.4;border-radius:2px;width:90%;"></div>
+            <div style="height:3px;background:${t.text};opacity:0.4;border-radius:2px;width:75%;"></div>
+            <div style="display:flex;gap:4px;margin-top:4px;">
+              <div style="height:14px;width:36px;background:${t.primary};border-radius:4px;"></div>
+              <div style="height:14px;width:24px;background:${t.accent};border-radius:4px;opacity:0.85;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="theme-info">
+          <div class="theme-name">${t.name}</div>
+          <div class="theme-desc">${t.desc}</div>
+        </div>
+        ${isActive ? '<div class="theme-active-tag">✓ مفعَّل</div>' : ''}
       </div>
-      <div class="theme-name">${t.name}</div>
-      <div class="theme-desc">${t.desc}</div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 }
 
 /** يُطبّق قالب ألوان على الحقول اليدوية */
@@ -2897,7 +2861,7 @@ window.applyThemePreset = function(themeId) {
   set("settTextColor", t.text, "settTextColorHex");
 
   // علّم البطاقة النشطة
-  document.querySelectorAll(".theme-card").forEach(c => {
+  document.querySelectorAll(".theme-card-big").forEach(c => {
     c.classList.toggle("active", c.dataset.themeId === themeId);
   });
 
@@ -2907,7 +2871,7 @@ window.applyThemePreset = function(themeId) {
 
 /** يُزيل تعليم القالب النشط (عند التعديل اليدوي) */
 window._themeClearActive = function() {
-  document.querySelectorAll(".theme-card.active").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".theme-card-big.active").forEach(c => c.classList.remove("active"));
   // معاينة فورية بالقيم اليدوية
   _themeApplyToDocument({
     bg: document.getElementById("settBgColor").value,
@@ -2989,7 +2953,7 @@ window.saveSettings = async function () {
     primaryColor: document.getElementById("settPrimaryColor").value,
     accentColor:  document.getElementById("settAccentColor")?.value || "#00c9b1",
     textColor:    document.getElementById("settTextColor").value,
-    themeId:      document.querySelector(".theme-card.active")?.dataset.themeId || "",
+    themeId:      document.querySelector(".theme-card-big.active")?.dataset.themeId || "",
     h1Size: parseFloat(document.getElementById("settH1Size").value) || 2,
     pSize:  parseFloat(document.getElementById("settPSize").value)  || 1,
     heroTitle:      document.getElementById("settHeroTitle").value.trim(),
