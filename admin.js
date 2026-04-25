@@ -162,7 +162,7 @@ import {
    VERSION: 2024-10-06-v3 (TinyMCE + modals + cms-sec-item)
 ══════════════════════════════════════════════════════════ */
 (function applyAdminTheme() {
-  const VERSION = 'v3-modals-editor';
+  const VERSION = 'v4-card2-fixed';
   console.log('%c[Admin Theme]', 'background:#6c2fa0;color:#fff;padding:2px 8px;border-radius:4px', 'Loaded version:', VERSION);
 
   // أضف شارة مرئية صغيرة تختفي بعد 3 ثوانٍ (للتأكد من التحديث)
@@ -223,6 +223,7 @@ import {
     if (isLight) {
       r.setProperty('--bg3', darken(theme.bg, 5));
       r.setProperty('--card', theme.sidebar || '#f5f5f7');
+      r.setProperty('--card2', darken(theme.bg, 3));      // للمودالز
       r.setProperty('--text-muted', 'rgba(0,0,0,0.6)');
       r.setProperty('--text-faint', 'rgba(0,0,0,0.45)');
       r.setProperty('--border', 'rgba(0,0,0,0.12)');
@@ -371,136 +372,95 @@ import {
       html[data-theme-mode="light"] .sb-user-email { color: ${theme.text} !important; }
 
       /* ═══ TinyMCE Editor (المنطقة السوداء في المحررات) ═══ */
-      html[data-theme-mode="light"] .tox.tox-tinymce,
-      html[data-theme-mode="light"] .tox .tox-edit-area,
-      html[data-theme-mode="light"] .tox .tox-editor-container,
-      html[data-theme-mode="light"] .tox .tox-editor-header,
-      html[data-theme-mode="light"] .tox .tox-toolbar,
-      html[data-theme-mode="light"] .tox .tox-toolbar__primary,
-      html[data-theme-mode="light"] .tox .tox-toolbar-overlord,
-      html[data-theme-mode="light"] .tox .tox-statusbar,
-      html[data-theme-mode="light"] .tox .tox-menubar {
+      html[data-theme-mode="light"] .tox.tox-tinymce {
         background: ${theme.sidebar} !important;
         border-color: rgba(0,0,0,0.1) !important;
       }
+      html[data-theme-mode="light"] .tox .tox-toolbar,
+      html[data-theme-mode="light"] .tox .tox-toolbar__primary,
+      html[data-theme-mode="light"] .tox .tox-toolbar-overlord,
+      html[data-theme-mode="light"] .tox .tox-menubar,
+      html[data-theme-mode="light"] .tox .tox-statusbar {
+        background: ${darken(theme.bg, 2)} !important;
+        border-color: rgba(0,0,0,0.12) !important;
+      }
+      html[data-theme-mode="light"] .tox .tox-toolbar__group {
+        border-right-color: rgba(0,0,0,0.08) !important;
+      }
       html[data-theme-mode="light"] .tox .tox-tbtn,
       html[data-theme-mode="light"] .tox .tox-mbtn,
-      html[data-theme-mode="light"] .tox .tox-tbtn__select-label,
-      html[data-theme-mode="light"] .tox .tox-statusbar__path-item,
-      html[data-theme-mode="light"] .tox .tox-statusbar__wordcount {
-        color: ${theme.text} !important;
+      html[data-theme-mode="light"] .tox .tox-tbtn--select,
+      html[data-theme-mode="light"] .tox .tox-tbtn__select-label {
+        color: rgba(0,0,0,0.7) !important;
+      }
+      html[data-theme-mode="light"] .tox .tox-tbtn svg,
+      html[data-theme-mode="light"] .tox .tox-mbtn svg {
+        fill: rgba(0,0,0,0.7) !important;
       }
       html[data-theme-mode="light"] .tox .tox-tbtn:hover,
       html[data-theme-mode="light"] .tox .tox-mbtn:hover {
         background: ${theme.primary}15 !important;
-      }
-      html[data-theme-mode="light"] .tox .tox-tbtn svg,
-      html[data-theme-mode="light"] .tox .tox-mbtn svg { fill: ${theme.text} !important; }
-      /* منطقة الكتابة داخل TinyMCE (iframe) — لا يمكن تعديلها من هنا،
-         لكن نضع خلفية افتراضية فاتحة على الحاوية */
-      html[data-theme-mode="light"] .tox .tox-edit-area iframe {
-        background: #ffffff !important;
-      }
-
-      /* ═══ Modal overlays (خلفية داكنة خلف المودال) ═══ */
-      html[data-theme-mode="light"] .qm-modal-overlay,
-      html[data-theme-mode="light"] .tr-modal-overlay,
-      html[data-theme-mode="light"] .modal-overlay {
-        background: rgba(0,0,0,0.5) !important;
-      }
-
-      /* ═══ Modal content (المستطيل نفسه) ═══ */
-      html[data-theme-mode="light"] .qm-modal,
-      html[data-theme-mode="light"] .tr-modal,
-      html[data-theme-mode="light"] .modal {
-        background: ${theme.sidebar} !important;
-        color: ${theme.text} !important;
-        border: 1px solid rgba(0,0,0,0.1) !important;
-      }
-      html[data-theme-mode="light"] .qm-modal-title,
-      html[data-theme-mode="light"] .tr-modal-title,
-      html[data-theme-mode="light"] .modal-title {
         color: ${theme.primary} !important;
       }
-      html[data-theme-mode="light"] .qm-modal-header,
-      html[data-theme-mode="light"] .tr-modal-header,
-      html[data-theme-mode="light"] .modal-header {
-        border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+      html[data-theme-mode="light"] .tox .tox-tbtn:hover svg {
+        fill: ${theme.primary} !important;
       }
-      html[data-theme-mode="light"] .qm-modal-body,
-      html[data-theme-mode="light"] .tr-modal-body,
-      html[data-theme-mode="light"] .modal-body {
-        background: ${theme.sidebar} !important;
-        color: ${theme.text} !important;
+      html[data-theme-mode="light"] .tox .tox-edit-area,
+      html[data-theme-mode="light"] .tox .tox-edit-area__iframe {
+        background: #ffffff !important;
       }
-      html[data-theme-mode="light"] .qm-modal label,
-      html[data-theme-mode="light"] .tr-modal label,
-      html[data-theme-mode="light"] .modal label {
-        color: ${theme.text} !important;
-      }
-      html[data-theme-mode="light"] .qm-modal-close,
-      html[data-theme-mode="light"] .tr-modal-close {
-        background: rgba(0,0,0,0.05) !important;
-        color: ${theme.text} !important;
+      html[data-theme-mode="light"] .tox .tox-statusbar,
+      html[data-theme-mode="light"] .tox .tox-statusbar__wordcount,
+      html[data-theme-mode="light"] .tox .tox-statusbar a {
+        color: rgba(0,0,0,0.55) !important;
       }
 
-      /* ═══ حقول الإدخال داخل المودالز — الخلفية البيضاء (التي تراها) ═══ */
-      html[data-theme-mode="light"] .qm-modal input[type="text"],
-      html[data-theme-mode="light"] .qm-modal input[type="number"],
-      html[data-theme-mode="light"] .qm-modal textarea,
-      html[data-theme-mode="light"] .qm-modal select,
-      html[data-theme-mode="light"] .tr-modal input[type="text"],
-      html[data-theme-mode="light"] .tr-modal input[type="number"],
+      /* ═══ المودالز (.tr-modal و .qm-modal تستخدم --card2) ═══ */
+      html[data-theme-mode="light"] .tr-modal,
+      html[data-theme-mode="light"] .qm-modal,
+      html[data-theme-mode="light"] .tr-modal-overlay .tr-modal,
+      html[data-theme-mode="light"] .qm-modal-overlay .qm-modal {
+        background: ${theme.sidebar} !important;
+        color: ${theme.text} !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
+      }
+      html[data-theme-mode="light"] .tr-modal-title,
+      html[data-theme-mode="light"] .qm-modal-title {
+        color: ${theme.primary} !important;
+      }
+      html[data-theme-mode="light"] .tr-modal-field label,
+      html[data-theme-mode="light"] .qm-modal label {
+        color: ${theme.text} !important;
+        opacity: 0.75;
+      }
+      html[data-theme-mode="light"] .tr-modal-field input,
+      html[data-theme-mode="light"] .tr-modal input,
+      html[data-theme-mode="light"] .qm-modal input,
       html[data-theme-mode="light"] .tr-modal textarea,
-      html[data-theme-mode="light"] .tr-modal select {
+      html[data-theme-mode="light"] .qm-modal textarea {
         background: #ffffff !important;
         color: #1a1a2e !important;
         border: 1px solid rgba(0,0,0,0.2) !important;
       }
-      html[data-theme-mode="light"] .qm-modal select option,
-      html[data-theme-mode="light"] .tr-modal select option {
+      html[data-theme-mode="light"] .tr-modal select,
+      html[data-theme-mode="light"] .qm-modal select {
         background: #ffffff !important;
         color: #1a1a2e !important;
+        border: 1px solid rgba(0,0,0,0.2) !important;
+      }
+      html[data-theme-mode="light"] .tr-modal-close,
+      html[data-theme-mode="light"] .qm-modal-close {
+        background: rgba(0,0,0,0.06) !important;
+        color: rgba(0,0,0,0.6) !important;
       }
 
-      /* ═══ قائمة أقسام الصفحة في CMS (الشريط الأسود في الصورة 1) ═══ */
+      /* ═══ أقسام CMS — cms-sec-item (الشريط الأسود) ═══ */
       html[data-theme-mode="light"] .cms-sec-item,
-      html[data-theme-mode="light"] .cms-section-item,
-      html[data-theme-mode="light"] [id^="cmsSectionsList"] > div,
-      html[data-theme-mode="light"] #cmsSectionsList > div {
-        background: ${darken(theme.bg, 3)} !important;
+      html[data-theme-mode="light"] #cmsSectionsList > div,
+      html[data-theme-mode="light"] #cmsSectionsList .cms-section-item {
+        background: ${darken(theme.bg, 2)} !important;
         color: ${theme.text} !important;
-        border: 1px solid rgba(0,0,0,0.1) !important;
-      }
-      html[data-theme-mode="light"] .cms-sec-item .cms-sec-title,
-      html[data-theme-mode="light"] #cmsSectionsList h3 {
-        color: ${theme.text} !important;
-      }
-
-      /* ═══ محرر الصفحات الجديدة (cms page editor rows) ═══ */
-      html[data-theme-mode="light"] .cms-editor-row,
-      html[data-theme-mode="light"] .cms-controls {
-        background: ${theme.sidebar} !important;
-        color: ${theme.text} !important;
-      }
-
-      /* ═══ حقول select داكنة متبقية ═══ */
-      html[data-theme-mode="light"] select.qz-select,
-      html[data-theme-mode="light"] .qz-select {
-        background: #ffffff !important;
-        color: #1a1a2e !important;
-      }
-      html[data-theme-mode="light"] .qz-select option {
-        background: #ffffff !important;
-        color: #1a1a2e !important;
-      }
-
-      /* ═══ أزرار الإجراءات في CMS (إخفاء/إظهار، حذف، معاينة) ═══ */
-      html[data-theme-mode="light"] .cms-action-btn,
-      html[data-theme-mode="light"] [onclick*="cmsToggle"],
-      html[data-theme-mode="light"] [onclick*="cmsDelete"],
-      html[data-theme-mode="light"] [onclick*="cmsPreview"] {
-        border: 1px solid rgba(0,0,0,0.15) !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
       }
     `;
 
