@@ -162,7 +162,7 @@ import {
    VERSION: 2024-10-06-v3 (TinyMCE + modals + cms-sec-item)
 ══════════════════════════════════════════════════════════ */
 (function applyAdminTheme() {
-  const VERSION = 'v6-two-themes';
+  const VERSION = 'v7-three-dark-themes';
   console.log('%c[Admin Theme]', 'background:#6c2fa0;color:#fff;padding:2px 8px;border-radius:4px', 'Loaded version:', VERSION);
 
   // أضف شارة مرئية صغيرة تختفي بعد 3 ثوانٍ (للتأكد من التحديث)
@@ -2785,21 +2785,27 @@ window.loadSettings = async function () {
  * تجميع بيانات بطاقات الأقسام من الحقول
  */
 /* ══════════════════════════════════════════════════════
-   🎨 قالبا الألوان (Theme Presets) — مبسّط لقالبين فقط
-   نفس الهوية البصرية (بنفسجي + فيروزي) في كلا القالبين
+   🎨 قوالب الألوان (Theme Presets) — 3 قوالب احترافية
+   كلها داكنة (أكثر استقراراً + تتجنب مشاكل المحرر)
 ══════════════════════════════════════════════════════ */
 const THEME_PRESETS = [
   {
-    id: "dark",
-    name: "🌙 الوضع الداكن",
-    desc: "القالب الافتراضي — مريح للعين في الإضاءة الخافتة",
+    id: "dark-purple",
+    name: "🌙 البنفسجي الأصلي",
+    desc: "القالب الافتراضي — بنفسجي وفيروزي",
     bg: "#080a14", sidebar: "#0e1022", primary: "#6c2fa0", accent: "#00c9b1", text: "#e8eaf6"
   },
   {
-    id: "light",
-    name: "☀️ الوضع الفاتح",
-    desc: "خلفية بيضاء — مناسب للنهار والإضاءة العالية",
-    bg: "#ffffff", sidebar: "#f5f5f7", primary: "#6c2fa0", accent: "#0891b2", text: "#1a1a2e"
+    id: "dark-teal",
+    name: "🌿 الأخضر التقني",
+    desc: "بأسلوب رايات TVTC — أخضر زيتي راقٍ",
+    bg: "#0a1614", sidebar: "#0f1f1c", primary: "#1d7a6e", accent: "#52c1a8", text: "#e8f5f2"
+  },
+  {
+    id: "dark-blue",
+    name: "💧 الأزرق التركواز",
+    desc: "بأسلوب TVTC LMS — أزرق هادئ وعصري",
+    bg: "#081420", sidebar: "#0d1d2e", primary: "#1e7a9b", accent: "#4cc9d8", text: "#e8f3f8"
   },
 ];
 
@@ -2809,7 +2815,7 @@ function renderThemePresets(activeId) {
   if (!container) return;
 
   // اختيار افتراضي = داكن (إن لم يكن هناك إعداد محفوظ)
-  const active = activeId || "dark";
+  const active = activeId || "dark-purple";
 
   container.innerHTML = THEME_PRESETS.map(t => {
     const isActive = t.id === active;
@@ -2887,28 +2893,36 @@ function _themeApplyToDocument(t) {
   const r = document.documentElement.style;
   r.setProperty("--bg", t.bg);
   r.setProperty("--bg2", t.sidebar);
+  r.setProperty("--bg3", _darkenColor(t.bg, -3));     // أغمق قليلاً من bg
   r.setProperty("--primary", t.primary);
+  r.setProperty("--primary-l", _lightenColor(t.primary, 20));
   r.setProperty("--accent", t.accent);
+  r.setProperty("--accent-l", _lightenColor(t.accent, 15));
   r.setProperty("--text", t.text);
 
-  // تحقق فاتح أم داكن (YIQ brightness)
-  const isLight = _isLightColor(t.bg);
-  if (isLight) {
-    r.setProperty("--text-muted", "rgba(0,0,0,0.55)");
-    r.setProperty("--text-faint", "rgba(0,0,0,0.4)");
-    r.setProperty("--border",     "rgba(0,0,0,0.12)");
-    r.setProperty("--border2",    "rgba(0,0,0,0.18)");
-    r.setProperty("--card",       t.sidebar);
-    document.documentElement.setAttribute("data-theme-mode", "light");
-  } else {
-    r.setProperty("--text-muted", "rgba(255,255,255,0.6)");
-    r.setProperty("--text-faint", "rgba(255,255,255,0.4)");
-    r.setProperty("--border",     "rgba(255,255,255,0.08)");
-    r.setProperty("--border2",    "rgba(255,255,255,0.12)");
-    r.setProperty("--card",       t.sidebar);
-    document.documentElement.setAttribute("data-theme-mode", "dark");
-  }
+  // كل القوالب داكنة — استخدم إعدادات الوضع الداكن مباشرة
+  r.setProperty("--text-muted", "rgba(255,255,255,0.6)");
+  r.setProperty("--text-faint", "rgba(255,255,255,0.4)");
+  r.setProperty("--border",     "rgba(255,255,255,0.08)");
+  r.setProperty("--border2",    "rgba(255,255,255,0.12)");
+  r.setProperty("--card",       t.sidebar);
+  r.setProperty("--card2",      _lightenColor(t.sidebar, 4));
+  document.documentElement.setAttribute("data-theme-mode", "dark");
 }
+
+/** تفتيح/تغميق لون hex */
+function _lightenColor(hex, pct) {
+  try {
+    const h = (hex || "").replace("#", "");
+    if (h.length !== 6) return hex;
+    const amt = Math.round(255 * pct / 100);
+    let r = Math.max(0, Math.min(255, parseInt(h.substring(0,2),16) + amt));
+    let g = Math.max(0, Math.min(255, parseInt(h.substring(2,4),16) + amt));
+    let b = Math.max(0, Math.min(255, parseInt(h.substring(4,6),16) + amt));
+    return "#" + r.toString(16).padStart(2,"0") + g.toString(16).padStart(2,"0") + b.toString(16).padStart(2,"0");
+  } catch { return hex; }
+}
+function _darkenColor(hex, pct) { return _lightenColor(hex, pct); }
 
 function _isLightColor(hex) {
   try {
