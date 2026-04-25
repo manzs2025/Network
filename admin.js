@@ -162,7 +162,7 @@ import {
    VERSION: 2024-10-06-v3 (TinyMCE + modals + cms-sec-item)
 ══════════════════════════════════════════════════════════ */
 (function applyAdminTheme() {
-  const VERSION = 'v4-card2-fixed';
+  const VERSION = 'v5-tinymce-nav';
   console.log('%c[Admin Theme]', 'background:#6c2fa0;color:#fff;padding:2px 8px;border-radius:4px', 'Loaded version:', VERSION);
 
   // أضف شارة مرئية صغيرة تختفي بعد 3 ثوانٍ (للتأكد من التحديث)
@@ -1303,6 +1303,11 @@ window.exportResultsToExcel = function () {
      - extraSetup    : دالة إضافية للـ setup
      - extra         : مفاتيح إضافية لدمجها في الكونفج
 ══════════════════════════════════════════════════════ */
+/** يكتشف ما إذا كان الموقع يستخدم قالب فاتح حالياً */
+function _isLightTheme() {
+  return document.documentElement.getAttribute('data-theme-mode') === 'light';
+}
+
 window._getFullEditorConfig = function (selector, options = {}) {
   const opts = options || {};
   const cfg = {
@@ -1361,17 +1366,17 @@ window._getFullEditorConfig = function (selector, options = {}) {
         line-height: 1.85;
         direction: rtl;
         text-align: right;
-        color: #e8eaf6;
-        background: #161929;
+        color: ${_isLightTheme() ? '#1a1a2e' : '#e8eaf6'};
+        background: ${_isLightTheme() ? '#ffffff' : '#161929'};
         margin: 12px 16px;
       }
-      h1,h2,h3,h4 { color:#fff; }
+      h1,h2,h3,h4 { color: ${_isLightTheme() ? '#1a1a2e' : '#fff'}; }
       h2 { border-bottom:2px solid rgba(108,47,160,0.4); padding-bottom:0.5rem; }
       h3 { color:#00c9b1; }
       p  { margin-bottom:0.85rem; }
       ul, ol { padding-right:1.5rem; }
       li { margin-bottom:0.4rem; }
-      strong { color:#fff; }
+      strong { color: ${_isLightTheme() ? '#000' : '#fff'}; }
       a { color:#00c9b1; }
       blockquote {
         border-right: 4px solid #8b46c8;
@@ -1379,7 +1384,7 @@ window._getFullEditorConfig = function (selector, options = {}) {
         padding: 0.5rem 1rem;
         margin: 0.75rem 0;
         background: rgba(108,47,160,0.1);
-        color: #8c90b5;
+        color: ${_isLightTheme() ? '#555' : '#8c90b5'};
       }
       table { border-collapse:collapse; width:100%; }
       table td, table th {

@@ -315,13 +315,36 @@
 
       html[data-theme-mode="light"] .site-header,
       html[data-theme-mode="light"] .top-nav,
-      html[data-theme-mode="light"] .navbar {
-        background: ${card} !important;
+      html[data-theme-mode="light"] .navbar,
+      html[data-theme-mode="light"] nav.main-nav {
+        background: ${card}f0 !important;
         border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+        backdrop-filter: blur(20px) !important;
       }
       html[data-theme-mode="light"] .site-header a,
-      html[data-theme-mode="light"] .site-header .logo {
+      html[data-theme-mode="light"] .site-header .logo,
+      html[data-theme-mode="light"] nav.main-nav a,
+      html[data-theme-mode="light"] nav.main-nav .nav-logo {
         color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .nav-menu-trigger {
+        background: ${primary}15 !important;
+        border-color: ${primary}40 !important;
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .nav-menu-trigger span {
+        background: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .nav-search-pill,
+      html[data-theme-mode="light"] .search-input {
+        background: ${bg} !important;
+        color: ${text} !important;
+        border: 1px solid rgba(0,0,0,0.12) !important;
+      }
+      html[data-theme-mode="light"] .login-btn,
+      html[data-theme-mode="light"] .nav-login {
+        background: ${primary} !important;
+        color: #fff !important;
       }
 
       html[data-theme-mode="light"] button:not([class*="theme-"]):not([id^="dbg"]):not([id^="_theme"]) {
