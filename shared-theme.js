@@ -242,7 +242,8 @@
 
   function buildLightCSS(theme) {
     const bg = theme.bg;
-    const card = theme.sidebar;
+    const card = theme.card || theme.sidebar;
+    const card2 = theme.card2 || theme.sidebar;
     const text = theme.text;
     const primary = theme.primary;
     const accent = theme.accent;
@@ -426,6 +427,70 @@
       html[data-theme-mode="light"] .home-card h3,
       html[data-theme-mode="light"] .section-card h3 {
         color: ${primary} !important;
+      }
+
+      /* ═══════════════════════════════════════════════════════════
+         📱 الشريط الجانبي (nav-drawer) — يُضاف من shared-nav.js
+      ═══════════════════════════════════════════════════════════ */
+      html[data-theme-mode="light"] aside.nav-drawer {
+        background: ${card} !important;
+        border-left: 1px solid rgba(0,0,0,0.1) !important;
+        box-shadow: -20px 0 60px rgba(0,0,0,0.15) !important;
+      }
+      html[data-theme-mode="light"] .drawer-head {
+        border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+      }
+      html[data-theme-mode="light"] .drawer-title,
+      html[data-theme-mode="light"] .drawer-name,
+      html[data-theme-mode="light"] .drawer-section-title {
+        color: ${text} !important;
+      }
+      html[data-theme-mode="light"] .drawer-subtitle,
+      html[data-theme-mode="light"] .drawer-sub {
+        color: ${text} !important;
+        opacity: 0.65;
+      }
+      html[data-theme-mode="light"] a.drawer-link {
+        color: ${text} !important;
+      }
+      html[data-theme-mode="light"] a.drawer-link:hover {
+        background: ${primary}12 !important;
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] a.drawer-link.active {
+        background: ${primary}20 !important;
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] a.drawer-link.active::before {
+        background: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .drawer-icon {
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .drawer-num {
+        background: ${primary}15 !important;
+        color: ${primary} !important;
+      }
+      html[data-theme-mode="light"] .drawer-close,
+      html[data-theme-mode="light"] .drawer-close-btn {
+        background: rgba(0,0,0,0.05) !important;
+        color: ${text} !important;
+      }
+      html[data-theme-mode="light"] .drawer-close:hover {
+        background: rgba(0,0,0,0.1) !important;
+      }
+      html[data-theme-mode="light"] .drawer-footer,
+      html[data-theme-mode="light"] .drawer-bottom {
+        background: ${card2 || card} !important;
+        border-top: 1px solid rgba(0,0,0,0.08) !important;
+      }
+      /* الـ overlay الخلفي يبقى داكن */
+      html[data-theme-mode="light"] .nav-drawer-overlay {
+        background: rgba(0,0,0,0.4) !important;
+      }
+      /* scrollbar */
+      html[data-theme-mode="light"] .drawer-links::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2) !important;
       }
 
       /* ═══════════════════════════════════════════════════════════
