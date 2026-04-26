@@ -162,7 +162,7 @@ import {
    VERSION: 2024-10-06-v3 (TinyMCE + modals + cms-sec-item)
 ══════════════════════════════════════════════════════════ */
 (function applyAdminTheme() {
-  const VERSION = 'v8-tailwind-tinted';
+  const VERSION = 'v9-deeper-tones';
   console.log('%c[Admin Theme]', 'background:#6c2fa0;color:#fff;padding:2px 8px;border-radius:4px', 'Loaded version:', VERSION);
 
   // أضف شارة مرئية صغيرة تختفي بعد 3 ثوانٍ (للتأكد من التحديث)
@@ -2805,87 +2805,82 @@ const THEME_PRESETS = [
   {
     id: "soft-violet",
     name: "🪻 البنفسجي الناعم",
-    desc: "خلفية بيج بنفسجية فاتحة — احترافي ومريح للعين",
+    desc: "بيج بنفسجية متوسطة — احترافي ومريح للعين",
     mode: "light",
-    // مستوحى من Tailwind Violet/Stone — متناغم تماماً
-    bg: "#faf7fc",      // violet-50 مع لمسة بيج
-    sidebar: "#f3eef7",  // violet-100
-    primary: "#7c3aed",  // violet-600
-    accent: "#0891b2",   // cyan-600
-    text: "#2e1065",     // violet-950
-    card: "#ffffff",
-    card2: "#f5f3ff",    // violet-50
-    border: "rgba(124,58,237,0.15)",
-    textMuted: "rgba(46,16,101,0.65)",
-    textFaint: "rgba(46,16,101,0.45)"
+    bg: "#ede4f5",       // أعمق 40%
+    sidebar: "#ddc8ec",   // أعمق 40%
+    primary: "#6d28d9",   // violet-700 (أعمق للتباين)
+    accent: "#0e7490",    // cyan-700
+    text: "#2e1065",      // violet-950
+    card: "#faf7fc",
+    card2: "#ede4f5",
+    border: "rgba(109,40,217,0.2)",
+    textMuted: "rgba(46,16,101,0.7)",
+    textFaint: "rgba(46,16,101,0.5)"
   },
   {
     id: "ocean-mist",
     name: "🌊 ضباب المحيط",
-    desc: "أزرق-تركواز هادئ — مستوحى من بحر الكاريبي",
+    desc: "أزرق-تركواز هادئ بعمق متوسط",
     mode: "light",
-    // مستوحى من Tailwind Sky/Slate
-    bg: "#f0f9ff",       // sky-50
-    sidebar: "#e0f2fe",   // sky-100
-    primary: "#0369a1",   // sky-700 (أعمق للتباين)
-    accent: "#0d9488",    // teal-600
-    text: "#0c4a6e",      // sky-900
-    card: "#ffffff",
-    card2: "#f0f9ff",
-    border: "rgba(3,105,161,0.15)",
-    textMuted: "rgba(12,74,110,0.65)",
-    textFaint: "rgba(12,74,110,0.45)"
+    bg: "#cce8f7",        // أعمق 40%
+    sidebar: "#b8dff0",    // أعمق 40%
+    primary: "#075985",    // sky-800 (أعمق للتباين)
+    accent: "#0f766e",     // teal-700
+    text: "#0c4a6e",       // sky-900
+    card: "#f0f9ff",
+    card2: "#dcedf6",
+    border: "rgba(7,89,133,0.2)",
+    textMuted: "rgba(12,74,110,0.7)",
+    textFaint: "rgba(12,74,110,0.5)"
   },
   {
     id: "forest-sage",
     name: "🌿 المريمية الخضراء",
-    desc: "أخضر زيتي راقٍ — مستوحى من واحات نخيل المملكة",
+    desc: "أخضر زيتي راقٍ — طبيعي ومريح",
     mode: "light",
-    // مستوحى من Tailwind Emerald/Stone
-    bg: "#f0fdf4",        // green-50
-    sidebar: "#dcfce7",    // green-100
-    primary: "#15803d",    // green-700
-    accent: "#ca8a04",     // yellow-600 (تكامل لوني)
+    bg: "#cce8d4",        // أعمق 40%
+    sidebar: "#b3e3c4",    // أعمق 40%
+    primary: "#166534",    // green-800
+    accent: "#a16207",     // yellow-700
     text: "#14532d",       // green-900
-    card: "#ffffff",
-    card2: "#f0fdf4",
-    border: "rgba(21,128,61,0.15)",
-    textMuted: "rgba(20,83,45,0.65)",
-    textFaint: "rgba(20,83,45,0.45)"
+    card: "#f0fdf4",
+    card2: "#daedde",
+    border: "rgba(22,101,52,0.2)",
+    textMuted: "rgba(20,83,45,0.7)",
+    textFaint: "rgba(20,83,45,0.5)"
   },
   {
     id: "warm-amber",
     name: "🌅 الكهرمان الدافئ",
-    desc: "ذهبي دافئ — كأشعة الشمس عند الغروب",
+    desc: "ذهبي دافئ — كأشعة الشمس",
     mode: "light",
-    // مستوحى من Tailwind Amber/Stone
-    bg: "#fffbeb",         // amber-50
-    sidebar: "#fef3c7",     // amber-100
-    primary: "#b45309",     // amber-700
-    accent: "#9333ea",      // purple-600 (تكامل لوني)
+    bg: "#fde7b8",         // أعمق 40%
+    sidebar: "#fcd58a",     // أعمق 40%
+    primary: "#92400e",     // amber-800
+    accent: "#7e22ce",      // purple-700
     text: "#451a03",        // amber-950
-    card: "#ffffff",
-    card2: "#fffbeb",
-    border: "rgba(180,83,9,0.15)",
-    textMuted: "rgba(69,26,3,0.65)",
-    textFaint: "rgba(69,26,3,0.45)"
+    card: "#fffbeb",
+    card2: "#f7eccc",
+    border: "rgba(146,64,14,0.22)",
+    textMuted: "rgba(69,26,3,0.72)",
+    textFaint: "rgba(69,26,3,0.5)"
   },
   {
     id: "cool-slate",
     name: "🪨 الإردواز البارد",
-    desc: "رمادي مزرق محايد — احترافي ومتطور",
+    desc: "رمادي مزرق متوسط — احترافي ومتطور",
     mode: "light",
-    // مستوحى من Tailwind Slate
-    bg: "#f8fafc",          // slate-50
-    sidebar: "#f1f5f9",      // slate-100
-    primary: "#475569",      // slate-600
-    accent: "#0ea5e9",       // sky-500
+    bg: "#dde2ea",          // أعمق 40%
+    sidebar: "#c8d2dd",      // أعمق 40%
+    primary: "#334155",      // slate-700
+    accent: "#0369a1",       // sky-700
     text: "#0f172a",         // slate-900
-    card: "#ffffff",
-    card2: "#f8fafc",
-    border: "rgba(71,85,105,0.15)",
-    textMuted: "rgba(15,23,42,0.65)",
-    textFaint: "rgba(15,23,42,0.45)"
+    card: "#f5f7fa",
+    card2: "#e1e7ee",
+    border: "rgba(51,65,85,0.22)",
+    textMuted: "rgba(15,23,42,0.72)",
+    textFaint: "rgba(15,23,42,0.5)"
   },
 ];
 

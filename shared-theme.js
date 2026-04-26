@@ -58,6 +58,52 @@
   // ── 2) اجلب أحدث الإعدادات من Firestore في الخلفية ──
   fetchAndApply();
 
+  // ── كاتالوج القوالب (يجب أن يطابق ما في admin.js) ──
+  const PRESETS = {
+    "dark-purple": {
+      mode: "dark",
+      bg: "#080a14", sidebar: "#0e1022", primary: "#6c2fa0", accent: "#00c9b1", text: "#e8eaf6",
+      card: "#0e1022", card2: "#13162e",
+      border: "rgba(255,255,255,0.08)",
+      textMuted: "rgba(255,255,255,0.6)", textFaint: "rgba(255,255,255,0.4)"
+    },
+    "soft-violet": {
+      mode: "light",
+      bg: "#ede4f5", sidebar: "#ddc8ec", primary: "#6d28d9", accent: "#0e7490", text: "#2e1065",
+      card: "#faf7fc", card2: "#ede4f5",
+      border: "rgba(109,40,217,0.2)",
+      textMuted: "rgba(46,16,101,0.7)", textFaint: "rgba(46,16,101,0.5)"
+    },
+    "ocean-mist": {
+      mode: "light",
+      bg: "#cce8f7", sidebar: "#b8dff0", primary: "#075985", accent: "#0f766e", text: "#0c4a6e",
+      card: "#f0f9ff", card2: "#dcedf6",
+      border: "rgba(7,89,133,0.2)",
+      textMuted: "rgba(12,74,110,0.7)", textFaint: "rgba(12,74,110,0.5)"
+    },
+    "forest-sage": {
+      mode: "light",
+      bg: "#cce8d4", sidebar: "#b3e3c4", primary: "#166534", accent: "#a16207", text: "#14532d",
+      card: "#f0fdf4", card2: "#daedde",
+      border: "rgba(22,101,52,0.2)",
+      textMuted: "rgba(20,83,45,0.7)", textFaint: "rgba(20,83,45,0.5)"
+    },
+    "warm-amber": {
+      mode: "light",
+      bg: "#fde7b8", sidebar: "#fcd58a", primary: "#92400e", accent: "#7e22ce", text: "#451a03",
+      card: "#fffbeb", card2: "#f7eccc",
+      border: "rgba(146,64,14,0.22)",
+      textMuted: "rgba(69,26,3,0.72)", textFaint: "rgba(69,26,3,0.5)"
+    },
+    "cool-slate": {
+      mode: "light",
+      bg: "#dde2ea", sidebar: "#c8d2dd", primary: "#334155", accent: "#0369a1", text: "#0f172a",
+      card: "#f5f7fa", card2: "#e1e7ee",
+      border: "rgba(51,65,85,0.22)",
+      textMuted: "rgba(15,23,42,0.72)", textFaint: "rgba(15,23,42,0.5)"
+    },
+  };
+
   function fetchAndApply() {
     const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/settings/general`;
     dbg('Fetching from Firestore...');
@@ -72,16 +118,27 @@
           return;
         }
         const f = data.fields;
-        const theme = {
-          bg:      f.bgColor?.stringValue      || null,
-          sidebar: f.sidebarColor?.stringValue  || null,
-          primary: f.primaryColor?.stringValue  || null,
-          accent:  f.accentColor?.stringValue   || null,
-          text:    f.textColor?.stringValue     || null,
-          h1Size:  f.h1Size?.doubleValue ?? f.h1Size?.integerValue ?? null,
-          pSize:   f.pSize?.doubleValue  ?? f.pSize?.integerValue  ?? null,
-        };
-        dbg('Theme from Firestore', theme);
+        const themeId = f.themeId?.stringValue || "";
+
+        // إذا كان themeId معروفاً، استخدم القالب من الكاتالوج (مع كل ألوانه الفرعية)
+        let theme;
+        if (themeId && PRESETS[themeId]) {
+          theme = { ...PRESETS[themeId], id: themeId };
+          dbg('Using preset: ' + themeId, theme);
+        } else {
+          // وضع توافق: قراءة الألوان الأساسية المخصصة
+          theme = {
+            bg:      f.bgColor?.stringValue      || null,
+            sidebar: f.sidebarColor?.stringValue  || null,
+            primary: f.primaryColor?.stringValue  || null,
+            accent:  f.accentColor?.stringValue   || null,
+            text:    f.textColor?.stringValue     || null,
+          };
+          dbg('Custom theme from Firestore', theme);
+        }
+        theme.h1Size = f.h1Size?.doubleValue ?? f.h1Size?.integerValue ?? null;
+        theme.pSize  = f.pSize?.doubleValue  ?? f.pSize?.integerValue  ?? null;
+
         applyTheme(theme);
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify({ theme, ts: Date.now() }));
@@ -96,9 +153,9 @@
     if (!theme) { dbg('⚠️ applyTheme called with null'); return; }
     const r = document.documentElement.style;
 
-    // اكتشف: هل هذا قالب فاتح أم داكن؟
-    const isLight = theme.bg ? isLightColor(theme.bg) : false;
-    dbg('Applying theme. isLight=' + isLight, { bg: theme.bg });
+    // اكتشف نمط القالب: من mode أو من إضاءة الخلفية
+    const isLight = theme.mode === "light" || (theme.bg && isLightColor(theme.bg));
+    dbg('Applying theme. isLight=' + isLight, { bg: theme.bg, mode: theme.mode });
 
     if (theme.bg)      r.setProperty('--bg', theme.bg);
     if (theme.sidebar) r.setProperty('--bg2', theme.sidebar);
@@ -112,25 +169,27 @@
     }
     if (theme.text) r.setProperty('--text', theme.text);
 
-    // ── ألوان فرعية تتكيّف مع نوع القالب (فاتح/داكن) ──
+    // ── ألوان فرعية: استخدم المخصصة من القالب إن وُجدت ──
     if (theme.text) {
       if (isLight) {
-        // قالب فاتح: حدود داكنة خفيفة، نصوص ثانوية داكنة باهتة
-        r.setProperty('--text-muted', 'rgba(0,0,0,0.55)');
-        r.setProperty('--text-faint', 'rgba(0,0,0,0.4)');
-        r.setProperty('--border',     'rgba(0,0,0,0.12)');
-        r.setProperty('--border2',    'rgba(0,0,0,0.18)');
-        r.setProperty('--card',       theme.sidebar || '#f5f5f7');
+        r.setProperty('--text-muted', theme.textMuted || 'rgba(0,0,0,0.7)');
+        r.setProperty('--text-faint', theme.textFaint || 'rgba(0,0,0,0.5)');
+        r.setProperty('--border',     theme.border    || 'rgba(0,0,0,0.15)');
+        r.setProperty('--border2',    theme.border    || 'rgba(0,0,0,0.2)');
+        r.setProperty('--card',       theme.card      || theme.sidebar || '#f5f5f7');
+        r.setProperty('--card2',      theme.card2     || theme.sidebar || '#ede4f5');
+        r.setProperty('--bg3',        theme.card2     || theme.sidebar || '#ede4f5');
         r.setProperty('--overlay',    'rgba(0,0,0,0.45)');
         document.documentElement.setAttribute('data-theme-mode', 'light');
         injectLightOverrides(theme);
       } else {
-        // قالب داكن: إعدادات قياسية
-        r.setProperty('--text-muted', 'rgba(255,255,255,0.6)');
-        r.setProperty('--text-faint', 'rgba(255,255,255,0.4)');
-        r.setProperty('--border',     'rgba(255,255,255,0.08)');
-        r.setProperty('--border2',    'rgba(255,255,255,0.12)');
-        r.setProperty('--card',       theme.sidebar || '#0e1022');
+        r.setProperty('--text-muted', theme.textMuted || 'rgba(255,255,255,0.6)');
+        r.setProperty('--text-faint', theme.textFaint || 'rgba(255,255,255,0.4)');
+        r.setProperty('--border',     theme.border    || 'rgba(255,255,255,0.08)');
+        r.setProperty('--border2',    theme.border    || 'rgba(255,255,255,0.12)');
+        r.setProperty('--card',       theme.card      || theme.sidebar || '#0e1022');
+        r.setProperty('--card2',      theme.card2     || lighten(theme.sidebar || '#0e1022', 4));
+        r.setProperty('--bg3',        theme.card2     || lighten(theme.sidebar || '#0e1022', 2));
         r.setProperty('--overlay',    'rgba(0,0,0,0.7)');
         document.documentElement.setAttribute('data-theme-mode', 'dark');
         removeLightOverrides();
