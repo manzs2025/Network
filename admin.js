@@ -727,11 +727,238 @@ const SECTION_QUESTIONS = {
     { type:"multi", text:"من خصائص الشبكة النجمية:", options:["تعتمد على نقطة مركزية","سهلة الإدارة","مستخدمة بكثرة","لا تحتاج أسلاك"], correctAnswers:["تعتمد على نقطة مركزية","سهلة الإدارة","مستخدمة بكثرة"] }
   ],
 
-  // ─── الأقسام الأخرى (ستُضاف لاحقاً عند توفير الأسئلة) ───
-  security: [],
-  osi: [],
-  cables: [],
-  ip: []
+  // ─── الأمان في الشبكات (15 سؤال) ───
+  security: [
+    // ═══ صح أو خطأ (4) ═══
+    { type:"tf", text:"أمان الشبكات يهدف إلى حماية البيانات من الوصول غير المصرح به.", correctAnswer:"true" },
+    { type:"tf", text:"التهديدات الداخلية تأتي فقط من خارج المؤسسة.", correctAnswer:"false" },
+    { type:"tf", text:"من التهديدات الخارجية: هجمات الاختراق والبرمجيات الخبيثة.", correctAnswer:"true" },
+    { type:"tf", text:"النسخ الاحتياطي لا يساعد في حماية البيانات من الفقدان.", correctAnswer:"false" },
+
+    // ═══ مطابقة (3) ═══
+    { type:"match", text:"طابق بين نوع التهديد ومصدره:", pairs:[
+      { left:"التهديدات الداخلية", right:"من داخل المؤسسة" },
+      { left:"التهديدات الخارجية", right:"من خارج الشبكة" },
+      { left:"Firewall", right:"حماية الشبكة" }
+    ]},
+    { type:"match", text:"طابق بين التهديد ووصفه:", pairs:[
+      { left:"Malware", right:"برمجيات خبيثة" },
+      { left:"Phishing", right:"خداع المستخدم" },
+      { left:"DDoS", right:"تعطيل الخدمة" }
+    ]},
+    { type:"match", text:"طابق بين أداة الأمان ووظيفتها:", pairs:[
+      { left:"Encryption", right:"تحويل البيانات" },
+      { left:"Backup", right:"حماية البيانات" },
+      { left:"Access Control", right:"تحديد الصلاحيات" }
+    ]},
+
+    // ═══ اختيار الإجابة الصحيحة (4) ═══
+    { type:"mcq", text:"ما الهدف الرئيسي من أمان الشبكات؟", options:["زيادة سرعة الإنترنت","حماية البيانات","تحسين الأجهزة","تقليل المستخدمين"], correctAnswer:"حماية البيانات" },
+    { type:"mcq", text:"أي من التالي يعتبر تهديد داخلي؟", options:["هجوم DDoS","موظف يشارك كلمة المرور","اختراق خارجي","فيروس"], correctAnswer:"موظف يشارك كلمة المرور" },
+    { type:"mcq", text:"أي من التالي مثال على تهديد خارجي؟", options:["حذف ملفات بالخطأ","مشاركة كلمة المرور","هجوم Hacking","استخدام جهاز شخصي"], correctAnswer:"هجوم Hacking" },
+    { type:"mcq", text:"ما وظيفة Firewall؟", options:["نقل البيانات","تخزين البيانات","حماية الشبكة","تسريع الإنترنت"], correctAnswer:"حماية الشبكة" },
+
+    // ═══ اختيار الإجابات الصحيحة (4) ═══
+    { type:"multi", text:"من أهمية أمان الشبكات:", options:["حماية البيانات الحساسة","ضمان استمرارية العمل","منع الخسائر المالية","تعزيز الثقة"], correctAnswers:["حماية البيانات الحساسة","ضمان استمرارية العمل","منع الخسائر المالية","تعزيز الثقة"] },
+    { type:"multi", text:"من التهديدات الداخلية:", options:["مشاركة كلمة المرور","حذف الملفات بالخطأ","استخدام أجهزة غير آمنة","هجوم DDoS"], correctAnswers:["مشاركة كلمة المرور","حذف الملفات بالخطأ","استخدام أجهزة غير آمنة"] },
+    { type:"multi", text:"من التهديدات الخارجية:", options:["Malware","DDoS","Phishing","Hacking"], correctAnswers:["Malware","DDoS","Phishing","Hacking"] },
+    { type:"multi", text:"من حلول الأمان:", options:["Firewall","Encryption","Backup","IDS/IPS"], correctAnswers:["Firewall","Encryption","Backup","IDS/IPS"] }
+  ],
+
+  // ─── نموذج OSI (30 سؤال) ───
+  osi: [
+    // ═══ صح أو خطأ (8) ═══
+    { type:"tf", text:"نموذج OSI يتكون من 7 طبقات.", correctAnswer:"true" },
+    { type:"tf", text:"تم إنشاء نموذج OSI بواسطة شركة Cisco.", correctAnswer:"false" },
+    { type:"tf", text:"طبقة النقل مسؤولة عن تحديد نوع البروتوكول المستخدم.", correctAnswer:"true" },
+    { type:"tf", text:"طبقة الشبكة لا تستخدم عنوان IP.", correctAnswer:"false" },
+    { type:"tf", text:"عملية إضافة الترويسات تسمى Encapsulation.", correctAnswer:"true" },
+    { type:"tf", text:"UDP يضمن وصول البيانات بشكل كامل.", correctAnswer:"false" },
+    { type:"tf", text:"طبقة ربط البيانات تستخدم عنوان MAC.", correctAnswer:"true" },
+    { type:"tf", text:"الراوتر يعمل في الطبقة الثانية من نموذج OSI.", correctAnswer:"false" },
+
+    // ═══ مطابقة (6) ═══
+    { type:"match", text:"طابق بين الطبقة ووظيفتها (الطبقات العليا):", pairs:[
+      { left:"Application", right:"التطبيقات" },
+      { left:"Presentation", right:"عرض البيانات" },
+      { left:"Session", right:"إدارة الاتصال" }
+    ]},
+    { type:"match", text:"طابق بين الطبقة ووظيفتها (الطبقات السفلى):", pairs:[
+      { left:"Transport", right:"نقل البيانات" },
+      { left:"Network", right:"توجيه البيانات" },
+      { left:"Data Link", right:"Frames" }
+    ]},
+    { type:"match", text:"طابق بين البروتوكول ووصفه:", pairs:[
+      { left:"TCP", right:"موثوق" },
+      { left:"UDP", right:"سريع بدون تحقق" },
+      { left:"IP", right:"عنونة" }
+    ]},
+    { type:"match", text:"طابق بين الجهاز والعنوان المستخدم:", pairs:[
+      { left:"Router", right:"IP Address" },
+      { left:"Switch", right:"MAC Address" },
+      { left:"Hub", right:"الطبقة الفيزيائية" }
+    ]},
+    { type:"match", text:"طابق بين وحدة البيانات والطبقة:", pairs:[
+      { left:"Packet", right:"طبقة الشبكة" },
+      { left:"Frame", right:"طبقة النقل" },
+      { left:"Bits", right:"الطبقة الفيزيائية" }
+    ]},
+    { type:"match", text:"طابق بين نوع الاتصال ووصفه:", pairs:[
+      { left:"Simplex", right:"اتجاه واحد" },
+      { left:"Half Duplex", right:"تبادل غير متزامن" },
+      { left:"Full Duplex", right:"إرسال واستقبال" }
+    ]},
+
+    // ═══ اختيار الإجابة الصحيحة (8) ═══
+    { type:"mcq", text:"كم عدد طبقات OSI؟", options:["5","6","7","8"], correctAnswer:"7" },
+    { type:"mcq", text:"أي طبقة مسؤولة عن التشفير؟", options:["Transport","Presentation","Network","Physical"], correctAnswer:"Presentation" },
+    { type:"mcq", text:"أي بروتوكول يستخدم لنقل البيانات الموثوقة؟", options:["UDP","TCP","IP","HTTP"], correctAnswer:"TCP" },
+    { type:"mcq", text:"في أي طبقة يعمل الراوتر؟", options:["Layer 2","Layer 3","Layer 4","Layer 1"], correctAnswer:"Layer 3" },
+    { type:"mcq", text:"ما اسم البيانات في طبقة الشبكة؟", options:["Frame","Packet","Segment","Bits"], correctAnswer:"Packet" },
+    { type:"mcq", text:"أي طبقة مسؤولة عن فتح وإغلاق الجلسة؟", options:["Session","Application","Network","Data Link"], correctAnswer:"Session" },
+    { type:"mcq", text:"ما وظيفة البروتوكول؟", options:["زيادة السرعة","تنظيم الاتصال","تخزين البيانات","حذف البيانات"], correctAnswer:"تنظيم الاتصال" },
+    { type:"mcq", text:"أي طبقة تحول البيانات إلى Bits؟", options:["Physical","Network","Transport","Application"], correctAnswer:"Physical" },
+
+    // ═══ اختيار الإجابات الصحيحة (8) ═══
+    { type:"multi", text:"من فوائد OSI:", options:["حل مشاكل الشبكة","فهم البيانات","معرفة الأجهزة","تصنيع المعالجات"], correctAnswers:["حل مشاكل الشبكة","فهم البيانات","معرفة الأجهزة"] },
+    { type:"multi", text:"من طبقات OSI:", options:["Application","Transport","Network","Data Link"], correctAnswers:["Application","Transport","Network","Data Link"] },
+    { type:"multi", text:"من بروتوكولات طبقة التطبيقات:", options:["HTTP","FTP","SMTP","MAC"], correctAnswers:["HTTP","FTP","SMTP"] },
+    { type:"multi", text:"من مهام طبقة التقديم:", options:["التشفير","فك التشفير","تنسيق البيانات","توجيه البيانات"], correctAnswers:["التشفير","فك التشفير","تنسيق البيانات"] },
+    { type:"multi", text:"من أنواع الاتصال:", options:["Simplex","Half Duplex","Full Duplex","Quarter Duplex"], correctAnswers:["Simplex","Half Duplex","Full Duplex"] },
+    { type:"multi", text:"من خصائص TCP:", options:["موثوق","يتحقق من الأخطاء","ترتيب البيانات","لا يتحقق من الأخطاء"], correctAnswers:["موثوق","يتحقق من الأخطاء","ترتيب البيانات"] },
+    { type:"multi", text:"من خصائص UDP:", options:["سريع","لا يتحقق من الأخطاء","موثوق","بطيء"], correctAnswers:["سريع","لا يتحقق من الأخطاء"] },
+    { type:"multi", text:"من أجهزة الشبكة:", options:["Router","Switch","Hub","RAM"], correctAnswers:["Router","Switch","Hub"] }
+  ],
+
+  // ─── كيابل الشبكات (30 سؤال) ───
+  cables: [
+    // ═══ صح أو خطأ (8) ═══
+    { type:"tf", text:"الكابل يستخدم لنقل البيانات بين الأجهزة في الشبكة.", correctAnswer:"true" },
+    { type:"tf", text:"الكابل المحوري هو النوع الوحيد المستخدم في الشبكات.", correctAnswer:"false" },
+    { type:"tf", text:"الكابل المزدوج المجدول يقلل من التشويش الكهرومغناطيسي.", correctAnswer:"true" },
+    { type:"tf", text:"كابل UTP يحتوي على طبقة حماية معدنية.", correctAnswer:"false" },
+    { type:"tf", text:"كابل STP يحتوي على طبقة حماية إضافية.", correctAnswer:"true" },
+    { type:"tf", text:"التوصيل Crossover يستخدم لتوصيل أجهزة مختلفة.", correctAnswer:"false" },
+    { type:"tf", text:"الألياف الضوئية سريعة جدًا في نقل البيانات.", correctAnswer:"true" },
+    { type:"tf", text:"الألياف الضوئية تتأثر بالتداخل الكهرومغناطيسي.", correctAnswer:"false" },
+
+    // ═══ مطابقة (6) ═══
+    { type:"match", text:"طابق بين نوع الكابل واسمه:", pairs:[
+      { left:"Coaxial", right:"كابل محوري" },
+      { left:"Twisted Pair", right:"كابل مزدوج" },
+      { left:"Fiber Optic", right:"ألياف ضوئية" }
+    ]},
+    { type:"match", text:"طابق بين نوع الكابل ووصفه:", pairs:[
+      { left:"STP", right:"محمي" },
+      { left:"UTP", right:"بدون حماية" },
+      { left:"Twisted Pair", right:"أزواج ملتوية" }
+    ]},
+    { type:"match", text:"طابق بين نوع التوصيل واستخدامه:", pairs:[
+      { left:"Straight", right:"أجهزة مختلفة" },
+      { left:"Crossover", right:"أجهزة متشابهة" },
+      { left:"RJ-45", right:"موصل" }
+    ]},
+    { type:"match", text:"طابق بين نوع الألياف والمصدر الضوئي:", pairs:[
+      { left:"SMF", right:"ليزر" },
+      { left:"MMF", right:"LED" },
+      { left:"Fiber", right:"نقل ضوئي" }
+    ]},
+    { type:"match", text:"طابق بين وحدة البيانات وقيمتها:", pairs:[
+      { left:"Bit", right:"1 أو 0" },
+      { left:"Byte", right:"8 bits" },
+      { left:"KB", right:"1024 Byte" }
+    ]},
+    { type:"match", text:"طابق بين الأداة ووظيفتها:", pairs:[
+      { left:"Crimping Tool", right:"تثبيت RJ45" },
+      { left:"Cable Tester", right:"اختبار الكابل" },
+      { left:"Stripper", right:"إزالة العازل" }
+    ]},
+
+    // ═══ اختيار الإجابة الصحيحة (8) ═══
+    { type:"mcq", text:"أي كابل يستخدم الضوء لنقل البيانات؟", options:["Coaxial","UTP","Fiber Optic","STP"], correctAnswer:"Fiber Optic" },
+    { type:"mcq", text:"أي نوع من الكابلات يحتوي على حماية؟", options:["UTP","STP","Fiber","Coaxial"], correctAnswer:"STP" },
+    { type:"mcq", text:"ما وظيفة الكابل؟", options:["تخزين البيانات","نقل البيانات","حذف البيانات","ضغط البيانات"], correctAnswer:"نقل البيانات" },
+    { type:"mcq", text:"أي كابل يستخدم لتوصيل أجهزة متشابهة؟", options:["Straight","Crossover","Fiber","Coaxial"], correctAnswer:"Crossover" },
+    { type:"mcq", text:"ما نوع الموصل المستخدم في كابل UTP؟", options:["USB","RJ-45","HDMI","VGA"], correctAnswer:"RJ-45" },
+    { type:"mcq", text:"ما الوسيلة المستخدمة في SMF؟", options:["LED","ليزر","كهرباء","مغناطيس"], correctAnswer:"ليزر" },
+    { type:"mcq", text:"كم يساوي 1 Byte؟", options:["4 bits","8 bits","16 bits","32 bits"], correctAnswer:"8 bits" },
+    { type:"mcq", text:"أي أداة تستخدم لاختبار الكابل؟", options:["Crimping","Tester","Stripper","Fiber Tool"], correctAnswer:"Tester" },
+
+    // ═══ اختيار الإجابات الصحيحة (8) ═══
+    { type:"multi", text:"من أنواع الكابلات:", options:["Coaxial","Twisted Pair","Fiber Optic","HDMI"], correctAnswers:["Coaxial","Twisted Pair","Fiber Optic"] },
+    { type:"multi", text:"من مميزات الألياف الضوئية:", options:["سرعة عالية","لا تتأثر بالتشويش","مسافات طويلة","رخيصة جداً"], correctAnswers:["سرعة عالية","لا تتأثر بالتشويش","مسافات طويلة"] },
+    { type:"multi", text:"من أنواع Twisted Pair:", options:["STP","UTP","Coaxial","Fiber"], correctAnswers:["STP","UTP"] },
+    { type:"multi", text:"من أنواع التوصيل:", options:["Straight","Crossover","Wireless","Serial"], correctAnswers:["Straight","Crossover"] },
+    { type:"multi", text:"من أدوات الشبكات:", options:["Cable Tester","Crimping Tool","Stripper","Monitor"], correctAnswers:["Cable Tester","Crimping Tool","Stripper"] },
+    { type:"multi", text:"من خصائص MMF:", options:["يستخدم LED","مسافة أقصر","يستخدم ليزر","مسافات طويلة"], correctAnswers:["يستخدم LED","مسافة أقصر"] },
+    { type:"multi", text:"من خصائص SMF:", options:["يستخدم ليزر","مسافات طويلة","يستخدم LED","مسافة أقصر"], correctAnswers:["يستخدم ليزر","مسافات طويلة"] },
+    { type:"multi", text:"من وحدات البيانات:", options:["Bit","Byte","Kilobyte","Pixel"], correctAnswers:["Bit","Byte","Kilobyte"] }
+  ],
+
+  // ─── بروتوكول IP (30 سؤال) ───
+  ip: [
+    // ═══ صح أو خطأ (8) ═══
+    { type:"tf", text:"عنوان IP هو رقم يميز كل جهاز على الشبكة.", correctAnswer:"true" },
+    { type:"tf", text:"IPv4 يحتوي على 128 بت.", correctAnswer:"false" },
+    { type:"tf", text:"IPv6 يوفر عددًا أكبر من العناوين مقارنة بـ IPv4.", correctAnswer:"true" },
+    { type:"tf", text:"العنوان الخاص يستخدم للوصول إلى الإنترنت مباشرة.", correctAnswer:"false" },
+    { type:"tf", text:"NAT يستخدم لتحويل العناوين الخاصة إلى عامة.", correctAnswer:"true" },
+    { type:"tf", text:"كل Octet في IPv4 يحتوي على 16 بت.", correctAnswer:"false" },
+    { type:"tf", text:"عنوان 127.0.0.0 يستخدم للـ Loopback.", correctAnswer:"true" },
+    { type:"tf", text:"النظام الثنائي يحتوي على الأرقام من 0 إلى 9.", correctAnswer:"false" },
+
+    // ═══ مطابقة (6) ═══
+    { type:"match", text:"طابق بين إصدار IP ووصفه:", pairs:[
+      { left:"IPv4", right:"32 بت" },
+      { left:"IPv6", right:"128 بت" },
+      { left:"IP", right:"عنوان" }
+    ]},
+    { type:"match", text:"طابق بين نوع العنوان واستخدامه:", pairs:[
+      { left:"Public IP", right:"الإنترنت" },
+      { left:"Private IP", right:"شبكة محلية" },
+      { left:"NAT", right:"تحويل العناوين" }
+    ]},
+    { type:"match", text:"طابق بين وحدة البيانات ووصفها:", pairs:[
+      { left:"Bit", right:"1 أو 0" },
+      { left:"Byte", right:"8 bits" },
+      { left:"Octet", right:"جزء من IP" }
+    ]},
+    { type:"match", text:"طابق بين الفئة ونطاقها:", pairs:[
+      { left:"Class A", right:"1-126" },
+      { left:"Class B", right:"128-191" },
+      { left:"Class C", right:"192-223" }
+    ]},
+    { type:"match", text:"طابق بين نوع الاتصال ووصفه:", pairs:[
+      { left:"Unicast", right:"جهاز واحد" },
+      { left:"Multicast", right:"مجموعة" },
+      { left:"Anycast", right:"أقرب جهاز" }
+    ]},
+    { type:"match", text:"طابق بين نظام الترقيم ووصفه:", pairs:[
+      { left:"Decimal", right:"0-9" },
+      { left:"Binary", right:"0 و1" },
+      { left:"Hexadecimal", right:"0-F" }
+    ]},
+
+    // ═══ اختيار الإجابة الصحيحة (8) ═══
+    { type:"mcq", text:"كم طول عنوان IPv4؟", options:["16 بت","32 بت","64 بت","128 بت"], correctAnswer:"32 بت" },
+    { type:"mcq", text:"كم عدد خانات IPv4؟", options:["2","4","6","8"], correctAnswer:"4" },
+    { type:"mcq", text:"ما نوع النظام المستخدم في IPv6؟", options:["عشري","ثنائي","سداسي عشري","ثماني"], correctAnswer:"سداسي عشري" },
+    { type:"mcq", text:"أي عنوان يستخدم داخل الشبكة المحلية؟", options:["Public","Private","Global","Loopback"], correctAnswer:"Private" },
+    { type:"mcq", text:"ما وظيفة NAT؟", options:["تشفير","تحويل العناوين","تخزين","حذف"], correctAnswer:"تحويل العناوين" },
+    { type:"mcq", text:"ما قيمة البايت؟", options:["4 bits","8 bits","16 bits","32 bits"], correctAnswer:"8 bits" },
+    { type:"mcq", text:"كم عدد بتات IPv6؟", options:["32","64","128","256"], correctAnswer:"128" },
+    { type:"mcq", text:"أي نوع اتصال لجهاز واحد؟", options:["Multicast","Broadcast","Unicast","Anycast"], correctAnswer:"Unicast" },
+
+    // ═══ اختيار الإجابات الصحيحة (8) ═══
+    { type:"multi", text:"من إصدارات IP:", options:["IPv4","IPv6","IPv8","IPv2"], correctAnswers:["IPv4","IPv6"] },
+    { type:"multi", text:"من أنواع العناوين:", options:["Private","Public","Virtual","Hidden"], correctAnswers:["Private","Public"] },
+    { type:"multi", text:"من أنظمة الترقيم:", options:["Decimal","Binary","Hexadecimal","Alphabetical"], correctAnswers:["Decimal","Binary","Hexadecimal"] },
+    { type:"multi", text:"من خصائص IPv4:", options:["32 بت","4 Octets","0-255","128 بت"], correctAnswers:["32 بت","4 Octets","0-255"] },
+    { type:"multi", text:"من خصائص IPv6:", options:["128 بت","Hexadecimal","8 Blocks","32 بت"], correctAnswers:["128 بت","Hexadecimal","8 Blocks"] },
+    { type:"multi", text:"من فئات العناوين:", options:["Class A","Class B","Class C","Class Z"], correctAnswers:["Class A","Class B","Class C"] },
+    { type:"multi", text:"من أنواع IPv6:", options:["Unicast","Multicast","Anycast","Dualcast"], correctAnswers:["Unicast","Multicast","Anycast"] },
+    { type:"multi", text:"من عمليات الشبكة:", options:["NAT","Subnetting","Bitwise AND","Defragment"], correctAnswers:["NAT","Subnetting","Bitwise AND"] }
+  ]
 };
 
 // للتوافق مع الكود القديم الذي يستخدم QUESTION_BANK كـ fallback
