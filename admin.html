@@ -1934,6 +1934,35 @@ select optgroup {
 }
 .seed-bank-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(108,47,160,0.35); }
 
+/* ── أزرار التحكم ببنك الأسئلة ── */
+.seed-bank-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+  width: 100%;
+}
+.seed-bank-controls .qz-select {
+  flex: 0 0 auto;
+}
+.seed-bank-btn.delete-all-btn {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  border-color: #dc2626 !important;
+}
+.seed-bank-btn.delete-all-btn:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  box-shadow: 0 0 16px rgba(220,38,38,0.4);
+}
+.seed-bank-btn.delete-section-btn {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  border-color: #d97706 !important;
+}
+.seed-bank-btn.delete-section-btn:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  box-shadow: 0 0 16px rgba(217,119,6,0.4);
+}
+
 /* ════════════════════════════════════════════════
    QUESTION DETAILS IN BANK (Upgrade 1)
 ════════════════════════════════════════════════ */
@@ -3032,10 +3061,22 @@ select optgroup {
         <!-- ── رفع بنك الأسئلة إلى Firestore ── -->
         <div class="seed-bank-wrap">
           <div class="seed-info">
-            🏦 <strong>بنك الأسئلة:</strong> يحتوي على 50 سؤالاً متنوعاً (صح/خطأ، اختيار من متعدد، إجابات متعددة، مطابقة) تغطي جميع الأقسام.
-            اضغط الزر لرفعها إلى Firestore للمرة الأولى.
+            🏦 <strong>بنك الأسئلة:</strong> اختر القسم ثم ارفع أسئلته إلى Firestore.
+            كل قسم يحتوي على أسئلة متنوعة (صح/خطأ، اختيار، إجابات متعددة، مطابقة).
           </div>
-          <button class="seed-bank-btn" onclick="seedQuestionBank()">📤 رفع البنك إلى Firestore</button>
+          <div class="seed-bank-controls">
+            <select id="seedSectionSelect" class="qz-input qz-select" style="max-width:260px;">
+              <option value="">— اختر القسم —</option>
+              <option value="networks">شبكات الحاسب الآلي</option>
+              <option value="security">الأمان في الشبكات</option>
+              <option value="osi">نموذج OSI</option>
+              <option value="cables">كيابل الشبكات</option>
+              <option value="ip">بروتوكول IP</option>
+            </select>
+            <button class="seed-bank-btn" onclick="seedQuestionBank()">📤 رفع أسئلة القسم</button>
+            <button class="seed-bank-btn delete-all-btn" onclick="deleteAllBankQuestions()">🗑️ حذف كل البنك</button>
+            <button class="seed-bank-btn delete-section-btn" onclick="deleteSectionQuestions()">🗑️ حذف أسئلة القسم</button>
+          </div>
         </div>
         <div class="qz-form-msg" id="seedBankStatus" style="display:none"></div>
 

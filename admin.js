@@ -655,17 +655,209 @@ window.renderQModalDynamicFields = function(existingData = null) {
 };
 
 /* ══════════════════════════════════════════════════
-   بنك الأسئلة المبدئي (للاستخدام عند التأسيس فقط)
+   بنك الأسئلة حسب الأقسام — يُرفع قسم بقسم
 ══════════════════════════════════════════════════ */
-const QUESTION_BANK = [
-  { id:"N01", category:"networks", type:"tf", text:"الشبكة المحلية (LAN) تغطي منطقة جغرافية واسعة مثل دولة كاملة.", correctAnswer:"false" },
-  { id:"N02", category:"networks", type:"tf", text:"شبكة الإنترنت هي أكبر مثال على شبكة WAN.", correctAnswer:"true" },
-  { id:"N03", category:"networks", type:"mcq", text:"ما نوع الشبكة التي تغطي مبنى واحداً؟", options:["WAN","LAN","MAN","PAN"], correctAnswer:"LAN" }
-  // (بقية الأسئلة موجودة في Firestore بفضل زر WriteBatch السابق)
-];
-
 const CATEGORY_LABELS = { networks:"شبكات الحاسب", security:"الأمان في الشبكات", osi:"نموذج OSI", cables:"كيابل الشبكات", ip:"بروتوكول IP" };
 const TYPE_LABELS = { tf:"صح وخطأ", mcq:"اختيار من متعدد", multi:"إجابات متعددة", match:"مطابقة" };
+
+const SECTION_QUESTIONS = {
+
+  /* ─────────── شبكات الحاسب الآلي (30 سؤال) ─────────── */
+  networks: [
+    // ═══ صح أو خطأ (8) ═══
+    { type:"tf", text:"شبكة الحاسب هي مجموعة من الأجهزة المتصلة لتبادل البيانات والموارد.", correctAnswer:"true" },
+    { type:"tf", text:"الأجهزة الطرفية تقوم بتوجيه البيانات داخل الشبكة.", correctAnswer:"false" },
+    { type:"tf", text:"من أمثلة الأجهزة الوسيطة: الراوتر والسويتش.", correctAnswer:"true" },
+    { type:"tf", text:"وسائط الشبكة تشمل الكابلات فقط.", correctAnswer:"false" },
+    { type:"tf", text:"الشبكة المحلية (LAN) تستخدم داخل نطاق جغرافي محدود.", correctAnswer:"true" },
+    { type:"tf", text:"الشبكة الواسعة (WAN) تربط أجهزة داخل غرفة واحدة فقط.", correctAnswer:"false" },
+    { type:"tf", text:"شبكة نظير إلى نظير لا تحتاج إلى خادم مركزي.", correctAnswer:"true" },
+    { type:"tf", text:"الشبكة النجمية تعتمد على كابل واحد رئيسي فقط.", correctAnswer:"false" },
+
+    // ═══ مطابقة (6) ═══
+    { type:"match", text:"طابق بين نوع الجهاز ووظيفته:", pairs:[
+      { left:"الأجهزة الطرفية", right:"إرسال واستقبال البيانات" },
+      { left:"الأجهزة الوسيطة", right:"توجيه البيانات" },
+      { left:"وسائط الشبكة", right:"نقل البيانات" }
+    ]},
+    { type:"match", text:"طابق بين الجهاز ووظيفته:", pairs:[
+      { left:"Router", right:"توجيه البيانات" },
+      { left:"Switch", right:"ربط الأجهزة داخل الشبكة" },
+      { left:"Access Point", right:"اتصال لاسلكي" }
+    ]},
+    { type:"match", text:"طابق بين نوع الشبكة والوصف:", pairs:[
+      { left:"LAN", right:"شبكة محلية" },
+      { left:"MAN", right:"شبكة تربط مدن" },
+      { left:"WAN", right:"شبكة واسعة" }
+    ]},
+    { type:"match", text:"طابق بين الشكل الهندسي والوصف:", pairs:[
+      { left:"Bus", right:"كابل رئيسي" },
+      { left:"Ring", right:"حلقة مغلقة" },
+      { left:"Star", right:"نقطة مركزية" }
+    ]},
+    { type:"match", text:"طابق بين نوع الشبكة ووصفها:", pairs:[
+      { left:"P2P", right:"بدون خادم" },
+      { left:"Client/Server", right:"خادم مركزي" },
+      { left:"Server", right:"يقدم خدمات" }
+    ]},
+    { type:"match", text:"طابق بين وسيلة النقل ونوعها:", pairs:[
+      { left:"Cable", right:"سلكي" },
+      { left:"Wireless", right:"لاسلكي" },
+      { left:"Fiber", right:"ألياف ضوئية" }
+    ]},
+
+    // ═══ اختيار الإجابة الصحيحة (8) ═══
+    { type:"mcq", text:"ما هو الجهاز الذي يوجه البيانات بين الشبكات؟", options:["Switch","Router","Printer","Cable"], correctAnswer:"Router" },
+    { type:"mcq", text:"أي من التالي يمثل وسيلة نقل بيانات؟", options:["Server","Cable","Router","Client"], correctAnswer:"Cable" },
+    { type:"mcq", text:"الشبكة التي تغطي مدينة هي:", options:["LAN","WAN","MAN","PAN"], correctAnswer:"MAN" },
+    { type:"mcq", text:"أي نوع شبكة يستخدم Wi-Fi؟", options:["LAN","WLAN","WAN","MAN"], correctAnswer:"WLAN" },
+    { type:"mcq", text:"الشبكة التي تحتوي على خادم مركزي:", options:["P2P","Client/Server","Mesh","Ring"], correctAnswer:"Client/Server" },
+    { type:"mcq", text:"أي من التالي جهاز طرفي؟", options:["Router","Switch","Computer","Access Point"], correctAnswer:"Computer" },
+    { type:"mcq", text:"أي من التالي يمثل شبكة شخصية؟", options:["WAN","PAN","LAN","MAN"], correctAnswer:"PAN" },
+    { type:"mcq", text:"أي تصميم شبكة يعتمد على نقطة مركزية؟", options:["Bus","Ring","Star","Mesh"], correctAnswer:"Star" },
+
+    // ═══ اختيار الإجابات الصحيحة (8) ═══
+    { type:"multi", text:"مكونات شبكة الحاسب:", options:["الأجهزة الطرفية","الأجهزة الوسيطة","وسائط الشبكة","الطابعة الورقية"], correctAnswers:["الأجهزة الطرفية","الأجهزة الوسيطة","وسائط الشبكة"] },
+    { type:"multi", text:"من الأجهزة الوسيطة:", options:["Router","Switch","Access Point","Monitor"], correctAnswers:["Router","Switch","Access Point"] },
+    { type:"multi", text:"من وسائط الشبكة:", options:["Cable","Wireless","Fiber","RAM"], correctAnswers:["Cable","Wireless","Fiber"] },
+    { type:"multi", text:"من أنواع الشبكات حسب النطاق:", options:["LAN","MAN","WAN","PAN"], correctAnswers:["LAN","MAN","WAN","PAN"] },
+    { type:"multi", text:"من أشكال التصميم الهندسي:", options:["Bus","Star","Ring","Mesh"], correctAnswers:["Bus","Star","Ring","Mesh"] },
+    { type:"multi", text:"من فوائد الشبكات:", options:["مشاركة الملفات","مشاركة الأجهزة","الألعاب الجماعية","تصنيع المعالجات"], correctAnswers:["مشاركة الملفات","مشاركة الأجهزة","الألعاب الجماعية"] },
+    { type:"multi", text:"من خصائص شبكة P2P:", options:["لا يوجد خادم مركزي","كل جهاز عميل وخادم","تحتاج سيرفر دائماً","بطيئة دائماً"], correctAnswers:["لا يوجد خادم مركزي","كل جهاز عميل وخادم"] },
+    { type:"multi", text:"من خصائص الشبكة النجمية:", options:["تعتمد على نقطة مركزية","سهلة الإدارة","مستخدمة بكثرة","لا تحتاج أسلاك"], correctAnswers:["تعتمد على نقطة مركزية","سهلة الإدارة","مستخدمة بكثرة"] }
+  ],
+
+  // ─── الأقسام الأخرى (ستُضاف لاحقاً عند توفير الأسئلة) ───
+  security: [],
+  osi: [],
+  cables: [],
+  ip: []
+};
+
+// للتوافق مع الكود القديم الذي يستخدم QUESTION_BANK كـ fallback
+const QUESTION_BANK = [];
+
+/* ── رفع أسئلة قسم محدد إلى Firestore ── */
+window.seedQuestionBank = async function() {
+  const section = document.getElementById("seedSectionSelect")?.value;
+  const status  = document.getElementById("seedBankStatus");
+
+  if (!section) {
+    status.textContent = "❌ اختر القسم أولاً!";
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    return;
+  }
+
+  const questions = SECTION_QUESTIONS[section];
+  if (!questions || !questions.length) {
+    status.textContent = `❌ لا توجد أسئلة جاهزة لقسم "${CATEGORY_LABELS[section]}" بعد.`;
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    return;
+  }
+
+  if (!confirm(`سيتم رفع ${questions.length} سؤال لقسم "${CATEGORY_LABELS[section]}".\nهل تريد المتابعة؟`)) return;
+
+  status.textContent = `⏳ جارٍ رفع ${questions.length} سؤال...`;
+  status.className = "qz-form-msg"; status.style.display = "block";
+
+  try {
+    const batch = writeBatch(db);
+    questions.forEach(q => {
+      const ref = doc(collection(db, "questionBank"));
+      batch.set(ref, { ...q, category: section });
+    });
+    await batch.commit();
+
+    status.textContent = `✅ تم رفع ${questions.length} سؤال لقسم "${CATEGORY_LABELS[section]}" بنجاح!`;
+    status.className = "qz-form-msg success"; status.style.display = "block";
+    renderQuestionBankSelector();
+    loadStats();
+  } catch(e) {
+    status.textContent = "❌ فشل الرفع: " + e.message;
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    console.error("seedQuestionBank error:", e);
+  }
+};
+
+/* ── حذف كل أسئلة البنك ── */
+window.deleteAllBankQuestions = async function() {
+  const status = document.getElementById("seedBankStatus");
+
+  if (!confirm("⚠️ سيتم حذف جميع أسئلة البنك نهائياً!\nهل أنت متأكد؟")) return;
+  if (!confirm("⚠️ تأكيد نهائي: هل تريد حذف كل الأسئلة فعلاً؟")) return;
+
+  status.textContent = "⏳ جارٍ حذف كل الأسئلة...";
+  status.className = "qz-form-msg"; status.style.display = "block";
+
+  try {
+    const snap = await getDocs(collection(db, "questionBank"));
+    if (snap.empty) {
+      status.textContent = "ℹ️ البنك فارغ أصلاً.";
+      status.className = "qz-form-msg"; status.style.display = "block";
+      return;
+    }
+
+    let count = 0, batch = writeBatch(db), batchCount = 0;
+    for (const d of snap.docs) {
+      batch.delete(d.ref);
+      batchCount++; count++;
+      if (batchCount >= 450) { await batch.commit(); batch = writeBatch(db); batchCount = 0; }
+    }
+    if (batchCount > 0) await batch.commit();
+
+    status.textContent = `✅ تم حذف ${count} سؤال من البنك!`;
+    status.className = "qz-form-msg success"; status.style.display = "block";
+    renderQuestionBankSelector();
+    loadStats();
+  } catch(e) {
+    status.textContent = "❌ فشل الحذف: " + e.message;
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    console.error("deleteAllBankQuestions error:", e);
+  }
+};
+
+/* ── حذف أسئلة قسم محدد ── */
+window.deleteSectionQuestions = async function() {
+  const section = document.getElementById("seedSectionSelect")?.value;
+  const status  = document.getElementById("seedBankStatus");
+
+  if (!section) {
+    status.textContent = "❌ اختر القسم أولاً!";
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    return;
+  }
+
+  if (!confirm(`سيتم حذف جميع أسئلة قسم "${CATEGORY_LABELS[section]}" من البنك.\nهل أنت متأكد؟`)) return;
+
+  status.textContent = `⏳ جارٍ حذف أسئلة القسم...`;
+  status.className = "qz-form-msg"; status.style.display = "block";
+
+  try {
+    const snap = await getDocs(query(collection(db, "questionBank"), where("category", "==", section)));
+    if (snap.empty) {
+      status.textContent = `ℹ️ لا توجد أسئلة لقسم "${CATEGORY_LABELS[section]}".`;
+      status.className = "qz-form-msg"; status.style.display = "block";
+      return;
+    }
+
+    let count = 0, batch = writeBatch(db), batchCount = 0;
+    for (const d of snap.docs) {
+      batch.delete(d.ref);
+      batchCount++; count++;
+      if (batchCount >= 450) { await batch.commit(); batch = writeBatch(db); batchCount = 0; }
+    }
+    if (batchCount > 0) await batch.commit();
+
+    status.textContent = `✅ تم حذف ${count} سؤال من قسم "${CATEGORY_LABELS[section]}"!`;
+    status.className = "qz-form-msg success"; status.style.display = "block";
+    renderQuestionBankSelector();
+    loadStats();
+  } catch(e) {
+    status.textContent = "❌ فشل الحذف: " + e.message;
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    console.error("deleteSectionQuestions error:", e);
+  }
+};
 
 /* ─── حارس الصفحة ─── */
 // ─── حماية: إخفاء شاشة "جارٍ التحقق" قسراً بعد 10 ثوانٍ كحد أقصى ───
