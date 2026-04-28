@@ -1,0 +1,3796 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>   
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم — أكاديمية الشبكات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+<!-- TinyMCE Rich Text Editor -->
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.4/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- SheetJS — معالجة ملفات Excel للرفع الجماعي -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- jsPDF + html2canvas — لإنشاء تقارير PDF بدعم العربية -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Sortable.js — لإعادة ترتيب المقالات بالسحب والإفلات -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<style>
+/* ════════════════════════════════════════════════
+   RESET & VARIABLES
+════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary:       #6c2fa0;
+  --primary-l:     #8b46c8;
+  --primary-d:     #4a1f6e;
+  --accent:        #00c9b1;
+  --accent-d:      #00a896;
+  --bg:            #080a14;
+  --bg2:           #0e1022;
+  --bg3:           #131629;
+  --sidebar-w:     256px;
+  --topbar-h:      64px;
+  --card:          #161929;
+  --card2:         #1c2038;
+  --border:        rgba(108,47,160,0.2);
+  --border2:       rgba(255,255,255,0.06);
+  --text:          #e8eaf6;
+  --text-muted:    #7a7f9e;
+  --text-faint:    #4a4f6b;
+  --radius:        14px;
+  --radius-sm:     8px;
+  --sidebar-item-h:42px;
+  --transition:    0.22s ease;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  direction: rtl;
+  overflow: hidden; /* prevent body scroll; only main-content scrolls */
+}
+
+/* ════════════════════════════════════════════════
+   LOADING OVERLAY (shown until auth confirmed)
+════════════════════════════════════════════════ */
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  transition: opacity 0.4s ease;
+}
+#loadingOverlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.loading-ring {
+  width: 44px; height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loadingOverlay p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+/* ════════════════════════════════════════════════
+   DASHBOARD SHELL
+════════════════════════════════════════════════ */
+#dashboardShell {
+  display: none; /* shown after auth */
+  height: 100vh;
+  /* sidebar + topbar + content */
+}
+#dashboardShell.visible { display: flex; }
+
+/* ════════════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  height: 100vh;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: width var(--transition);
+  z-index: 100;
+}
+
+/* sidebar top accent */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+/* ── Sidebar Brand ── */
+.sb-brand {
+  padding: 1.4rem 1.25rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sb-brand-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.sb-brand-text { overflow: hidden; }
+.sb-brand-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.sb-brand-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Sidebar Nav ── */
+.sb-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sb-nav::-webkit-scrollbar { width: 4px; }
+.sb-nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sb-section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.75rem 0.5rem 0.3rem;
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0 0.85rem;
+  height: var(--sidebar-item-h);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: right;
+  transition: background var(--transition), color var(--transition);
+  position: relative;
+  white-space: nowrap;
+}
+
+.sb-item:hover {
+  background: rgba(108,47,160,0.12);
+  color: var(--text);
+}
+
+.sb-item.active {
+  background: rgba(108,47,160,0.2);
+  color: var(--text);
+}
+
+/* active indicator bar */
+.sb-item.active::before {
+  content: '';
+  position: absolute;
+  right: 0; top: 25%; bottom: 25%;
+  width: 3px;
+  background: linear-gradient(180deg, var(--primary-l), var(--accent));
+  border-radius: 2px 0 0 2px;
+}
+
+.sb-item .sb-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.sb-item .sb-badge {
+  margin-right: auto;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  line-height: 1.4;
+}
+
+/* ── Sidebar Footer (user info) ── */
+.sb-footer {
+  padding: 0.9rem 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.sb-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--primary-d), var(--primary-l));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.sb-user-info { flex: 1; overflow: hidden; }
+.sb-user-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-user-role {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════
+   MAIN AREA (topbar + content)
+════════════════════════════════════════════════ */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Top Bar ── */
+.topbar {
+  height: var(--topbar-h);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.75rem;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.topbar-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.3rem;
+}
+
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.topbar-breadcrumb .crumb-active {
+  color: var(--text);
+  font-weight: 700;
+}
+.topbar-breadcrumb .sep { opacity: 0.4; font-size: 0.7rem; }
+
+.topbar-right {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.topbar-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  background: rgba(0,201,177,0.1);
+  border: 1px solid rgba(0,201,177,0.25);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.topbar-chip .chip-dot {
+  width: 7px; height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Main Content ── */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 1.75rem;
+  background: var(--bg);
+}
+
+.main-content::-webkit-scrollbar { width: 5px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ════════════════════════════════════════════════
+   PANELS (shown/hidden by JS)
+════════════════════════════════════════════════ */
+.panel { display: none; animation: panelIn 0.3s ease both; }
+.panel.active { display: block; }
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Panel Header ── */
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+.panel-title-group {}
+.panel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.85rem;
+  background: rgba(108,47,160,0.15);
+  border: 1px solid rgba(108,47,160,0.3);
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary-l);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
+}
+.panel-title {
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.2;
+}
+.panel-title span { color: var(--accent); }
+.panel-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  line-height: 1.6;
+}
+
+/* ── Stats Grid (Home) ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s, border-color 0.25s;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(108,47,160,0.4);
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.stat-card:hover::before { opacity: 1; }
+.stat-card.c-purple::before { background: linear-gradient(90deg, var(--primary), var(--primary-l)); }
+.stat-card.c-teal::before   { background: linear-gradient(90deg, var(--accent-d), var(--accent)); }
+.stat-card.c-amber::before  { background: linear-gradient(90deg, #e67e00, #f5a623); }
+.stat-card.c-blue::before   { background: linear-gradient(90deg, #0077cc, #00aaff); }
+
+.stat-icon {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+.stat-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.stat-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.73rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  color: var(--accent);
+}
+
+/* ── Quick Actions ── */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.action-btn:hover {
+  background: rgba(108,47,160,0.12);
+  border-color: rgba(108,47,160,0.4);
+  transform: translateY(-2px);
+}
+.action-btn .ab-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.ab-purple { background: rgba(108,47,160,0.2); }
+.ab-teal   { background: rgba(0,201,177,0.15); }
+.ab-amber  { background: rgba(245,166,35,0.15); }
+.ab-blue   { background: rgba(0,170,255,0.13); }
+
+/* ── Info Card ── */
+.info-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+.info-card h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.info-card p {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.85;
+}
+
+/* Placeholder "Coming Soon" badge */
+.coming-soon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1.1rem;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f5a623;
+  margin-top: 1rem;
+}
+
+/* ════════════════════════════════════════════════
+   SETTINGS PANEL STYLES
+════════════════════════════════════════════════ */
+.settings-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+.settings-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--border2);
+  background: rgba(108,47,160,0.06);
+}
+.settings-section-icon { font-size: 1.15rem; }
+.settings-section-title { font-size: 1rem; font-weight: 800; color: var(--text); }
+.settings-section-body { padding: 1.5rem; display: grid; gap: 1.25rem; }
+.settings-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+.sett-field { display: flex; flex-direction: column; gap: 0.45rem; }
+.sett-field label { font-size: 0.82rem; font-weight: 700; color: var(--text-muted); }
+.sett-field input[type="text"],
+.sett-field input[type="number"],
+.sett-field textarea {
+  padding: 0.7rem 0.9rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.sett-field input:focus, .sett-field textarea:focus { border-color: var(--primary-l); }
+.sett-field textarea { min-height: 70px; resize: vertical; line-height: 1.7; }
+.sett-color-wrap { display: flex; align-items: center; gap: 0.75rem; }
+.sett-color-wrap input[type="color"] {
+  width: 44px; height: 44px; border: 2px solid var(--border);
+  border-radius: var(--radius-sm); background: transparent; cursor: pointer; padding: 2px;
+  transition: border-color var(--transition);
+}
+.sett-color-wrap input[type="color"]:hover { border-color: var(--primary-l); }
+.sett-color-wrap .sett-color-hex {
+  font-size: 0.82rem; color: var(--text-muted);
+  font-family: 'Courier New', monospace; direction: ltr; min-width: 65px;
+}
+.sett-editor-wrap {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  overflow: hidden; min-height: 280px;
+}
+#settingsTinyEditor { visibility: hidden; height: 0; }
+.sett-save-bar { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 0 0; }
+.sett-save-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border: none; border-radius: var(--radius-sm);
+  color: #fff; font-family: 'Cairo', sans-serif; font-size: 0.92rem; font-weight: 700;
+  cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+}
+.sett-save-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.sett-save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.sett-save-msg { font-size: 0.85rem; font-weight: 700; display: none; }
+.sett-save-msg.success { color: var(--accent); display: inline; }
+.sett-save-msg.error   { color: #ff6b6b; display: inline; }
+
+/* ═══════════════════════════════════════════════════════
+   🎨 بطاقات قوالب الألوان (مبسّطة لقالبين)
+═══════════════════════════════════════════════════════ */
+.theme-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.theme-card-big {
+  position: relative;
+  padding: 1rem;
+  background: rgba(255,255,255,0.02);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.22,1,0.36,1);
+  overflow: hidden;
+}
+.theme-card-big:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+  border-color: var(--primary);
+}
+.theme-card-big.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,201,177,0.25), 0 8px 20px rgba(0,201,177,0.15);
+  background: rgba(0,201,177,0.05);
+}
+.theme-mockup {
+  width: 100%;
+  height: 130px;
+  border-radius: 10px;
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.theme-info {
+  padding: 0 0.25rem;
+}
+.theme-name {
+  font-weight: 900;
+  color: var(--text);
+  font-size: 1.05rem;
+  margin-bottom: 0.35rem;
+}
+.theme-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.theme-active-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--accent);
+  color: #000;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0,201,177,0.4);
+}
+@media (max-width: 600px) {
+  .theme-presets { grid-template-columns: 1fr; }
+  .theme-mockup { height: 110px; }
+}
+
+/* ── Home card editor items ── */
+.hc-card-editor {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.hc-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 1.1rem;
+  background: rgba(0,201,177,0.06);
+  border-bottom: 1px solid var(--border2);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.hc-card-header:hover { background: rgba(0,201,177,0.1); }
+.hc-card-header-title {
+  font-size: 0.92rem; font-weight: 800; color: var(--text);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.hc-card-header-toggle {
+  font-size: 0.78rem; color: var(--text-muted); font-weight: 600;
+  background: none; border: none; cursor: pointer; font-family: 'Cairo', sans-serif;
+}
+.hc-card-body { padding: 1.25rem; display: none; }
+.hc-card-body.open { display: grid; gap: 1rem; }
+.hc-card-body .settings-row { grid-template-columns: 1fr 1fr; }
+
+/* ── Section divider ── */
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border2);
+}
+
+/* ════════════════════════════════════════════════
+   ARTICLES MANAGEMENT STYLES
+   جميع classes تبدأ بـ art- لعدم التعارض
+════════════════════════════════════════════════ */
+
+.art-form-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+
+.art-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--border2);
+  background: rgba(0,201,177,0.05);
+}
+
+.art-form-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* وسم وضع التعديل */
+.art-edit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.7rem;
+  background: rgba(245,166,35,0.15);
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f5a623;
+}
+
+.art-form-body { padding: 1.5rem; }
+.art-form-body.collapsed { display: none; }
+
+/* ── TinyMCE container ── */
+.art-editor-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  min-height: 300px;
+  position: relative;
+}
+
+/* Textarea hidden — TinyMCE replaces it */
+#tinyEditor { visibility: hidden; height: 0; }
+
+/* ── TinyMCE dark skin overrides (oxide-dark) ── */
+.tox.tox-tinymce {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+/* Toolbar & menubar */
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar-overlord,
+.tox .tox-menubar {
+  background: var(--bg3) !important;
+  border-bottom: 1px solid var(--border2) !important;
+}
+
+.tox .tox-toolbar__group {
+  border-right: 1px solid var(--border2) !important;
+  border-left: none !important;
+}
+
+/* Toolbar buttons */
+.tox .tox-tbtn {
+  color: var(--text-muted) !important;
+}
+.tox .tox-tbtn svg { fill: var(--text-muted) !important; }
+.tox .tox-tbtn:hover,
+.tox .tox-tbtn:focus {
+  background: rgba(108,47,160,0.15) !important;
+  color: var(--text) !important;
+}
+.tox .tox-tbtn:hover svg,
+.tox .tox-tbtn:focus svg { fill: var(--accent) !important; }
+.tox .tox-tbtn--enabled,
+.tox .tox-tbtn--enabled:hover {
+  background: rgba(108,47,160,0.25) !important;
+  color: var(--accent) !important;
+}
+.tox .tox-tbtn--enabled svg { fill: var(--accent) !important; }
+
+/* Select boxes (font, size) */
+.tox .tox-tbtn--select {
+  color: var(--text-muted) !important;
+}
+.tox .tox-tbtn--select:hover { color: var(--accent) !important; }
+
+/* Editor content area */
+.tox .tox-edit-area,
+.tox .tox-edit-area__iframe {
+  background: var(--card) !important;
+}
+
+/* Status bar */
+.tox .tox-statusbar {
+  background: var(--bg3) !important;
+  border-top: 1px solid var(--border2) !important;
+  color: var(--text-faint) !important;
+}
+.tox .tox-statusbar a,
+.tox .tox-statusbar__wordcount { color: var(--text-faint) !important; }
+
+/* Dialogs & popups */
+.tox .tox-dialog,
+.tox .tox-dialog-wrap__backdrop {
+  background: var(--bg2) !important;
+}
+.tox .tox-dialog__header {
+  background: var(--bg3) !important;
+  color: var(--text) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.tox .tox-dialog__body { background: var(--bg2) !important; }
+.tox .tox-dialog__footer {
+  background: var(--bg3) !important;
+  border-top: 1px solid var(--border) !important;
+}
+.tox .tox-label,
+.tox .tox-dialog__body-content { color: var(--text-muted) !important; }
+.tox .tox-textfield,
+.tox .tox-selectfield select,
+.tox .tox-textarea {
+  background: rgba(255,255,255,0.05) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+.tox .tox-textfield:focus,
+.tox .tox-textarea:focus {
+  border-color: rgba(0,201,177,0.5) !important;
+}
+
+/* Dropdown menus */
+.tox .tox-collection--list .tox-collection__item,
+.tox .tox-menu {
+  background: var(--bg2) !important;
+  color: var(--text-muted) !important;
+}
+.tox .tox-collection--list .tox-collection__item:hover,
+.tox .tox-collection--list .tox-collection__item--active {
+  background: rgba(108,47,160,0.2) !important;
+  color: var(--text) !important;
+}
+.tox .tox-collection__item-label { color: inherit !important; }
+
+/* Notifications */
+.tox-notifications-container { display: none !important; }
+
+/* ════════════════════════════════════════════════
+   🔥 z-index لقوائم TinyMCE المنبثقة داخل المودال
+   .tr-modal-overlay عنده z-index:9000 — والقوائم المنسدلة
+   (fontfamily, fontsize, styles, emoji picker, dialogs...)
+   تُحقن في <body> مباشرة، لذا نرفع z-index لها فوق 9000
+   حتى تظهر وتتفاعل بشكل صحيح.
+════════════════════════════════════════════════ */
+.tox-tinymce-aux,
+.tox .tox-menu,
+.tox .tox-tiered-menu,
+.tox .tox-collection,
+.tox .tox-pop,
+.tox .tox-toolbar__overflow,
+.tox .tox-silver-sink,
+.tox-silver-sink {
+  z-index: 99999 !important;
+}
+/* Dialogs (روابط، صور، جداول، search...) */
+.tox .tox-dialog-wrap,
+.tox .tox-dialog,
+.tox .tox-dialog-wrap__backdrop {
+  z-index: 99998 !important;
+}
+/* Fullscreen داخل مودال: يجب أن يغطي المودال نفسه */
+.tox.tox-tinymce--fullscreen {
+  z-index: 100000 !important;
+}
+
+/* زر تعديل في الجدول */
+.art-edit-btn {
+  padding: 0.32rem 0.7rem;
+  background: rgba(0,201,177,0.08);
+  border: 1px solid rgba(0,201,177,0.22);
+  border-radius: 6px;
+  color: var(--accent);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  margin-left: 0.4rem;
+}
+.art-edit-btn:hover {
+  background: rgba(0,201,177,0.18);
+  border-color: rgba(0,201,177,0.5);
+}
+
+/* ════════════════════════════════════════════════
+   QUIZ MANAGEMENT STYLES
+   جميع classes تبدأ بـ qz- لعدم التعارض
+════════════════════════════════════════════════ */
+
+/* ── بطاقة النموذج ── */
+.qz-form-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+
+.qz-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--border2);
+  background: rgba(108,47,160,0.06);
+}
+
+.qz-form-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qz-form-icon { font-size: 1.1rem; }
+
+.qz-collapse-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.qz-collapse-btn:hover { border-color: var(--primary-l); color: var(--text); }
+
+.qz-form-body {
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+.qz-form-body.collapsed { display: none; }
+
+/* ── حقول الاختبار الأساسية ── */
+.qz-fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.qz-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.qz-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.qz-input {
+  padding: 0.72rem 1rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  direction: rtl;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+}
+.qz-input:focus {
+  border-color: rgba(0,201,177,0.5);
+  background: rgba(0,201,177,0.04);
+}
+.qz-input.error { border-color: rgba(244,67,54,0.55); }
+
+.qz-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7f9e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 0.9rem center;
+  cursor: pointer;
+}
+.qz-select option { background: var(--bg2); color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════
+   🎨 تنسيق القوائم المنسدلة داخل لوحة التحكم
+   (يطبّق على القوائم داخل panels والـ modals فقط — لا يمس عناصر النظام)
+═══════════════════════════════════════════════════════ */
+.panel select,
+.qm-modal select,
+.tr-modal select,
+.sett-field select,
+.settings-section select,
+select.qz-input,
+select.qz-select,
+select.qm-input {
+  background-color: var(--bg2, #0e1022) !important;
+  color: var(--text, #e8eaf6) !important;
+}
+.panel select option,
+.qm-modal select option,
+.tr-modal select option,
+.sett-field select option,
+.settings-section select option,
+select.qz-input option,
+select.qz-select option,
+select.qm-input option {
+  background-color: var(--bg2, #0e1022) !important;
+  color: var(--text, #e8eaf6) !important;
+  padding: 6px 10px !important;
+}
+.panel select option:checked,
+.qm-modal select option:checked,
+.tr-modal select option:checked,
+select.qz-input option:checked,
+select.qz-select option:checked {
+  background-color: var(--primary, #6c2fa0) !important;
+  color: #fff !important;
+}
+select optgroup {
+  background-color: var(--bg, #080a14) !important;
+  color: var(--accent, #00c9b1) !important;
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* ── منطقة الأسئلة ── */
+.qz-questions-area {
+  margin-bottom: 1.5rem;
+}
+
+.qz-questions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.qz-questions-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+}
+
+.qz-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: rgba(0,201,177,0.1);
+  border: 1px solid rgba(0,201,177,0.3);
+  border-radius: 8px;
+  color: var(--accent);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.83rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s;
+}
+.qz-add-btn:hover {
+  background: rgba(0,201,177,0.18);
+  border-color: rgba(0,201,177,0.55);
+  transform: translateY(-1px);
+}
+
+/* ── رسالة لا توجد أسئلة ── */
+.qz-empty-questions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 2.5rem 1rem;
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius);
+  color: var(--text-faint);
+  font-size: 0.88rem;
+  text-align: center;
+}
+.qz-empty-questions small { font-size: 0.77rem; }
+
+/* ── بطاقة السؤال الواحد ── */
+.qz-question-card {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  animation: panelIn 0.25s ease both;
+}
+
+.qz-question-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.1rem;
+  background: rgba(108,47,160,0.08);
+  border-bottom: 1px solid var(--border2);
+}
+
+.qz-question-num {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--primary-l);
+}
+
+.qz-question-del {
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.qz-question-del:hover { color: #ff6b6b; background: rgba(244,67,54,0.1); }
+
+.qz-question-body { padding: 1.1rem; }
+
+/* حقل نص السؤال */
+.qz-question-text {
+  width: 100%;
+  padding: 0.72rem 1rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  direction: rtl;
+  resize: vertical;
+  min-height: 64px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 1rem;
+}
+.qz-question-text:focus { border-color: rgba(0,201,177,0.5); }
+
+/* شبكة الخيارات الأربعة */
+.qz-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.qz-option-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Radio button مخصص */
+.qz-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.qz-radio:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--card2);
+}
+.qz-radio:hover:not(:checked) { border-color: var(--primary-l); }
+
+.qz-option-input {
+  flex: 1;
+  padding: 0.6rem 0.85rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.83rem;
+  direction: rtl;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.qz-option-input:focus { border-color: rgba(0,201,177,0.45); }
+.qz-option-input::placeholder { color: var(--text-faint); }
+
+/* مؤشر الإجابة الصحيحة */
+.qz-correct-hint {
+  font-size: 0.73rem;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.qz-correct-hint .dot {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* ── أزرار حفظ ومسح النموذج ── */
+.qz-form-actions {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border2);
+}
+
+.qz-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-l));
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+.qz-save-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108,47,160,0.38);
+}
+.qz-save-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.qz-reset-btn {
+  padding: 0.75rem 1.25rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.qz-reset-btn:hover { border-color: #ff6b6b; color: #ff6b6b; }
+
+/* رسالة نتيجة النموذج */
+.qz-form-msg {
+  margin-top: 0.9rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.qz-form-msg.success {
+  background: rgba(0,201,177,0.1);
+  border: 1px solid rgba(0,201,177,0.3);
+  color: var(--accent);
+}
+.qz-form-msg.error {
+  background: rgba(244,67,54,0.1);
+  border: 1px solid rgba(244,67,54,0.3);
+  color: #ff6b6b;
+}
+
+/* ── قسم الجدول ── */
+.qz-table-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.qz-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--border2);
+  background: rgba(0,201,177,0.04);
+}
+
+.qz-table-title {
+  font-size: 0.97rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.qz-refresh-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.32rem 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.qz-refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.qz-table-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 2rem 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.qz-table-empty {
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.88rem;
+}
+
+.qz-table-wrap { overflow-x: auto; }
+
+.qz-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.qz-table thead { background: rgba(108,47,160,0.1); }
+.qz-table thead th {
+  padding: 0.8rem 1.1rem;
+  text-align: right;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+}
+
+.qz-table tbody tr {
+  border-bottom: 1px solid var(--border2);
+  transition: background 0.2s;
+}
+.qz-table tbody tr:last-child { border-bottom: none; }
+.qz-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+.qz-table tbody td {
+  padding: 0.85rem 1.1rem;
+  color: var(--text-muted);
+  vertical-align: middle;
+}
+.qz-table tbody td:first-child { color: var(--text); font-weight: 700; }
+
+/* شارة القسم في الجدول */
+.qz-page-badge {
+  display: inline-block;
+  padding: 0.18rem 0.65rem;
+  background: rgba(108,47,160,0.15);
+  border: 1px solid rgba(108,47,160,0.25);
+  border-radius: 10px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: var(--primary-l);
+  white-space: nowrap;
+}
+
+/* عدد الأسئلة في الجدول */
+.qz-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px; height: 24px;
+  background: rgba(0,201,177,0.1);
+  border: 1px solid rgba(0,201,177,0.2);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* زر الحذف في الجدول */
+.qz-del-btn {
+  padding: 0.35rem 0.75rem;
+  background: rgba(244,67,54,0.08);
+  border: 1px solid rgba(244,67,54,0.22);
+  border-radius: 6px;
+  color: #ff6b6b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.qz-del-btn:hover {
+  background: rgba(244,67,54,0.18);
+  border-color: rgba(244,67,54,0.45);
+}
+.qz-del-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* تاريخ في الجدول */
+.qz-date { font-size: 0.79rem; color: var(--text-faint); }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .qz-fields-row   { grid-template-columns: 1fr; }
+  .qz-options-grid  { grid-template-columns: 1fr; }
+  .qz-form-actions  { flex-direction: column; }
+  .qz-save-btn, .qz-reset-btn { width: 100%; justify-content: center; }
+}
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 99;
+}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════ */
+@media (max-width: 860px) {
+  .sidebar {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100vh;
+    transform: translateX(0);
+    z-index: 200;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.hidden {
+    transform: translateX(100%);
+  }
+  .sidebar-overlay { display: block; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+  .topbar-hamburger { display: flex; }
+  .main-content { padding: 1.5rem 1.25rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .quick-actions { grid-template-columns: 1fr; }
+}
+
+/* ════════════════════════════════════════════════
+   BULK IMPORT — زر الرفع الجماعي وشريط التقدم
+════════════════════════════════════════════════ */
+.bulk-import-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 1px dashed var(--border2);
+}
+
+.bulk-import-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.btn-bulk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.1rem;
+  background: rgba(0,201,177,0.08);
+  border: 1px solid rgba(0,201,177,0.3);
+  border-radius: 8px;
+  color: var(--accent);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-bulk:hover:not(:disabled) {
+  background: rgba(0,201,177,0.15);
+  border-color: rgba(0,201,177,0.55);
+  transform: translateY(-1px);
+}
+.btn-bulk:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* حقل الملف مخفي — يُفتح عبر الزر */
+#bulkFileInput { display: none; }
+
+/* شريط التقدم */
+.bulk-progress-wrap {
+  display: none;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  animation: fadeUp 0.25s ease;
+}
+.bulk-progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--border2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.bulk-progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+.bulk-progress-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.bulk-progress-log {
+  max-height: 120px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  font-family: monospace;
+  direction: rtl;
+}
+
+/* ════════════════════════════════════════════════
+   EDIT TRAINEE MODAL — نافذة تعديل بيانات المتدرب
+════════════════════════════════════════════════ */
+.tr-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease;
+}
+.tr-modal-overlay.open { display: flex; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.tr-modal {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 480px;
+  padding: 2rem;
+  position: relative;
+  animation: modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* الخط العلوي الملوّن */
+.tr-modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 18px 18px 0 0;
+}
+
+.tr-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.tr-modal-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tr-modal-close {
+  width: 32px; height: 32px;
+  background: var(--border2);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.tr-modal-close:hover { background: rgba(244,67,54,0.15); color: #ff6b6b; }
+
+.tr-modal-field { margin-bottom: 1.1rem; }
+.tr-modal-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.45rem;
+}
+.tr-modal-field input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.tr-modal-field input:focus {
+  border-color: rgba(0,201,177,0.55);
+  box-shadow: 0 0 0 3px rgba(0,201,177,0.1);
+}
+
+.tr-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.btn-modal-save {
+  flex: 1;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-l));
+  border: none;
+  border-radius: 9px;
+  color: #fff;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+.btn-modal-save:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,47,160,0.35); }
+.btn-modal-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-modal-cancel {
+  padding: 0.75rem 1.2rem;
+  background: var(--border2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text-muted);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-modal-cancel:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+
+.tr-modal-msg {
+  margin-top: 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  display: none;
+}
+.tr-modal-msg.error   { background: rgba(244,67,54,0.1);  border: 1px solid rgba(244,67,54,0.3);  color: #ff6b6b; display: block; }
+.tr-modal-msg.success { background: rgba(0,201,177,0.1);  border: 1px solid rgba(0,201,177,0.3);  color: var(--accent); display: block; }
+
+/* زر التعديل في صفوف الجدول */
+.tr-edit-btn {
+  padding: 0.28rem 0.6rem;
+  background: rgba(108,47,160,0.1);
+  border: 1px solid rgba(108,47,160,0.25);
+  border-radius: 6px;
+  color: var(--primary-l);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'Cairo', sans-serif;
+}
+.tr-edit-btn:hover { background: rgba(108,47,160,0.22); border-color: rgba(108,47,160,0.5); transform: translateY(-1px); }
+
+/* ════════════════════════════════════════════════
+   QUESTION BANK SELECTOR
+════════════════════════════════════════════════ */
+.bank-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.bank-filters select {
+  padding: 0.55rem 0.9rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7f9e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 0.7rem center;
+  padding-left: 2rem;
+}
+.bank-filters select option { background: var(--bg2); color: var(--text); }
+
+.bank-actions-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.bank-action-btn {
+  padding: 0.35rem 0.8rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bank-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.bank-q-container {
+  max-height: 420px;
+  overflow-y: auto;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+}
+.bank-q-container::-webkit-scrollbar { width: 4px; }
+.bank-q-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.bank-q-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.18s;
+  margin-bottom: 0.35rem;
+}
+.bank-q-item:hover { background: rgba(108,47,160,0.06); }
+.bank-q-item.selected {
+  background: rgba(0,201,177,0.06);
+  border-color: rgba(0,201,177,0.25);
+}
+
+.bank-q-check {
+  width: 18px; height: 18px;
+  margin-top: 0.15rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.bank-q-content { flex: 1; min-width: 0; }
+.bank-q-text {
+  font-size: 0.84rem;
+  color: var(--text);
+  line-height: 1.65;
+  margin-bottom: 0.4rem;
+}
+.bank-q-meta { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.bank-q-badge {
+  display: inline-block;
+  padding: 0.12rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.bank-q-badge.cat {
+  background: rgba(108,47,160,0.12);
+  border: 1px solid rgba(108,47,160,0.22);
+  color: var(--primary-l);
+}
+.bank-q-badge.type {
+  background: rgba(0,201,177,0.08);
+  border: 1px solid rgba(0,201,177,0.2);
+  color: var(--accent);
+}
+
+/* ── Schedule Badges ── */
+.schedule-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.schedule-badge.active   { background: rgba(0,201,177,0.1);  color: var(--accent); border: 1px solid rgba(0,201,177,0.25); }
+.schedule-badge.upcoming { background: rgba(245,166,35,0.1); color: #f5a623;      border: 1px solid rgba(245,166,35,0.25); }
+.schedule-badge.expired  { background: rgba(244,67,54,0.08); color: #ff6b6b;      border: 1px solid rgba(244,67,54,0.2); }
+
+/* ── Schedule Fields ── */
+.schedule-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(245,166,35,0.04);
+  border: 1px dashed rgba(245,166,35,0.2);
+  border-radius: var(--radius);
+}
+.schedule-row .qz-input[type="datetime-local"] {
+  direction: ltr;
+  text-align: right;
+}
+
+/* ── Seed Bank Button ── */
+.seed-bank-wrap {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: rgba(108,47,160,0.06);
+  border: 1px dashed rgba(108,47,160,0.25);
+  border-radius: var(--radius);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+.seed-bank-wrap .seed-info {
+  flex: 1;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.seed-bank-btn {
+  padding: 0.65rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-l));
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.seed-bank-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(108,47,160,0.35); }
+
+/* ── أزرار التحكم ببنك الأسئلة ── */
+.seed-bank-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+  width: 100%;
+}
+.seed-bank-controls .qz-select {
+  flex: 0 0 auto;
+}
+.seed-bank-btn.delete-all-btn {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  border-color: #dc2626 !important;
+}
+.seed-bank-btn.delete-all-btn:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  box-shadow: 0 0 16px rgba(220,38,38,0.4);
+}
+.seed-bank-btn.delete-section-btn {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  border-color: #d97706 !important;
+}
+.seed-bank-btn.delete-section-btn:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  box-shadow: 0 0 16px rgba(217,119,6,0.4);
+}
+
+/* ════════════════════════════════════════════════
+   QUESTION DETAILS IN BANK (Upgrade 1)
+════════════════════════════════════════════════ */
+.bank-q-options {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+}
+.bank-q-options-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.bank-q-opt {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  margin-bottom: 0.2rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: background 0.15s;
+}
+.bank-q-opt.correct {
+  background: rgba(0,201,177,0.1);
+  border: 1px solid rgba(0,201,177,0.25);
+  color: var(--accent);
+  font-weight: 700;
+}
+.bank-q-opt .opt-icon {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
+.bank-q-match-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.3rem 0.5rem;
+  align-items: center;
+}
+.bank-q-match-grid .match-left,
+.bank-q-match-grid .match-right {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+.bank-q-match-grid .match-left {
+  background: rgba(108,47,160,0.12);
+  color: var(--primary-l);
+  text-align: center;
+  font-weight: 600;
+}
+.bank-q-match-grid .match-right {
+  background: rgba(0,201,177,0.08);
+  color: var(--accent);
+  text-align: center;
+}
+.bank-q-match-grid .match-arrow {
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+/* ── Bank: Edit Button per Question ── */
+.bank-q-edit-btn {
+  padding: 0.2rem 0.5rem;
+  background: rgba(108,47,160,0.1);
+  border: 1px solid rgba(108,47,160,0.22);
+  border-radius: 6px;
+  color: var(--primary-l);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'Cairo', sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.bank-q-edit-btn:hover {
+  background: rgba(108,47,160,0.22);
+  border-color: rgba(108,47,160,0.5);
+  transform: translateY(-1px);
+}
+
+/* ════════════════════════════════════════════════
+   ADD/EDIT QUESTION MODAL (Upgrade 2)
+════════════════════════════════════════════════ */
+#questionModal .tr-modal {
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+#questionModal .tr-modal::-webkit-scrollbar { width: 4px; }
+#questionModal .tr-modal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.qm-field { margin-bottom: 1rem; }
+.qm-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+.qm-field input,
+.qm-field textarea,
+.qm-field select {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.qm-field input:focus,
+.qm-field textarea:focus,
+.qm-field select:focus {
+  border-color: rgba(0,201,177,0.55);
+  box-shadow: 0 0 0 3px rgba(0,201,177,0.08);
+}
+.qm-field textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+.qm-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7f9e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 0.7rem center;
+  padding-left: 2rem;
+}
+.qm-field select option { background: var(--bg2); color: var(--text); }
+
+.qm-options-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.qm-option-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.qm-option-row input[type="text"] {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.84rem;
+  outline: none;
+}
+.qm-option-row input[type="text"]:focus { border-color: rgba(0,201,177,0.45); }
+.qm-option-row input[type="radio"],
+.qm-option-row input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.qm-option-row .qm-remove-opt {
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.qm-option-row .qm-remove-opt:hover { color: #ff6b6b; background: rgba(244,67,54,0.1); }
+
+.qm-add-option-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(0,201,177,0.08);
+  border: 1px solid rgba(0,201,177,0.25);
+  border-radius: 20px;
+  color: var(--accent);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  transition: all 0.18s;
+}
+.qm-add-option-btn:hover { background: rgba(0,201,177,0.15); }
+
+/* ── Match Pairs Editor ── */
+.qm-pair-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+.qm-pair-row input {
+  padding: 0.55rem 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.84rem;
+  outline: none;
+}
+.qm-pair-row input:focus { border-color: rgba(0,201,177,0.45); }
+.qm-pair-row .pair-arrow { color: var(--text-faint); font-size: 0.85rem; text-align: center; }
+
+/* ════════════════════════════════════════════════
+   GRADING SYSTEM (Upgrade 3)
+════════════════════════════════════════════════ */
+.bank-q-grade-wrap {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  background: rgba(245,166,35,0.06);
+  border: 1px dashed rgba(245,166,35,0.25);
+  border-radius: 8px;
+}
+.bank-q-grade-wrap.visible { display: flex; }
+.bank-q-grade-wrap label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f5a623;
+  white-space: nowrap;
+}
+.bank-q-grade-input {
+  width: 55px;
+  padding: 0.3rem 0.4rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(245,166,35,0.35);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  direction: ltr;
+}
+.bank-q-grade-input:focus { border-color: rgba(245,166,35,0.65); box-shadow: 0 0 0 2px rgba(245,166,35,0.1); }
+
+.quiz-total-score-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.2rem;
+  background: linear-gradient(135deg, rgba(245,166,35,0.08), rgba(0,201,177,0.06));
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+.quiz-total-score-bar .total-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.quiz-total-score-bar .total-value {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #f5a623;
+  direction: ltr;
+}
+
+@media (max-width: 640px) {
+  .schedule-row { grid-template-columns: 1fr; }
+  .bank-filters { flex-direction: column; align-items: stretch; }
+  #questionModal .tr-modal { max-width: 95%; }
+  .qm-pair-row { grid-template-columns: 1fr; }
+  .qm-pair-row .pair-arrow { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOADING OVERLAY ══════════ -->
+<div id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <p>جارٍ التحقق من صلاحياتك…</p>
+</div>
+
+<!-- ══════════ DASHBOARD SHELL ══════════ -->
+<div id="dashboardShell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar hidden" id="sidebar">
+
+    <div class="sb-brand">
+      <div class="sb-brand-icon">🌐</div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-title">أكاديمية الشبكات</div>
+        <div class="sb-brand-sub">لوحة التحكم</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav" id="sbNav">
+
+      <div class="sb-section-label">القائمة الرئيسية</div>
+
+      <button class="sb-item active" data-panel="home" onclick="switchPanel(this, 'home')">
+        <span class="sb-icon">🏠</span>
+        الرئيسية
+      </button>
+
+      <button class="sb-item" data-panel="articles" onclick="switchPanel(this, 'articles')">
+        <span class="sb-icon">📝</span>
+        إدارة المقالات
+      </button>
+
+      <button class="sb-item" data-panel="cms" onclick="switchPanel(this, 'cms')">
+        <span class="sb-icon">🌐</span>
+        محرر الموقع
+      </button>
+
+      <button class="sb-item" data-panel="legacyEdit" onclick="switchPanel(this, 'legacyEdit')">
+        <span class="sb-icon">✏️</span>
+        تعديل المحتوى القديم
+      </button>
+
+      <button class="sb-item" data-panel="quizzes" onclick="switchPanel(this, 'quizzes')">
+        <span class="sb-icon">📋</span>
+        إدارة الاختبارات
+      </button>
+
+      <button class="sb-item" data-panel="trainees" onclick="switchPanel(this, 'trainees')">
+        <span class="sb-icon">👥</span>
+        المتدربون
+      </button>
+
+      <div class="sb-section-label">الحساب</div>
+
+      <button class="sb-item" data-panel="settings" onclick="switchPanel(this, 'settings')">
+        <span class="sb-icon">⚙️</span>
+        الإعدادات
+      </button>
+
+      <button class="sb-item" id="btnLogout" onclick="handleLogout()">
+        <span class="sb-icon">🚪</span>
+        تسجيل الخروج
+      </button>
+
+    </nav>
+
+    <!-- User Info Footer -->
+    <div class="sb-footer">
+      <div class="sb-avatar" id="sbAvatarInitial">م</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name" id="sbUserName">—</div>
+        <div class="sb-user-role">مشرف النظام</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ── MAIN AREA ── -->
+  <div class="main-area">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="topbar-hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="القائمة">
+        ☰
+      </button>
+      <div class="topbar-breadcrumb">
+        <span>لوحة التحكم</span>
+        <span class="sep">›</span>
+        <span class="crumb-active" id="topbarCrumb">الرئيسية</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-chip">
+          <div class="chip-dot"></div>
+          متصل
+        </div>
+      </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <main class="main-content">
+
+      <!-- ════════════ PANEL: HOME ════════════ -->
+      <section class="panel active" id="panel-home">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">🏠 الصفحة الرئيسية</div>
+            <div class="panel-title">مرحباً، <span id="welcomeName">المشرف</span> 👋</div>
+            <div class="panel-subtitle">إليك نظرة عامة على حالة الأكاديمية اليوم</div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="section-label">الإحصاءات العامة</div>
+        <div class="stats-grid">
+          <div class="stat-card c-purple">
+            <span class="stat-icon">👥</span>
+            <div class="stat-value" id="statTrainees">—</div>
+            <div class="stat-label">متدرب مسجّل</div>
+            <div class="stat-change">↑ جارٍ التحميل</div>
+          </div>
+          <div class="stat-card c-teal">
+            <span class="stat-icon">📋</span>
+            <div class="stat-value" id="statQuizzes">—</div>
+            <div class="stat-label">اختبار منشور</div>
+            <div class="stat-change">↑ جارٍ التحميل</div>
+          </div>
+          <div class="stat-card c-amber">
+            <span class="stat-icon">📝</span>
+            <div class="stat-value">5</div>
+            <div class="stat-label">صفحة محتوى</div>
+            <div class="stat-change">✓ مكتملة</div>
+          </div>
+          <div class="stat-card c-blue">
+            <span class="stat-icon">📊</span>
+            <div class="stat-value" id="statResults">—</div>
+            <div class="stat-label">نتيجة محفوظة</div>
+            <div class="stat-change">↑ جارٍ التحميل</div>
+          </div>
+          <div class="stat-card c-amber">
+            <span class="stat-icon">🏦</span>
+            <div class="stat-value" id="statBank">—</div>
+            <div class="stat-label">سؤال في البنك</div>
+            <div class="stat-change">↑ جارٍ التحميل</div>
+          </div>
+        </div>
+
+        <!-- ══ إحصائيات متقدمة ══ -->
+        <div class="section-label">📊 إحصائيات الأداء المتقدمة</div>
+        <div id="advancedStatsWrap" style="margin-bottom:2rem;">
+          <button class="seed-bank-btn" onclick="loadAdvancedStats()" id="btnLoadAdvStats">📈 تحميل الإحصائيات المتقدمة</button>
+          <div id="advStatsLoading" style="display:none;text-align:center;padding:2rem;color:var(--text-muted);">
+            <div class="loading-ring" style="margin:0 auto 1rem;width:32px;height:32px;border-width:2px;"></div>
+            جارٍ تحليل البيانات…
+          </div>
+          <div id="advStatsContent" style="display:none;">
+            <!-- نسب النجاح لكل قسم -->
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-top:1rem;">
+              <h4 style="margin-bottom:1rem;font-size:1rem;color:var(--text);">🏆 نسب النجاح والرسوب حسب القسم</h4>
+              <div id="sectionStatsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;"></div>
+            </div>
+            <!-- الإحصائيات العامة -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-top:1rem;">
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;">
+                <div style="font-size:2rem;font-weight:900;color:var(--accent);" id="advAvgScore">—</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">متوسط الدرجات</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;">
+                <div style="font-size:2rem;font-weight:900;color:#00c9b1;" id="advPassRate">—</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">نسبة النجاح الكلية</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;">
+                <div style="font-size:2rem;font-weight:900;color:#ff6b6b;" id="advFailRate">—</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">نسبة الرسوب الكلية</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;">
+                <div style="font-size:2rem;font-weight:900;color:var(--primary-l);" id="advTopScore">—</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">أعلى درجة</div>
+              </div>
+            </div>
+            <!-- أصعب الأسئلة -->
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-top:1rem;">
+              <h4 style="margin-bottom:1rem;font-size:1rem;color:var(--text);">🔴 أصعب الأسئلة (الأكثر خطأً)</h4>
+              <div id="hardestQuestionsList" style="font-size:0.88rem;color:var(--text-muted);line-height:1.8;">جارٍ التحميل…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-label">إجراءات سريعة</div>
+        <div class="quick-actions">
+          <button class="action-btn" onclick="switchPanelById('articles')">
+            <div class="ab-icon ab-purple">📝</div>
+            تعديل المقالات
+          </button>
+          <button class="action-btn" onclick="switchPanelById('quizzes')">
+            <div class="ab-icon ab-teal">➕</div>
+            إنشاء اختبار جديد
+          </button>
+          <button class="action-btn" onclick="switchPanelById('trainees')">
+            <div class="ab-icon ab-amber">👥</div>
+            إضافة متدرب
+          </button>
+          <button class="action-btn" onclick="exportStatisticsToPDF()">
+            <div class="ab-icon" style="background:linear-gradient(135deg,#ff6b6b,#ee5a52);">📊</div>
+            تقرير إحصائيات PDF
+          </button>
+          <a href="index.html" target="_blank" class="action-btn">
+            <div class="ab-icon ab-blue">🌐</div>
+            عرض الموقع
+          </a>
+        </div>
+
+        <!-- System Info -->
+        <div class="section-label">معلومات النظام</div>
+        <div class="info-card">
+          <h3>📌 حالة المشروع</h3>
+          <p>
+            تم بناء الواجهة الأمامية للموقع بالكامل (5 صفحات) وربطها بـ Firebase.
+            المرحلة الحالية: إعداد لوحة التحكم (CMS) ونظام الاختبارات (LMS).
+            قاعدة البيانات: Firestore — <strong style="color:var(--accent)">networkacademy-795c8</strong>
+          </p>
+        </div>
+
+      </section>
+
+      <!-- ════════════ PANEL: ARTICLES ════════════ -->
+      <section class="panel" id="panel-articles">
+
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">📝 إدارة المقالات</div>
+            <div class="panel-title">محرر <span>المحتوى</span></div>
+            <div class="panel-subtitle">إنشاء مقالات جديدة وتحريرها بمحرر نصوص احترافي كامل</div>
+          </div>
+        </div>
+
+        <!-- ── نموذج المقال ── -->
+        <div class="art-form-card">
+          <div class="art-form-header">
+            <h3 class="art-form-title" id="articleFormTitle">
+              <span>✏️</span>
+              <span id="articleFormTitleText">إنشاء مقال جديد</span>
+              <!-- يظهر هذا الوسم في وضع التعديل فقط -->
+              <span class="art-edit-badge" id="articleEditBadge" style="display:none">
+                ✏️ وضع التعديل
+              </span>
+            </h3>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <button
+                class="qz-reset-btn"
+                id="btnCancelEdit"
+                onclick="cancelEditArticle()"
+                style="display:none;padding:0.32rem 0.85rem;font-size:0.78rem;"
+              >✕ إلغاء التعديل</button>
+              <button class="qz-collapse-btn" onclick="toggleArticleForm()">تصغير ↑</button>
+            </div>
+          </div>
+
+          <div class="art-form-body" id="articleFormBody">
+
+            <!-- الحقول الأساسية -->
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="articleTitle">عنوان المقال *</label>
+                <input
+                  type="text"
+                  id="articleTitle"
+                  class="qz-input"
+                  placeholder="مثال: مقدمة في شبكات الحاسب"
+                  maxlength="150"
+                >
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="articlePage">القسم التابع له * <button type="button" onclick="openSectionsManager()" style="background:rgba(0,201,177,0.12);color:#00c9b1;border:1px solid rgba(0,201,177,0.35);border-radius:6px;padding:2px 10px;font-size:0.75rem;font-family:'Cairo',sans-serif;cursor:pointer;margin-right:0.5rem;">⚙️ إدارة الأقسام</button></label>
+                <select id="articlePage" class="qz-input qz-select" onchange="loadSectionArticlesForOrder()">
+                  <option value="">— اختر القسم —</option>
+                  <option value="home">🏠 الرئيسية</option>
+                  <option value="networks">📡 شبكات الحاسب الآلي</option>
+                  <option value="security">🔒 الأمان في الشبكات</option>
+                  <option value="osi">🔁 نموذج OSI</option>
+                  <option value="cables">🔌 كيابل الشبكات</option>
+                  <option value="ip">🌍 بروتوكول IP</option>
+                  <!-- الأقسام المخصّصة تُحقن هنا ديناميكياً -->
+                </select>
+              </div>
+            </div>
+
+            <!-- حقل الترتيب — يظهر بعد اختيار القسم -->
+            <div id="articleOrderWrap" style="display:none;margin-bottom:1.25rem;">
+              <label class="qz-label" for="articleOrderSelect">
+                📌 ترتيب المقال في القسم
+                <span style="font-size:0.75rem;color:#7a7f9e;font-weight:400;margin-right:0.4rem;">(اختياري — الافتراضي: في النهاية)</span>
+              </label>
+              <div id="articleOrderLoading" style="display:none;font-size:0.82rem;color:#7a7f9e;padding:0.4rem 0;">⏳ جارٍ تحميل مقالات القسم…</div>
+              <select id="articleOrderSelect" class="qz-input qz-select" style="display:none;">
+                <option value="end">➕ في النهاية (بعد آخر مقال)</option>
+              </select>
+              <div id="articleOrderPreview" style="display:none;margin-top:0.6rem;padding:0.6rem 0.9rem;background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.25);border-radius:8px;font-size:0.78rem;color:#a0a5c9;"></div>
+            </div>
+
+            <!-- TinyMCE Editor -->
+            <div class="qz-field-group" style="margin-bottom:1.25rem;">
+              <label class="qz-label">محتوى المقال *</label>
+              <div class="art-editor-wrap">
+                <textarea id="tinyEditor"></textarea>
+              </div>
+            </div>
+
+            <!-- أزرار الحفظ -->
+            <div class="qz-form-actions">
+              <button class="qz-save-btn" id="btnSaveArticle" onclick="saveArticle()">
+                <span class="art-btn-text">💾 حفظ المقال</span>
+                <span class="art-btn-spinner" style="display:none">⏳</span>
+              </button>
+              <button class="qz-reset-btn" onclick="resetArticleForm()">🗑️ مسح النموذج</button>
+            </div>
+
+            <div class="qz-form-msg" id="articleFormMsg" style="display:none"></div>
+
+          </div><!-- /art-form-body -->
+        </div><!-- /art-form-card -->
+
+        <!-- ════════════════════════════════════════════════
+             🎯 إعادة ترتيب مواضيع قسم محدد (سحب وإفلات)
+        ════════════════════════════════════════════════ -->
+        <div class="qz-table-section" id="reorderSection" style="margin-top:1.5rem;">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">🎯 إعادة ترتيب مواضيع قسم</h3>
+            <button class="qz-refresh-btn" onclick="reorderRefresh()" title="إعادة تحميل">↻ تحديث</button>
+          </div>
+
+          <div style="padding:1rem 1.25rem;">
+            <!-- اختيار القسم -->
+            <div class="qz-field-group" style="margin-bottom:0.85rem;">
+              <label class="qz-label" for="reorderPageSelect">
+                📂 اختر القسم لعرض مواضيعه
+              </label>
+              <select id="reorderPageSelect" class="qz-input qz-select" onchange="reorderLoadArticles()">
+                <option value="">— اختر القسم —</option>
+                <option value="home">🏠 الرئيسية</option>
+                <option value="networks">📡 شبكات الحاسب الآلي</option>
+                <option value="security">🔒 الأمان في الشبكات</option>
+                <option value="osi">🔁 نموذج OSI</option>
+                <option value="cables">🔌 كيابل الشبكات</option>
+                <option value="ip">🌍 بروتوكول IP</option>
+                <!-- الأقسام المخصّصة تُحقن هنا ديناميكياً -->
+              </select>
+            </div>
+
+            <!-- شريط تعليمات -->
+            <div id="reorderHint" style="display:none;background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.25);border-radius:8px;padding:0.6rem 0.9rem;font-size:0.8rem;color:#a0a5c9;margin-bottom:0.85rem;">
+              💡 <strong style="color:#00c9b1;">اسحب</strong> أيّ موضوع لأعلى أو لأسفل لتغيير ترتيبه، ثم اضغط <strong style="color:#00c9b1;">حفظ الترتيب</strong>.
+            </div>
+
+            <!-- حالة التحميل -->
+            <div id="reorderLoading" style="display:none;text-align:center;padding:1.5rem;color:#7a7f9e;font-size:0.9rem;">
+              <div class="loading-ring" style="width:32px;height:32px;border-width:2px;margin:0 auto 0.6rem;"></div>
+              جارٍ تحميل مواضيع القسم…
+            </div>
+
+            <!-- حالة فارغة -->
+            <div id="reorderEmpty" style="display:none;text-align:center;padding:1.5rem;color:#7a7f9e;font-size:0.9rem;">
+              لا توجد مواضيع في هذا القسم بعد.
+            </div>
+
+            <!-- قائمة المواضيع القابلة للسحب -->
+            <ul id="reorderList" style="list-style:none;padding:0;margin:0;display:none;"></ul>
+
+            <!-- أزرار الحفظ -->
+            <div id="reorderActions" style="display:none;margin-top:1rem;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+              <button class="qz-save-btn" id="reorderSaveBtn" onclick="reorderSave()" disabled style="opacity:0.5;cursor:not-allowed;">
+                <span class="reorder-btn-text">💾 حفظ الترتيب</span>
+                <span class="reorder-btn-spinner" style="display:none;">⏳</span>
+              </button>
+              <button class="qz-reset-btn" id="reorderCancelBtn" onclick="reorderCancel()" disabled style="opacity:0.5;cursor:not-allowed;">
+                ↺ إلغاء التغييرات
+              </button>
+              <span id="reorderStatus" style="font-size:0.78rem;color:#7a7f9e;"></span>
+            </div>
+            <!-- ملاحظة flexbox للأزرار -->
+            <style>
+              #reorderActions { display: none; }
+              #reorderActions[data-show="1"] { display: flex !important; }
+              .reorder-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 0.9rem;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid var(--border, rgba(255,255,255,0.08));
+                border-radius: 10px;
+                margin-bottom: 0.55rem;
+                transition: background 0.18s, border-color 0.18s, transform 0.12s;
+                cursor: grab;
+                user-select: none;
+                -webkit-user-select: none;
+                touch-action: none;
+              }
+              .reorder-item > * {
+                pointer-events: none;
+              }
+              .reorder-item:hover {
+                background: rgba(108,47,160,0.08);
+                border-color: rgba(108,47,160,0.4);
+              }
+              .reorder-item.sortable-ghost {
+                opacity: 0.35;
+                background: rgba(0,201,177,0.12) !important;
+                border: 1px dashed #00c9b1 !important;
+              }
+              .reorder-item.sortable-chosen {
+                cursor: grabbing;
+              }
+              .reorder-item.sortable-drag {
+                cursor: grabbing;
+                box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+              }
+              .reorder-handle {
+                color: #6c2fa0;
+                font-size: 1.25rem;
+                line-height: 1;
+                opacity: 0.6;
+                flex-shrink: 0;
+              }
+              .reorder-pos {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 28px;
+                height: 28px;
+                background: rgba(108,47,160,0.18);
+                border-radius: 7px;
+                font-size: 0.8rem;
+                font-weight: 800;
+                color: #a07ee0;
+                flex-shrink: 0;
+              }
+              .reorder-pos.changed {
+                background: rgba(0,201,177,0.18);
+                color: #00c9b1;
+              }
+              .reorder-title {
+                flex: 1;
+                font-size: 0.88rem;
+                color: var(--text, #e8eaf6);
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              .reorder-old-pos {
+                font-size: 0.72rem;
+                color: #7a7f9e;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 6px;
+                flex-shrink: 0;
+              }
+              /* تحسين على الجوال: زرّان مساعدان للسحب */
+              @media (max-width: 600px) {
+                .reorder-handle { font-size: 1.4rem; }
+                .reorder-title { font-size: 0.82rem; }
+              }
+            </style>
+          </div>
+        </div>
+
+        <!-- ── جدول المقالات ── -->
+        <div class="qz-table-section">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">📚 المقالات المحفوظة</h3>
+            <button class="qz-refresh-btn" onclick="loadArticles()">↻ تحديث</button>
+          </div>
+
+          <div class="qz-table-loading" id="articlesLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل المقالات…</span>
+          </div>
+
+          <div class="qz-table-empty" id="articlesEmpty" style="display:none">
+            لا توجد مقالات محفوظة بعد
+          </div>
+
+          <div class="qz-table-wrap" id="articlesTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>عنوان المقال</th>
+                  <th>القسم</th>
+                  <th>تاريخ الإضافة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="articlesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════ PANEL: CMS (محرر الموقع - صفحات جديدة) ════════════ -->
+      <section class="panel" id="panel-cms">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">🌐 محرر الموقع</div>
+            <div class="panel-title">إضافة <span>صفحات وأقسام جديدة</span></div>
+            <div class="panel-subtitle">إنشاء صفحات كاملة جديدة للموقع بمحتواها وأقسامها</div>
+          </div>
+        </div>
+
+        <!-- شريط أدوات -->
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:flex-end;">
+          <div style="flex:1;min-width:200px;">
+            <label class="qz-label">اختر صفحة للتحرير</label>
+            <select id="cmsPageSelect" class="qz-input qz-select" onchange="cmsLoadPage()">
+              <option value="">— اختر صفحة —</option>
+            </select>
+          </div>
+          <button class="qz-save-btn" onclick="cmsShowNewPageForm()" style="white-space:nowrap;height:44px;">
+            ➕ إضافة صفحة جديدة
+          </button>
+          <button class="qz-refresh-btn" id="cmsBtnPreview" onclick="cmsPreview()" style="display:none;white-space:nowrap;height:44px;color:var(--accent);border-color:rgba(0,201,177,0.3);background:rgba(0,201,177,0.08);">
+            👁️ معاينة الصفحة
+          </button>
+          <button class="qz-refresh-btn" id="cmsBtnDeletePage" onclick="cmsDeletePage()" style="display:none;white-space:nowrap;height:44px;color:#ff6b6b;border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.08);">
+            🗑️ حذف الصفحة
+          </button>
+          <button class="qz-refresh-btn" id="cmsBtnHidePage" onclick="cmsToggleHidePage()" style="display:none;white-space:nowrap;height:44px;">
+            👁️‍🗨️ إخفاء/إظهار
+          </button>
+        </div>
+
+        <!-- نموذج إضافة صفحة جديدة -->
+        <div id="cmsNewPageForm" style="display:none;background:var(--card2);border:2px dashed rgba(108,47,160,0.5);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+          <div style="font-weight:800;color:var(--primary-l);margin-bottom:1rem;">🆕 إضافة صفحة جديدة للموقع</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+            <div>
+              <label class="qz-label">معرّف الصفحة (إنجليزي) *</label>
+              <input type="text" id="cmsNewPageId" class="qz-input" placeholder="مثال: wireless" style="direction:ltr;text-align:left;" oninput="document.getElementById('cmsNewPageIdPreview').textContent=this.value||'...'">
+            </div>
+            <div>
+              <label class="qz-label">اسم الصفحة بالعربية *</label>
+              <input type="text" id="cmsNewPageName" class="qz-input" placeholder="مثال: الشبكات اللاسلكية">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+            <div>
+              <label class="qz-label">أيقونة الصفحة</label>
+              <input type="text" id="cmsNewPageIcon" class="qz-input" placeholder="📶" maxlength="4">
+            </div>
+            <div>
+              <label class="qz-label">وصف قصير للصفحة</label>
+              <input type="text" id="cmsNewPageDesc" class="qz-input" placeholder="وصف مختصر">
+            </div>
+          </div>
+          <div style="background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--text-muted);">
+            💡 الرابط سيكون: <code style="color:#00c9b1;background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:4px;direction:ltr;display:inline-block;">page.html?id=<span id="cmsNewPageIdPreview">...</span></code>
+          </div>
+          <div style="display:flex;gap:0.75rem;">
+            <button class="qz-save-btn" onclick="cmsCreateNewPage()" style="height:38px;padding:0 1.25rem;">✅ إنشاء الصفحة</button>
+            <button class="qz-refresh-btn" onclick="document.getElementById('cmsNewPageForm').style.display='none'" style="height:38px;padding:0 1rem;">إلغاء</button>
+          </div>
+        </div>
+
+        <!-- رسائل -->
+        <div id="cmsMsg" style="display:none;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-weight:600;font-size:0.88rem;"></div>
+
+        <!-- حالة التحميل -->
+        <div id="cmsLoading" style="display:none;text-align:center;padding:3rem;color:var(--text-muted);">
+          <div class="loading-ring" style="margin:0 auto 1rem;"></div>
+          جارٍ تحميل المحتوى...
+        </div>
+
+        <!-- الأقسام -->
+        <div id="cmsSectionsList" style="display:none;">
+          <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;">
+            <div style="font-weight:800;font-size:1rem;color:var(--text);flex:1;">
+              📄 أقسام الصفحة: <span id="cmsPageName" style="color:var(--accent)">—</span>
+              <span id="cmsPageHiddenBadge" style="display:none;margin-right:0.5rem;background:rgba(245,166,35,0.15);color:#f5a623;padding:2px 10px;border-radius:10px;font-size:0.72rem;">🔒 مخفية</span>
+            </div>
+            <button class="qz-save-btn" onclick="cmsAddSection()" style="height:38px;padding:0 1rem;font-size:0.85rem;">
+              ➕ قسم جديد
+            </button>
+          </div>
+
+          <div id="cmsSectionsContainer"></div>
+
+          <div id="cmsAddSectionForm" style="display:none;background:var(--card2);border:2px dashed rgba(0,201,177,0.4);border-radius:12px;padding:1.25rem;margin-top:1rem;">
+            <div style="font-weight:800;color:#00c9b1;margin-bottom:1rem;">➕ إضافة قسم جديد</div>
+            <div style="margin-bottom:0.75rem;">
+              <label class="qz-label">عنوان القسم *</label>
+              <input type="text" id="cmsNewSectionTitle" class="qz-input" placeholder="مثال: ما هي الشبكة؟">
+            </div>
+            <div style="margin-bottom:0.75rem;">
+              <label class="qz-label">أيقونة القسم (اختياري)</label>
+              <input type="text" id="cmsNewSectionIcon" class="qz-input" placeholder="📡" maxlength="4">
+            </div>
+            <div style="display:flex;gap:0.75rem;">
+              <button class="qz-save-btn" onclick="cmsConfirmAddSection()" style="height:38px;padding:0 1rem;">✅ إضافة</button>
+              <button class="qz-refresh-btn" onclick="document.getElementById('cmsAddSectionForm').style.display='none'" style="height:38px;padding:0 1rem;">إلغاء</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="cmsEmpty" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+          <div style="font-size:3rem;margin-bottom:1rem;">🌐</div>
+          <div style="font-weight:700;margin-bottom:0.5rem;">اختر صفحة جديدة لتحريرها</div>
+          <div style="font-size:0.85rem;">هذه اللوحة لإدارة <strong>الصفحات الجديدة</strong> فقط.<br>لتعديل الصفحات الأصلية، استخدم "✏️ تعديل المحتوى القديم"</div>
+        </div>
+      </section>
+
+      <!-- ════════════ PANEL: LEGACY EDIT (تعديل المحتوى القديم) ════════════ -->
+      <section class="panel" id="panel-legacyEdit">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">✏️ تعديل المحتوى القديم</div>
+            <div class="panel-title">تعديل <span>نصوص الصفحات الأصلية</span></div>
+            <div class="panel-subtitle">عدّل أي نص في الصفحات الخمس القديمة (شبكات، أمان، OSI، كيابل، IP) — المحتوى الأصلي محفوظ دائماً</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.25);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.87rem;color:var(--text-muted);line-height:1.7;">
+          💡 <strong>كيف يعمل النظام؟</strong><br>
+          • كل نص تعدّله يُحفظ في قاعدة البيانات كطبقة فوق الأصلي<br>
+          • المحتوى الأصلي لا يُمسّ أبداً — يبقى محفوظاً في ملفات HTML<br>
+          • يمكنك <strong>إرجاع أي عنصر لأصله</strong> في أي وقت<br>
+          • زر 🔄 <strong>إرجاع الكل للأصل</strong> يمسح جميع تعديلات الصفحة ويرجعها كما كانت
+        </div>
+
+        <!-- اختيار الصفحة -->
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:flex-end;">
+          <div style="flex:1;min-width:200px;">
+            <label class="qz-label">اختر الصفحة</label>
+            <select id="legacyPageSelect" class="qz-input qz-select" onchange="legacyLoadPage()">
+              <option value="">— اختر صفحة —</option>
+              <option value="networks">📡 شبكات الحاسب الآلي</option>
+              <option value="security">🔒 الأمان في الشبكات</option>
+              <option value="osi">🔁 نموذج OSI</option>
+              <option value="cables">🔌 كيابل الشبكات</option>
+              <option value="ip">🌍 بروتوكول IP</option>
+            </select>
+          </div>
+          <button class="qz-refresh-btn" id="legacyBtnPreview" onclick="legacyPreview()" style="display:none;white-space:nowrap;height:44px;color:var(--accent);border-color:rgba(0,201,177,0.3);background:rgba(0,201,177,0.08);">
+            👁️ معاينة
+          </button>
+          <button class="qz-refresh-btn" id="legacyBtnResetAll" onclick="legacyResetAll()" style="display:none;white-space:nowrap;height:44px;color:#ff6b6b;border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.08);">
+            🔄 إرجاع الكل للأصل
+          </button>
+        </div>
+
+        <!-- رسائل -->
+        <div id="legacyMsg" style="display:none;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-weight:600;font-size:0.88rem;"></div>
+
+        <!-- حالة التحميل -->
+        <div id="legacyLoading" style="display:none;text-align:center;padding:3rem;color:var(--text-muted);">
+          <div class="loading-ring" style="margin:0 auto 1rem;"></div>
+          جارٍ جلب محتوى الصفحة...
+        </div>
+
+        <!-- ════════════════════════════════════════════════
+             🎯 إعادة ترتيب مواضيع الصفحة (سحب وإفلات)
+        ════════════════════════════════════════════════ -->
+        <div id="legacyTopicsBox" style="display:none;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+            <div>
+              <div style="font-weight:800;color:var(--text);font-size:1rem;">🎯 ترتيب مواضيع الصفحة</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">اسحب أي موضوع لتغيير ترتيبه على الموقع</div>
+            </div>
+            <button id="legacyTopicsToggleBtn" onclick="legacyTopicsToggle()" style="background:rgba(108,47,160,0.15);border:1px solid rgba(108,47,160,0.35);color:var(--primary-l);cursor:pointer;padding:6px 14px;border-radius:8px;font-size:0.82rem;font-family:inherit;font-weight:700;">
+              ▼ إظهار قائمة الترتيب
+            </button>
+          </div>
+
+          <div id="legacyTopicsBody" style="display:none;">
+            <div id="legacyTopicsHint" style="background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.25);border-radius:8px;padding:0.6rem 0.9rem;font-size:0.8rem;color:#a0a5c9;margin-bottom:0.85rem;">
+              💡 <strong style="color:#00c9b1;">اسحب</strong> أي موضوع لأعلى أو لأسفل، ثم اضغط <strong style="color:#00c9b1;">حفظ الترتيب</strong>. التغييرات تظهر للزوار فور إعادة تحميل الصفحة.
+            </div>
+
+            <ul id="legacyTopicsList" style="list-style:none;padding:0;margin:0;"></ul>
+
+            <div id="legacyTopicsActions" style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-top:1rem;">
+              <button class="qz-save-btn" id="legacyTopicsSaveBtn" onclick="legacyTopicsSave()" disabled style="opacity:0.5;cursor:not-allowed;">
+                <span class="lt-btn-text">💾 حفظ الترتيب</span>
+                <span class="lt-btn-spinner" style="display:none;">⏳</span>
+              </button>
+              <button class="qz-reset-btn" id="legacyTopicsCancelBtn" onclick="legacyTopicsCancel()" disabled style="opacity:0.5;cursor:not-allowed;">
+                ↺ إلغاء التغييرات
+              </button>
+              <button class="qz-reset-btn" id="legacyTopicsResetBtn" onclick="legacyTopicsResetToOriginal()" style="color:#ff6b6b;border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.08);">
+                🔄 العودة للترتيب الأصلي
+              </button>
+              <span id="legacyTopicsStatus" style="font-size:0.78rem;color:#7a7f9e;"></span>
+            </div>
+
+            <style>
+              .lt-item {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 0.9rem;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid var(--border, rgba(255,255,255,0.08));
+                border-radius: 10px;
+                margin-bottom: 0.55rem;
+                transition: background 0.18s, border-color 0.18s;
+                cursor: grab;
+                user-select: none;
+                -webkit-user-select: none;
+                touch-action: none;
+              }
+              /* العناصر الداخلية لا تلتقط أحداث السحب */
+              .lt-item > * {
+                pointer-events: none;
+              }
+              .lt-item:hover {
+                background: rgba(108,47,160,0.08);
+                border-color: rgba(108,47,160,0.4);
+              }
+              .lt-item.sortable-ghost {
+                opacity: 0.35;
+                background: rgba(0,201,177,0.12) !important;
+                border: 1px dashed #00c9b1 !important;
+              }
+              .lt-item.sortable-chosen { cursor: grabbing; }
+              .lt-item.sortable-drag {
+                cursor: grabbing;
+                box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+              }
+              .lt-handle {
+                color: #6c2fa0;
+                font-size: 1.25rem;
+                line-height: 1;
+                opacity: 0.6;
+                flex-shrink: 0;
+              }
+              .lt-pos {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 28px;
+                height: 28px;
+                background: rgba(108,47,160,0.18);
+                border-radius: 7px;
+                font-size: 0.8rem;
+                font-weight: 800;
+                color: #a07ee0;
+                flex-shrink: 0;
+              }
+              .lt-pos.changed {
+                background: rgba(0,201,177,0.18);
+                color: #00c9b1;
+              }
+              .lt-icon {
+                font-size: 1.2rem;
+                line-height: 1;
+                flex-shrink: 0;
+              }
+              .lt-title {
+                flex: 1;
+                font-size: 0.88rem;
+                color: var(--text, #e8eaf6);
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              .lt-old-pos {
+                font-size: 0.72rem;
+                color: #7a7f9e;
+                background: rgba(255,255,255,0.05);
+                padding: 2px 8px;
+                border-radius: 6px;
+                flex-shrink: 0;
+              }
+              .lt-id {
+                font-size: 0.7rem;
+                color: #7a7f9e;
+                background: rgba(255,255,255,0.04);
+                padding: 2px 8px;
+                border-radius: 5px;
+                direction: ltr;
+                font-family: monospace;
+                flex-shrink: 0;
+              }
+              @media (max-width: 600px) {
+                .lt-id { display: none; }
+                .lt-handle { font-size: 1.4rem; }
+                .lt-title { font-size: 0.82rem; }
+              }
+            </style>
+          </div>
+        </div>
+
+        <!-- حاوية العناصر -->
+        <div id="legacyElements" style="display:none;"></div>
+
+        <div id="legacyEmpty" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+          <div style="font-size:3rem;margin-bottom:1rem;">✏️</div>
+          <div style="font-weight:700;margin-bottom:0.5rem;">اختر صفحة لتبدأ التحرير</div>
+          <div style="font-size:0.85rem;">ستظهر كل عناوين وفقرات الصفحة — عدّل أي عنصر مباشرة</div>
+        </div>
+
+        <!-- Modal للتعديل -->
+        <div id="legacyEditModal" class="tr-modal-overlay" style="display:none;">
+          <div class="tr-modal" style="max-width:920px;width:95%;max-height:92vh;overflow-y:auto;">
+            <div class="tr-modal-header">
+              <div class="tr-modal-title">✏️ تعديل النص</div>
+              <button class="tr-modal-close" onclick="legacyCloseEditModal()">✕</button>
+            </div>
+            <input type="hidden" id="legacyEditModalElId">
+            <div class="tr-modal-field">
+              <label>النص الأصلي (للمقارنة):</label>
+              <div id="legacyEditModalOriginal" style="padding:0.75rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:0.87rem;max-height:120px;overflow-y:auto;line-height:1.7;"></div>
+            </div>
+            <div class="tr-modal-field">
+              <label>النص الجديد (يدعم التنسيق والصور):</label>
+              <div style="background:rgba(0,201,177,0.07);border:1px solid rgba(0,201,177,0.2);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:0.5rem;font-size:0.78rem;color:var(--text-muted);line-height:1.6;">
+                💡 لإضافة صورة: اضغط زر 🖼️ → الصق رابط الصورة (من Google Drive، Imgur، إلخ).
+                الصور لا تُرفع على قاعدة البيانات — فقط روابطها.
+              </div>
+              <textarea id="legacyEditModalEditor"></textarea>
+            </div>
+            <div class="tr-modal-actions">
+              <button class="btn-modal-save" onclick="legacySaveEdit()">💾 حفظ التعديل</button>
+              <button class="btn-modal-cancel" onclick="legacyCloseEditModal()">إلغاء</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════ PANEL: QUIZZES ════════════ -->
+      <section class="panel" id="panel-quizzes">
+
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">📋 إدارة الاختبارات</div>
+            <div class="panel-title">نظام <span>الاختبارات المتقدم</span></div>
+            <div class="panel-subtitle">إنشاء اختبارات من بنك الأسئلة مع جدولة زمنية وإدارة المحاولات</div>
+          </div>
+        </div>
+
+        <!-- ── رفع بنك الأسئلة إلى Firestore ── -->
+        <div class="seed-bank-wrap">
+          <div class="seed-info">
+            🏦 <strong>بنك الأسئلة:</strong> اختر القسم ثم ارفع أسئلته إلى Firestore.
+            كل قسم يحتوي على أسئلة متنوعة (صح/خطأ، اختيار، إجابات متعددة، مطابقة).
+          </div>
+          <div class="seed-bank-controls">
+            <select id="seedSectionSelect" class="qz-input qz-select" style="max-width:260px;">
+              <option value="">— اختر القسم —</option>
+              <option value="networks">شبكات الحاسب الآلي</option>
+              <option value="security">الأمان في الشبكات</option>
+              <option value="osi">نموذج OSI</option>
+              <option value="cables">كيابل الشبكات</option>
+              <option value="ip">بروتوكول IP</option>
+            </select>
+            <button class="seed-bank-btn" onclick="seedQuestionBank()">📤 رفع أسئلة القسم</button>
+            <button class="seed-bank-btn delete-all-btn" onclick="deleteAllBankQuestions()">🗑️ حذف كل البنك</button>
+            <button class="seed-bank-btn delete-section-btn" onclick="deleteSectionQuestions()">🗑️ حذف أسئلة القسم</button>
+          </div>
+        </div>
+        <div class="qz-form-msg" id="seedBankStatus" style="display:none"></div>
+
+        <!-- ── نموذج إنشاء اختبار (Quiz Builder) ── -->
+        <div class="qz-form-card" id="quizFormCard">
+          <div class="qz-form-header">
+            <h3 class="qz-form-title">
+              <span class="qz-form-icon">✏️</span>
+              إنشاء اختبار جديد
+            </h3>
+            <button class="qz-collapse-btn" id="quizFormToggle" onclick="toggleQuizForm()">
+              تصغير ↑
+            </button>
+          </div>
+
+          <div class="qz-form-body" id="quizFormBody">
+            <!-- حقل مخفي لمعرف التعديل -->
+            <input type="hidden" id="quizEditId" value="">
+
+            <!-- الحقول الأساسية: العنوان + المدة + الدرجة الإجمالية -->
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizTitle">عنوان الاختبار *</label>
+                <input type="text" id="quizTitle" class="qz-input" placeholder="مثال: اختبار شبكات الحاسب الآلي" maxlength="100">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizDuration">⏱️ مدة الاختبار (بالدقائق) <small style="color:var(--text-faint);font-weight:400;">(اختياري)</small></label>
+                <input type="number" id="quizDuration" class="qz-input" placeholder="مثال: 30" min="1" max="600" style="direction:ltr;text-align:right;">
+              </div>
+            </div>
+
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizTotalScore">🏆 الدرجة الإجمالية للاختبار * <small style="color:var(--text-faint);font-weight:400;">(تُقسَّم بالتساوي على عدد الأسئلة)</small></label>
+                <input type="number" id="quizTotalScore" class="qz-input" placeholder="مثال: 100" min="1" max="1000" step="0.5" onchange="updateTotalScore()" style="direction:ltr;text-align:right;">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizPage">📚 القسم التابع له *</label>
+                <select id="quizPage" class="qz-input qz-select">
+                  <option value="">— اختر القسم —</option>
+                  <option value="networks">شبكات الحاسب الآلي</option>
+                  <option value="security">الأمان في الشبكات</option>
+                  <option value="osi">نموذج OSI</option>
+                  <option value="cables">كيابل الشبكات</option>
+                  <option value="ip">بروتوكول IP</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- الجدولة الزمنية -->
+            <div class="qz-label" style="margin-bottom:0.5rem;">📅 الجدولة الزمنية <small style="color:var(--text-faint);font-weight:400;">(اختياري — اتركها فارغة ليكون الاختبار متاحاً دائماً)</small></div>
+            <div class="schedule-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizStartDate">وقت البدء</label>
+                <input type="datetime-local" id="quizStartDate" class="qz-input">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizEndDate">وقت الانتهاء</label>
+                <input type="datetime-local" id="quizEndDate" class="qz-input">
+              </div>
+            </div>
+
+            <!-- إعدادات المحاولات والخلط -->
+            <div class="qz-fields-row" style="margin-top:1rem;">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizMaxAttempts">🔄 عدد المحاولات المسموح <small style="color:var(--text-faint);font-weight:400;">(0 = بلا حد)</small></label>
+                <input type="number" id="quizMaxAttempts" class="qz-input" placeholder="مثال: 1" min="0" max="10" value="1" style="direction:ltr;text-align:right;">
+              </div>
+              <div class="qz-field-group" style="display:flex;align-items:center;gap:0.75rem;padding-top:1.6rem;">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem;font-weight:600;">
+                  <input type="checkbox" id="quizShuffle" checked style="width:18px;height:18px;accent-color:var(--primary);">
+                  🔀 خلط الأسئلة والخيارات
+                </label>
+              </div>
+            </div>
+
+            <!-- اختيار الأسئلة من البنك -->
+            <div class="qz-questions-area">
+              <div class="qz-questions-header">
+                <span class="qz-questions-count" id="selectedQCount">0 سؤال محدد</span>
+                <button class="qz-add-btn" onclick="openAddQuestionModal()">➕ إضافة سؤال جديد إلى البنك</button>
+              </div>
+
+              <!-- شريط الدرجة الإجمالية -->
+              <div class="quiz-total-score-bar" id="quizTotalScoreBar">
+                <span class="total-label">📊 الدرجة الإجمالية للاختبار:</span>
+                <span class="total-value" id="quizTotalScoreValue">0</span>
+              </div>
+
+              <!-- الفلاتر -->
+              <div class="bank-filters">
+                <select id="bankFilterCategory" onchange="filterBankQuestions()">
+                  <option value="">كل الأقسام</option>
+                  <option value="networks">شبكات الحاسب</option>
+                  <option value="security">الأمان</option>
+                  <option value="osi">نموذج OSI</option>
+                  <option value="cables">الكيابل</option>
+                  <option value="ip">بروتوكول IP</option>
+                </select>
+                <select id="bankFilterType" onchange="filterBankQuestions()">
+                  <option value="">كل الأنواع</option>
+                  <option value="tf">صح وخطأ</option>
+                  <option value="mcq">اختيار من متعدد</option>
+                  <option value="multi">إجابات متعددة</option>
+                  <option value="match">مطابقة</option>
+                </select>
+              </div>
+
+              <!-- أزرار تحديد/إلغاء الكل -->
+              <div class="bank-actions-row">
+                <button class="bank-action-btn" onclick="selectAllBankQuestions()">✅ تحديد الكل</button>
+                <button class="bank-action-btn" onclick="deselectAllBankQuestions()">✕ إلغاء الكل</button>
+              </div>
+
+              <!-- حاوية الأسئلة -->
+              <div class="bank-q-container" id="bankQuestionsContainer">
+                <div class="qz-empty-questions">
+                  <span>جارٍ تحميل بنك الأسئلة…</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- أزرار الحفظ -->
+            <div class="qz-form-actions">
+              <button class="qz-save-btn" id="btnSaveQuiz" onclick="saveQuizFromBank()">
+                <span class="qz-btn-text">💾 حفظ الاختبار</span>
+                <span class="qz-btn-spinner" style="display:none">⏳</span>
+              </button>
+              <button class="qz-reset-btn" onclick="resetQuizForm()">
+                🗑️ مسح النموذج
+              </button>
+            </div>
+
+            <div class="qz-form-msg" id="quizFormMsg" style="display:none"></div>
+
+          </div>
+        </div>
+
+        <!-- ── جدول الاختبارات الحالية ── -->
+        <div class="qz-table-section">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">📚 الاختبارات المحفوظة</h3>
+            <button class="qz-refresh-btn" onclick="loadQuizzes()" title="تحديث">↻ تحديث</button>
+          </div>
+
+          <div class="qz-table-loading" id="quizzesLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل الاختبارات…</span>
+          </div>
+
+          <div class="qz-table-empty" id="quizzesEmpty" style="display:none">
+            لا توجد اختبارات محفوظة بعد
+          </div>
+
+          <div class="qz-table-wrap" id="quizzesTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>عنوان الاختبار</th>
+                  <th>القسم</th>
+                  <th>عدد الأسئلة</th>
+                  <th>الدرجة الكلية</th>
+                  <th>الحالة</th>
+                  <th>تاريخ الإضافة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="quizzesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════ PANEL: TRAINEES ════════════ -->
+      <section class="panel" id="panel-trainees">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">👥 المتدربون</div>
+            <div class="panel-title">إدارة <span>المتدربين</span></div>
+            <div class="panel-subtitle">إضافة حسابات متدربين جديدة ومتابعة درجاتهم</div>
+          </div>
+        </div>
+
+        <!-- نموذج إضافة متدرب -->
+        <div class="art-form-card" style="margin-bottom:1.75rem;">
+          <div class="art-form-header">
+            <h3 class="art-form-title"><span>➕</span> إضافة متدرب جديد</h3>
+            <button class="qz-collapse-btn" onclick="toggleAddTrainee()">تصغير ↑</button>
+          </div>
+          <div id="addTraineeBody" style="padding:1.5rem;">
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="newTraineeName">الاسم الكامل *</label>
+                <input type="text" id="newTraineeName" class="qz-input" placeholder="مثال: أحمد محمد العمري">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="newTraineeEmail">الرقم التدريبي * <small style="color:var(--text-faint);font-weight:400;">(9 أرقام)</small></label>
+                <input type="text" id="newTraineeEmail" class="qz-input" placeholder="مثال: 441234567" inputmode="numeric" maxlength="9" style="direction:ltr;text-align:right;letter-spacing:0.06em;">
+              </div>
+            </div>
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label">كلمة المرور الافتراضية</label>
+                <div style="padding:0.65rem 0.9rem;background:rgba(0,201,177,0.06);border:1px dashed rgba(0,201,177,0.3);border-radius:8px;font-size:0.85rem;color:var(--accent);direction:ltr;text-align:right;letter-spacing:0.08em;font-weight:700;">
+                  12345678 <span style="font-size:0.72rem;color:var(--text-muted);margin-right:0.5rem;font-weight:400;">(ثابتة تلقائياً)</span>
+                </div>
+              </div>
+              <div class="qz-field-group" style="justify-content:flex-end;padding-top:1.4rem;">
+                <button class="qz-save-btn" id="btnAddTrainee" onclick="addTrainee()" style="width:100%;justify-content:center;">
+                  <span id="addTraineeBtnText">➕ إنشاء الحساب</span>
+                  <span id="addTraineeBtnSpinner" style="display:none">⏳</span>
+                </button>
+              </div>
+            </div>
+            <div class="qz-form-msg" id="addTraineeMsg" style="display:none"></div>
+
+            <!-- ── الرفع الجماعي من Excel ── -->
+            <div class="bulk-import-wrap">
+              <span class="bulk-import-label">📥 رفع جماعي:</span>
+              <button class="btn-bulk" id="btnBulkImport" onclick="document.getElementById('bulkFileInput').click()">
+                📊 رفع ملف Excel
+              </button>
+              <input type="file" id="bulkFileInput" accept=".xlsx,.xls" onchange="handleBulkImport(this)">
+              <span style="font-size:0.75rem;color:var(--text-faint);">أعمدة مطلوبة: الاسم، الرقم التدريبي</span>
+            </div>
+            <!-- شريط تقدم الرفع الجماعي -->
+            <div class="bulk-progress-wrap" id="bulkProgressWrap">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span class="bulk-progress-text" id="bulkProgressText">جارٍ المعالجة…</span>
+                <span class="bulk-progress-text" id="bulkProgressCount"></span>
+              </div>
+              <div class="bulk-progress-bar-track">
+                <div class="bulk-progress-bar-fill" id="bulkProgressFill"></div>
+              </div>
+              <div class="bulk-progress-log" id="bulkProgressLog"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- جدول المتدربين -->
+        <div class="qz-table-section">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">👥 قائمة المتدربين</h3>
+            <button class="qz-refresh-btn" onclick="loadTrainees()">↻ تحديث</button>
+          </div>
+          <div class="qz-table-loading" id="traineesLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل المتدربين…</span>
+          </div>
+          <div class="qz-table-empty" id="traineesEmpty" style="display:none">لا يوجد متدربون مسجّلون بعد</div>
+          <div class="qz-table-wrap" id="traineesTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>الاسم</th>
+                  <th>الرقم التدريبي</th>
+                  <th>عدد الاختبارات</th>
+                  <th>تاريخ التسجيل</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="traineesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- جدول آخر النتائج -->
+        <div class="qz-table-section" style="margin-top:1.5rem;">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">📊 آخر نتائج المتدربين</h3>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <button class="qz-refresh-btn" onclick="exportResultsToPDF()" style="background:rgba(244,67,54,0.10);color:#ff6b6b;border-color:rgba(244,67,54,0.3);">📄 تقرير PDF</button>
+              <button class="qz-refresh-btn" onclick="exportResultsToExcel()" style="background:rgba(0,201,177,0.10);color:var(--accent);border-color:rgba(0,201,177,0.3);">📥 تصدير Excel</button>
+              <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
+            </div>
+          </div>
+          <div class="qz-table-loading" id="resultsLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل النتائج…</span>
+          </div>
+          <div class="qz-table-empty" id="resultsEmpty" style="display:none">لا توجد نتائج بعد</div>
+          <div class="qz-table-wrap" id="resultsTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>المتدرب</th>
+                  <th>الاختبار</th>
+                  <th>الدرجة</th>
+                  <th>النسبة</th>
+                  <th>النتيجة</th>
+                  <th>المحاولة</th>
+                  <th>التاريخ</th>
+                  <th style="text-align:center">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════ PANEL: SETTINGS ════════════ -->
+      <section class="panel" id="panel-settings">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">⚙️ الإعدادات</div>
+            <div class="panel-title">المظهر و<span>الصفحة الرئيسية</span></div>
+            <div class="panel-subtitle">تخصيص ألوان الموقع والخطوط ومحتوى الصفحة الرئيسية وبطاقات الأقسام</div>
+          </div>
+        </div>
+
+        <!-- ──── 1) الهوية البصرية والألوان ──── -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <span class="settings-section-icon">🎨</span>
+            <span class="settings-section-title">الهوية البصرية والألوان</span>
+          </div>
+          <div class="settings-section-body">
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.7;">
+              اختر قالب ألوان جاهز لموقعك. ستُطبَّق الألوان تلقائياً على كل الصفحات.
+            </p>
+
+            <div class="theme-presets" id="themePresets">
+              <!-- يُولَّد ديناميكياً من admin.js -->
+            </div>
+
+            <details style="margin-top:1.2rem;">
+              <summary style="cursor:pointer;padding:0.6rem 0.85rem;background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.25);border-radius:8px;font-size:0.85rem;color:var(--text);font-weight:700;">
+                🎯 تخصيص ألوان يدوياً (متقدم)
+              </summary>
+              <div class="settings-row" style="margin-top:1rem;">
+                <div class="sett-field">
+                  <label>لون الخلفية الأساسي</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settBgColor" value="#080a14" onchange="document.getElementById('settBgColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settBgColorHex">#080a14</span>
+                  </div>
+                </div>
+                <div class="sett-field">
+                  <label>لون القوائم / الشريط الجانبي</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settSidebarColor" value="#0e1022" onchange="document.getElementById('settSidebarColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settSidebarColorHex">#0e1022</span>
+                  </div>
+                </div>
+                <div class="sett-field">
+                  <label>اللون الأساسي (Primary) للأزرار</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settPrimaryColor" value="#6c2fa0" onchange="document.getElementById('settPrimaryColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settPrimaryColorHex">#6c2fa0</span>
+                  </div>
+                </div>
+                <div class="sett-field">
+                  <label>اللون الثانوي (Accent)</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settAccentColor" value="#00c9b1" onchange="document.getElementById('settAccentColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settAccentColorHex">#00c9b1</span>
+                  </div>
+                </div>
+                <div class="sett-field">
+                  <label>لون النصوص</label>
+                  <div class="sett-color-wrap">
+                    <input type="color" id="settTextColor" value="#e8eaf6" onchange="document.getElementById('settTextColorHex').textContent=this.value; _themeClearActive();">
+                    <span class="sett-color-hex" id="settTextColorHex">#e8eaf6</span>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- ──── 2) الخطوط ──── -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <span class="settings-section-icon">🔤</span>
+            <span class="settings-section-title">الخطوط (Typography)</span>
+          </div>
+          <div class="settings-section-body">
+            <div class="settings-row">
+              <div class="sett-field">
+                <label>حجم خط العناوين (H1) — بالـ rem</label>
+                <input type="number" id="settH1Size" value="2" min="1" max="6" step="0.1">
+              </div>
+              <div class="sett-field">
+                <label>حجم خط النصوص العادية (P) — بالـ rem</label>
+                <input type="number" id="settPSize" value="1" min="0.5" max="3" step="0.05">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ──── 3) عنوان ووصف الصفحة الرئيسية ──── -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <span class="settings-section-icon">🏠</span>
+            <span class="settings-section-title">عنوان ووصف الصفحة الرئيسية</span>
+          </div>
+          <div class="settings-section-body">
+            <div class="sett-field">
+              <label>عنوان الصفحة الرئيسية (Hero Title)</label>
+              <input type="text" id="settHeroTitle" placeholder="مثال: مبادئ شبكات الحاسب الآلي">
+            </div>
+            <div class="sett-field">
+              <label>وصف الصفحة الرئيسية (Hero Subtitle)</label>
+              <input type="text" id="settHeroSubtitle" placeholder="مثال: دليل شامل ومتكامل لتعلم شبكات الحاسب">
+            </div>
+            <div class="sett-field">
+              <label>المقال الترحيبي / نبذة الصفحة الرئيسية</label>
+              <div class="sett-editor-wrap">
+                <textarea id="settingsTinyEditor"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ──── 4) إعدادات الاختبارات ──── -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <span class="settings-section-icon">📋</span>
+            <span class="settings-section-title">إعدادات الاختبارات</span>
+          </div>
+          <div class="settings-section-body">
+            <div class="sett-field">
+              <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                <input type="checkbox" id="settAllowReview" style="width:20px;height:20px;cursor:pointer;accent-color:#00c9b1;">
+                <div>
+                  <div style="font-weight:700;color:var(--text);">السماح للمتدرب بمراجعة إجاباته بعد الاختبار</div>
+                  <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+                    عند تفعيل هذا الخيار، يرى المتدرب زر "مراجعة الإجابات" في نهاية الاختبار ويستطيع رؤية الإجابات الصحيحة والخاطئة.
+                    <br>⚠️ إذا كنت تستخدم الاختبارات للتقييم الرسمي، يُنصح بإبقائه مُعطّلاً.
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="sett-field" style="margin-top:1rem;">
+              <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                <input type="checkbox" id="settShowRunningScore" style="width:20px;height:20px;cursor:pointer;accent-color:#00c9b1;">
+                <div>
+                  <div style="font-weight:700;color:var(--text);">إظهار "الدرجة الجارية" للمتدرب أثناء الاختبار</div>
+                  <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+                    عند تفعيله، يرى المتدرب شارة "✅ درجاتك حتى الآن" تتحدّث تلقائياً مع كل إجابة.
+                    <br>⚠️ <strong style="color:#ffa726;">تحذير:</strong> هذا يتيح للمتدرب استنتاج صحة إجاباته فور الاختيار. يُنصح بإبقائه مُعطّلاً في الاختبارات الرسمية.
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ──── 5) بطاقات أقسام الصفحة الرئيسية ──── -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <span class="settings-section-icon">📑</span>
+            <span class="settings-section-title">بطاقات أقسام الصفحة الرئيسية</span>
+          </div>
+          <div class="settings-section-body" id="homeCardsContainer">
+            <!-- يتم توليدها ديناميكياً بواسطة JS -->
+            <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+              <div class="loading-ring" style="width:28px;height:28px;border-width:2px;margin:0 auto 0.75rem"></div>
+              جارٍ تحميل بطاقات الأقسام...
+            </div>
+          </div>
+        </div>
+
+        <!-- ──── شريط الحفظ ──── -->
+        <div class="sett-save-bar">
+          <button class="sett-save-btn" id="btnSaveSettings" onclick="saveSettings()">
+            <span id="settSaveBtnText">💾 حفظ جميع الإعدادات</span>
+            <span id="settSaveBtnSpinner" style="display:none">⏳ جارٍ الحفظ...</span>
+          </button>
+          <span class="sett-save-msg" id="settSaveMsg"></span>
+        </div>
+
+        <!-- ──── معلومات الحساب ──── -->
+        <div class="info-card" style="margin-top:2rem;">
+          <h3>🔐 معلومات الحساب</h3>
+          <p>
+            الاسم: <strong id="settingsName" style="color:var(--text)">—</strong><br>
+            البريد: <strong id="settingsEmail" style="color:var(--text)">—</strong><br>
+            الدور: <strong style="color:var(--accent)">مشرف</strong>
+          </p>
+        </div>
+        <div class="info-card">
+          <h3>🚪 تسجيل الخروج</h3>
+          <p>الضغط على الزر أدناه سيُنهي جلستك الحالية ويعيدك لصفحة تسجيل الدخول.</p>
+          <button onclick="handleLogout()" style="margin-top:1.1rem;padding:0.7rem 1.5rem;background:rgba(244,67,54,0.12);border:1px solid rgba(244,67,54,0.3);border-radius:8px;color:#ff6b6b;font-family:'Cairo',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(244,67,54,0.22)'" onmouseout="this.style.background='rgba(244,67,54,0.12)'">🚪 تسجيل الخروج</button>
+        </div>
+      </section>
+
+    </main><!-- /main-content -->
+  </div><!-- /main-area -->
+</div><!-- /dashboardShell -->
+
+<!-- ════════════ EDIT TRAINEE MODAL ════════════ -->
+<div class="tr-modal-overlay" id="editTraineeModal">
+  <div class="tr-modal">
+    <div class="tr-modal-header">
+      <div class="tr-modal-title">✏️ تعديل بيانات المتدرب</div>
+      <button class="tr-modal-close" onclick="closeEditTraineeModal()" title="إغلاق">✕</button>
+    </div>
+
+    <!-- حقل مخفي لتخزين uid المتدرب المُعدَّل -->
+    <input type="hidden" id="editTraineeUid">
+
+    <div class="tr-modal-field">
+      <label for="editTraineeName">الاسم الكامل *</label>
+      <input type="text" id="editTraineeName" placeholder="مثال: أحمد محمد العمري">
+    </div>
+
+    <div class="tr-modal-field">
+      <label for="editTraineeStudentId">
+        الرقم التدريبي *
+        <small style="color:var(--text-faint);font-weight:400;margin-right:0.4rem;">(10 أرقام — يُعدِّل البريد في Auth أيضاً)</small>
+      </label>
+      <input type="text" id="editTraineeStudentId" inputmode="numeric" maxlength="10"
+             style="direction:ltr;text-align:right;letter-spacing:0.06em;" placeholder="4412345678">
+    </div>
+
+    <div class="tr-modal-actions">
+      <button class="btn-modal-save" id="btnSaveEditTrainee" onclick="saveEditTrainee()">
+        <span id="editSaveBtnText">💾 حفظ التعديلات</span>
+        <span id="editSaveBtnSpinner" style="display:none">⏳</span>
+      </button>
+      <button class="btn-modal-cancel" onclick="closeEditTraineeModal()">إلغاء</button>
+    </div>
+
+    <div class="tr-modal-msg" id="editTraineeMsg"></div>
+  </div>
+</div>
+
+<!-- ════════════ RETAKE MODAL — إعادة الاختبار ════════════ -->
+<div class="tr-modal-overlay" id="retakeModal">
+  <div class="tr-modal">
+    <div class="tr-modal-header">
+      <div class="tr-modal-title">🔄 إعادة إتاحة الاختبار</div>
+      <button class="tr-modal-close" onclick="closeRetakeModal()" title="إغلاق">✕</button>
+    </div>
+
+    <input type="hidden" id="retakeTraineeUid">
+
+    <div style="margin-bottom:1.25rem;padding:0.85rem;background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:9px;">
+      <span style="font-size:0.82rem;color:var(--text-muted);">المتدرب:</span>
+      <strong style="color:var(--text);margin-right:0.4rem;" id="retakeTraineeName">—</strong>
+    </div>
+
+    <div class="tr-modal-field">
+      <label for="retakeQuizSelect">اختر الاختبار المراد إعادة إتاحته *</label>
+      <select id="retakeQuizSelect" style="width:100%;padding:0.75rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;">
+        <option value="">— اختر الاختبار —</option>
+      </select>
+    </div>
+
+    <div class="tr-modal-actions">
+      <button class="btn-modal-save" onclick="grantRetake()" style="background:linear-gradient(135deg, var(--accent-d), var(--accent));">
+        🔄 إتاحة إعادة الاختبار
+      </button>
+      <button class="btn-modal-cancel" onclick="closeRetakeModal()">إلغاء</button>
+    </div>
+
+    <div class="tr-modal-msg" id="retakeMsg"></div>
+  </div>
+</div>
+
+<!-- ════════════ QUESTION ADD/EDIT MODAL ════════════ -->
+<div class="tr-modal-overlay" id="questionModal">
+  <div class="tr-modal">
+    <div class="tr-modal-header">
+      <div class="tr-modal-title" id="questionModalTitle">➕ إضافة سؤال جديد</div>
+      <button class="tr-modal-close" onclick="closeQuestionModal()" title="إغلاق">✕</button>
+    </div>
+
+    <input type="hidden" id="qmEditId" value="">
+
+    <div class="qm-field">
+      <label for="qmCategory">القسم *</label>
+      <select id="qmCategory">
+        <option value="">— اختر القسم —</option>
+        <option value="networks">شبكات الحاسب الآلي</option>
+        <option value="security">الأمان في الشبكات</option>
+        <option value="osi">نموذج OSI</option>
+        <option value="cables">كيابل الشبكات</option>
+        <option value="ip">بروتوكول IP</option>
+      </select>
+    </div>
+
+    <div class="qm-field">
+      <label for="qmType">نوع السؤال *</label>
+      <select id="qmType" onchange="onQuestionTypeChange()">
+        <option value="">— اختر النوع —</option>
+        <option value="tf">صح وخطأ</option>
+        <option value="mcq">اختيار من متعدد</option>
+        <option value="multi">إجابات متعددة</option>
+        <option value="match">مطابقة</option>
+      </select>
+    </div>
+
+    <div class="qm-field">
+      <label for="qmText">نص السؤال *</label>
+      <textarea id="qmText" rows="3" placeholder="اكتب نص السؤال هنا…"></textarea>
+    </div>
+
+    <!-- حقول ديناميكية حسب نوع السؤال -->
+    <div id="qmDynamicFields"></div>
+
+    <div class="tr-modal-actions">
+      <button class="btn-modal-save" id="btnSaveQuestion" onclick="saveQuestion()">
+        <span id="qmSaveBtnText">💾 حفظ السؤال</span>
+        <span id="qmSaveBtnSpinner" style="display:none">⏳</span>
+      </button>
+      <button class="btn-modal-cancel" onclick="closeQuestionModal()">إلغاء</button>
+    </div>
+
+    <div class="tr-modal-msg" id="questionModalMsg"></div>
+  </div>
+</div>
+
+<!-- ════════════ MODAL: إدارة الأقسام المخصّصة ════════════ -->
+<div class="tr-modal-overlay" id="sectionsManagerModal">
+  <div class="tr-modal" style="max-width:700px;">
+    <div class="tr-modal-header">
+      <h3>⚙️ إدارة الأقسام المخصّصة</h3>
+      <button class="tr-modal-close" onclick="closeSectionsManager()">×</button>
+    </div>
+    <div class="tr-modal-body">
+
+      <div style="background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.35);border-radius:8px;padding:0.85rem 1rem;color:#ffc107;font-size:0.82rem;margin-bottom:1.25rem;">
+        💡 الأقسام المخصّصة تظهر في قائمة اختيار المقالات، ويمكن للزوار الوصول إليها عبر:
+        <br><code style="direction:ltr;display:inline-block;background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;margin-top:4px;">article.html?id=SECTION_ID</code>
+      </div>
+
+      <!-- إضافة قسم جديد -->
+      <div style="background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.35);border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;">
+        <div style="font-weight:800;color:#00c9b1;margin-bottom:1rem;">➕ إضافة قسم جديد</div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label class="qz-label">معرّف القسم (إنجليزي فقط، بدون مسافات) *</label>
+          <input type="text" id="newSectionId" class="qz-input" placeholder="مثال: wireless" style="direction:ltr;text-align:right;" pattern="[a-z0-9_-]+">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label class="qz-label">اسم القسم بالعربية *</label>
+          <input type="text" id="newSectionTitle" class="qz-input" placeholder="مثال: الشبكات اللاسلكية">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label class="qz-label">أيقونة القسم (اختياري)</label>
+          <input type="text" id="newSectionIcon" class="qz-input" placeholder="📶" maxlength="4">
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label class="qz-label">وصف قصير (اختياري)</label>
+          <input type="text" id="newSectionDesc" class="qz-input" placeholder="نظرة عامة على الشبكات اللاسلكية ومعاييرها">
+        </div>
+
+        <button class="qz-save-btn" onclick="addCustomSection()" style="width:100%;justify-content:center;">
+          <span>➕ إضافة القسم</span>
+        </button>
+      </div>
+
+      <!-- قائمة الأقسام الموجودة -->
+      <div style="font-weight:800;color:var(--text);margin-bottom:0.75rem;">📋 الأقسام الحالية</div>
+      <div id="sectionsManagerList" style="max-height:300px;overflow-y:auto;">
+        <div style="text-align:center;padding:2rem;color:var(--text-muted);">جارٍ التحميل...</div>
+      </div>
+
+      <div class="tr-modal-msg" id="sectionsManagerMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
