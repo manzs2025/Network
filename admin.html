@@ -2404,6 +2404,47 @@ select optgroup {
           </div>
         </div>
 
+        <!-- ══ إحصائيات متقدمة ══ -->
+        <div class="section-label">📊 إحصائيات الأداء المتقدمة</div>
+        <div id="advancedStatsWrap" style="margin-bottom:2rem;">
+          <button class="seed-bank-btn" onclick="loadAdvancedStats()" id="btnLoadAdvStats">📈 تحميل الإحصائيات المتقدمة</button>
+          <div id="advStatsLoading" style="display:none;text-align:center;padding:2rem;color:var(--text-muted);">
+            <div class="loading-ring" style="margin:0 auto 1rem;width:32px;height:32px;border-width:2px;"></div>
+            جارٍ تحليل البيانات…
+          </div>
+          <div id="advStatsContent" style="display:none;">
+            <!-- نسب النجاح لكل قسم -->
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-top:1rem;">
+              <h4 style="margin-bottom:1rem;font-size:1rem;color:var(--text);">🏆 نسب النجاح والرسوب حسب القسم</h4>
+              <div id="sectionStatsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;"></div>
+            </div>
+            <!-- الإحصائيات العامة -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-top:1rem;">
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;">
+                <div style="font-size:2rem;font-weight:900;color:var(--accent);" id="advAvgScore">—</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">متوسط الدرجات</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;">
+                <div style="font-size:2rem;font-weight:900;color:#00c9b1;" id="advPassRate">—</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">نسبة النجاح الكلية</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;">
+                <div style="font-size:2rem;font-weight:900;color:#ff6b6b;" id="advFailRate">—</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">نسبة الرسوب الكلية</div>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;">
+                <div style="font-size:2rem;font-weight:900;color:var(--primary-l);" id="advTopScore">—</div>
+                <div style="font-size:0.85rem;color:var(--text-muted);">أعلى درجة</div>
+              </div>
+            </div>
+            <!-- أصعب الأسئلة -->
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-top:1rem;">
+              <h4 style="margin-bottom:1rem;font-size:1rem;color:var(--text);">🔴 أصعب الأسئلة (الأكثر خطأً)</h4>
+              <div id="hardestQuestionsList" style="font-size:0.88rem;color:var(--text-muted);line-height:1.8;">جارٍ التحميل…</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Quick Actions -->
         <div class="section-label">إجراءات سريعة</div>
         <div class="quick-actions">

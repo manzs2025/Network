@@ -1554,6 +1554,124 @@ window.loadStats = async function () {
   }
 };
 
+/* ══════════════════════════════════════════════════════
+   📊 إحصائيات الأداء المتقدمة
+══════════════════════════════════════════════════════ */
+window.loadAdvancedStats = async function() {
+  const btn = document.getElementById("btnLoadAdvStats");
+  const loading = document.getElementById("advStatsLoading");
+  const content = document.getElementById("advStatsContent");
+  btn.style.display = "none";
+  loading.style.display = "block";
+
+  try {
+    const [quizzesSnap, resultsSnap] = await Promise.all([
+      getDocs(collection(db, "quizzes")),
+      getDocs(collection(db, "results"))
+    ]);
+
+    const quizzes = {};
+    quizzesSnap.forEach(s => { quizzes[s.id] = s.data(); });
+
+    const results = [];
+    resultsSnap.forEach(s => results.push({ id: s.id, ...s.data() }));
+
+    if (!results.length) {
+      loading.style.display = "none";
+      content.style.display = "block";
+      document.getElementById("sectionStatsGrid").innerHTML = '<div style="color:var(--text-faint);">لا توجد نتائج بعد</div>';
+      document.getElementById("hardestQuestionsList").textContent = "لا توجد بيانات";
+      return;
+    }
+
+    // ── إحصائيات عامة ──
+    const totalResults = results.length;
+    const passed = results.filter(r => r.passed).length;
+    const avgPct = Math.round(results.reduce((s,r) => s + (r.percentage || 0), 0) / totalResults);
+    const topScore = Math.max(...results.map(r => r.percentage || 0));
+
+    document.getElementById("advAvgScore").textContent = avgPct + "%";
+    document.getElementById("advPassRate").textContent = Math.round(passed/totalResults*100) + "%";
+    document.getElementById("advFailRate").textContent = Math.round((totalResults-passed)/totalResults*100) + "%";
+    document.getElementById("advTopScore").textContent = topScore + "%";
+
+    // ── نسب النجاح حسب القسم ──
+    const sectionData = {};
+    results.forEach(r => {
+      const quiz = quizzes[r.quizId];
+      const sec = quiz?.page || "other";
+      if (!sectionData[sec]) sectionData[sec] = { total:0, passed:0, sumPct:0 };
+      sectionData[sec].total++;
+      if (r.passed) sectionData[sec].passed++;
+      sectionData[sec].sumPct += (r.percentage || 0);
+    });
+
+    const sectionGrid = document.getElementById("sectionStatsGrid");
+    sectionGrid.innerHTML = "";
+    const secColors = { networks:"#6c2fa0", security:"#e67e00", osi:"#0077cc", cables:"#00c9b1", ip:"#f5a623" };
+
+    Object.entries(sectionData).forEach(([sec, data]) => {
+      const label = CATEGORY_LABELS[sec] || sec;
+      const passRate = Math.round(data.passed / data.total * 100);
+      const avgP = Math.round(data.sumPct / data.total);
+      const color = secColors[sec] || "#8b46c8";
+      sectionGrid.innerHTML += `
+        <div style="background:var(--bg2);border-radius:10px;padding:1rem;border:1px solid var(--border2);">
+          <div style="font-weight:800;font-size:0.9rem;color:${color};margin-bottom:0.5rem;">${label}</div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-muted);margin-bottom:0.4rem;">
+            <span>نسبة النجاح</span><span style="font-weight:700;color:#00c9b1;">${passRate}%</span>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-bottom:0.5rem;">
+            <div style="height:100%;width:${passRate}%;background:${color};border-radius:3px;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-faint);">
+            <span>المتوسط: ${avgP}%</span><span>${data.total} نتيجة</span>
+          </div>
+        </div>`;
+    });
+
+    // ── أصعب الأسئلة ──
+    const questionErrors = {};
+    results.forEach(r => {
+      const answers = r.answers || r.userAnswers || r.questionResults;
+      if (!answers || typeof answers !== "object") return;
+      Object.entries(answers).forEach(([qIdx, ans]) => {
+        const qText = ans.question || ans.text || `سؤال ${parseInt(qIdx)+1}`;
+        const isCorrect = ans.isCorrect || ans.correct;
+        const key = qText.substring(0, 80);
+        if (!questionErrors[key]) questionErrors[key] = { total:0, wrong:0, text:qText };
+        questionErrors[key].total++;
+        if (!isCorrect) questionErrors[key].wrong++;
+      });
+    });
+
+    const hardest = Object.values(questionErrors)
+      .filter(q => q.total >= 2)
+      .map(q => ({ ...q, errorRate: Math.round(q.wrong/q.total*100) }))
+      .sort((a,b) => b.errorRate - a.errorRate)
+      .slice(0, 5);
+
+    const listEl = document.getElementById("hardestQuestionsList");
+    if (hardest.length) {
+      listEl.innerHTML = hardest.map((q, i) => `
+        <div style="display:flex;gap:0.75rem;align-items:flex-start;padding:0.6rem 0;${i < hardest.length-1 ? 'border-bottom:1px solid var(--border2);' : ''}">
+          <span style="background:rgba(244,67,54,0.15);color:#ff6b6b;border-radius:6px;padding:0.2rem 0.6rem;font-weight:700;font-size:0.8rem;white-space:nowrap;">${q.errorRate}% خطأ</span>
+          <span style="color:var(--text);">${q.text}</span>
+        </div>`).join("");
+    } else {
+      listEl.textContent = "لا توجد بيانات كافية لتحليل الأسئلة (تحتاج محاولتين على الأقل لكل سؤال)";
+    }
+
+    loading.style.display = "none";
+    content.style.display = "block";
+  } catch(e) {
+    console.error("loadAdvancedStats:", e);
+    loading.style.display = "none";
+    btn.style.display = "block";
+    alert("❌ فشل التحميل: " + e.message);
+  }
+};
+
 window.editQuiz = async function(quizId) {
   try {
     const snap = await getDoc(doc(db,"quizzes",quizId));
