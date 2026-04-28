@@ -51,6 +51,7 @@ let _currentQIndex  = 0;
 let _submitted      = false;
 let _startTime      = null;
 const _attemptedInSession = new Set(); /* اختبارات حلّها المتدرب في هذه الجلسة */
+let _userAttemptCounts = {}; /* عدد محاولات كل اختبار { quizId: count } */
 
 /* ══════════════════════════════════════════════════════
    1. حراسة الصفحة
@@ -116,12 +117,14 @@ async function loadQuizzes() {
       )) : Promise.resolve(null)
     ]);
 
-    // تحديث ذاكرة الجلسة بناءً على ما في قاعدة البيانات
-    _attemptedInSession.clear();
+    // تحديث عدد محاولات كل اختبار من قاعدة البيانات
+    _userAttemptCounts = {};
     if (resultsSnap) {
       resultsSnap.forEach(r => {
         const data = r.data();
-        if (data.quizId) _attemptedInSession.add(data.quizId);
+        if (data.quizId) {
+          _userAttemptCounts[data.quizId] = (_userAttemptCounts[data.quizId] || 0) + 1;
+        }
       });
     }
 
@@ -150,21 +153,31 @@ async function loadQuizzes() {
 
       visibleCount++;
 
-      // توحيد أسماء الحقول مع admin.js: page (لا pageId)، questionCount (لا questionsCount)
+      // توحيد أسماء الحقول مع admin.js
       const pageKey = d.page ?? d.pageId;
       const qCount  = d.questionCount ?? d.questionsCount ?? d.questions?.length ?? 0;
       const label   = PAGE_LABELS[pageKey] ?? pageKey ?? "—";
       const dur     = d.duration ? `⏱ ${d.duration} دقيقة` : `⏱ بدون حد زمني`;
       const totalSc = d.totalScore ? ` · 🏆 ${d.totalScore} درجة` : "";
 
-      const alreadyAttempted = _attemptedInSession.has(docSnap.id);
-      const btnHtml = alreadyAttempted
-        ? `<button class="qc-btn" style="background:rgba(128,128,128,0.3);color:#8c90b5;cursor:not-allowed;" disabled>✔ تم الحل مسبقاً</button>`
-        : `<button class="qc-btn" onclick="startQuiz('${docSnap.id}')">▶ ابدأ الاختبار</button>`;
+      // حساب المحاولات من الذاكرة المحلية
+      const userAttempts = _userAttemptCounts[docSnap.id] || 0;
+      const maxAttempts = d.maxAttempts ?? 1;
+      const exhausted = maxAttempts > 0 && userAttempts >= maxAttempts;
+
+      let btnHtml;
+      if (exhausted) {
+        btnHtml = `<button class="qc-btn" style="background:rgba(128,128,128,0.3);color:#8c90b5;cursor:not-allowed;" disabled>✔ استُنفدت المحاولات (${userAttempts}/${maxAttempts})</button>`;
+      } else if (userAttempts > 0) {
+        const attLabel = maxAttempts > 0 ? `${userAttempts}/${maxAttempts}` : `${userAttempts}`;
+        btnHtml = `<button class="qc-btn" style="background:linear-gradient(135deg,#d97706,#b45309);" onclick="startQuiz('${docSnap.id}')">🔄 إعادة المحاولة (${attLabel})</button>`;
+      } else {
+        btnHtml = `<button class="qc-btn" onclick="startQuiz('${docSnap.id}')">▶ ابدأ الاختبار</button>`;
+      }
 
       const card = document.createElement("div");
       card.className = "quiz-card";
-      if (alreadyAttempted) card.style.opacity = "0.65";
+      if (exhausted) card.style.opacity = "0.65";
       card.innerHTML = `
         <div class="qc-tag">📋 ${label}</div>
         <div class="qc-title">${_esc(d.title ?? "—")}</div>
@@ -223,15 +236,10 @@ window.startQuiz = async function (quizId) {
     }
   }
 
-  /* ── التحقق من المحاولة السابقة ── (منع الإعادة إلا بإذن المشرف) */
-  // أولاً: تحقّق من الذاكرة المحلية (حماية فورية من race conditions)
-  if (_attemptedInSession.has(quizId)) {
-    alert("⛔ لقد حللت هذا الاختبار مسبقاً في هذه الجلسة.\nلإعادة المحاولة، يجب التواصل مع المشرف للسماح لك بذلك.");
-    loadQuizzes();
-    return;
-  }
+  /* ── التحقق من المحاولات السابقة (يدعم maxAttempts) ── */
+  const maxAttempts = d.maxAttempts ?? 1; // 0 = بلا حد، 1 = مرة واحدة (الافتراضي)
+  let previousAttempts = 0;
 
-  // ثانياً: تحقّق قسري من الخادم (ليس من الكاش)
   try {
     const { getDocsFromServer } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     const prevSnap = await getDocsFromServer(query(
@@ -239,37 +247,38 @@ window.startQuiz = async function (quizId) {
       where("userId", "==", _currentUser.uid),
       where("quizId", "==", quizId)
     ));
-    if (!prevSnap.empty) {
-      _attemptedInSession.add(quizId);
-      alert("⛔ لقد حللت هذا الاختبار مسبقاً.\nلإعادة المحاولة، يجب التواصل مع المشرف للسماح لك بذلك.");
-      loadQuizzes();
-      return;
-    }
+    previousAttempts = prevSnap.size;
   } catch (err) {
-    console.error("previous attempt check failed:", err);
-    // محاولة احتياطية بالطريقة التقليدية
+    console.error("attempt check failed:", err);
     try {
       const prevSnap = await getDocs(query(
         collection(db, "results"),
         where("userId", "==", _currentUser.uid),
         where("quizId", "==", quizId)
       ));
-      if (!prevSnap.empty) {
-        _attemptedInSession.add(quizId);
-        alert("⛔ لقد حللت هذا الاختبار مسبقاً.\nلإعادة المحاولة، يجب التواصل مع المشرف للسماح لك بذلك.");
-        loadQuizzes();
-        return;
-      }
+      previousAttempts = prevSnap.size;
     } catch (e2) {
       console.error("fallback check failed:", e2);
     }
   }
 
-  if (!confirm(`هل أنت مستعد لبدء اختبار "${d.title}"؟\n${d.duration ? `⏱️ المدة: ${d.duration} دقيقة (سيُرسَل الاختبار تلقائياً عند انتهاء الوقت)` : "⏱️ بدون حد زمني"}\n❓ عدد الأسئلة: ${d.questions?.length || 0}\n\n⚠️ تنبيه: لا يمكن إعادة الاختبار بعد تسليمه إلا بإذن المشرف.`)) {
+  if (maxAttempts > 0 && previousAttempts >= maxAttempts) {
+    alert(`⛔ لقد استنفدت جميع المحاولات (${maxAttempts} من ${maxAttempts}).\nلإعادة المحاولة، يجب التواصل مع المشرف.`);
+    _attemptedInSession.add(quizId);
+    loadQuizzes();
+    return;
+  }
+
+  const attemptsMsg = maxAttempts > 0
+    ? `🔄 المحاولة: ${previousAttempts + 1} من ${maxAttempts}`
+    : `🔄 المحاولة: ${previousAttempts + 1} (بلا حد)`;
+
+  if (!confirm(`هل أنت مستعد لبدء اختبار "${d.title}"؟\n${d.duration ? `⏱️ المدة: ${d.duration} دقيقة (سيُرسَل الاختبار تلقائياً عند انتهاء الوقت)` : "⏱️ بدون حد زمني"}\n❓ عدد الأسئلة: ${d.questions?.length || 0}\n${attemptsMsg}\n\n⚠️ تنبيه: لن تتمكن من تعديل إجاباتك بعد التسليم.`)) {
     return;
   }
 
   _currentQuiz  = { id: quizId, ...d };
+  _currentQuiz._attemptNumber = previousAttempts + 1;
   _answers      = {};
   _currentQIndex = 0;
   _submitted     = false;
@@ -278,8 +287,24 @@ window.startQuiz = async function (quizId) {
   // تفريغ ذاكرة خلط أسئلة المطابقة (لضمان خلط جديد في كل محاولة)
   for (const k in _matchShuffleCache) delete _matchShuffleCache[k];
 
+  /* ── خلط الأسئلة والخيارات إذا مفعّل ── */
+  let questionsToUse = [...(d.questions ?? [])];
+  if (d.shuffleQuestions !== false) {
+    questionsToUse = _shuffle([...questionsToUse]);
+    questionsToUse = questionsToUse.map(q => {
+      const qCopy = { ...q };
+      if ((q.type === "mcq" || q.type === "multi") && Array.isArray(q.options)) {
+        // خلط الخيارات مع تحديث الإجابة الصحيحة
+        const shuffledOpts = _shuffle([...q.options]);
+        qCopy.options = shuffledOpts;
+        // لا نحتاج تحديث correctAnswer لأن المقارنة بالنص لا بالفهرس
+      }
+      return qCopy;
+    });
+  }
+
   /* بناء شاشة الحل */
-  _buildSolver(d.questions ?? []);
+  _buildSolver(questionsToUse);
 
   /* بدء المؤقّت إن وُجدت مدة */
   if (d.duration && d.duration > 0) {
@@ -844,7 +869,7 @@ window.submitQuiz = async function (isAutoSubmit = false) {
       autoSubmitted: isAutoSubmit,
       tabSwitchCount: _currentQuiz._tabSwitchCount ?? 0,
       penaltyDeducted: penalty,
-      attempt:     1,
+      attempt:     _currentQuiz._attemptNumber || 1,
       submittedAt: serverTimestamp(),
     });
   } catch (err) {

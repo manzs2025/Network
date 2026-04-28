@@ -1380,6 +1380,8 @@ window.saveQuizFromBank = async function() {
   const totalScore = totalScoreRaw ? parseFloat(totalScoreRaw) : 0;
   const startDate = document.getElementById("quizStartDate")?.value;
   const endDate   = document.getElementById("quizEndDate")?.value;
+  const maxAttempts = parseInt(document.getElementById("quizMaxAttempts")?.value) || 0;
+  const shuffleQuestions = document.getElementById("quizShuffle")?.checked !== false;
 
   if (!title) return showQuizMsg("❌ يرجى كتابة عنوان الاختبار.", "error");
   if (!page)  return showQuizMsg("❌ يرجى اختيار القسم.", "error");
@@ -1408,7 +1410,9 @@ window.saveQuizFromBank = async function() {
     startDate: startDate ? Timestamp.fromDate(new Date(startDate)) : null,
     endDate:   endDate   ? Timestamp.fromDate(new Date(endDate))   : null,
     available: true, // افتراضياً مُتاح عند الإنشاء
-    status: "active"
+    status: "active",
+    maxAttempts: maxAttempts, // 0 = بلا حد، 1 = مرة واحدة ...
+    shuffleQuestions: shuffleQuestions // خلط الأسئلة والخيارات
   };
 
   const btn = document.getElementById("btnSaveQuiz");
@@ -1436,6 +1440,8 @@ function showQuizMsg(text, type) {
 
 window.resetQuizForm = function() {
   ["quizTitle","quizPage","quizDuration","quizTotalScore","quizStartDate","quizEndDate","quizEditId"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  const maxAtt = document.getElementById("quizMaxAttempts"); if (maxAtt) maxAtt.value = "1";
+  const shuf = document.getElementById("quizShuffle"); if (shuf) shuf.checked = true;
   selectedQuestionIds.clear(); renderFilteredBank();
   document.querySelector("#quizFormCard .qz-form-title").innerHTML = `<span class="qz-form-icon">✏️</span> إنشاء اختبار جديد`;
 };
@@ -1558,6 +1564,8 @@ window.editQuiz = async function(quizId) {
     const totalEl = document.getElementById("quizTotalScore"); if (totalEl) totalEl.value = d.totalScore || "";
     if (d.startDate?.toDate) document.getElementById("quizStartDate").value = toLocalDT(d.startDate.toDate());
     if (d.endDate?.toDate) document.getElementById("quizEndDate").value = toLocalDT(d.endDate.toDate());
+    const maxAttEl = document.getElementById("quizMaxAttempts"); if (maxAttEl) maxAttEl.value = d.maxAttempts ?? 1;
+    const shufEl = document.getElementById("quizShuffle"); if (shufEl) shufEl.checked = d.shuffleQuestions !== false;
     
     selectedQuestionIds.clear();
     (d.questions || []).forEach(q => selectedQuestionIds.add(q.id));
