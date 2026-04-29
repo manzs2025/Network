@@ -150,6 +150,7 @@ async function loadQuizzes() {
 
     const now = new Date();
     let visibleCount = 0;
+    let newCount = 0;
 
     quizzesSnap.forEach(docSnap => {
       const d = docSnap.data();
@@ -189,6 +190,7 @@ async function loadQuizzes() {
       }
 
       const isNew = newQuizIds.has(docSnap.id);
+      if (isNew) newCount++;
 
       const card = document.createElement("div");
       card.className = "quiz-card";
@@ -214,12 +216,6 @@ async function loadQuizzes() {
     // إشعار الاختبارات الجديدة
     const oldBanner = document.getElementById("newQuizBanner");
     if (oldBanner) oldBanner.remove();
-    const newCount = [...newQuizIds].filter(id => {
-      // فقط الاختبارات المرئية
-      let found = false;
-      quizzesSnap.forEach(s => { if (s.id === id) found = true; });
-      return found;
-    }).length;
     if (newCount > 0) {
       const banner = document.createElement("div");
       banner.id = "newQuizBanner";
@@ -1049,6 +1045,25 @@ async function _showResult ({ questions, answersMap, correct, total, score, tota
   document.getElementById("rTotal").textContent   = total;
   document.getElementById("rScore").textContent   = `${score} / ${totalPoints}`;
 
+  /* ── زر الشهادة (للناجحين فقط) ── */
+  const btnCert = document.getElementById("btnCertificate");
+  if (btnCert) {
+    if (passed) {
+      btnCert.style.display = "inline-flex";
+      // حفظ بيانات الشهادة
+      window._certData = {
+        name: _currentUser?.displayName || _currentUser?.email || "متدرب",
+        quiz: _currentQuiz?.title || "الاختبار",
+        score: score,
+        total: totalPoints,
+        percentage: percentage,
+        date: new Date().toLocaleDateString("ar-SA", { year:"numeric", month:"long", day:"numeric" })
+      };
+    } else {
+      btnCert.style.display = "none";
+    }
+  }
+
   /* ── التحقق من السماح بالمراجعة من الإعدادات ── */
   const settings = await _fetchSiteSettings();
   const allowReview = settings.allowReview === true;
@@ -1458,3 +1473,119 @@ function _ensureMatchStyles() {
     }
   });
 })();
+
+/* ══════════════════════════════════════════════════════
+   🎓 تحميل شهادة النجاح (PDF via jsPDF)
+══════════════════════════════════════════════════════ */
+window.downloadCertificate = async function() {
+  const d = window._certData;
+  if (!d) { alert("لا توجد بيانات شهادة."); return; }
+
+  const btn = document.getElementById("btnCertificate");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ جارٍ إنشاء الشهادة..."; }
+
+  try {
+    // تحميل jsPDF إذا لم يكن محمّلاً
+    if (!window.jspdf) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js";
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation:"landscape", unit:"mm", format:"a4" });
+    const W = 297, H = 210;
+
+    // ─── خلفية ───
+    pdf.setFillColor(8, 10, 20);
+    pdf.rect(0, 0, W, H, "F");
+
+    // ─── إطار مزخرف ───
+    pdf.setDrawColor(108, 47, 160);
+    pdf.setLineWidth(1.5);
+    pdf.rect(10, 10, W-20, H-20);
+    pdf.setDrawColor(0, 201, 177);
+    pdf.setLineWidth(0.5);
+    pdf.rect(14, 14, W-28, H-28);
+
+    // ─── شعار أكاديمية الشبكات ───
+    pdf.setFontSize(14);
+    pdf.setTextColor(0, 201, 177);
+    pdf.text("أكاديمية الشبكات", W/2, 32, { align:"center" });
+    pdf.setFontSize(9);
+    pdf.setTextColor(140, 144, 181);
+    pdf.text("الكلية التقنية بالمندق", W/2, 39, { align:"center" });
+
+    // ─── عنوان الشهادة ───
+    pdf.setFontSize(28);
+    pdf.setTextColor(108, 47, 160);
+    pdf.text("شهادة نجاح", W/2, 58, { align:"center" });
+
+    // ─── خط فاصل ───
+    pdf.setDrawColor(108, 47, 160);
+    pdf.setLineWidth(0.8);
+    pdf.line(W/2-40, 63, W/2+40, 63);
+
+    // ─── النص ───
+    pdf.setFontSize(13);
+    pdf.setTextColor(200, 200, 220);
+    pdf.text("تشهد أكاديمية الشبكات بأن", W/2, 78, { align:"center" });
+
+    // ─── اسم المتدرب ───
+    pdf.setFontSize(22);
+    pdf.setTextColor(0, 201, 177);
+    pdf.text(d.name, W/2, 92, { align:"center" });
+
+    // ─── خط تحت الاسم ───
+    pdf.setDrawColor(0, 201, 177);
+    pdf.setLineWidth(0.4);
+    const nameWidth = pdf.getTextWidth(d.name);
+    pdf.line(W/2 - nameWidth/2 - 5, 95, W/2 + nameWidth/2 + 5, 95);
+
+    // ─── تفاصيل الاختبار ───
+    pdf.setFontSize(12);
+    pdf.setTextColor(200, 200, 220);
+    pdf.text("قد اجتاز بنجاح اختبار", W/2, 108, { align:"center" });
+
+    pdf.setFontSize(16);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(d.quiz, W/2, 120, { align:"center" });
+
+    // ─── الدرجة ───
+    pdf.setFontSize(13);
+    pdf.setTextColor(200, 200, 220);
+    pdf.text(`بدرجة ${d.score} من ${d.total} (${d.percentage}%)`, W/2, 134, { align:"center" });
+
+    // ─── شارة الدرجة ───
+    const badgeColor = d.percentage >= 90 ? [255,215,0] : d.percentage >= 75 ? [0,201,177] : [108,47,160];
+    const badgeLabel = d.percentage >= 90 ? "ممتاز" : d.percentage >= 75 ? "جيد جداً" : "ناجح";
+    pdf.setFillColor(...badgeColor);
+    pdf.roundedRect(W/2-18, 140, 36, 12, 3, 3, "F");
+    pdf.setFontSize(11);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(badgeLabel, W/2, 148, { align:"center" });
+
+    // ─── التاريخ ───
+    pdf.setFontSize(10);
+    pdf.setTextColor(140, 144, 181);
+    pdf.text(`التاريخ: ${d.date}`, W/2, 165, { align:"center" });
+
+    // ─── ذيل الشهادة ───
+    pdf.setFontSize(8);
+    pdf.setTextColor(100, 100, 130);
+    pdf.text("هذه الشهادة صادرة إلكترونياً من أكاديمية الشبكات — الكلية التقنية بالمندق", W/2, H-18, { align:"center" });
+
+    // ─── تحميل ───
+    pdf.save(`شهادة_${d.name}_${d.quiz}.pdf`);
+
+  } catch(e) {
+    console.error("Certificate error:", e);
+    alert("❌ فشل إنشاء الشهادة: " + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "🎓 تحميل الشهادة"; }
+  }
+};

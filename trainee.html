@@ -290,6 +290,8 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
 .btn-home-action:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(108,47,160,0.35); }
 .btn-review-action { background:rgba(255,255,255,0.05); border:1px solid var(--border2); color:var(--text-muted); }
 .btn-review-action:hover { border-color:var(--accent); color:var(--accent); }
+.btn-cert-action { background:linear-gradient(135deg,#00c9b1,#00e6cc); color:#000; font-weight:700; }
+.btn-cert-action:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,201,177,0.35); }
 
 /* ─── MY RESULTS PAGE ─── */
 .results-table-wrap { overflow-x:auto; border-radius:var(--radius); border:1px solid var(--border); }
@@ -465,6 +467,7 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
     <div class="result-actions">
       <button class="btn-action btn-home-action" onclick="backToHome()">🏠 العودة للرئيسية</button>
       <button class="btn-action btn-review-action" id="btnToggleReview" onclick="toggleReview()">👁 مراجعة الإجابات</button>
+      <button class="btn-action btn-cert-action" id="btnCertificate" onclick="downloadCertificate()" style="display:none">🎓 تحميل الشهادة</button>
     </div>
   </div>
 
