@@ -1712,9 +1712,35 @@ window.loadTrainees = async function () {
     tbody.innerHTML = "";
     snap.forEach(s => {
       const d = s.data(); const safeName = (d.displayName || "").replace(/'/g, "\\'");
-      tbody.innerHTML += `<tr data-uid="${s.id}"><td>${d.displayName || "—"}</td><td style="direction:ltr;text-align:center">${d.studentId || "—"}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td style="white-space:nowrap"><button class="tr-edit-btn" onclick="openEditTraineeModal('${s.id}','${safeName}','${d.studentId || ""}')">✏️</button><button class="tr-edit-btn" style="background:rgba(0,201,177,0.1);color:var(--accent);" onclick="openRetakeModal('${s.id}','${safeName}')">🔄</button><button class="tr-edit-btn" style="background:rgba(244,67,54,0.1);color:#ff6b6b;" onclick="deleteTrainee('${s.id}')">🗑️</button></td></tr>`;
+      tbody.innerHTML += `<tr data-uid="${s.id}" data-name="${(d.displayName||'').toLowerCase()}" data-sid="${d.studentId||''}"><td>${d.displayName || "—"}</td><td style="direction:ltr;text-align:center">${d.studentId || "—"}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td style="white-space:nowrap"><button class="tr-edit-btn" onclick="openEditTraineeModal('${s.id}','${safeName}','${d.studentId || ""}')">✏️</button><button class="tr-edit-btn" style="background:rgba(0,201,177,0.1);color:var(--accent);" onclick="openRetakeModal('${s.id}','${safeName}')">🔄</button><button class="tr-edit-btn" style="background:rgba(244,67,54,0.1);color:#ff6b6b;" onclick="deleteTrainee('${s.id}')">🗑️</button></td></tr>`;
     });
+    // مسح حقل البحث
+    const searchInput = document.getElementById("traineeSearchInput");
+    if (searchInput) searchInput.value = "";
   } catch (e) { console.error(e); } finally { loadingEl.style.display = "none"; wrap.style.display = "block"; }
+};
+
+/* ── بحث وفلترة المتدربين ── */
+window.filterTrainees = function() {
+  const query = (document.getElementById("traineeSearchInput")?.value || "").toLowerCase().trim();
+  const rows = document.querySelectorAll("#traineesTableBody tr");
+  let visibleCount = 0;
+  rows.forEach(row => {
+    const name = row.getAttribute("data-name") || "";
+    const sid = row.getAttribute("data-sid") || "";
+    const match = !query || name.includes(query) || sid.includes(query);
+    row.style.display = match ? "" : "none";
+    if (match) visibleCount++;
+  });
+  // رسالة إذا لم يُعثر على نتائج
+  const emptyEl = document.getElementById("traineesEmpty");
+  const wrapEl = document.getElementById("traineesTableWrap");
+  if (visibleCount === 0 && query) {
+    emptyEl.style.display = "block";
+    emptyEl.textContent = `لم يُعثر على نتائج لـ "${query}"`;
+  } else {
+    emptyEl.style.display = "none";
+  }
 };
 
 window.handleBulkImport = async function (inputEl) {

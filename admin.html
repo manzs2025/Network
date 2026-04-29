@@ -3366,7 +3366,10 @@ select optgroup {
         <div class="qz-table-section">
           <div class="qz-table-header">
             <h3 class="qz-table-title">👥 قائمة المتدربين</h3>
-            <button class="qz-refresh-btn" onclick="loadTrainees()">↻ تحديث</button>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <input type="text" id="traineeSearchInput" class="qz-input" placeholder="🔍 بحث بالاسم أو الرقم التدريبي..." oninput="filterTrainees()" style="max-width:280px;font-size:0.82rem;padding:0.45rem 0.8rem;">
+              <button class="qz-refresh-btn" onclick="loadTrainees()">↻ تحديث</button>
+            </div>
           </div>
           <div class="qz-table-loading" id="traineesLoading">
             <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
