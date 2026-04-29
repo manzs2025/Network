@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6c2fa0">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <!-- يطبّق ألوان الموقع من إعدادات لوحة التحكم — يجب أن يُوضع مبكراً لتجنّب وميض الألوان -->
 <script src="shared-theme.js"></script>
 <title>بوابة المتدرب — أكاديمية الشبكات</title>
@@ -606,5 +610,6 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
 </nav>
 
 <script type="module" src="trainee.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
 </body>
 </html>
