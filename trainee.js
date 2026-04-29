@@ -128,6 +128,19 @@ async function loadQuizzes() {
       });
     }
 
+    /* ── كشف الاختبارات الجديدة (إشعار) ── */
+    const seenKey = "nw_seen_quizzes_" + (_currentUser?.uid || "anon");
+    let seenIds = [];
+    try { seenIds = JSON.parse(localStorage.getItem(seenKey) || "[]"); } catch(e) {}
+    const allIds = [];
+    const newQuizIds = new Set();
+    quizzesSnap.forEach(s => {
+      allIds.push(s.id);
+      if (!seenIds.includes(s.id)) newQuizIds.add(s.id);
+    });
+    // حفظ كل الـ IDs كمشاهَدة بعد الزيارة
+    try { localStorage.setItem(seenKey, JSON.stringify(allIds)); } catch(e) {}
+
     loadingEl.style.display = "none";
 
     if (quizzesSnap.empty) {
@@ -175,10 +188,14 @@ async function loadQuizzes() {
         btnHtml = `<button class="qc-btn" onclick="startQuiz('${docSnap.id}')">▶ ابدأ الاختبار</button>`;
       }
 
+      const isNew = newQuizIds.has(docSnap.id);
+
       const card = document.createElement("div");
       card.className = "quiz-card";
       if (exhausted) card.style.opacity = "0.65";
+      if (isNew) card.style.boxShadow = "0 0 0 2px var(--accent), 0 4px 20px rgba(0,201,177,0.25)";
       card.innerHTML = `
+        ${isNew ? '<div class="qc-new-badge">🆕 جديد</div>' : ''}
         <div class="qc-tag">📋 ${label}</div>
         <div class="qc-title">${_esc(d.title ?? "—")}</div>
         <div class="qc-meta">
@@ -192,6 +209,23 @@ async function loadQuizzes() {
 
     if (visibleCount === 0) {
       emptyEl.style.display = "block";
+    }
+
+    // إشعار الاختبارات الجديدة
+    const oldBanner = document.getElementById("newQuizBanner");
+    if (oldBanner) oldBanner.remove();
+    const newCount = [...newQuizIds].filter(id => {
+      // فقط الاختبارات المرئية
+      let found = false;
+      quizzesSnap.forEach(s => { if (s.id === id) found = true; });
+      return found;
+    }).length;
+    if (newCount > 0) {
+      const banner = document.createElement("div");
+      banner.id = "newQuizBanner";
+      banner.className = "new-quiz-banner";
+      banner.innerHTML = `🔔 يوجد <strong>${newCount}</strong> اختبار جديد! قم بحلّه الآن.`;
+      grid.parentElement.insertBefore(banner, grid);
     }
 
   } catch (err) {
