@@ -150,6 +150,52 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
 }
 .quiz-card { position: relative; }
 
+/* ─── LEADERBOARD ─── */
+.lb-podium {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-top: 1rem;
+}
+.lb-podium-card {
+  text-align: center;
+  border-radius: 12px;
+  padding: 1rem 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  flex: 0 0 100px;
+  transition: transform 0.2s;
+}
+.lb-podium-card:hover { transform: translateY(-4px); }
+.lb-podium-card.rank-1 { border-color: #ffd700; box-shadow: 0 4px 20px rgba(255,215,0,0.2); flex: 0 0 120px; }
+.lb-podium-card.rank-2 { border-color: #c0c0c0; }
+.lb-podium-card.rank-3 { border-color: #cd7f32; }
+.lb-medal { font-size: 1.8rem; margin-bottom: 0.3rem; }
+.lb-name { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-score { font-size: 1.3rem; font-weight: 900; }
+.lb-podium-card.rank-1 .lb-score { color: #ffd700; }
+.lb-podium-card.rank-2 .lb-score { color: #c0c0c0; }
+.lb-podium-card.rank-3 .lb-score { color: #cd7f32; }
+.lb-sub { font-size: 0.7rem; color: var(--text-faint); }
+.lb-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+.lb-rank { font-weight: 800; color: var(--text-faint); min-width: 28px; text-align: center; }
+.lb-row-name { flex: 1; font-weight: 600; color: var(--text); }
+.lb-row-score { font-weight: 800; color: var(--accent); }
+.lb-row-count { font-size: 0.75rem; color: var(--text-faint); }
+.lb-row.is-me { border-color: var(--accent); background: rgba(0,201,177,0.06); }
+
 /* ─── EMPTY / LOADING STATES ─── */
 .state-box {
   text-align:center; padding:4rem 2rem;
@@ -515,6 +561,34 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
   </div>
 </div>
 
+<!-- ══════════════════════════════════════
+     PAGE 5: لوحة الصدارة
+══════════════════════════════════════ -->
+<div class="page page-with-bnav" id="pageLeaderboard">
+  <div class="container">
+    <div class="sec-heading">
+      <div>
+        <div class="sec-title">لوحة <span>الصدارة</span></div>
+        <div class="sec-sub">ترتيب المتدربين حسب أفضل أداء</div>
+      </div>
+      <button class="solver-back" onclick="loadLeaderboard()">↻ تحديث</button>
+    </div>
+
+    <div id="lbLoading" class="state-box">
+      <span class="state-icon">⏳</span>جارٍ التحميل…
+    </div>
+    <div id="lbEmpty" class="state-box" style="display:none">
+      <span class="state-icon">🏆</span>لا توجد نتائج بعد
+    </div>
+    <div id="lbContent" style="display:none">
+      <!-- المراكز الثلاثة الأولى -->
+      <div class="lb-podium" id="lbPodium"></div>
+      <!-- بقية الترتيب -->
+      <div class="lb-list" id="lbList"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ BOTTOM NAV ══ -->
 <nav class="bottom-nav" id="mainBottomNav" style="display:none">
   <button class="bnav-item active" id="bnav-home" onclick="showPage('pageHome','bnav-home')">
@@ -524,6 +598,10 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
   <button class="bnav-item" id="bnav-results" onclick="showPage('pageMyResults','bnav-results');loadMyResults()">
     <span class="bnav-icon">📊</span>
     نتائجي
+  </button>
+  <button class="bnav-item" id="bnav-lb" onclick="showPage('pageLeaderboard','bnav-lb');loadLeaderboard()">
+    <span class="bnav-icon">🏆</span>
+    الصدارة
   </button>
 </nav>
 

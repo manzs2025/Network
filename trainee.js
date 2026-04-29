@@ -1475,6 +1475,104 @@ function _ensureMatchStyles() {
 })();
 
 /* ══════════════════════════════════════════════════════
+   🏆 لوحة الصدارة
+══════════════════════════════════════════════════════ */
+window.loadLeaderboard = async function() {
+  const loading = document.getElementById("lbLoading");
+  const empty   = document.getElementById("lbEmpty");
+  const content = document.getElementById("lbContent");
+  const podium  = document.getElementById("lbPodium");
+  const list    = document.getElementById("lbList");
+
+  loading.style.display = "block";
+  empty.style.display = "none";
+  content.style.display = "none";
+
+  try {
+    const resultsSnap = await getDocs(collection(db, "results"));
+    if (resultsSnap.empty) {
+      loading.style.display = "none";
+      empty.style.display = "block";
+      return;
+    }
+
+    // تجميع أفضل نتيجة لكل متدرب
+    const userBest = {};
+    resultsSnap.forEach(s => {
+      const d = s.data();
+      const uid = d.userId;
+      const name = d.userName || d.userEmail || "متدرب";
+      const pct = d.percentage || 0;
+
+      if (!userBest[uid]) {
+        userBest[uid] = { name, bestPct: pct, totalQuizzes: 1, totalPct: pct };
+      } else {
+        userBest[uid].totalQuizzes++;
+        userBest[uid].totalPct += pct;
+        if (pct > userBest[uid].bestPct) {
+          userBest[uid].bestPct = pct;
+          userBest[uid].name = name;
+        }
+      }
+    });
+
+    // حساب المتوسط وترتيب
+    const ranked = Object.entries(userBest)
+      .map(([uid, d]) => ({
+        uid,
+        name: d.name,
+        avgPct: Math.round(d.totalPct / d.totalQuizzes),
+        quizCount: d.totalQuizzes
+      }))
+      .sort((a, b) => b.avgPct - a.avgPct);
+
+    if (!ranked.length) {
+      loading.style.display = "none";
+      empty.style.display = "block";
+      return;
+    }
+
+    // المراكز الثلاثة الأولى
+    const medals = ["🥇", "🥈", "🥉"];
+    podium.innerHTML = "";
+    const podiumOrder = [1, 0, 2]; // عرض: فضي، ذهبي، برونزي (الذهبي أعلى في الوسط)
+    podiumOrder.forEach(i => {
+      if (!ranked[i]) return;
+      const r = ranked[i];
+      const isMe = r.uid === (_currentUser?.uid || "");
+      podium.innerHTML += `
+        <div class="lb-podium-card rank-${i+1} ${isMe ? 'is-me' : ''}">
+          <div class="lb-medal">${medals[i]}</div>
+          <div class="lb-name">${r.name.split("@")[0]}</div>
+          <div class="lb-score">${r.avgPct}%</div>
+          <div class="lb-sub">${r.quizCount} اختبار</div>
+        </div>`;
+    });
+
+    // بقية الترتيب (من المركز 4)
+    list.innerHTML = "";
+    ranked.slice(3).forEach((r, i) => {
+      const isMe = r.uid === (_currentUser?.uid || "");
+      list.innerHTML += `
+        <div class="lb-row ${isMe ? 'is-me' : ''}">
+          <div class="lb-rank">#${i+4}</div>
+          <div class="lb-row-name">${r.name.split("@")[0]}</div>
+          <div class="lb-row-count">${r.quizCount} اختبار</div>
+          <div class="lb-row-score">${r.avgPct}%</div>
+        </div>`;
+    });
+
+    loading.style.display = "none";
+    content.style.display = "block";
+
+  } catch(e) {
+    console.error("loadLeaderboard:", e);
+    loading.style.display = "none";
+    empty.style.display = "block";
+  }
+};
+
+/* ══════════════════════════════════════════════════════
    🎓 تحميل شهادة النجاح (PDF via jsPDF)
 ══════════════════════════════════════════════════════ */
 window.downloadCertificate = async function() {
