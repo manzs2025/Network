@@ -63,6 +63,48 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
 }
 .btn-logout:hover { background:rgba(244,67,54,0.18); }
 
+/* ─── THEME TOGGLE ─── */
+.btn-theme-toggle {
+  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
+  background:rgba(255,255,255,0.05); font-size:1.1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.3s;
+}
+.btn-theme-toggle:hover { background:rgba(255,255,255,0.12); transform:rotate(20deg); }
+
+/* ─── LIGHT THEME ─── */
+html.trainee-light {
+  --bg: #f4f2f7;
+  --bg2: #ece8f3;
+  --bg3: #e2dced;
+  --card: #ffffff;
+  --card2: #faf9fc;
+  --text: #1a1a2e;
+  --text-muted: #555577;
+  --text-faint: #8888aa;
+  --border: #d8d0e8;
+  --border2: #e8e2f2;
+  --primary: #6c2fa0;
+  --primary-l: #8b46c8;
+  --accent: #009e8e;
+  --accent-d: #007a6e;
+}
+html.trainee-light .topbar { background:rgba(255,255,255,0.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+html.trainee-light .topbar-logo { color: var(--primary); }
+html.trainee-light .trainee-chip { background:rgba(108,47,160,0.08); border-color:rgba(108,47,160,0.2); color:var(--primary); }
+html.trainee-light .quiz-card { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+html.trainee-light .quiz-card:hover { box-shadow: 0 8px 24px rgba(108,47,160,0.12); }
+html.trainee-light .bottom-nav { background:rgba(255,255,255,0.95); border-top:1px solid var(--border); }
+html.trainee-light .bnav-item { color: var(--text-muted); }
+html.trainee-light .bnav-item.active { color: var(--primary); }
+html.trainee-light .state-box { border-color: var(--border); }
+html.trainee-light .result-circle.pass { background:linear-gradient(135deg,#e8f5e9,#c8e6c9); }
+html.trainee-light .result-circle.fail { background:linear-gradient(135deg,#fce4ec,#f8bbd0); }
+html.trainee-light .new-quiz-banner { background:linear-gradient(135deg,rgba(0,158,142,0.1),rgba(108,47,160,0.08)); border-color:var(--accent); }
+html.trainee-light .lb-podium-card { box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+html.trainee-light .lb-row { box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+html.trainee-light .btn-theme-toggle { background:rgba(108,47,160,0.08); border-color:rgba(108,47,160,0.2); }
+
 /* ─── LOADING OVERLAY ─── */
 #loadingOverlay {
   position:fixed; inset:0; background:var(--bg); z-index:9999;
@@ -417,6 +459,7 @@ html,body { height:100%; font-family:'Cairo',sans-serif; background:var(--bg); c
     أكاديمية الشبكات
   </a>
   <div class="topbar-right">
+    <button class="btn-theme-toggle" id="btnThemeToggle" onclick="toggleTraineeTheme()" title="تبديل المظهر">🌙</button>
     <div class="trainee-chip">👤 <span id="traineeNameChip">متدرب</span></div>
     <button class="btn-logout" onclick="doLogout()">خروج 🚪</button>
   </div>

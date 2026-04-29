@@ -1475,6 +1475,29 @@ function _ensureMatchStyles() {
 })();
 
 /* ══════════════════════════════════════════════════════
+   🌙/☀️ تبديل المظهر (فاتح/داكن) لبوابة المتدرب
+══════════════════════════════════════════════════════ */
+window.toggleTraineeTheme = function() {
+  const html = document.documentElement;
+  const isLight = html.classList.toggle("trainee-light");
+  const btn = document.getElementById("btnThemeToggle");
+  if (btn) btn.textContent = isLight ? "☀️" : "🌙";
+  try { localStorage.setItem("nw_trainee_theme", isLight ? "light" : "dark"); } catch(e) {}
+};
+
+// تطبيق المظهر المحفوظ عند التحميل
+(function() {
+  try {
+    const saved = localStorage.getItem("nw_trainee_theme");
+    if (saved === "light") {
+      document.documentElement.classList.add("trainee-light");
+      const btn = document.getElementById("btnThemeToggle");
+      if (btn) btn.textContent = "☀️";
+    }
+  } catch(e) {}
+})();
+
+/* ══════════════════════════════════════════════════════
    🏆 لوحة الصدارة
 ══════════════════════════════════════════════════════ */
 window.loadLeaderboard = async function() {
