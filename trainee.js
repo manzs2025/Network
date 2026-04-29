@@ -1221,6 +1221,9 @@ window.loadMyResults = async function () {
       tbody.appendChild(tr);
     });
 
+    // ── بناء تقرير الأداء الشامل ──
+    _buildPerformanceReport(results);
+
   } catch (err) {
     console.error("loadMyResults:", err);
     loadingEl.style.display = "none";
@@ -1229,6 +1232,81 @@ window.loadMyResults = async function () {
     emptyEl.lastChild.textContent = `خطأ في التحميل: ${err.message}`;
   }
 };
+
+/* ══════════════════════════════════════════════════════
+   📊 تقرير الأداء الشامل
+══════════════════════════════════════════════════════ */
+function _buildPerformanceReport(results) {
+  const wrap = document.getElementById("perfReportWrap");
+  if (!wrap || !results.length) { if (wrap) wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+
+  // ترتيب زمني (الأقدم أولاً) للرسم البياني
+  const sorted = [...results].sort((a, b) => {
+    const ta = a.submittedAt?.toDate?.()?.getTime() ?? 0;
+    const tb = b.submittedAt?.toDate?.()?.getTime() ?? 0;
+    return ta - tb;
+  });
+
+  // ── رسم بياني ──
+  const chart = document.getElementById("perfChart");
+  chart.innerHTML = "";
+  const maxPct = 100;
+  const colors = { pass:"linear-gradient(to top,#00c9b1,#00e6cc)", fail:"linear-gradient(to top,#ff6b6b,#ff8a8a)" };
+  sorted.forEach((r, i) => {
+    const pct = r.percentage || 0;
+    const passed = r.passed ?? (pct >= 50);
+    const h = Math.max(8, (pct / maxPct) * 150);
+    const label = r.quizTitle ? r.quizTitle.substring(0, 8) : `#${i+1}`;
+    chart.innerHTML += `
+      <div class="perf-bar" style="height:${h}px;background:${passed ? colors.pass : colors.fail};" title="${r.quizTitle || ''}: ${pct}%">
+        <div class="perf-bar-val">${pct}%</div>
+        <div class="perf-bar-label">${label}</div>
+      </div>`;
+  });
+
+  // ── الأداء حسب القسم ──
+  const secData = {};
+  results.forEach(r => {
+    const sec = r.page || r.pageId || "other";
+    if (!secData[sec]) secData[sec] = { total: 0, sumPct: 0 };
+    secData[sec].total++;
+    secData[sec].sumPct += (r.percentage || 0);
+  });
+
+  const secEl = document.getElementById("perfSections");
+  secEl.innerHTML = "";
+  const secColors = { networks:"#6c2fa0", security:"#e67e00", osi:"#0077cc", cables:"#00c9b1", ip:"#f5a623" };
+  Object.entries(secData).forEach(([sec, d]) => {
+    const avg = Math.round(d.sumPct / d.total);
+    const label = PAGE_LABELS[sec] || sec;
+    const color = secColors[sec] || "#8b46c8";
+    const level = avg >= 90 ? "ممتاز" : avg >= 75 ? "جيد جداً" : avg >= 50 ? "جيد" : "يحتاج تحسين";
+    secEl.innerHTML += `
+      <div class="perf-sec-card">
+        <div class="perf-sec-name">${label}</div>
+        <div class="perf-sec-bar-wrap"><div class="perf-sec-bar" style="width:${avg}%;background:${color};"></div></div>
+        <div class="perf-sec-pct" style="color:${color};">${avg}%</div>
+        <div style="font-size:0.68rem;color:var(--text-faint);">${level} · ${d.total} اختبار</div>
+      </div>`;
+  });
+
+  // ── ملخص ──
+  const allPcts = results.map(r => r.percentage || 0);
+  const avg = Math.round(allPcts.reduce((a, b) => a + b, 0) / allPcts.length);
+  const best = Math.max(...allPcts);
+  document.getElementById("perfAvg").textContent = avg + "%";
+  document.getElementById("perfBest").textContent = best + "%";
+  document.getElementById("perfTotal").textContent = results.length;
+
+  // نجاحات متتالية
+  let streak = 0, maxStreak = 0;
+  sorted.forEach(r => {
+    if (r.passed ?? (r.percentage >= 50)) { streak++; maxStreak = Math.max(maxStreak, streak); }
+    else streak = 0;
+  });
+  document.getElementById("perfStreak").textContent = maxStreak;
+}
 
 /* ══════════════════════════════════════════════════════
    تنقل الصفحات
