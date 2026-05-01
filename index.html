@@ -192,7 +192,7 @@
 <!-- ═══ PAGES GRID ═══ -->
 <div class="pages-grid" id="pagesGrid">
 
-  <a href="networks.html" class="page-card">
+  <a href="content.html?section=networks" class="page-card">
     <span class="pc-icon">📡</span>
     <div class="pc-title">شبكات الحاسب الآلي</div>
     <div class="pc-en">Computer Networks</div>
@@ -206,7 +206,7 @@
     <div class="pc-arrow">ابدأ التعلم ←</div>
   </a>
 
-  <a href="security.html" class="page-card">
+  <a href="content.html?section=security" class="page-card">
     <span class="pc-icon">🔒</span>
     <div class="pc-title">الأمان في الشبكات</div>
     <div class="pc-en">Network Security</div>
@@ -220,7 +220,7 @@
     <div class="pc-arrow">ابدأ التعلم ←</div>
   </a>
 
-  <a href="osi.html" class="page-card">
+  <a href="content.html?section=osi" class="page-card">
     <span class="pc-icon">🔁</span>
     <div class="pc-title">نموذج OSI</div>
     <div class="pc-en">OSI Model</div>
@@ -235,7 +235,7 @@
     <div class="pc-arrow">ابدأ التعلم ←</div>
   </a>
 
-  <a href="cables.html" class="page-card">
+  <a href="content.html?section=cables" class="page-card">
     <span class="pc-icon">🔌</span>
     <div class="pc-title">كيابل الشبكات</div>
     <div class="pc-en">Networking Cables</div>
@@ -249,7 +249,7 @@
     <div class="pc-arrow">ابدأ التعلم ←</div>
   </a>
 
-  <a href="ip.html" class="page-card">
+  <a href="content.html?section=ip" class="page-card">
     <span class="pc-icon">🌍</span>
     <div class="pc-title">بروتوكول IP</div>
     <div class="pc-en">Internet Protocol Address</div>
@@ -269,15 +269,14 @@
   <p>إعداد: <strong>الكلية التقنية بالمندق</strong> | المدرب: <strong>منصور الزهراني</strong></p>
   <p style="margin-top:0.35rem;">المؤسسة العامة للتدريب التقني والمهني — مبادئ شبكات الحاسب الآلي</p>
   <div class="footer-links">
-    <a href="networks.html">شبكات الحاسب</a>
-    <a href="security.html">الأمان</a>
-    <a href="osi.html">نموذج OSI</a>
-    <a href="cables.html">الكيابل</a>
-    <a href="ip.html">بروتوكول IP</a>
+    <a href="content.html?section=networks">شبكات الحاسب</a>
+    <a href="content.html?section=security">الأمان</a>
+    <a href="content.html?section=osi">نموذج OSI</a>
+    <a href="content.html?section=cables">الكيابل</a>
+    <a href="content.html?section=ip">بروتوكول IP</a>
   </div>
 </footer>
 
-<script type="module" src="articles-loader.js" data-page="home"></script>
 <script src="shared-nav.js"></script>
 
 <!-- ═══ Firebase — جلب إعدادات المظهر والصفحة الرئيسية ═══ -->
@@ -385,7 +384,6 @@ function darkenColor(hex, pct) {
   return "#"+(0x1000000+(r<<16)+(g<<8)+b).toString(16).slice(1);
 }
 </script>
-<script src="index-cms-loader.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
 </body>
 </html>
