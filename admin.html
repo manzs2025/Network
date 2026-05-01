@@ -1907,6 +1907,24 @@ select optgroup {
 
 /* ── Seed Bank Button ── */
 .seed-bank-wrap {
+
+/* ─── PDF LINKS MANAGEMENT ─── */
+.pdf-links-grid { display:grid; gap:1rem; }
+.pdf-link-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:1rem;
+}
+.pdf-link-header {
+  font-weight:700;
+  font-size:0.88rem;
+  color:var(--text);
+  margin-bottom:0.6rem;
+}
+.pdf-link-header span { margin-left:0.4rem; }
+.pdf-link-card .qz-input { direction:ltr; text-align:left; font-size:0.8rem !important; }
+
   margin-bottom: 1.5rem;
   padding: 1.25rem;
   background: rgba(108,47,160,0.06);
@@ -2294,6 +2312,11 @@ select optgroup {
       <button class="sb-item" data-panel="cms" onclick="switchPanel(this, 'cms')">
         <span class="sb-icon">🌐</span>
         محرر الموقع
+      </button>
+
+      <button class="sb-item" data-panel="pdf" onclick="switchPanel(this, 'pdf'); loadPdfLinks();">
+        <span class="sb-icon">📄</span>
+        ملفات الأقسام
       </button>
 
       <button class="sb-item" data-panel="legacyEdit" onclick="switchPanel(this, 'legacyEdit')">
@@ -3429,6 +3452,57 @@ select optgroup {
       </section>
 
       <!-- ════════════ PANEL: SETTINGS ════════════ -->
+      <!-- ════════════ PANEL: إدارة ملفات PDF ════════════ -->
+      <section class="panel" id="panel-pdf" style="display:none;">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">📄 إدارة ملفات الأقسام</div>
+            <div class="panel-title">ملفات <span>PDF</span></div>
+            <div class="panel-subtitle">ضع رابط Google Drive لكل قسم — الملف يظهر مباشرة للزوار</div>
+          </div>
+        </div>
+
+        <div style="padding:1.5rem;display:grid;gap:1.5rem;">
+          <div style="background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:10px;padding:1rem;font-size:0.82rem;color:var(--accent);line-height:1.8;">
+            📌 <strong>طريقة الاستخدام:</strong><br>
+            1. ارفع ملف PDF على Google Drive<br>
+            2. اضغط "مشاركة" واجعله "أي شخص لديه الرابط"<br>
+            3. انسخ الرابط والصقه هنا<br>
+            4. اضغط "💾 حفظ جميع الروابط"
+          </div>
+
+          <div class="pdf-links-grid" id="pdfLinksGrid">
+            <div class="pdf-link-card">
+              <div class="pdf-link-header"><span>📡</span> شبكات الحاسب الآلي</div>
+              <input type="url" id="pdfLink_networks" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
+            </div>
+            <div class="pdf-link-card">
+              <div class="pdf-link-header"><span>🔒</span> الأمان في الشبكات</div>
+              <input type="url" id="pdfLink_security" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
+            </div>
+            <div class="pdf-link-card">
+              <div class="pdf-link-header"><span>🔁</span> نموذج OSI</div>
+              <input type="url" id="pdfLink_osi" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
+            </div>
+            <div class="pdf-link-card">
+              <div class="pdf-link-header"><span>🔌</span> كيابل الشبكات</div>
+              <input type="url" id="pdfLink_cables" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
+            </div>
+            <div class="pdf-link-card">
+              <div class="pdf-link-header"><span>🌍</span> بروتوكول IP</div>
+              <input type="url" id="pdfLink_ip" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button class="qz-save-btn" onclick="savePdfLinks()">💾 حفظ جميع الروابط</button>
+            <button class="qz-refresh-btn" onclick="loadPdfLinks()">↻ تحديث</button>
+          </div>
+          <div class="qz-form-msg" id="pdfLinksStatus" style="display:none;"></div>
+        </div>
+      </section>
+
+      <!-- ════════════ PANEL: الإعدادات ════════════ -->
       <section class="panel" id="panel-settings">
         <div class="panel-header">
           <div class="panel-title-group">

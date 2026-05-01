@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6c2fa0">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<script src="shared-theme.js"></script>
+<title>محتوى القسم — أكاديمية الشبكات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080a14; --bg2: #0e1022; --bg3: #161833;
+  --card: #12142a; --card2: #1a1c3a;
+  --primary: #6c2fa0; --primary-l: #8b46c8;
+  --accent: #00c9b1; --accent-d: #009e8e;
+  --text: #e8e6f0; --text-muted: #8c90b5; --text-faint: #555880;
+  --border: #23264a; --border2: #2e3160;
+  --radius: 12px;
+}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── SECTION INFO HEADER ─── */
+.section-hero {
+  padding: 6rem 1.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.section-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(108,47,160,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.section-num {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--primary), var(--primary-l));
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+.section-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+.section-title span { color: var(--accent); }
+.section-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ─── PDF VIEWER ─── */
+.pdf-container {
+  max-width: 900px;
+  margin: 0 auto 3rem;
+  padding: 0 1rem;
+}
+.pdf-frame-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  min-height: 500px;
+}
+.pdf-frame-wrap iframe {
+  width: 100%;
+  height: 85vh;
+  border: none;
+  display: block;
+}
+.pdf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.pdf-toolbar-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.pdf-toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.pdf-toolbar-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pdf-toolbar-btn:hover {
+  background: rgba(108,47,160,0.15);
+  color: var(--primary-l);
+  border-color: rgba(108,47,160,0.3);
+}
+
+/* ─── LOADING & EMPTY ─── */
+.pdf-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  gap: 1rem;
+}
+.pdf-loading .spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.pdf-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-faint);
+}
+.pdf-empty-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+.pdf-empty-msg { font-size: 0.9rem; line-height: 1.8; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 600px) {
+  .section-hero { padding: 5rem 1rem 1.5rem; }
+  .section-title { font-size: 1.5rem; }
+  .pdf-frame-wrap iframe { height: 70vh; }
+  .pdf-toolbar { flex-direction: column; gap: 0.5rem; }
+}
+</style>
+</head>
+<body>
+<script src="shared-nav.js"></script>
+
+<!-- ── SECTION HERO ── -->
+<div class="section-hero">
+  <div class="section-num" id="sectionNum">القسم</div>
+  <h1 class="section-title" id="sectionTitle">جارٍ التحميل…</h1>
+  <p class="section-subtitle" id="sectionSubtitle"></p>
+</div>
+
+<!-- ── PDF VIEWER ── -->
+<div class="pdf-container">
+  <div id="pdfLoading" class="pdf-loading">
+    <div class="spinner"></div>
+    جارٍ تحميل المحتوى…
+  </div>
+
+  <div id="pdfEmpty" class="pdf-empty" style="display:none;">
+    <span class="pdf-empty-icon">📄</span>
+    <div class="pdf-empty-msg">لم يتم رفع محتوى لهذا القسم بعد.<br>يرجى التواصل مع المشرف.</div>
+  </div>
+
+  <div id="pdfViewer" style="display:none;">
+    <div class="pdf-frame-wrap">
+      <div class="pdf-toolbar">
+        <div class="pdf-toolbar-title" id="pdfToolbarTitle">📖 محتوى القسم</div>
+        <div class="pdf-toolbar-actions">
+          <button class="pdf-toolbar-btn" onclick="openPdfNewTab()">↗ فتح في تبويب جديد</button>
+          <button class="pdf-toolbar-btn" onclick="downloadPdf()">⬇ تحميل PDF</button>
+        </div>
+      </div>
+      <iframe id="pdfIframe" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCz9Wedr_X3VzoaH0gJj8QCxksetbIKMYM",
+  authDomain: "networkacademy-795c8.firebaseapp.com",
+  projectId: "networkacademy-795c8"
+});
+const db = getFirestore(app);
+
+/* ── الأقسام ── */
+const SECTIONS = {
+  networks: { title: "شبكات الحاسب الآلي", num: "القسم الأول", icon: "📡", subtitle: "مقدمة في شبكات الحاسب وأنواعها ومكوناتها" },
+  security: { title: "الأمان في الشبكات", num: "القسم الثاني", icon: "🔒", subtitle: "التهديدات وحلول الأمان في الشبكات" },
+  osi:      { title: "نموذج OSI", num: "القسم الثالث", icon: "🔁", subtitle: "طبقات نموذج الاتصال المعياري" },
+  cables:   { title: "كيابل الشبكات", num: "القسم الرابع", icon: "🔌", subtitle: "أنواع الكابلات ومواصفاتها وأدوات التصنيع" },
+  ip:       { title: "بروتوكول IP", num: "القسم الخامس", icon: "🌍", subtitle: "العنونة والبروتوكولات في الشبكات" }
+};
+
+/* ── تحديد القسم من URL ── */
+const params = new URLSearchParams(location.search);
+const sectionId = params.get("section") || "networks";
+const section = SECTIONS[sectionId] || SECTIONS.networks;
+
+/* ── تحديث العنوان ── */
+document.title = `${section.title} — أكاديمية الشبكات`;
+document.getElementById("sectionNum").textContent = `${section.icon} ${section.num}`;
+document.getElementById("sectionTitle").innerHTML = section.title;
+document.getElementById("sectionSubtitle").textContent = section.subtitle;
+document.getElementById("pdfToolbarTitle").textContent = `📖 ${section.title}`;
+
+/* ── جلب رابط PDF من Firestore ── */
+async function loadPdf() {
+  const loadingEl = document.getElementById("pdfLoading");
+  const emptyEl = document.getElementById("pdfEmpty");
+  const viewerEl = document.getElementById("pdfViewer");
+
+  try {
+    const snap = await getDoc(doc(db, "settings", "pdfLinks"));
+    const data = snap.exists() ? snap.data() : {};
+    const rawUrl = data[sectionId];
+
+    if (!rawUrl || !rawUrl.trim()) {
+      loadingEl.style.display = "none";
+      emptyEl.style.display = "block";
+      return;
+    }
+
+    /* تحويل رابط Google Drive للعرض المباشر */
+    let embedUrl = rawUrl.trim();
+    
+    // رابط مشاركة عادي: https://drive.google.com/file/d/FILE_ID/view?...
+    const match = embedUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) {
+      embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
+    // رابط open: https://drive.google.com/open?id=FILE_ID
+    const match2 = embedUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (match2 && !match) {
+      embedUrl = `https://drive.google.com/file/d/${match2[1]}/preview`;
+    }
+
+    window._currentPdfUrl = rawUrl;
+    window._currentPdfEmbed = embedUrl;
+
+    document.getElementById("pdfIframe").src = embedUrl;
+    loadingEl.style.display = "none";
+    viewerEl.style.display = "block";
+
+  } catch (e) {
+    console.error("loadPdf:", e);
+    loadingEl.style.display = "none";
+    emptyEl.style.display = "block";
+  }
+}
+
+loadPdf();
+
+/* ── أزرار ── */
+window.openPdfNewTab = function() {
+  if (window._currentPdfUrl) window.open(window._currentPdfUrl, "_blank");
+};
+window.downloadPdf = function() {
+  if (window._currentPdfUrl) {
+    const match = window._currentPdfUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match) {
+      window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, "_blank");
+    } else {
+      window.open(window._currentPdfUrl, "_blank");
+    }
+  }
+};
+</script>
+
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
+</body>
+</html>

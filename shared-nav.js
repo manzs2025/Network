@@ -5,17 +5,19 @@
 
   /* الصفحات الثابتة الأصلية */
   const staticPages = [
-    { href: 'index.html',    label: 'الرئيسية',       icon: '🏠', num: ''   },
-    { href: 'networks.html', label: 'شبكات الحاسب',   icon: '📡', num: '01' },
-    { href: 'security.html', label: 'الأمان',          icon: '🔒', num: '02' },
-    { href: 'osi.html',      label: 'نموذج OSI',       icon: '🔁', num: '03' },
-    { href: 'cables.html',   label: 'الكيابل',         icon: '🔌', num: '04' },
-    { href: 'ip.html',       label: 'بروتوكول IP',     icon: '🌍', num: '05' },
+    { href: 'index.html',                    label: 'الرئيسية',       icon: '🏠', num: ''   },
+    { href: 'content.html?section=networks', label: 'شبكات الحاسب',   icon: '📡', num: '01' },
+    { href: 'content.html?section=security', label: 'الأمان',          icon: '🔒', num: '02' },
+    { href: 'content.html?section=osi',      label: 'نموذج OSI',       icon: '🔁', num: '03' },
+    { href: 'content.html?section=cables',   label: 'الكيابل',         icon: '🔌', num: '04' },
+    { href: 'content.html?section=ip',       label: 'بروتوكول IP',     icon: '🌍', num: '05' },
   ];
 
   const current = window.location.pathname.split('/').pop() || 'index.html';
   const urlId   = new URLSearchParams(location.search).get("id");
+  const urlSection = new URLSearchParams(location.search).get("section");
   const isDynamicPage = current === "page.html" && urlId;
+  const isContentPage = current === "content.html" && urlSection;
 
   /* ── جلب الصفحات الديناميكية من Firestore (قبل بناء الشريط) ── */
   async function fetchDynamicPages() {
@@ -56,7 +58,9 @@
   function buildDrawerLinks(list) {
     return list.map(p => {
       let active = '';
-      if (isDynamicPage) {
+      if (isContentPage) {
+        active = (p.href === `content.html?section=${urlSection}`) ? 'active' : '';
+      } else if (isDynamicPage) {
         active = (p.href === `page.html?id=${urlId}`) ? 'active' : '';
       } else {
         active = (p.href === current) ? 'active' : '';
@@ -83,7 +87,10 @@
 
     /* العنوان الحالي للعرض في الشريط المصغّر */
     let currentLabel = 'الرئيسية';
-    if (isDynamicPage) {
+    if (isContentPage) {
+      const match = allPages.find(p => p.href === `content.html?section=${urlSection}`);
+      if (match) currentLabel = match.label;
+    } else if (isDynamicPage) {
       const match = allPages.find(p => p.href === `page.html?id=${urlId}`);
       if (match) currentLabel = match.label;
     } else {

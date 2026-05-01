@@ -3605,6 +3605,42 @@ function collectHomeCards() {
  * حفظ جميع الإعدادات في Firestore → settings/general
  */
 /* ── رسالة ترحيبية للمتدربين ── */
+
+/* ══════════════════════════════════════════════════════
+   📄 إدارة ملفات PDF للأقسام
+══════════════════════════════════════════════════════ */
+const PDF_SECTIONS = ["networks","security","osi","cables","ip"];
+
+window.loadPdfLinks = async function() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "pdfLinks"));
+    const data = snap.exists() ? snap.data() : {};
+    PDF_SECTIONS.forEach(sec => {
+      const el = document.getElementById(`pdfLink_${sec}`);
+      if (el) el.value = data[sec] || "";
+    });
+  } catch(e) { console.error("loadPdfLinks:", e); }
+};
+
+window.savePdfLinks = async function() {
+  const status = document.getElementById("pdfLinksStatus");
+  const data = {};
+  PDF_SECTIONS.forEach(sec => {
+    const el = document.getElementById(`pdfLink_${sec}`);
+    if (el) data[sec] = el.value.trim();
+  });
+
+  try {
+    await setDoc(doc(db, "settings", "pdfLinks"), data);
+    status.textContent = "✅ تم حفظ جميع الروابط بنجاح!";
+    status.className = "qz-form-msg success"; status.style.display = "block";
+    setTimeout(() => status.style.display = "none", 3000);
+  } catch(e) {
+    status.textContent = "❌ فشل الحفظ: " + e.message;
+    status.className = "qz-form-msg error"; status.style.display = "block";
+  }
+};
+
 window.saveWelcomeMsg = async function() {
   const msg = document.getElementById("settWelcomeMsg")?.value?.trim() || "";
   const status = document.getElementById("welcomeMsgStatus");
