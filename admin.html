@@ -1907,24 +1907,6 @@ select optgroup {
 
 /* ── Seed Bank Button ── */
 .seed-bank-wrap {
-
-/* ─── PDF LINKS MANAGEMENT ─── */
-.pdf-links-grid { display:grid; gap:1rem; }
-.pdf-link-card {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:1rem;
-}
-.pdf-link-header {
-  font-weight:700;
-  font-size:0.88rem;
-  color:var(--text);
-  margin-bottom:0.6rem;
-}
-.pdf-link-header span { margin-left:0.4rem; }
-.pdf-link-card .qz-input { direction:ltr; text-align:left; font-size:0.8rem !important; }
-
   margin-bottom: 1.5rem;
   padding: 1.25rem;
   background: rgba(108,47,160,0.06);
@@ -2304,7 +2286,10 @@ select optgroup {
         الرئيسية
       </button>
 
-      <button class="sb-item" data-panel="pdf" onclick="switchPanel(this, 'pdf'); loadPdfLinks();">
+
+
+
+      <button class="sb-item" data-panel="pdf" onclick="switchPanel(this, 'pdf')">
         <span class="sb-icon">📄</span>
         ملفات الأقسام
       </button>
@@ -2495,7 +2480,7 @@ select optgroup {
 
       </section>
 
-      <!-- ════════════ PANEL: SETTINGS ════════════ -->
+      <!-- ════════════ PANEL: QUIZZES ════════════ -->
       <!-- ════════════ PANEL: إدارة ملفات PDF ════════════ -->
       <section class="panel" id="panel-pdf">
         <div class="panel-header">
@@ -2505,7 +2490,6 @@ select optgroup {
             <div class="panel-subtitle">ضع رابط Google Drive لكل قسم — الملف يظهر مباشرة للزوار</div>
           </div>
         </div>
-
         <div style="padding:1.5rem;display:grid;gap:1.5rem;">
           <div style="background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:10px;padding:1rem;font-size:0.82rem;color:var(--accent);line-height:1.8;">
             📌 <strong>طريقة الاستخدام:</strong><br>
@@ -2514,30 +2498,13 @@ select optgroup {
             3. انسخ الرابط والصقه هنا<br>
             4. اضغط "💾 حفظ جميع الروابط"
           </div>
-
-          <div class="pdf-links-grid" id="pdfLinksGrid">
-            <div class="pdf-link-card">
-              <div class="pdf-link-header"><span>📡</span> شبكات الحاسب الآلي</div>
-              <input type="url" id="pdfLink_networks" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
-            </div>
-            <div class="pdf-link-card">
-              <div class="pdf-link-header"><span>🔒</span> الأمان في الشبكات</div>
-              <input type="url" id="pdfLink_security" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
-            </div>
-            <div class="pdf-link-card">
-              <div class="pdf-link-header"><span>🔁</span> نموذج OSI</div>
-              <input type="url" id="pdfLink_osi" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
-            </div>
-            <div class="pdf-link-card">
-              <div class="pdf-link-header"><span>🔌</span> كيابل الشبكات</div>
-              <input type="url" id="pdfLink_cables" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
-            </div>
-            <div class="pdf-link-card">
-              <div class="pdf-link-header"><span>🌍</span> بروتوكول IP</div>
-              <input type="url" id="pdfLink_ip" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;">
-            </div>
+          <div id="pdfLinksGrid" style="display:grid;gap:1rem;">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">📡 شبكات الحاسب الآلي</div><input type="url" id="pdfLink_networks" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔒 الأمان في الشبكات</div><input type="url" id="pdfLink_security" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔁 نموذج OSI</div><input type="url" id="pdfLink_osi" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔌 كيابل الشبكات</div><input type="url" id="pdfLink_cables" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🌍 بروتوكول IP</div><input type="url" id="pdfLink_ip" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
           </div>
-
           <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
             <button class="qz-save-btn" onclick="savePdfLinks()">💾 حفظ جميع الروابط</button>
             <button class="qz-refresh-btn" onclick="loadPdfLinks()">↻ تحديث</button>
@@ -2546,7 +2513,343 @@ select optgroup {
         </div>
       </section>
 
-      <!-- ════════════ PANEL: الإعدادات ════════════ -->
+      <!-- ════════════ PANEL: QUIZZES ════════════ -->
+      <section class="panel" id="panel-quizzes">
+
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">📋 إدارة الاختبارات</div>
+            <div class="panel-title">نظام <span>الاختبارات المتقدم</span></div>
+            <div class="panel-subtitle">إنشاء اختبارات من بنك الأسئلة مع جدولة زمنية وإدارة المحاولات</div>
+          </div>
+        </div>
+
+        <!-- ── رفع بنك الأسئلة إلى Firestore ── -->
+        <div class="seed-bank-wrap">
+          <div class="seed-info">
+            🏦 <strong>بنك الأسئلة:</strong> اختر القسم ثم ارفع أسئلته إلى Firestore.
+            كل قسم يحتوي على أسئلة متنوعة (صح/خطأ، اختيار، إجابات متعددة، مطابقة).
+          </div>
+          <div class="seed-bank-controls">
+            <select id="seedSectionSelect" class="qz-input qz-select" style="max-width:260px;">
+              <option value="">— اختر القسم —</option>
+              <option value="networks">شبكات الحاسب الآلي</option>
+              <option value="security">الأمان في الشبكات</option>
+              <option value="osi">نموذج OSI</option>
+              <option value="cables">كيابل الشبكات</option>
+              <option value="ip">بروتوكول IP</option>
+            </select>
+            <button class="seed-bank-btn" onclick="seedQuestionBank()">📤 رفع أسئلة القسم</button>
+            <button class="seed-bank-btn delete-all-btn" onclick="deleteAllBankQuestions()">🗑️ حذف كل البنك</button>
+            <button class="seed-bank-btn delete-section-btn" onclick="deleteSectionQuestions()">🗑️ حذف أسئلة القسم</button>
+          </div>
+        </div>
+        <div class="qz-form-msg" id="seedBankStatus" style="display:none"></div>
+
+        <!-- ── نموذج إنشاء اختبار (Quiz Builder) ── -->
+        <div class="qz-form-card" id="quizFormCard">
+          <div class="qz-form-header">
+            <h3 class="qz-form-title">
+              <span class="qz-form-icon">✏️</span>
+              إنشاء اختبار جديد
+            </h3>
+            <button class="qz-collapse-btn" id="quizFormToggle" onclick="toggleQuizForm()">
+              تصغير ↑
+            </button>
+          </div>
+
+          <div class="qz-form-body" id="quizFormBody">
+            <!-- حقل مخفي لمعرف التعديل -->
+            <input type="hidden" id="quizEditId" value="">
+
+            <!-- الحقول الأساسية: العنوان + المدة + الدرجة الإجمالية -->
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizTitle">عنوان الاختبار *</label>
+                <input type="text" id="quizTitle" class="qz-input" placeholder="مثال: اختبار شبكات الحاسب الآلي" maxlength="100">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizDuration">⏱️ مدة الاختبار (بالدقائق) <small style="color:var(--text-faint);font-weight:400;">(اختياري)</small></label>
+                <input type="number" id="quizDuration" class="qz-input" placeholder="مثال: 30" min="1" max="600" style="direction:ltr;text-align:right;">
+              </div>
+            </div>
+
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizTotalScore">🏆 الدرجة الإجمالية للاختبار * <small style="color:var(--text-faint);font-weight:400;">(تُقسَّم بالتساوي على عدد الأسئلة)</small></label>
+                <input type="number" id="quizTotalScore" class="qz-input" placeholder="مثال: 100" min="1" max="1000" step="0.5" onchange="updateTotalScore()" style="direction:ltr;text-align:right;">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizPage">📚 القسم التابع له *</label>
+                <select id="quizPage" class="qz-input qz-select">
+                  <option value="">— اختر القسم —</option>
+                  <option value="networks">شبكات الحاسب الآلي</option>
+                  <option value="security">الأمان في الشبكات</option>
+                  <option value="osi">نموذج OSI</option>
+                  <option value="cables">كيابل الشبكات</option>
+                  <option value="ip">بروتوكول IP</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- الجدولة الزمنية -->
+            <div class="qz-label" style="margin-bottom:0.5rem;">📅 الجدولة الزمنية <small style="color:var(--text-faint);font-weight:400;">(اختياري — اتركها فارغة ليكون الاختبار متاحاً دائماً)</small></div>
+            <div class="schedule-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizStartDate">وقت البدء</label>
+                <input type="datetime-local" id="quizStartDate" class="qz-input">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizEndDate">وقت الانتهاء</label>
+                <input type="datetime-local" id="quizEndDate" class="qz-input">
+              </div>
+            </div>
+
+            <!-- إعدادات المحاولات والخلط -->
+            <div class="qz-fields-row" style="margin-top:1rem;">
+              <div class="qz-field-group">
+                <label class="qz-label" for="quizMaxAttempts">🔄 عدد المحاولات المسموح <small style="color:var(--text-faint);font-weight:400;">(0 = بلا حد)</small></label>
+                <input type="number" id="quizMaxAttempts" class="qz-input" placeholder="مثال: 1" min="0" max="10" value="1" style="direction:ltr;text-align:right;">
+              </div>
+              <div class="qz-field-group" style="display:flex;align-items:center;gap:0.75rem;padding-top:1.6rem;">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem;font-weight:600;">
+                  <input type="checkbox" id="quizShuffle" checked style="width:18px;height:18px;accent-color:var(--primary);">
+                  🔀 خلط الأسئلة والخيارات
+                </label>
+              </div>
+            </div>
+
+            <!-- اختيار الأسئلة من البنك -->
+            <div class="qz-questions-area">
+              <div class="qz-questions-header">
+                <span class="qz-questions-count" id="selectedQCount">0 سؤال محدد</span>
+                <button class="qz-add-btn" onclick="openAddQuestionModal()">➕ إضافة سؤال جديد إلى البنك</button>
+              </div>
+
+              <!-- شريط الدرجة الإجمالية -->
+              <div class="quiz-total-score-bar" id="quizTotalScoreBar">
+                <span class="total-label">📊 الدرجة الإجمالية للاختبار:</span>
+                <span class="total-value" id="quizTotalScoreValue">0</span>
+              </div>
+
+              <!-- الفلاتر -->
+              <div class="bank-filters">
+                <select id="bankFilterCategory" onchange="filterBankQuestions()">
+                  <option value="">كل الأقسام</option>
+                  <option value="networks">شبكات الحاسب</option>
+                  <option value="security">الأمان</option>
+                  <option value="osi">نموذج OSI</option>
+                  <option value="cables">الكيابل</option>
+                  <option value="ip">بروتوكول IP</option>
+                </select>
+                <select id="bankFilterType" onchange="filterBankQuestions()">
+                  <option value="">كل الأنواع</option>
+                  <option value="tf">صح وخطأ</option>
+                  <option value="mcq">اختيار من متعدد</option>
+                  <option value="multi">إجابات متعددة</option>
+                  <option value="match">مطابقة</option>
+                </select>
+              </div>
+
+              <!-- أزرار تحديد/إلغاء الكل -->
+              <div class="bank-actions-row">
+                <button class="bank-action-btn" onclick="selectAllBankQuestions()">✅ تحديد الكل</button>
+                <button class="bank-action-btn" onclick="deselectAllBankQuestions()">✕ إلغاء الكل</button>
+              </div>
+
+              <!-- حاوية الأسئلة -->
+              <div class="bank-q-container" id="bankQuestionsContainer">
+                <div class="qz-empty-questions">
+                  <span>جارٍ تحميل بنك الأسئلة…</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- أزرار الحفظ -->
+            <div class="qz-form-actions">
+              <button class="qz-save-btn" id="btnSaveQuiz" onclick="saveQuizFromBank()">
+                <span class="qz-btn-text">💾 حفظ الاختبار</span>
+                <span class="qz-btn-spinner" style="display:none">⏳</span>
+              </button>
+              <button class="qz-reset-btn" onclick="resetQuizForm()">
+                🗑️ مسح النموذج
+              </button>
+            </div>
+
+            <div class="qz-form-msg" id="quizFormMsg" style="display:none"></div>
+
+          </div>
+        </div>
+
+        <!-- ── جدول الاختبارات الحالية ── -->
+        <div class="qz-table-section">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">📚 الاختبارات المحفوظة</h3>
+            <button class="qz-refresh-btn" onclick="loadQuizzes()" title="تحديث">↻ تحديث</button>
+          </div>
+
+          <div class="qz-table-loading" id="quizzesLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل الاختبارات…</span>
+          </div>
+
+          <div class="qz-table-empty" id="quizzesEmpty" style="display:none">
+            لا توجد اختبارات محفوظة بعد
+          </div>
+
+          <div class="qz-table-wrap" id="quizzesTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>عنوان الاختبار</th>
+                  <th>القسم</th>
+                  <th>عدد الأسئلة</th>
+                  <th>الدرجة الكلية</th>
+                  <th>الحالة</th>
+                  <th>تاريخ الإضافة</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="quizzesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════ PANEL: TRAINEES ════════════ -->
+      <section class="panel" id="panel-trainees">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">👥 المتدربون</div>
+            <div class="panel-title">إدارة <span>المتدربين</span></div>
+            <div class="panel-subtitle">إضافة حسابات متدربين جديدة ومتابعة درجاتهم</div>
+          </div>
+        </div>
+
+        <!-- نموذج إضافة متدرب -->
+        <div class="art-form-card" style="margin-bottom:1.75rem;">
+          <div class="art-form-header">
+            <h3 class="art-form-title"><span>➕</span> إضافة متدرب جديد</h3>
+            <button class="qz-collapse-btn" onclick="toggleAddTrainee()">تصغير ↑</button>
+          </div>
+          <div id="addTraineeBody" style="padding:1.5rem;">
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label" for="newTraineeName">الاسم الكامل *</label>
+                <input type="text" id="newTraineeName" class="qz-input" placeholder="مثال: أحمد محمد العمري">
+              </div>
+              <div class="qz-field-group">
+                <label class="qz-label" for="newTraineeEmail">الرقم التدريبي * <small style="color:var(--text-faint);font-weight:400;">(9 أرقام)</small></label>
+                <input type="text" id="newTraineeEmail" class="qz-input" placeholder="مثال: 441234567" inputmode="numeric" maxlength="9" style="direction:ltr;text-align:right;letter-spacing:0.06em;">
+              </div>
+            </div>
+            <div class="qz-fields-row">
+              <div class="qz-field-group">
+                <label class="qz-label">كلمة المرور الافتراضية</label>
+                <div style="padding:0.65rem 0.9rem;background:rgba(0,201,177,0.06);border:1px dashed rgba(0,201,177,0.3);border-radius:8px;font-size:0.85rem;color:var(--accent);direction:ltr;text-align:right;letter-spacing:0.08em;font-weight:700;">
+                  12345678 <span style="font-size:0.72rem;color:var(--text-muted);margin-right:0.5rem;font-weight:400;">(ثابتة تلقائياً)</span>
+                </div>
+              </div>
+              <div class="qz-field-group" style="justify-content:flex-end;padding-top:1.4rem;">
+                <button class="qz-save-btn" id="btnAddTrainee" onclick="addTrainee()" style="width:100%;justify-content:center;">
+                  <span id="addTraineeBtnText">➕ إنشاء الحساب</span>
+                  <span id="addTraineeBtnSpinner" style="display:none">⏳</span>
+                </button>
+              </div>
+            </div>
+            <div class="qz-form-msg" id="addTraineeMsg" style="display:none"></div>
+
+            <!-- ── الرفع الجماعي من Excel ── -->
+            <div class="bulk-import-wrap">
+              <span class="bulk-import-label">📥 رفع جماعي:</span>
+              <button class="btn-bulk" id="btnBulkImport" onclick="document.getElementById('bulkFileInput').click()">
+                📊 رفع ملف Excel
+              </button>
+              <input type="file" id="bulkFileInput" accept=".xlsx,.xls" onchange="handleBulkImport(this)">
+              <span style="font-size:0.75rem;color:var(--text-faint);">أعمدة مطلوبة: الاسم، الرقم التدريبي</span>
+            </div>
+            <!-- شريط تقدم الرفع الجماعي -->
+            <div class="bulk-progress-wrap" id="bulkProgressWrap">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span class="bulk-progress-text" id="bulkProgressText">جارٍ المعالجة…</span>
+                <span class="bulk-progress-text" id="bulkProgressCount"></span>
+              </div>
+              <div class="bulk-progress-bar-track">
+                <div class="bulk-progress-bar-fill" id="bulkProgressFill"></div>
+              </div>
+              <div class="bulk-progress-log" id="bulkProgressLog"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- جدول المتدربين -->
+        <div class="qz-table-section">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">👥 قائمة المتدربين</h3>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <input type="text" id="traineeSearchInput" class="qz-input" placeholder="🔍 بحث بالاسم أو الرقم التدريبي..." oninput="filterTrainees()" style="max-width:280px;font-size:0.82rem;padding:0.45rem 0.8rem;">
+              <button class="qz-refresh-btn" onclick="loadTrainees()">↻ تحديث</button>
+            </div>
+          </div>
+          <div class="qz-table-loading" id="traineesLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل المتدربين…</span>
+          </div>
+          <div class="qz-table-empty" id="traineesEmpty" style="display:none">لا يوجد متدربون مسجّلون بعد</div>
+          <div class="qz-table-wrap" id="traineesTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>الاسم</th>
+                  <th>الرقم التدريبي</th>
+                  <th>عدد الاختبارات</th>
+                  <th>تاريخ التسجيل</th>
+                  <th>إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="traineesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- جدول آخر النتائج -->
+        <div class="qz-table-section" style="margin-top:1.5rem;">
+          <div class="qz-table-header">
+            <h3 class="qz-table-title">📊 آخر نتائج المتدربين</h3>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <button class="qz-refresh-btn" onclick="exportResultsToPDF()" style="background:rgba(244,67,54,0.10);color:#ff6b6b;border-color:rgba(244,67,54,0.3);">📄 تقرير PDF</button>
+              <button class="qz-refresh-btn" onclick="exportResultsToExcel()" style="background:rgba(0,201,177,0.10);color:var(--accent);border-color:rgba(0,201,177,0.3);">📥 تصدير Excel</button>
+              <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
+            </div>
+          </div>
+          <div class="qz-table-loading" id="resultsLoading">
+            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+            <span>جارٍ تحميل النتائج…</span>
+          </div>
+          <div class="qz-table-empty" id="resultsEmpty" style="display:none">لا توجد نتائج بعد</div>
+          <div class="qz-table-wrap" id="resultsTableWrap" style="display:none">
+            <table class="qz-table">
+              <thead>
+                <tr>
+                  <th>المتدرب</th>
+                  <th>الاختبار</th>
+                  <th>الدرجة</th>
+                  <th>النسبة</th>
+                  <th>النتيجة</th>
+                  <th>المحاولة</th>
+                  <th>التاريخ</th>
+                  <th style="text-align:center">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════ PANEL: SETTINGS ════════════ -->
       <section class="panel" id="panel-settings">
         <div class="panel-header">
           <div class="panel-title-group">
@@ -2556,8 +2859,6 @@ select optgroup {
           </div>
         </div>
 
-        <!-- ──── 1) الهوية البصرية والألوان ──── -->
-
         <!-- ──── 0) رسالة ترحيبية للمتدربين ──── -->
         <div class="settings-section" style="margin-bottom:1.5rem;">
           <div class="settings-section-header">
@@ -2566,7 +2867,7 @@ select optgroup {
           </div>
           <div class="settings-section-body">
             <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;margin-bottom:0.75rem;">
-              اكتب رسالة تظهر لجميع المتدربين عند دخولهم بوابة المتدرب (مثل: "الاختبار النهائي يوم الأحد"). اتركها فارغة لإخفائها.
+              اكتب رسالة تظهر لجميع المتدربين عند دخولهم بوابة المتدرب. اتركها فارغة لإخفائها.
             </p>
             <textarea id="settWelcomeMsg" class="qz-input" rows="3" placeholder="مثال: الاختبار النهائي يوم الأحد القادم — استعدوا!" style="resize:vertical;font-size:0.88rem;"></textarea>
             <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
