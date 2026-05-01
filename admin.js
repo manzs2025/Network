@@ -3333,6 +3333,10 @@ window.loadSettings = async function () {
     const showRunningScoreEl = document.getElementById("settShowRunningScore");
     if (showRunningScoreEl) showRunningScoreEl.checked = d.showRunningScore === true;
 
+    // ─ رسالة ترحيبية للمتدربين
+    const wmEl = document.getElementById("settWelcomeMsg");
+    if (wmEl) wmEl.value = d.welcomeMessage || "";
+
     // ─ المقال الترحيبي (TinyMCE)
     if (d.welcomeContent) {
       const waitForEditor = setInterval(() => {
@@ -3600,6 +3604,25 @@ function collectHomeCards() {
 /**
  * حفظ جميع الإعدادات في Firestore → settings/general
  */
+/* ── رسالة ترحيبية للمتدربين ── */
+window.saveWelcomeMsg = async function() {
+  const msg = document.getElementById("settWelcomeMsg")?.value?.trim() || "";
+  const status = document.getElementById("welcomeMsgStatus");
+  try {
+    await setDoc(doc(db, "settings", "general"), { welcomeMessage: msg }, { merge: true });
+    status.textContent = "✅ تم حفظ الرسالة!";
+    status.className = "qz-form-msg success"; status.style.display = "block";
+    setTimeout(() => status.style.display = "none", 3000);
+  } catch(e) {
+    status.textContent = "❌ فشل الحفظ: " + e.message;
+    status.className = "qz-form-msg error"; status.style.display = "block";
+  }
+};
+window.clearWelcomeMsg = async function() {
+  document.getElementById("settWelcomeMsg").value = "";
+  await window.saveWelcomeMsg();
+};
+
 window.saveSettings = async function () {
   const btn = document.getElementById("btnSaveSettings");
   const btnText = document.getElementById("settSaveBtnText");

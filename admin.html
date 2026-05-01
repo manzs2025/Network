@@ -3439,6 +3439,27 @@ select optgroup {
         </div>
 
         <!-- ──── 1) الهوية البصرية والألوان ──── -->
+
+        <!-- ──── 0) رسالة ترحيبية للمتدربين ──── -->
+        <div class="settings-section" style="margin-bottom:1.5rem;">
+          <div class="settings-section-header">
+            <span class="settings-section-icon">📢</span>
+            <span class="settings-section-title">رسالة ترحيبية للمتدربين</span>
+          </div>
+          <div class="settings-section-body">
+            <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;margin-bottom:0.75rem;">
+              اكتب رسالة تظهر لجميع المتدربين عند دخولهم بوابة المتدرب (مثل: "الاختبار النهائي يوم الأحد"). اتركها فارغة لإخفائها.
+            </p>
+            <textarea id="settWelcomeMsg" class="qz-input" rows="3" placeholder="مثال: الاختبار النهائي يوم الأحد القادم — استعدوا!" style="resize:vertical;font-size:0.88rem;"></textarea>
+            <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+              <button class="qz-save-btn" onclick="saveWelcomeMsg()" style="font-size:0.82rem;padding:0.5rem 1.25rem;">💾 حفظ الرسالة</button>
+              <button class="qz-refresh-btn" onclick="clearWelcomeMsg()" style="font-size:0.82rem;">🗑️ مسح</button>
+            </div>
+            <div class="qz-form-msg" id="welcomeMsgStatus" style="display:none;margin-top:0.5rem;"></div>
+          </div>
+        </div>
+
+        <!-- ──── 1) الهوية البصرية والألوان ──── -->
         <div class="settings-section">
           <div class="settings-section-header">
             <span class="settings-section-icon">🎨</span>
