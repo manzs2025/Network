@@ -1162,6 +1162,7 @@ window.switchPanel = function (btn, panelId) {
   if (panelId === "quizzes")  { renderQuestionBankSelector(); loadQuizzes(); }
   if (panelId === "articles") { loadArticles(); _initTinyMCE(); }
   if (panelId === "settings") { loadSettings(); _initSettingsTinyMCE(); }
+  if (panelId === "pdf") { loadPdfLinks(); }
 };
 window.switchPanelById = function(panelId) { switchPanel(document.querySelector(`.sb-item[data-panel="${panelId}"]`), panelId); };
 
