@@ -18,9 +18,11 @@
 
   const _cur   = window.location.pathname.split('/').pop() || '';
   const _urlId = new URLSearchParams(location.search).get('id');
+  const _urlSection = new URLSearchParams(location.search).get('section');
 
-  // تحديد الفئة
+  // تحديد الفئة — يدعم content.html?section=xxx والصفحات القديمة
   let _category = PAGE_CATEGORY_MAP[_cur] || null;
+  if (!_category && _cur === 'content.html' && _urlSection) _category = _urlSection;
   if (!_category && _cur === 'page.html' && _urlId) _category = _urlId;
   if (!_category) return; // لا شيء للعرض في هذه الصفحة
 

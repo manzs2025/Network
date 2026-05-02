@@ -2,15 +2,18 @@
    Service Worker — أكاديمية الشبكات PWA
    استراتيجية: Network First مع Fallback للكاش
 ══════════════════════════════════════════════════ */
-const CACHE_NAME = "nw-academy-v1";
+const CACHE_NAME = "nw-academy-v2";
 const PRECACHE = [
   "./index.html",
   "./login.html",
   "./trainee.html",
+  "./content.html",
+  "./404.html",
   "./style.css",
   "./shared-nav.js",
   "./shared-theme.js",
-  "./login.js"
+  "./login.js",
+  "./quiz-widget.js"
 ];
 
 /* ── التثبيت: تخزين الملفات الأساسية ── */
