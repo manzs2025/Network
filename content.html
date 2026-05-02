@@ -86,18 +86,46 @@ body {
   border: none;
   display: block;
 }
-/* وضع Slides: نسبة 16:9 تستغل العرض بالكامل */
+
+/* ─── وضع Slides ─── */
+.slides-mode .section-hero {
+  padding: 4rem 1rem 0.8rem;
+}
+.slides-mode .section-subtitle {
+  margin-bottom: 0;
+}
 .slides-mode .pdf-container {
   max-width: 100%;
   padding: 0;
+  margin-bottom: 0;
 }
 .slides-mode .pdf-frame-wrap {
   border-radius: 0;
-  border-left: none;
-  border-right: none;
+  border: none;
+  min-height: auto;
+  position: relative;
+}
+.slides-mode .pdf-toolbar {
+  display: none;
 }
 .slides-mode .pdf-frame-wrap iframe {
-  height: 88vh;
+  width: 100%;
+  height: calc(100vh - 140px);
+}
+/* طبقة حماية شفافة فوق iframe — تمنع الزر الأيمن وحفظ الصور */
+.slides-overlay {
+  display: none;
+}
+.slides-mode .slides-overlay {
+  display: block;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  bottom: 50px; /* نترك شريط التنقل السفلي لـ Google Slides يعمل */
+  z-index: 10;
+  cursor: default;
+}
+.slides-mode .pdf-frame-wrap {
+  position: relative;
 }
 .pdf-toolbar {
   display: flex;
@@ -146,10 +174,11 @@ body {
   .section-hero { padding: 4.5rem 1rem 1rem; }
   .section-title { font-size: 1.5rem; }
   .pdf-frame-wrap iframe { height: 75vh; }
-  .slides-mode .pdf-frame-wrap iframe { height: 35vh; }
-}
-@media (min-width: 601px) and (max-width: 1024px) {
-  .slides-mode .pdf-frame-wrap iframe { height: 60vh; }
+  .slides-mode .section-hero { padding: 4rem 1rem 0.5rem; }
+  .slides-mode .section-num { font-size: 0.65rem; padding: 0.2rem 0.7rem; margin-bottom: 0.5rem; }
+  .slides-mode .section-title { font-size: 1.2rem; margin-bottom: 0.2rem; }
+  .slides-mode .section-subtitle { font-size: 0.75rem; }
+  .slides-mode .pdf-frame-wrap iframe { height: calc(100vh - 120px); }
 }
 /* إخفاء شعار الشريط العلوي */
 .nav-logo { display: none !important; }
@@ -184,6 +213,7 @@ body {
         <div class="pdf-toolbar-title" id="pdfToolbarTitle">📖 محتوى القسم</div>
       </div>
       <iframe id="pdfIframe" allowfullscreen></iframe>
+      <div class="slides-overlay" id="slidesOverlay"></div>
     </div>
   </div>
 </div>
