@@ -66,9 +66,9 @@ body {
   margin: 0 auto;
 }
 
-/* ─── PDF VIEWER ─── */
+/* ─── PDF / SLIDES VIEWER ─── */
 .pdf-container {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto 3rem;
   padding: 0 0.5rem;
 }
@@ -82,9 +82,22 @@ body {
 }
 .pdf-frame-wrap iframe {
   width: 100%;
-  height: 92vh;
+  height: 85vh;
   border: none;
   display: block;
+}
+/* وضع Slides: نسبة 16:9 تستغل العرض بالكامل */
+.slides-mode .pdf-container {
+  max-width: 100%;
+  padding: 0;
+}
+.slides-mode .pdf-frame-wrap {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+.slides-mode .pdf-frame-wrap iframe {
+  height: 88vh;
 }
 .pdf-toolbar {
   display: flex;
@@ -132,7 +145,11 @@ body {
 @media (max-width: 600px) {
   .section-hero { padding: 4.5rem 1rem 1rem; }
   .section-title { font-size: 1.5rem; }
-  .pdf-frame-wrap iframe { height: 80vh; }
+  .pdf-frame-wrap iframe { height: 75vh; }
+  .slides-mode .pdf-frame-wrap iframe { height: 35vh; }
+}
+@media (min-width: 601px) and (max-width: 1024px) {
+  .slides-mode .pdf-frame-wrap iframe { height: 60vh; }
 }
 /* إخفاء شعار الشريط العلوي */
 .nav-logo { display: none !important; }
@@ -238,6 +255,7 @@ async function loadContent() {
 
       document.getElementById("pdfToolbarTitle").textContent = `📊 ${section.title}`;
       document.getElementById("pdfIframe").src = embedUrl;
+      document.body.classList.add("slides-mode");
       loadingEl.style.display = "none";
       viewerEl.style.display = "block";
       return;
@@ -299,5 +317,41 @@ window.downloadPdf = function() {
 </script>
 
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
+
+<!-- ── حماية المحتوى ── -->
+<script>
+(function() {
+  // منع القائمة السياقية (الزر الأيمن)
+  document.addEventListener("contextmenu", function(e) { e.preventDefault(); return false; });
+
+  // منع النسخ والقص
+  ["copy", "cut"].forEach(function(evt) {
+    document.addEventListener(evt, function(e) { e.preventDefault(); return false; });
+  });
+
+  // منع تحديد النصوص
+  var s = document.createElement("style");
+  s.textContent = "body{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;}";
+  document.head.appendChild(s);
+
+  // منع اختصارات المطوّر
+  document.addEventListener("keydown", function(e) {
+    var k = (e.key || "").toLowerCase();
+    // F12
+    if (k === "f12") { e.preventDefault(); return false; }
+    // Ctrl+Shift+I/J/C/K
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && ["i","j","c","k"].indexOf(k) !== -1) { e.preventDefault(); return false; }
+    // Ctrl+U (View source)
+    if ((e.ctrlKey || e.metaKey) && k === "u") { e.preventDefault(); return false; }
+    // Ctrl+S (Save)
+    if ((e.ctrlKey || e.metaKey) && k === "s") { e.preventDefault(); return false; }
+    // Ctrl+P (Print)
+    if ((e.ctrlKey || e.metaKey) && k === "p") { e.preventDefault(); return false; }
+  });
+
+  // منع السحب
+  document.addEventListener("dragstart", function(e) { e.preventDefault(); return false; });
+})();
+</script>
 </body>
 </html>
