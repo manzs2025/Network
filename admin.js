@@ -1086,6 +1086,140 @@ window.deleteSectionQuestions = async function() {
   }
 };
 
+/* ══════════════════════════════════════════════════════
+   📂 رفع أسئلة من ملف Excel
+══════════════════════════════════════════════════════ */
+window.uploadQuestionsFromFile = async function() {
+  const section = document.getElementById("seedSectionSelect")?.value;
+  const status  = document.getElementById("seedBankStatus");
+  const fileInput = document.getElementById("excelFileInput");
+
+  if (!section) {
+    status.textContent = "❌ اختر القسم أولاً!";
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    return;
+  }
+  if (!fileInput?.files?.length) {
+    status.textContent = "❌ اختر ملف Excel أولاً!";
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    return;
+  }
+
+  status.textContent = "⏳ جارٍ قراءة الملف...";
+  status.className = "qz-form-msg"; status.style.display = "block";
+
+  try {
+    const file = fileInput.files[0];
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: "array" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    if (!rows.length) {
+      status.textContent = "❌ الملف فارغ!";
+      status.className = "qz-form-msg error"; status.style.display = "block";
+      return;
+    }
+
+    // تحويل الصفوف لأسئلة
+    const questions = [];
+    let errors = [];
+    rows.forEach((row, i) => {
+      const type = (row.type || "").trim().toLowerCase();
+      const text = (row.text || "").trim();
+
+      if (!type || !text) { errors.push(`سطر ${i+2}: نوع أو نص فارغ`); return; }
+
+      const q = { type, text, category: section };
+
+      if (type === "tf") {
+        const ans = String(row.correctAnswer || "").trim().toLowerCase();
+        if (ans !== "true" && ans !== "false") { errors.push(`سطر ${i+2}: إجابة tf يجب أن تكون true أو false`); return; }
+        q.correctAnswer = ans;
+      }
+      else if (type === "mcq") {
+        const opts = (row.options || "").split("|").map(s => s.trim()).filter(Boolean);
+        const ans = (row.correctAnswer || "").trim();
+        if (opts.length < 2) { errors.push(`سطر ${i+2}: mcq يحتاج خيارين على الأقل`); return; }
+        if (!ans) { errors.push(`سطر ${i+2}: mcq بدون إجابة صحيحة`); return; }
+        q.options = opts;
+        q.correctAnswer = ans;
+      }
+      else if (type === "multi") {
+        const opts = (row.options || "").split("|").map(s => s.trim()).filter(Boolean);
+        const ans = (row.correctAnswers || "").split("|").map(s => s.trim()).filter(Boolean);
+        if (opts.length < 2) { errors.push(`سطر ${i+2}: multi يحتاج خيارين على الأقل`); return; }
+        if (!ans.length) { errors.push(`سطر ${i+2}: multi بدون إجابات صحيحة`); return; }
+        q.options = opts;
+        q.correctAnswers = ans;
+      }
+      else if (type === "match") {
+        const pairsRaw = (row.pairs || "").split("|").map(s => s.trim()).filter(Boolean);
+        const pairs = pairsRaw.map(p => {
+          const parts = p.split("=");
+          return parts.length >= 2 ? { left: parts[0].trim(), right: parts[1].trim() } : null;
+        }).filter(Boolean);
+        if (pairs.length < 2) { errors.push(`سطر ${i+2}: match يحتاج زوجين على الأقل (استخدم = للربط و | للفصل)`); return; }
+        q.pairs = pairs;
+      }
+      else { errors.push(`سطر ${i+2}: نوع غير معروف "${type}"`); return; }
+
+      questions.push(q);
+    });
+
+    if (errors.length && !questions.length) {
+      status.innerHTML = `❌ كل الأسئلة فيها أخطاء:<br>${errors.slice(0,5).join("<br>")}`;
+      status.className = "qz-form-msg error"; status.style.display = "block";
+      return;
+    }
+
+    // تأكيد الرفع
+    let confirmMsg = `سيتم رفع ${questions.length} سؤال لقسم "${CATEGORY_LABELS[section]}".`;
+    if (errors.length) confirmMsg += `\n⚠️ تم تجاهل ${errors.length} سطر بسبب أخطاء.`;
+    if (!confirm(confirmMsg + "\nهل تريد المتابعة؟")) return;
+
+    // رفع لـ Firestore
+    status.textContent = `⏳ جارٍ رفع ${questions.length} سؤال...`;
+    const batch = writeBatch(db);
+    questions.forEach(q => {
+      const ref = doc(collection(db, "questionBank"));
+      batch.set(ref, q);
+    });
+    await batch.commit();
+
+    let msg = `✅ تم رفع ${questions.length} سؤال لقسم "${CATEGORY_LABELS[section]}" بنجاح!`;
+    if (errors.length) msg += `<br>⚠️ تم تجاهل ${errors.length} سطر بسبب أخطاء.`;
+    status.innerHTML = msg;
+    status.className = "qz-form-msg success"; status.style.display = "block";
+
+    fileInput.value = "";
+    renderQuestionBankSelector();
+    loadStats();
+
+  } catch(e) {
+    status.textContent = "❌ فشل القراءة: " + e.message;
+    status.className = "qz-form-msg error"; status.style.display = "block";
+    console.error("uploadQuestionsFromFile:", e);
+  }
+};
+
+/* ── تحميل قالب Excel فارغ ── */
+window.downloadQuestionTemplate = function() {
+  const headers = ["type", "text", "correctAnswer", "options", "correctAnswers", "pairs"];
+  const examples = [
+    { type:"tf", text:"شبكة الحاسب هي مجموعة أجهزة متصلة", correctAnswer:"true", options:"", correctAnswers:"", pairs:"" },
+    { type:"mcq", text:"ما وظيفة الراوتر؟", correctAnswer:"توجيه البيانات", options:"توجيه البيانات|تخزين البيانات|حذف البيانات|ضغط البيانات", correctAnswers:"", pairs:"" },
+    { type:"multi", text:"من أنواع الشبكات:", correctAnswer:"", options:"LAN|WAN|MAN|RAM", correctAnswers:"LAN|WAN|MAN", pairs:"" },
+    { type:"match", text:"طابق بين الجهاز ووظيفته:", correctAnswer:"", options:"", correctAnswers:"", pairs:"Router=توجيه|Switch=ربط|Hub=توزيع" },
+  ];
+
+  const ws = XLSX.utils.json_to_sheet(examples, { header: headers });
+  ws["!cols"] = [{ wch:8 },{ wch:40 },{ wch:20 },{ wch:50 },{ wch:30 },{ wch:50 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "questions");
+  XLSX.writeFile(wb, "قالب_أسئلة.xlsx");
+};
+
 /* ─── حارس الصفحة ─── */
 // ─── حماية: إخفاء شاشة "جارٍ التحقق" قسراً بعد 10 ثوانٍ كحد أقصى ───
 // (في حال حدث خطأ غير متوقّع في onAuthStateChanged)

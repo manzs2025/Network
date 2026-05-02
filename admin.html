@@ -2527,8 +2527,7 @@ select optgroup {
         <!-- ── رفع بنك الأسئلة إلى Firestore ── -->
         <div class="seed-bank-wrap">
           <div class="seed-info">
-            🏦 <strong>بنك الأسئلة:</strong> اختر القسم ثم ارفع أسئلته إلى Firestore.
-            كل قسم يحتوي على أسئلة متنوعة (صح/خطأ، اختيار، إجابات متعددة، مطابقة).
+            🏦 <strong>بنك الأسئلة:</strong> اختر القسم ثم ارفع أسئلته من ملف Excel أو استخدم الأسئلة الجاهزة.
           </div>
           <div class="seed-bank-controls">
             <select id="seedSectionSelect" class="qz-input qz-select" style="max-width:260px;">
@@ -2539,9 +2538,34 @@ select optgroup {
               <option value="cables">كيابل الشبكات</option>
               <option value="ip">بروتوكول IP</option>
             </select>
-            <button class="seed-bank-btn" onclick="seedQuestionBank()">📤 رفع أسئلة القسم</button>
+            <button class="seed-bank-btn" onclick="seedQuestionBank()">📤 رفع الأسئلة الجاهزة</button>
             <button class="seed-bank-btn delete-all-btn" onclick="deleteAllBankQuestions()">🗑️ حذف كل البنك</button>
             <button class="seed-bank-btn delete-section-btn" onclick="deleteSectionQuestions()">🗑️ حذف أسئلة القسم</button>
+          </div>
+
+          <!-- ── رفع أسئلة من ملف Excel ── -->
+          <div style="margin-top:1.25rem;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;">
+            <h4 style="font-size:0.95rem;font-weight:700;color:var(--text);margin-bottom:0.75rem;">📂 رفع أسئلة من ملف Excel</h4>
+            <div style="font-size:0.8rem;color:var(--text-muted);line-height:1.8;margin-bottom:1rem;">
+              <strong>تنسيق الملف المطلوب:</strong> ملف Excel (.xlsx) بأعمدة محددة حسب نوع السؤال.<br>
+              <strong>الأعمدة:</strong> type | text | correctAnswer | options | correctAnswers | pairs<br>
+              <details style="margin-top:0.5rem;">
+                <summary style="cursor:pointer;color:var(--accent);font-weight:700;">📋 شرح تفصيلي للأعمدة (اضغط)</summary>
+                <div style="margin-top:0.5rem;padding:0.75rem;background:var(--bg2);border-radius:8px;font-size:0.78rem;line-height:2;">
+                  <strong>type:</strong> نوع السؤال — <code>tf</code> (صح/خطأ) | <code>mcq</code> (اختيار واحد) | <code>multi</code> (إجابات متعددة) | <code>match</code> (مطابقة)<br>
+                  <strong>text:</strong> نص السؤال<br>
+                  <strong>correctAnswer:</strong> للـ tf: <code>true</code> أو <code>false</code> — للـ mcq: نص الإجابة الصحيحة<br>
+                  <strong>options:</strong> للـ mcq و multi: الخيارات مفصولة بـ <code>|</code> مثال: <code>راوتر|سويتش|كابل|شاشة</code><br>
+                  <strong>correctAnswers:</strong> للـ multi: الإجابات الصحيحة مفصولة بـ <code>|</code><br>
+                  <strong>pairs:</strong> للـ match: أزواج مفصولة بـ <code>|</code> وكل زوج بـ <code>=</code> مثال: <code>Router=توجيه|Switch=ربط|Hub=توزيع</code>
+                </div>
+              </details>
+            </div>
+            <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+              <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="font-size:0.82rem;color:var(--text-muted);">
+              <button class="seed-bank-btn" onclick="uploadQuestionsFromFile()">📤 رفع من الملف</button>
+              <button class="seed-bank-btn" style="background:linear-gradient(135deg,#0077cc,#00aaff)!important;border-color:#0077cc!important;" onclick="downloadQuestionTemplate()">⬇ تحميل قالب فارغ</button>
+            </div>
           </div>
         </div>
         <div class="qz-form-msg" id="seedBankStatus" style="display:none"></div>
