@@ -307,87 +307,7 @@ body::before{
   </div>
 
   <div class="sections-grid" id="sectionsGrid">
-
-    <a href="content.html?section=networks" class="sec-card fade-in">
-      <div class="sec-card-top">
-        <div class="sec-icon">📡</div>
-        <div class="sec-num">01</div>
-      </div>
-      <h3>شبكات الحاسب الآلي</h3>
-      <p>مقدمة في الشبكات وأنواعها ومكوناتها الأساسية وطرق الاتصال بين الأجهزة</p>
-      <div class="sec-card-footer">
-        <span class="sec-card-link">عرض المحتوى ←</span>
-        <div class="sec-progress" data-section="networks">
-          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
-          <span class="sec-progress-text">0%</span>
-        </div>
-      </div>
-    </a>
-
-    <a href="content.html?section=security" class="sec-card fade-in">
-      <div class="sec-card-top">
-        <div class="sec-icon">🔒</div>
-        <div class="sec-num">02</div>
-      </div>
-      <h3>الأمان في الشبكات</h3>
-      <p>التهديدات الأمنية وحلول الحماية والتشفير وأنظمة كشف التسلل</p>
-      <div class="sec-card-footer">
-        <span class="sec-card-link">عرض المحتوى ←</span>
-        <div class="sec-progress" data-section="security">
-          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
-          <span class="sec-progress-text">0%</span>
-        </div>
-      </div>
-    </a>
-
-    <a href="content.html?section=osi" class="sec-card fade-in">
-      <div class="sec-card-top">
-        <div class="sec-icon">🔁</div>
-        <div class="sec-num">03</div>
-      </div>
-      <h3>نموذج OSI</h3>
-      <p>الطبقات السبع لنموذج الاتصال المعياري ووظائف كل طبقة</p>
-      <div class="sec-card-footer">
-        <span class="sec-card-link">عرض المحتوى ←</span>
-        <div class="sec-progress" data-section="osi">
-          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
-          <span class="sec-progress-text">0%</span>
-        </div>
-      </div>
-    </a>
-
-    <a href="content.html?section=cables" class="sec-card fade-in">
-      <div class="sec-card-top">
-        <div class="sec-icon">🔌</div>
-        <div class="sec-num">04</div>
-      </div>
-      <h3>كيابل الشبكات</h3>
-      <p>أنواع الكابلات ومواصفاتها وأدوات التصنيع والتوصيل</p>
-      <div class="sec-card-footer">
-        <span class="sec-card-link">عرض المحتوى ←</span>
-        <div class="sec-progress" data-section="cables">
-          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
-          <span class="sec-progress-text">0%</span>
-        </div>
-      </div>
-    </a>
-
-    <a href="content.html?section=ip" class="sec-card fade-in">
-      <div class="sec-card-top">
-        <div class="sec-icon">🌍</div>
-        <div class="sec-num">05</div>
-      </div>
-      <h3>بروتوكول IP</h3>
-      <p>العنونة والبروتوكولات وتوجيه البيانات في الشبكات</p>
-      <div class="sec-card-footer">
-        <span class="sec-card-link">عرض المحتوى ←</span>
-        <div class="sec-progress" data-section="ip">
-          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
-          <span class="sec-progress-text">0%</span>
-        </div>
-      </div>
-    </a>
-
+    <div style="text-align:center;padding:2rem;color:var(--text-faint);font-size:0.85rem;">جارٍ تحميل الأقسام...</div>
   </div>
 </section>
 
@@ -460,7 +380,67 @@ body::before{
 <script src="shared-nav.js"></script>
 
 <script>
-/* ── جلب عدد المتدربين من Firestore ── */
+/* ── جلب الأقسام من Firestore وبناء البطاقات ── */
+(async function() {
+  const FB = "networkacademy-795c8";
+  const defaults = [
+    { id:"networks", title:"شبكات الحاسب الآلي", icon:"📡", subtitle:"مقدمة في شبكات الحاسب وأنواعها ومكوناتها", order:1 },
+    { id:"security", title:"الأمان في الشبكات", icon:"🔒", subtitle:"التهديدات وحلول الحماية والتشفير", order:2 },
+    { id:"osi",      title:"نموذج OSI",          icon:"🔁", subtitle:"طبقات نموذج الاتصال المعياري", order:3 },
+    { id:"cables",   title:"كيابل الشبكات",      icon:"🔌", subtitle:"أنواع الكابلات ومواصفاتها وأدوات التصنيع", order:4 },
+    { id:"ip",       title:"بروتوكول IP",         icon:"🌍", subtitle:"العنونة والبروتوكولات في الشبكات", order:5 },
+  ];
+
+  let sections = defaults;
+  try {
+    const resp = await fetch(`https://firestore.googleapis.com/v1/projects/${FB}/databases/(default)/documents/settings/sections`);
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.fields?.list?.arrayValue?.values) {
+        const list = data.fields.list.arrayValue.values
+          .map(v => {
+            const m = v.mapValue?.fields || {};
+            return {
+              id: m.id?.stringValue || '',
+              title: m.title?.stringValue || '',
+              icon: m.icon?.stringValue || '📄',
+              subtitle: m.subtitle?.stringValue || '',
+              visible: m.visible?.booleanValue !== false,
+              order: Number(m.order?.integerValue || m.order?.doubleValue || 99)
+            };
+          })
+          .filter(s => s.id && s.visible)
+          .sort((a,b) => a.order - b.order);
+        if (list.length > 0) sections = list;
+      }
+    }
+  } catch(e) { /* fallback */ }
+
+  // تحديث عدد الأقسام
+  document.querySelector('.stat-num').textContent = sections.length;
+
+  const grid = document.getElementById("sectionsGrid");
+  grid.innerHTML = sections.map((s, i) => `
+    <a href="content.html?section=${s.id}" class="sec-card fade-in">
+      <div class="sec-card-top">
+        <div class="sec-icon">${s.icon}</div>
+        <div class="sec-num">${String(i+1).padStart(2,'0')}</div>
+      </div>
+      <h3>${s.title}</h3>
+      <p>${s.subtitle}</p>
+      <div class="sec-card-footer">
+        <span class="sec-card-link">عرض المحتوى ←</span>
+        <div class="sec-progress" data-section="${s.id}">
+          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
+          <span class="sec-progress-text">0%</span>
+        </div>
+      </div>
+    </a>
+  `).join("");
+
+  // تفعيل animations
+  document.querySelectorAll(".sec-card.fade-in").forEach(el => observer.observe(el));
+})();
 (async function() {
   try {
     const url = "https://firestore.googleapis.com/v1/projects/networkacademy-795c8/databases/(default)/documents/users";

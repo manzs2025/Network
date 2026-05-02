@@ -198,26 +198,48 @@ const app = initializeApp({
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-/* ── الأقسام ── */
-const SECTIONS = {
+/* ── الأقسام الافتراضية (fallback) ── */
+const DEFAULT_SECTIONS = {
   networks: { title: "شبكات الحاسب الآلي", num: "القسم الأول", icon: "📡", subtitle: "مقدمة في شبكات الحاسب وأنواعها ومكوناتها" },
   security: { title: "الأمان في الشبكات", num: "القسم الثاني", icon: "🔒", subtitle: "التهديدات وحلول الأمان في الشبكات" },
   osi:      { title: "نموذج OSI", num: "القسم الثالث", icon: "🔁", subtitle: "طبقات نموذج الاتصال المعياري" },
   cables:   { title: "كيابل الشبكات", num: "القسم الرابع", icon: "🔌", subtitle: "أنواع الكابلات ومواصفاتها وأدوات التصنيع" },
   ip:       { title: "بروتوكول IP", num: "القسم الخامس", icon: "🌍", subtitle: "العنونة والبروتوكولات في الشبكات" }
 };
+const NUM_LABELS = ["الأول","الثاني","الثالث","الرابع","الخامس","السادس","السابع","الثامن","التاسع","العاشر"];
 
 /* ── تحديد القسم من URL ── */
 const params = new URLSearchParams(location.search);
 const sectionId = params.get("section") || "networks";
-const section = SECTIONS[sectionId] || SECTIONS.networks;
 
-/* ── تحديث العنوان ── */
-document.title = `${section.title} — أكاديمية الشبكات`;
-document.getElementById("sectionNum").textContent = `${section.icon} ${section.num}`;
-document.getElementById("sectionTitle").innerHTML = section.title;
-document.getElementById("sectionSubtitle").textContent = section.subtitle;
-document.getElementById("pdfShieldTitle").textContent = `📖 ${section.title}`;
+/* ── جلب بيانات القسم من Firestore أو الافتراضي ── */
+let section = DEFAULT_SECTIONS[sectionId] || { title: sectionId, num: "", icon: "📄", subtitle: "" };
+
+(async function loadSectionMeta() {
+  try {
+    const secSnap = await getDoc(doc(db, "settings", "sections"));
+    if (secSnap.exists() && secSnap.data().list) {
+      const list = secSnap.data().list.filter(s => s.visible !== false).sort((a,b) => (a.order||0) - (b.order||0));
+      const idx = list.findIndex(s => s.id === sectionId);
+      if (idx !== -1) {
+        const s = list[idx];
+        section = {
+          title: s.title || sectionId,
+          num: "القسم " + (NUM_LABELS[idx] || (idx + 1)),
+          icon: s.icon || "📄",
+          subtitle: s.subtitle || ""
+        };
+      }
+    }
+  } catch(e) { /* نستخدم الافتراضي */ }
+
+  /* ── تحديث العنوان ── */
+  document.title = `${section.title} — أكاديمية الشبكات`;
+  document.getElementById("sectionNum").textContent = `${section.icon} ${section.num}`;
+  document.getElementById("sectionTitle").innerHTML = section.title;
+  document.getElementById("sectionSubtitle").textContent = section.subtitle;
+  document.getElementById("pdfShieldTitle").textContent = `📖 ${section.title}`;
+})();
 
 /* ── جلب رابط PDF من Firestore ── */
 async function loadContent() {

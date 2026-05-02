@@ -2485,30 +2485,56 @@ select optgroup {
       <section class="panel" id="panel-pdf">
         <div class="panel-header">
           <div class="panel-title-group">
-            <div class="panel-tag">📄 إدارة ملفات الأقسام</div>
-            <div class="panel-title">ملفات <span>PDF</span></div>
-            <div class="panel-subtitle">ضع رابط Google Drive لكل قسم — الملف يظهر مباشرة للزوار</div>
+            <div class="panel-tag">📄 إدارة الأقسام والملفات</div>
+            <div class="panel-title">أقسام <span>المادة</span></div>
+            <div class="panel-subtitle">إضافة وحذف وإخفاء الأقسام — مع ربط ملفات PDF من Google Drive</div>
           </div>
         </div>
         <div style="padding:1.5rem;display:grid;gap:1.5rem;">
           <div style="background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:10px;padding:1rem;font-size:0.82rem;color:var(--accent);line-height:1.8;">
             📌 <strong>طريقة الاستخدام:</strong><br>
-            1. ارفع ملف PDF على Google Drive<br>
-            2. اضغط "مشاركة" واجعله "أي شخص لديه الرابط"<br>
-            3. انسخ الرابط والصقه هنا<br>
-            4. اضغط "💾 حفظ جميع الروابط"
+            1. ارفع ملف PDF على Google Drive ← مشاركة ← أي شخص لديه الرابط ← الصق الرابط<br>
+            2. يمكنك إضافة أقسام جديدة أو إخفاء أقسام مؤقتاً أو حذفها نهائياً<br>
+            3. القسم المخفي لا يظهر للمتدربين لكن بياناته محفوظة
           </div>
-          <div id="pdfLinksGrid" style="display:grid;gap:1rem;">
-            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">📡 شبكات الحاسب الآلي</div><input type="url" id="pdfLink_networks" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
-            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔒 الأمان في الشبكات</div><input type="url" id="pdfLink_security" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
-            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔁 نموذج OSI</div><input type="url" id="pdfLink_osi" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
-            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔌 كيابل الشبكات</div><input type="url" id="pdfLink_cables" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
-            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🌍 بروتوكول IP</div><input type="url" id="pdfLink_ip" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
+
+          <!-- زر إضافة قسم جديد -->
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+            <button class="qz-save-btn" onclick="showAddSectionForm()" style="background:linear-gradient(135deg,var(--accent-d),var(--accent));">➕ إضافة قسم جديد</button>
+            <button class="qz-save-btn" onclick="saveSectionsAndLinks()">💾 حفظ جميع التغييرات</button>
+            <button class="qz-refresh-btn" onclick="loadSectionsPanel()">↻ تحديث</button>
           </div>
-          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-            <button class="qz-save-btn" onclick="savePdfLinks()">💾 حفظ جميع الروابط</button>
-            <button class="qz-refresh-btn" onclick="loadPdfLinks()">↻ تحديث</button>
+
+          <!-- نموذج إضافة قسم جديد (مخفي افتراضياً) -->
+          <div id="addSectionForm" style="display:none;background:var(--card);border:1px solid var(--accent-d);border-radius:12px;padding:1.25rem;">
+            <div style="font-weight:700;font-size:0.9rem;margin-bottom:1rem;color:var(--accent);">➕ إضافة قسم جديد</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div>
+                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.3rem;">معرّف القسم (إنجليزي، بدون مسافات)</label>
+                <input type="text" id="newSecId" class="qz-input" placeholder="مثال: wireless" dir="ltr" style="font-size:0.82rem;text-align:left;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.3rem;">اسم القسم (عربي)</label>
+                <input type="text" id="newSecTitle" class="qz-input" placeholder="مثال: الشبكات اللاسلكية" style="font-size:0.82rem;">
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.3rem;">الأيقونة (إيموجي)</label>
+                <input type="text" id="newSecIcon" class="qz-input" placeholder="📶" style="font-size:0.82rem;text-align:center;" maxlength="4">
+              </div>
+              <div>
+                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.3rem;">وصف مختصر</label>
+                <input type="text" id="newSecSubtitle" class="qz-input" placeholder="مثال: أنواع الشبكات اللاسلكية ومعاييرها" style="font-size:0.82rem;">
+              </div>
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+              <button class="qz-save-btn" onclick="addNewSection()" style="font-size:0.8rem;padding:0.5rem 1rem;">✅ إضافة</button>
+              <button class="qz-refresh-btn" onclick="document.getElementById('addSectionForm').style.display='none'" style="font-size:0.8rem;padding:0.5rem 1rem;">✖ إلغاء</button>
+            </div>
           </div>
+
+          <!-- قائمة الأقسام (تُبنى ديناميكياً) -->
+          <div id="sectionsListContainer" style="display:grid;gap:1rem;"></div>
+
           <div class="qz-form-msg" id="pdfLinksStatus" style="display:none;"></div>
         </div>
       </section>

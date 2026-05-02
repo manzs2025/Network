@@ -3,8 +3,8 @@
 
   const FB_PROJECT = "networkacademy-795c8";
 
-  /* الصفحات الثابتة الأصلية */
-  const staticPages = [
+  /* الصفحات الثابتة الافتراضية (تُستخدم كـ fallback) */
+  const defaultPages = [
     { href: 'index.html',                    label: 'الرئيسية',       icon: '🏠', num: ''   },
     { href: 'content.html?section=networks', label: 'شبكات الحاسب',   icon: '📡', num: '01' },
     { href: 'content.html?section=security', label: 'الأمان',          icon: '🔒', num: '02' },
@@ -12,6 +12,53 @@
     { href: 'content.html?section=cables',   label: 'الكيابل',         icon: '🔌', num: '04' },
     { href: 'content.html?section=ip',       label: 'بروتوكول IP',     icon: '🌍', num: '05' },
   ];
+
+  /* جلب الأقسام من Firestore وبناء staticPages */
+  let staticPages = [defaultPages[0]]; /* الرئيسية دائماً أولاً */
+
+  async function loadSectionsForNav() {
+    try {
+      const url = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/settings/sections`;
+      const resp = await fetch(url);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      
+      if (data.fields && data.fields.list && data.fields.list.arrayValue && data.fields.list.arrayValue.values) {
+        const sections = data.fields.list.arrayValue.values
+          .map(v => {
+            const m = v.mapValue?.fields || {};
+            return {
+              id: m.id?.stringValue || '',
+              title: m.title?.stringValue || '',
+              icon: m.icon?.stringValue || '📄',
+              visible: m.visible?.booleanValue !== false,
+              order: Number(m.order?.integerValue || m.order?.doubleValue || 99)
+            };
+          })
+          .filter(s => s.id && s.visible)
+          .sort((a, b) => a.order - b.order);
+
+        if (sections.length > 0) {
+          staticPages = [defaultPages[0]];
+          sections.forEach((s, i) => {
+            staticPages.push({
+              href: `content.html?section=${s.id}`,
+              label: s.title,
+              icon: s.icon,
+              num: String(i + 1).padStart(2, '0')
+            });
+          });
+        } else {
+          staticPages = defaultPages;
+        }
+      } else {
+        staticPages = defaultPages;
+      }
+    } catch (e) {
+      console.warn("nav sections:", e.message);
+      staticPages = defaultPages;
+    }
+  }
 
   const current = window.location.pathname.split('/').pop() || 'index.html';
   const urlId   = new URLSearchParams(location.search).get("id");
@@ -76,7 +123,13 @@
 
   /* ── بناء الشريط بعد الحصول على كل الصفحات ── */
   async function buildNav() {
-    /* انتظر الصفحات الديناميكية أولاً (بحدّ أقصى 1500ms للسرعة) */
+    /* جلب الأقسام من Firestore أولاً (بحدّ أقصى 1500ms) */
+    await Promise.race([
+      loadSectionsForNav(),
+      new Promise(resolve => setTimeout(resolve, 1500))
+    ]);
+
+    /* انتظر الصفحات الديناميكية (بحدّ أقصى 1500ms للسرعة) */
     const dynamicPages = await Promise.race([
       fetchDynamicPages(),
       new Promise(resolve => setTimeout(() => resolve([]), 1500))

@@ -2880,32 +2880,93 @@ function collectHomeCards() {
 /* ── رسالة ترحيبية للمتدربين ── */
 
 /* ══════════════════════════════════════════════════════
-   📄 إدارة ملفات PDF للأقسام
+   📄 إدارة الأقسام وملفات PDF
 ══════════════════════════════════════════════════════ */
-const PDF_SECTIONS = ["networks","security","osi","cables","ip"];
 
-window.loadPdfLinks = async function() {
+/* الأقسام الافتراضية (تُستخدم فقط إذا لم تُوجد بيانات في Firestore) */
+const DEFAULT_SECTIONS = [
+  { id: "networks", title: "شبكات الحاسب الآلي", icon: "📡", subtitle: "مقدمة في شبكات الحاسب وأنواعها ومكوناتها", order: 1, visible: true },
+  { id: "security", title: "الأمان في الشبكات", icon: "🔒", subtitle: "التهديدات وحلول الأمان في الشبكات", order: 2, visible: true },
+  { id: "osi",      title: "نموذج OSI",          icon: "🔁", subtitle: "طبقات نموذج الاتصال المعياري", order: 3, visible: true },
+  { id: "cables",   title: "كيابل الشبكات",      icon: "🔌", subtitle: "أنواع الكابلات ومواصفاتها وأدوات التصنيع", order: 4, visible: true },
+  { id: "ip",       title: "بروتوكول IP",         icon: "🌍", subtitle: "العنونة والبروتوكولات في الشبكات", order: 5, visible: true },
+];
+
+let _sectionsData = []; /* النسخة الحالية من الأقسام في الذاكرة */
+
+/* ── تحميل الأقسام وروابط PDF من Firestore ── */
+window.loadSectionsPanel = async function() {
   try {
-    const snap = await getDoc(doc(db, "settings", "pdfLinks"));
-    const data = snap.exists() ? snap.data() : {};
-    PDF_SECTIONS.forEach(sec => {
-      const el = document.getElementById(`pdfLink_${sec}`);
-      if (el) el.value = data[sec] || "";
+    const [secSnap, pdfSnap] = await Promise.all([
+      getDoc(doc(db, "settings", "sections")),
+      getDoc(doc(db, "settings", "pdfLinks"))
+    ]);
+
+    const secData = secSnap.exists() ? secSnap.data() : null;
+    const pdfData = pdfSnap.exists() ? pdfSnap.data() : {};
+
+    // إذا لم تُوجد أقسام في Firestore، استخدم الافتراضية
+    if (secData && secData.list && secData.list.length > 0) {
+      _sectionsData = secData.list;
+    } else {
+      _sectionsData = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+    }
+
+    // ترتيب حسب order
+    _sectionsData.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    // بناء واجهة الأقسام
+    const container = document.getElementById("sectionsListContainer");
+    container.innerHTML = "";
+
+    _sectionsData.forEach((sec, idx) => {
+      const isHidden = sec.visible === false;
+      const pdfUrl = pdfData[sec.id] || "";
+      const num = String(idx + 1).padStart(2, "0");
+
+      container.innerHTML += `
+        <div class="sec-admin-card" data-sec-id="${sec.id}" style="background:var(--card);border:1px solid ${isHidden ? 'rgba(244,67,54,0.3)' : 'var(--border)'};border-radius:12px;padding:1rem;${isHidden ? 'opacity:0.6;' : ''}position:relative;">
+          ${isHidden ? '<div style="position:absolute;top:8px;left:8px;background:rgba(244,67,54,0.15);border:1px solid rgba(244,67,54,0.3);border-radius:6px;padding:0.15rem 0.5rem;font-size:0.65rem;font-weight:700;color:#ff6b6b;">مخفي</div>' : ''}
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="font-size:1.2rem;">${sec.icon || '📄'}</span>
+              <span style="font-weight:700;font-size:0.88rem;">${sec.title}</span>
+              <span style="font-size:0.65rem;color:var(--text-faint);background:rgba(0,201,177,0.08);padding:0.1rem 0.4rem;border-radius:8px;">${num}</span>
+            </div>
+            <div style="display:flex;gap:0.35rem;">
+              <button onclick="toggleSectionVisibility('${sec.id}')" title="${isHidden ? 'إظهار' : 'إخفاء'}" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.04);cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;">${isHidden ? '👁' : '🙈'}</button>
+              <button onclick="deleteSectionConfirm('${sec.id}','${sec.title}')" title="حذف" style="width:30px;height:30px;border-radius:6px;border:1px solid rgba(244,67,54,0.3);background:rgba(244,67,54,0.06);cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;">🗑</button>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem;">${sec.subtitle || ''}</div>
+          <input type="url" id="pdfLink_${sec.id}" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;" value="${pdfUrl}">
+        </div>
+      `;
     });
-  } catch(e) { console.error("loadPdfLinks:", e); }
+
+  } catch(e) {
+    console.error("loadSectionsPanel:", e);
+  }
 };
 
-window.savePdfLinks = async function() {
+/* ── حفظ الأقسام + روابط PDF ── */
+window.saveSectionsAndLinks = async function() {
   const status = document.getElementById("pdfLinksStatus");
-  const data = {};
-  PDF_SECTIONS.forEach(sec => {
-    const el = document.getElementById(`pdfLink_${sec}`);
-    if (el) data[sec] = el.value.trim();
-  });
-
   try {
-    await setDoc(doc(db, "settings", "pdfLinks"), data);
-    status.textContent = "✅ تم حفظ جميع الروابط بنجاح!";
+    // جمع روابط PDF
+    const pdfData = {};
+    _sectionsData.forEach(sec => {
+      const el = document.getElementById(`pdfLink_${sec.id}`);
+      if (el) pdfData[sec.id] = el.value.trim();
+    });
+
+    // حفظ الأقسام وروابط PDF بالتوازي
+    await Promise.all([
+      setDoc(doc(db, "settings", "sections"), { list: _sectionsData }),
+      setDoc(doc(db, "settings", "pdfLinks"), pdfData)
+    ]);
+
+    status.textContent = "✅ تم حفظ جميع الأقسام والروابط بنجاح!";
     status.className = "qz-form-msg success"; status.style.display = "block";
     setTimeout(() => status.style.display = "none", 3000);
   } catch(e) {
@@ -2913,6 +2974,89 @@ window.savePdfLinks = async function() {
     status.className = "qz-form-msg error"; status.style.display = "block";
   }
 };
+
+/* ── إظهار نموذج إضافة قسم ── */
+window.showAddSectionForm = function() {
+  const form = document.getElementById("addSectionForm");
+  form.style.display = form.style.display === "none" ? "block" : "none";
+  if (form.style.display === "block") {
+    document.getElementById("newSecId").value = "";
+    document.getElementById("newSecTitle").value = "";
+    document.getElementById("newSecIcon").value = "";
+    document.getElementById("newSecSubtitle").value = "";
+    document.getElementById("newSecId").focus();
+  }
+};
+
+/* ── إضافة قسم جديد ── */
+window.addNewSection = async function() {
+  const id = (document.getElementById("newSecId").value || "").trim().toLowerCase().replace(/\s+/g, "_");
+  const title = (document.getElementById("newSecTitle").value || "").trim();
+  const icon = (document.getElementById("newSecIcon").value || "📄").trim();
+  const subtitle = (document.getElementById("newSecSubtitle").value || "").trim();
+
+  if (!id) return alert("❌ يجب إدخال معرّف القسم (بالإنجليزية)");
+  if (!title) return alert("❌ يجب إدخال اسم القسم");
+  if (!/^[a-z][a-z0-9_]*$/.test(id)) return alert("❌ المعرّف يجب أن يبدأ بحرف إنجليزي ويحتوي فقط على حروف وأرقام و _");
+  if (_sectionsData.find(s => s.id === id)) return alert("❌ يوجد قسم بنفس المعرّف: " + id);
+
+  const newSec = {
+    id, title, icon, subtitle,
+    order: _sectionsData.length + 1,
+    visible: true
+  };
+
+  _sectionsData.push(newSec);
+
+  // حفظ فوري + إعادة تحميل
+  try {
+    await setDoc(doc(db, "settings", "sections"), { list: _sectionsData });
+    document.getElementById("addSectionForm").style.display = "none";
+    loadSectionsPanel();
+  } catch(e) {
+    alert("❌ فشل الحفظ: " + e.message);
+    _sectionsData.pop(); // تراجع
+  }
+};
+
+/* ── إخفاء/إظهار قسم ── */
+window.toggleSectionVisibility = async function(secId) {
+  const sec = _sectionsData.find(s => s.id === secId);
+  if (!sec) return;
+  sec.visible = !sec.visible;
+
+  try {
+    await setDoc(doc(db, "settings", "sections"), { list: _sectionsData });
+    loadSectionsPanel();
+  } catch(e) {
+    sec.visible = !sec.visible; // تراجع
+    alert("❌ فشل: " + e.message);
+  }
+};
+
+/* ── حذف قسم ── */
+window.deleteSectionConfirm = function(secId, title) {
+  if (!confirm(`هل أنت متأكد من حذف قسم "${title}"؟\n\n⚠️ سيتم حذف القسم من القائمة نهائياً (رابط PDF لن يُحذف من Firestore)`)) return;
+  deleteSectionNow(secId);
+};
+
+async function deleteSectionNow(secId) {
+  _sectionsData = _sectionsData.filter(s => s.id !== secId);
+  // إعادة ترقيم
+  _sectionsData.forEach((s, i) => s.order = i + 1);
+
+  try {
+    await setDoc(doc(db, "settings", "sections"), { list: _sectionsData });
+    loadSectionsPanel();
+  } catch(e) {
+    alert("❌ فشل الحذف: " + e.message);
+    loadSectionsPanel(); // إعادة تحميل من Firestore
+  }
+}
+
+/* ── التوافقية: loadPdfLinks و savePdfLinks (يُستدعون من أماكن أخرى) ── */
+window.loadPdfLinks = function() { loadSectionsPanel(); };
+window.savePdfLinks = function() { saveSectionsAndLinks(); };
 
 window.saveWelcomeMsg = async function() {
   const msg = document.getElementById("settWelcomeMsg")?.value?.trim() || "";
