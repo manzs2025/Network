@@ -89,28 +89,30 @@ body {
 
 /* ─── وضع Slides ─── */
 .slides-mode .section-hero {
-  padding: 4rem 1rem 0.8rem;
+  padding: 3.5rem 1rem 0.4rem;
 }
-.slides-mode .section-subtitle {
-  margin-bottom: 0;
-}
+.slides-mode .section-num { font-size: 0.7rem; padding: 0.2rem 0.8rem; margin-bottom: 0.5rem; }
+.slides-mode .section-title { font-size: 1.4rem; margin-bottom: 0.2rem; }
+.slides-mode .section-subtitle { font-size: 0.8rem; margin-bottom: 0; }
 .slides-mode .pdf-container {
   max-width: 100%;
   padding: 0;
   margin-bottom: 0;
+  overflow: hidden;
 }
 .slides-mode .pdf-frame-wrap {
   border-radius: 0;
   border: none;
   min-height: auto;
   position: relative;
+  overflow: hidden;
 }
 .slides-mode .pdf-toolbar {
   display: none;
 }
 .slides-mode .pdf-frame-wrap iframe {
-  width: 100%;
-  height: calc(100vh - 140px);
+  width: 100vw;
+  height: calc(100vh - 100px);
 }
 /* طبقة حماية شفافة فوق iframe — تمنع الزر الأيمن وحفظ الصور */
 .slides-overlay {
@@ -120,12 +122,23 @@ body {
   display: block;
   position: absolute;
   top: 0; left: 0; right: 0;
-  bottom: 50px; /* نترك شريط التنقل السفلي لـ Google Slides يعمل */
+  bottom: 50px;
   z-index: 10;
   cursor: default;
 }
-.slides-mode .pdf-frame-wrap {
-  position: relative;
+
+/* ─── Desktop: تكبير العرض على الشاشات الكبيرة ─── */
+@media (min-width: 1024px) {
+  .slides-mode .section-hero {
+    padding: 3.2rem 1rem 0.3rem;
+  }
+  .slides-mode .section-num { display: none; }
+  .slides-mode .section-title { font-size: 1.1rem; margin-bottom: 0; }
+  .slides-mode .section-subtitle { display: none; }
+  .slides-mode .pdf-frame-wrap iframe {
+    width: 100vw;
+    height: calc(100vh - 60px);
+  }
 }
 .pdf-toolbar {
   display: flex;
@@ -169,16 +182,16 @@ body {
 .pdf-empty-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
 .pdf-empty-msg { font-size: 0.9rem; line-height: 1.8; }
 
-/* ─── RESPONSIVE ─── */
+/* ─── RESPONSIVE: Mobile ─── */
 @media (max-width: 600px) {
   .section-hero { padding: 4.5rem 1rem 1rem; }
   .section-title { font-size: 1.5rem; }
   .pdf-frame-wrap iframe { height: 75vh; }
-  .slides-mode .section-hero { padding: 4rem 1rem 0.5rem; }
-  .slides-mode .section-num { font-size: 0.65rem; padding: 0.2rem 0.7rem; margin-bottom: 0.5rem; }
-  .slides-mode .section-title { font-size: 1.2rem; margin-bottom: 0.2rem; }
-  .slides-mode .section-subtitle { font-size: 0.75rem; }
-  .slides-mode .pdf-frame-wrap iframe { height: calc(100vh - 120px); }
+  .slides-mode .section-hero { padding: 3.8rem 1rem 0.3rem; }
+  .slides-mode .section-num { font-size: 0.6rem; padding: 0.15rem 0.6rem; margin-bottom: 0.3rem; }
+  .slides-mode .section-title { font-size: 1rem; margin-bottom: 0.1rem; }
+  .slides-mode .section-subtitle { display: none; }
+  .slides-mode .pdf-frame-wrap iframe { height: calc(100vh - 80px); }
 }
 /* إخفاء شعار الشريط العلوي */
 .nav-logo { display: none !important; }
