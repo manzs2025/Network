@@ -2949,7 +2949,7 @@ window.loadSectionsPanel = async function() {
               <input type="number" id="slidesCount_${sec.id}" class="qz-input" placeholder="0" min="0" style="font-size:0.82rem;text-align:center;" value="${sec.slidesCount || 0}">
             </div>
           </div>
-          <div style="font-size:0.65rem;color:var(--text-faint);margin-top:0.4rem;line-height:1.6;">💡 إذا وضعت عدد شرائح > 0، سيعرض صور من مجلد <code style="background:rgba(255,255,255,0.06);padding:0.1rem 0.3rem;border-radius:4px;direction:ltr;">slides/${sec.id}/1.jpg</code> بدلاً من PDF</div>
+          <div style="font-size:0.65rem;color:var(--text-faint);margin-top:0.4rem;line-height:1.6;">💡 إذا وضعت عدد شرائح > 0، سيعرض صور من مجلد <code style="background:rgba(255,255,255,0.06);padding:0.1rem 0.3rem;border-radius:4px;direction:ltr;">slides/${sec.id}/1.png</code> بدلاً من PDF</div>
         </div>
       `;
     });

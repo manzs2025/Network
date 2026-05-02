@@ -328,7 +328,7 @@ let section = DEFAULT_SECTIONS[sectionId] || { title: sectionId, num: "", icon: 
 })();
 
 /* ── جلب المحتوى: صور (slides) أولاً، ثم PDF كـ fallback ── */
-const SLIDES_BASE = "slides"; /* مجلد الصور في GitHub: slides/{sectionId}/1.jpg */
+const SLIDES_BASE = "slides"; /* مجلد الصور في GitHub: slides/{sectionId}/1.png */
 let _slides = { current: 1, total: 0 };
 
 async function loadContent() {
@@ -365,7 +365,7 @@ async function loadContent() {
       document.getElementById("slideCurrentNum").textContent = "1";
 
       const img = document.getElementById("slideImg");
-      img.src = `${SLIDES_BASE}/${sectionId}/1.jpg`;
+      img.src = `${SLIDES_BASE}/${sectionId}/1.png`;
       img.classList.add("loading");
       img.onload = () => img.classList.remove("loading");
 
@@ -423,7 +423,7 @@ window.prevSlide = function() {
 function showSlide(num) {
   const img = document.getElementById("slideImg");
   img.classList.add("loading");
-  img.src = `${SLIDES_BASE}/${sectionId}/${num}.jpg`;
+  img.src = `${SLIDES_BASE}/${sectionId}/${num}.png`;
   img.onload = () => img.classList.remove("loading");
   document.getElementById("slideCurrentNum").textContent = num;
   updateSlideNav();
@@ -440,7 +440,7 @@ function updateSlideNav() {
 function preloadNextSlide(num) {
   if (num > _slides.total) return;
   const img = new Image();
-  img.src = `${SLIDES_BASE}/${sectionId}/${num}.jpg`;
+  img.src = `${SLIDES_BASE}/${sectionId}/${num}.png`;
 }
 
 /* دعم أزرار لوحة المفاتيح */
