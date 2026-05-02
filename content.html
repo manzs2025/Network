@@ -86,7 +86,6 @@ body {
   border: none;
   display: block;
 }
-/* طبقة علوية تغطي شريط أدوات Google Drive (زر التحميل والطباعة) */
 .pdf-top-shield {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -103,13 +102,82 @@ body {
   font-weight: 700;
   color: var(--text);
 }
-/* طبقة سفلية تغطي أسفل عارض Google Drive */
 .pdf-bottom-shield {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 4px;
   z-index: 10;
   background: var(--card);
+}
+
+/* ─── SLIDES VIEWER (صور) ─── */
+.slides-viewer {
+  max-width: 1000px;
+  margin: 0 auto 2rem;
+  padding: 0 0.5rem;
+}
+.slides-img-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.slides-img-wrap img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+.slides-img-wrap img.loading { opacity: 0.3; }
+.slides-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  direction: ltr;
+}
+.slides-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.slides-btn:hover:not(:disabled) { background: var(--primary); border-color: var(--primary); color: #fff; }
+.slides-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.slides-counter {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 70px;
+  text-align: center;
+  direction: ltr;
+}
+.slides-progress-wrap {
+  max-width: 400px;
+  margin: 0.75rem auto 0;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.slides-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }
 /* ─── LOADING & EMPTY ─── */
 .pdf-loading {
@@ -146,6 +214,9 @@ body {
   .pdf-frame-wrap iframe { height: 80vh; }
   .pdf-top-shield { height: 40px; }
   .pdf-top-shield-title { font-size: 0.75rem; }
+  .slides-viewer { padding: 0 0.25rem; }
+  .slides-btn { width: 38px; height: 38px; font-size: 1rem; }
+  .slides-counter { font-size: 0.78rem; }
 }
 /* إخفاء شعار الشريط العلوي */
 .nav-logo { display: none !important; }
@@ -181,6 +252,21 @@ body {
       </div>
       <iframe id="pdfIframe" allowfullscreen></iframe>
       <div class="pdf-bottom-shield"></div>
+    </div>
+  </div>
+
+  <!-- عارض الصور (Slides) -->
+  <div id="slidesViewer" style="display:none;" class="slides-viewer">
+    <div class="slides-img-wrap">
+      <img id="slideImg" src="" alt="شريحة" draggable="false">
+    </div>
+    <div class="slides-nav">
+      <button class="slides-btn" id="btnPrevSlide" onclick="prevSlide()">&#9664;</button>
+      <div class="slides-counter"><span id="slideCurrentNum">1</span> / <span id="slideTotalNum">1</span></div>
+      <button class="slides-btn" id="btnNextSlide" onclick="nextSlide()">&#9654;</button>
+    </div>
+    <div class="slides-progress-wrap">
+      <div class="slides-progress-bar" id="slidesProgressBar" style="width:0%"></div>
     </div>
   </div>
 </div>
@@ -241,16 +327,58 @@ let section = DEFAULT_SECTIONS[sectionId] || { title: sectionId, num: "", icon: 
   document.getElementById("pdfShieldTitle").textContent = `📖 ${section.title}`;
 })();
 
-/* ── جلب رابط PDF من Firestore ── */
+/* ── جلب المحتوى: صور (slides) أولاً، ثم PDF كـ fallback ── */
+const SLIDES_BASE = "slides"; /* مجلد الصور في GitHub: slides/{sectionId}/1.jpg */
+let _slides = { current: 1, total: 0 };
+
 async function loadContent() {
   const loadingEl = document.getElementById("pdfLoading");
   const emptyEl = document.getElementById("pdfEmpty");
-  const viewerEl = document.getElementById("pdfViewer");
+  const pdfViewer = document.getElementById("pdfViewer");
+  const slidesViewer = document.getElementById("slidesViewer");
 
   try {
-    const snap = await getDoc(doc(db, "settings", "pdfLinks"));
-    const data = snap.exists() ? snap.data() : {};
-    const rawUrl = data[sectionId];
+    /* جلب إعدادات الأقسام + روابط PDF بالتوازي */
+    const [secSnap, pdfSnap] = await Promise.all([
+      getDoc(doc(db, "settings", "sections")),
+      getDoc(doc(db, "settings", "pdfLinks"))
+    ]);
+
+    const secData = secSnap.exists() ? secSnap.data() : {};
+    const pdfData = pdfSnap.exists() ? pdfSnap.data() : {};
+
+    /* البحث عن عدد شرائح هذا القسم */
+    let slidesCount = 0;
+    if (secData.list) {
+      const sec = secData.list.find(s => s.id === sectionId);
+      if (sec && sec.slidesCount && Number(sec.slidesCount) > 0) {
+        slidesCount = Number(sec.slidesCount);
+      }
+    }
+
+    /* ── الوضع 1: عرض صور (إذا حُدد عدد الشرائح) ── */
+    if (slidesCount > 0) {
+      _slides.total = slidesCount;
+      _slides.current = 1;
+
+      document.getElementById("slideTotalNum").textContent = slidesCount;
+      document.getElementById("slideCurrentNum").textContent = "1";
+
+      const img = document.getElementById("slideImg");
+      img.src = `${SLIDES_BASE}/${sectionId}/1.jpg`;
+      img.classList.add("loading");
+      img.onload = () => img.classList.remove("loading");
+
+      loadingEl.style.display = "none";
+      slidesViewer.style.display = "block";
+
+      updateSlideNav();
+      preloadNextSlide(2);
+      return;
+    }
+
+    /* ── الوضع 2: عرض PDF من Google Drive ── */
+    const rawUrl = pdfData[sectionId];
 
     if (!rawUrl || !rawUrl.trim()) {
       loadingEl.style.display = "none";
@@ -258,15 +386,11 @@ async function loadContent() {
       return;
     }
 
-    /* تحويل رابط Google Drive للعرض المباشر */
     let pdfEmbed = rawUrl.trim();
-    
-    // رابط مشاركة عادي: https://drive.google.com/file/d/FILE_ID/view?...
     const match = pdfEmbed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (match) {
       pdfEmbed = `https://drive.google.com/file/d/${match[1]}/preview`;
     }
-    // رابط open: https://drive.google.com/open?id=FILE_ID
     const match2 = pdfEmbed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
     if (match2 && !match) {
       pdfEmbed = `https://drive.google.com/file/d/${match2[1]}/preview`;
@@ -274,7 +398,7 @@ async function loadContent() {
 
     document.getElementById("pdfIframe").src = pdfEmbed;
     loadingEl.style.display = "none";
-    viewerEl.style.display = "block";
+    pdfViewer.style.display = "block";
 
   } catch (e) {
     console.error("loadContent:", e);
@@ -282,6 +406,48 @@ async function loadContent() {
     emptyEl.style.display = "block";
   }
 }
+
+/* ── التنقل بين الشرائح ── */
+window.nextSlide = function() {
+  if (_slides.current >= _slides.total) return;
+  _slides.current++;
+  showSlide(_slides.current);
+};
+
+window.prevSlide = function() {
+  if (_slides.current <= 1) return;
+  _slides.current--;
+  showSlide(_slides.current);
+};
+
+function showSlide(num) {
+  const img = document.getElementById("slideImg");
+  img.classList.add("loading");
+  img.src = `${SLIDES_BASE}/${sectionId}/${num}.jpg`;
+  img.onload = () => img.classList.remove("loading");
+  document.getElementById("slideCurrentNum").textContent = num;
+  updateSlideNav();
+  preloadNextSlide(num + 1);
+}
+
+function updateSlideNav() {
+  document.getElementById("btnPrevSlide").disabled = (_slides.current <= 1);
+  document.getElementById("btnNextSlide").disabled = (_slides.current >= _slides.total);
+  const pct = (_slides.current / _slides.total * 100).toFixed(0);
+  document.getElementById("slidesProgressBar").style.width = pct + "%";
+}
+
+function preloadNextSlide(num) {
+  if (num > _slides.total) return;
+  const img = new Image();
+  img.src = `${SLIDES_BASE}/${sectionId}/${num}.jpg`;
+}
+
+/* دعم أزرار لوحة المفاتيح */
+document.addEventListener("keydown", function(e) {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown") { nextSlide(); e.preventDefault(); }
+  if (e.key === "ArrowLeft" || e.key === "ArrowUp") { prevSlide(); e.preventDefault(); }
+});
 
 loadContent();
 

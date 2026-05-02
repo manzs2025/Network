@@ -2939,7 +2939,17 @@ window.loadSectionsPanel = async function() {
             </div>
           </div>
           <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem;">${sec.subtitle || ''}</div>
-          <input type="url" id="pdfLink_${sec.id}" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;" value="${pdfUrl}">
+          <div style="display:grid;grid-template-columns:1fr auto;gap:0.5rem;align-items:end;">
+            <div>
+              <div style="font-size:0.68rem;color:var(--text-faint);margin-bottom:0.25rem;">رابط PDF (Google Drive) — يُستخدم إذا لم تُرفع صور</div>
+              <input type="url" id="pdfLink_${sec.id}" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;" value="${pdfUrl}">
+            </div>
+            <div style="min-width:100px;">
+              <div style="font-size:0.68rem;color:var(--accent);margin-bottom:0.25rem;">عدد الشرائح (صور)</div>
+              <input type="number" id="slidesCount_${sec.id}" class="qz-input" placeholder="0" min="0" style="font-size:0.82rem;text-align:center;" value="${sec.slidesCount || 0}">
+            </div>
+          </div>
+          <div style="font-size:0.65rem;color:var(--text-faint);margin-top:0.4rem;line-height:1.6;">💡 إذا وضعت عدد شرائح > 0، سيعرض صور من مجلد <code style="background:rgba(255,255,255,0.06);padding:0.1rem 0.3rem;border-radius:4px;direction:ltr;">slides/${sec.id}/1.jpg</code> بدلاً من PDF</div>
         </div>
       `;
     });
@@ -2953,11 +2963,15 @@ window.loadSectionsPanel = async function() {
 window.saveSectionsAndLinks = async function() {
   const status = document.getElementById("pdfLinksStatus");
   try {
-    // جمع روابط PDF
+    // جمع روابط PDF + تحديث عدد الشرائح
     const pdfData = {};
     _sectionsData.forEach(sec => {
       const el = document.getElementById(`pdfLink_${sec.id}`);
       if (el) pdfData[sec.id] = el.value.trim();
+
+      // تحديث عدد الشرائح من الحقل
+      const scEl = document.getElementById(`slidesCount_${sec.id}`);
+      if (scEl) sec.slidesCount = parseInt(scEl.value) || 0;
     });
 
     // حفظ الأقسام وروابط PDF بالتوازي
