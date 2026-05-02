@@ -380,7 +380,22 @@ body::before{
 <script src="shared-nav.js"></script>
 
 <script>
-/* ── جلب الأقسام من Firestore وبناء البطاقات ── */
+/* ── Scroll animations (يجب تعريفه أولاً) ── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
+}, { threshold: 0.1 });
+document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
+
+/* ── Smooth scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener("click", e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute("href"));
+    if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
+
+/* ── جلب الأقسام + عدد المتدربين + التقدم ── */
 (async function() {
   const FB = "networkacademy-795c8";
   const defaults = [
@@ -391,6 +406,7 @@ body::before{
     { id:"ip",       title:"بروتوكول IP",         icon:"🌍", subtitle:"العنونة والبروتوكولات في الشبكات", order:5 },
   ];
 
+  /* 1) جلب الأقسام */
   let sections = defaults;
   try {
     const resp = await fetch(`https://firestore.googleapis.com/v1/projects/${FB}/databases/(default)/documents/settings/sections`);
@@ -416,9 +432,11 @@ body::before{
     }
   } catch(e) { /* fallback */ }
 
-  // تحديث عدد الأقسام
-  document.querySelector('.stat-num').textContent = sections.length;
+  // تحديث عدد الأقسام في الإحصائيات
+  const statNums = document.querySelectorAll('.stat-num');
+  if (statNums[0]) statNums[0].textContent = sections.length;
 
+  // بناء بطاقات الأقسام
   const grid = document.getElementById("sectionsGrid");
   grid.innerHTML = sections.map((s, i) => `
     <a href="content.html?section=${s.id}" class="sec-card fade-in">
@@ -438,68 +456,44 @@ body::before{
     </a>
   `).join("");
 
-  // تفعيل animations
+  // تفعيل animations على البطاقات الجديدة
   document.querySelectorAll(".sec-card.fade-in").forEach(el => observer.observe(el));
-})();
-(async function() {
-  try {
-    const url = "https://firestore.googleapis.com/v1/projects/networkacademy-795c8/databases/(default)/documents/users";
-    const resp = await fetch(url);
-    if (!resp.ok) return;
-    const data = await resp.json();
-    if (data.documents) {
-      const trainees = data.documents.filter(d => {
-        const role = d.fields?.role?.stringValue;
-        return role === "trainee";
-      });
-      const el = document.getElementById("traineeCount");
-      if (el) el.textContent = trainees.length;
-    }
-  } catch(e) { console.warn("count:", e); }
-})();
 
-/* ── جلب تقدم المتدرب (إن كان مسجّل دخول) ── */
-(async function() {
+  /* 2) جلب عدد المتدربين */
   try {
-    // نتحقق من وجود Firebase Auth token في localStorage
+    const resp2 = await fetch(`https://firestore.googleapis.com/v1/projects/${FB}/databases/(default)/documents/users`);
+    if (resp2.ok) {
+      const data2 = await resp2.json();
+      if (data2.documents) {
+        const trainees = data2.documents.filter(d => d.fields?.role?.stringValue === "trainee");
+        const el = document.getElementById("traineeCount");
+        if (el) el.textContent = trainees.length;
+      }
+    }
+  } catch(e) { /* ignore */ }
+
+  /* 3) جلب تقدم المتدرب (إن كان مسجّل دخول) */
+  try {
     const keys = Object.keys(localStorage);
     const fbKey = keys.find(k => k.startsWith("firebase:authUser:"));
     if (!fbKey) return;
     const userData = JSON.parse(localStorage.getItem(fbKey));
     if (!userData?.uid) return;
 
-    // جلب تقدم المتدرب
-    const url = `https://firestore.googleapis.com/v1/projects/networkacademy-795c8/databases/(default)/documents/progress/${userData.uid}`;
-    const resp = await fetch(url);
-    if (!resp.ok) return;
-    const data = await resp.json();
-    if (!data.fields) return;
+    const resp3 = await fetch(`https://firestore.googleapis.com/v1/projects/${FB}/databases/(default)/documents/progress/${userData.uid}`);
+    if (!resp3.ok) return;
+    const data3 = await resp3.json();
+    if (!data3.fields) return;
 
-    // تحديث أشرطة التقدم
     document.querySelectorAll("[data-section]").forEach(el => {
       const sec = el.dataset.section;
-      const val = data.fields[sec]?.integerValue || data.fields[sec]?.doubleValue || 0;
+      const val = data3.fields[sec]?.integerValue || data3.fields[sec]?.doubleValue || 0;
       const pct = Math.min(100, Math.max(0, Number(val)));
       el.querySelector(".sec-progress-fill").style.width = pct + "%";
       el.querySelector(".sec-progress-text").textContent = pct + "%";
     });
-  } catch(e) { console.warn("progress:", e); }
+  } catch(e) { /* ignore */ }
 })();
-
-/* ── Scroll animations ── */
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
-}, { threshold: 0.1 });
-document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
-
-/* ── Smooth scroll ── */
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener("click", e => {
-    e.preventDefault();
-    const t = document.querySelector(a.getAttribute("href"));
-    if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-});
 </script>
 
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
