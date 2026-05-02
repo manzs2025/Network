@@ -66,7 +66,7 @@ body {
   margin: 0 auto;
 }
 
-/* ─── PDF / SLIDES VIEWER ─── */
+/* ─── PDF VIEWER ─── */
 .pdf-container {
   max-width: 1400px;
   margin: 0 auto 3rem;
@@ -82,68 +82,35 @@ body {
 }
 .pdf-frame-wrap iframe {
   width: 100%;
-  height: 85vh;
+  height: 92vh;
   border: none;
   display: block;
 }
-
-/* ─── وضع Slides ─── */
-.slides-mode .section-hero {
-  display: none;
-}
-.slides-mode .pdf-container {
-  max-width: 100%;
-  padding: 0;
-  margin-bottom: 0;
-  overflow: hidden;
-}
-.slides-mode .pdf-frame-wrap {
-  border-radius: 0;
-  border: none;
-  min-height: auto;
-  position: relative;
-  overflow: hidden;
-}
-.slides-mode .pdf-toolbar {
-  display: none;
-}
-.slides-mode .pdf-frame-wrap iframe {
-  width: 100vw;
-  height: calc(100vh - 48px);
-}
-/* طبقة حماية شفافة فوق iframe — تمنع الزر الأيمن وحفظ الصور */
-.slides-overlay {
-  display: none;
-}
-.slides-mode .slides-overlay {
-  display: block;
+/* طبقة علوية تغطي شريط أدوات Google Drive (زر التحميل والطباعة) */
+.pdf-top-shield {
   position: absolute;
   top: 0; left: 0; right: 0;
-  bottom: 50px;
+  height: 50px;
   z-index: 10;
-  cursor: default;
-}
-
-/* ─── Desktop: تكبير العرض على الشاشات الكبيرة ─── */
-@media (min-width: 1024px) {
-  .slides-mode .pdf-frame-wrap iframe {
-    height: calc(100vh - 48px);
-  }
-}
-.pdf-toolbar {
+  background: var(--bg2);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.6rem 1rem;
-  background: var(--bg2);
   border-bottom: 1px solid var(--border);
 }
-.pdf-toolbar-title {
+.pdf-top-shield-title {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text);
 }
-
+/* طبقة سفلية تغطي أسفل عارض Google Drive */
+.pdf-bottom-shield {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  z-index: 10;
+  background: var(--card);
+}
 /* ─── LOADING & EMPTY ─── */
 .pdf-loading {
   display: flex;
@@ -176,8 +143,9 @@ body {
 @media (max-width: 600px) {
   .section-hero { padding: 4.5rem 1rem 1rem; }
   .section-title { font-size: 1.5rem; }
-  .pdf-frame-wrap iframe { height: 75vh; }
-  .slides-mode .pdf-frame-wrap iframe { height: calc(100vh - 48px); }
+  .pdf-frame-wrap iframe { height: 80vh; }
+  .pdf-top-shield { height: 40px; }
+  .pdf-top-shield-title { font-size: 0.75rem; }
 }
 /* إخفاء شعار الشريط العلوي */
 .nav-logo { display: none !important; }
@@ -208,11 +176,11 @@ body {
 
   <div id="pdfViewer" style="display:none;">
     <div class="pdf-frame-wrap">
-      <div class="pdf-toolbar">
-        <div class="pdf-toolbar-title" id="pdfToolbarTitle">📖 محتوى القسم</div>
+      <div class="pdf-top-shield">
+        <span class="pdf-top-shield-title" id="pdfShieldTitle">📖 محتوى القسم</span>
       </div>
       <iframe id="pdfIframe" allowfullscreen></iframe>
-      <div class="slides-overlay" id="slidesOverlay"></div>
+      <div class="pdf-bottom-shield"></div>
     </div>
   </div>
 </div>
@@ -247,9 +215,9 @@ document.title = `${section.title} — أكاديمية الشبكات`;
 document.getElementById("sectionNum").textContent = `${section.icon} ${section.num}`;
 document.getElementById("sectionTitle").innerHTML = section.title;
 document.getElementById("sectionSubtitle").textContent = section.subtitle;
-document.getElementById("pdfToolbarTitle").textContent = `📖 ${section.title}`;
+document.getElementById("pdfShieldTitle").textContent = `📖 ${section.title}`;
 
-/* ── جلب المحتوى من Firestore (Slides أو PDF) ── */
+/* ── جلب رابط PDF من Firestore ── */
 async function loadContent() {
   const loadingEl = document.getElementById("pdfLoading");
   const emptyEl = document.getElementById("pdfEmpty");
@@ -258,39 +226,6 @@ async function loadContent() {
   try {
     const snap = await getDoc(doc(db, "settings", "pdfLinks"));
     const data = snap.exists() ? snap.data() : {};
-
-    /* ── أولاً: تحقق من وجود رابط Google Slides للقسم ── */
-    const slidesKey = `slides_${sectionId}`;
-    const slidesUrl = data[slidesKey];
-
-    if (slidesUrl && slidesUrl.trim()) {
-      /* ── عرض Google Slides ── */
-      let embedUrl = slidesUrl.trim();
-
-      // استخراج ID العرض التقديمي من أنماط الروابط المختلفة
-      // نمط 1: https://docs.google.com/presentation/d/PRESENTATION_ID/...
-      const slideMatch = embedUrl.match(/\/presentation\/d\/([a-zA-Z0-9_-]+)/);
-      // نمط 2: https://docs.google.com/presentation/d/e/PUBLISHED_ID/...
-      const pubMatch = embedUrl.match(/\/presentation\/d\/e\/([a-zA-Z0-9_-]+)/);
-
-      if (pubMatch) {
-        // رابط منشور — نستخدمه كما هو مع embed
-        embedUrl = `https://docs.google.com/presentation/d/e/${pubMatch[1]}/embed?start=false&loop=false&delayms=0`;
-      } else if (slideMatch) {
-        // رابط عادي — نحوّله لرابط embed
-        embedUrl = `https://docs.google.com/presentation/d/${slideMatch[1]}/embed?start=false&loop=false&delayms=0`;
-      }
-      // إذا لم يتطابق مع أي نمط، نستخدمه كما هو (قد يكون رابط embed جاهز)
-
-      document.getElementById("pdfToolbarTitle").textContent = `📊 ${section.title}`;
-      document.getElementById("pdfIframe").src = embedUrl;
-      document.body.classList.add("slides-mode");
-      loadingEl.style.display = "none";
-      viewerEl.style.display = "block";
-      return;
-    }
-
-    /* ── ثانياً: عرض PDF (السلوك الأصلي) ── */
     const rawUrl = data[sectionId];
 
     if (!rawUrl || !rawUrl.trim()) {
@@ -313,9 +248,6 @@ async function loadContent() {
       pdfEmbed = `https://drive.google.com/file/d/${match2[1]}/preview`;
     }
 
-    window._currentPdfUrl = rawUrl;
-    window._currentPdfEmbed = pdfEmbed;
-
     document.getElementById("pdfIframe").src = pdfEmbed;
     loadingEl.style.display = "none";
     viewerEl.style.display = "block";
@@ -329,20 +261,6 @@ async function loadContent() {
 
 loadContent();
 
-/* ── أزرار ── */
-window.openPdfNewTab = function() {
-  if (window._currentPdfUrl) window.open(window._currentPdfUrl, "_blank");
-};
-window.downloadPdf = function() {
-  if (window._currentPdfUrl) {
-    const match = window._currentPdfUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (match) {
-      window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, "_blank");
-    } else {
-      window.open(window._currentPdfUrl, "_blank");
-    }
-  }
-};
 </script>
 
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
