@@ -2891,6 +2891,9 @@ window.loadPdfLinks = async function() {
     PDF_SECTIONS.forEach(sec => {
       const el = document.getElementById(`pdfLink_${sec}`);
       if (el) el.value = data[sec] || "";
+      // تحميل رابط Slides إن وُجد الحقل
+      const slidesEl = document.getElementById(`slidesLink_${sec}`);
+      if (slidesEl) slidesEl.value = data[`slides_${sec}`] || "";
     });
   } catch(e) { console.error("loadPdfLinks:", e); }
 };
@@ -2901,6 +2904,9 @@ window.savePdfLinks = async function() {
   PDF_SECTIONS.forEach(sec => {
     const el = document.getElementById(`pdfLink_${sec}`);
     if (el) data[sec] = el.value.trim();
+    // حفظ رابط Slides إن وُجد الحقل
+    const slidesEl = document.getElementById(`slidesLink_${sec}`);
+    if (slidesEl && slidesEl.value.trim()) data[`slides_${sec}`] = slidesEl.value.trim();
   });
 
   try {

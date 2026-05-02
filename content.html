@@ -203,8 +203,8 @@ document.getElementById("sectionTitle").innerHTML = section.title;
 document.getElementById("sectionSubtitle").textContent = section.subtitle;
 document.getElementById("pdfToolbarTitle").textContent = `📖 ${section.title}`;
 
-/* ── جلب رابط PDF من Firestore ── */
-async function loadPdf() {
+/* ── جلب المحتوى من Firestore (Slides أو PDF) ── */
+async function loadContent() {
   const loadingEl = document.getElementById("pdfLoading");
   const emptyEl = document.getElementById("pdfEmpty");
   const viewerEl = document.getElementById("pdfViewer");
@@ -212,6 +212,38 @@ async function loadPdf() {
   try {
     const snap = await getDoc(doc(db, "settings", "pdfLinks"));
     const data = snap.exists() ? snap.data() : {};
+
+    /* ── أولاً: تحقق من وجود رابط Google Slides للقسم ── */
+    const slidesKey = `slides_${sectionId}`;
+    const slidesUrl = data[slidesKey];
+
+    if (slidesUrl && slidesUrl.trim()) {
+      /* ── عرض Google Slides ── */
+      let embedUrl = slidesUrl.trim();
+
+      // استخراج ID العرض التقديمي من أنماط الروابط المختلفة
+      // نمط 1: https://docs.google.com/presentation/d/PRESENTATION_ID/...
+      const slideMatch = embedUrl.match(/\/presentation\/d\/([a-zA-Z0-9_-]+)/);
+      // نمط 2: https://docs.google.com/presentation/d/e/PUBLISHED_ID/...
+      const pubMatch = embedUrl.match(/\/presentation\/d\/e\/([a-zA-Z0-9_-]+)/);
+
+      if (pubMatch) {
+        // رابط منشور — نستخدمه كما هو مع embed
+        embedUrl = `https://docs.google.com/presentation/d/e/${pubMatch[1]}/embed?start=false&loop=false&delayms=0`;
+      } else if (slideMatch) {
+        // رابط عادي — نحوّله لرابط embed
+        embedUrl = `https://docs.google.com/presentation/d/${slideMatch[1]}/embed?start=false&loop=false&delayms=0`;
+      }
+      // إذا لم يتطابق مع أي نمط، نستخدمه كما هو (قد يكون رابط embed جاهز)
+
+      document.getElementById("pdfToolbarTitle").textContent = `📊 ${section.title}`;
+      document.getElementById("pdfIframe").src = embedUrl;
+      loadingEl.style.display = "none";
+      viewerEl.style.display = "block";
+      return;
+    }
+
+    /* ── ثانياً: عرض PDF (السلوك الأصلي) ── */
     const rawUrl = data[sectionId];
 
     if (!rawUrl || !rawUrl.trim()) {
@@ -221,34 +253,34 @@ async function loadPdf() {
     }
 
     /* تحويل رابط Google Drive للعرض المباشر */
-    let embedUrl = rawUrl.trim();
+    let pdfEmbed = rawUrl.trim();
     
     // رابط مشاركة عادي: https://drive.google.com/file/d/FILE_ID/view?...
-    const match = embedUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    const match = pdfEmbed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (match) {
-      embedUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
+      pdfEmbed = `https://drive.google.com/file/d/${match[1]}/preview`;
     }
     // رابط open: https://drive.google.com/open?id=FILE_ID
-    const match2 = embedUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    const match2 = pdfEmbed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
     if (match2 && !match) {
-      embedUrl = `https://drive.google.com/file/d/${match2[1]}/preview`;
+      pdfEmbed = `https://drive.google.com/file/d/${match2[1]}/preview`;
     }
 
     window._currentPdfUrl = rawUrl;
-    window._currentPdfEmbed = embedUrl;
+    window._currentPdfEmbed = pdfEmbed;
 
-    document.getElementById("pdfIframe").src = embedUrl;
+    document.getElementById("pdfIframe").src = pdfEmbed;
     loadingEl.style.display = "none";
     viewerEl.style.display = "block";
 
   } catch (e) {
-    console.error("loadPdf:", e);
+    console.error("loadContent:", e);
     loadingEl.style.display = "none";
     emptyEl.style.display = "block";
   }
 }
 
-loadPdf();
+loadContent();
 
 /* ── أزرار ── */
 window.openPdfNewTab = function() {

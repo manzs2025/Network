@@ -2493,13 +2493,20 @@ select optgroup {
         <div style="padding:1.5rem;display:grid;gap:1.5rem;">
           <div style="background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:10px;padding:1rem;font-size:0.82rem;color:var(--accent);line-height:1.8;">
             📌 <strong>طريقة الاستخدام:</strong><br>
-            1. ارفع ملف PDF على Google Drive<br>
-            2. اضغط "مشاركة" واجعله "أي شخص لديه الرابط"<br>
-            3. انسخ الرابط والصقه هنا<br>
-            4. اضغط "💾 حفظ جميع الروابط"
+            <strong>PDF:</strong> ارفع ملف PDF على Google Drive ← مشاركة ← أي شخص لديه الرابط ← الصق الرابط<br>
+            <strong>Slides (تجريبي):</strong> أنشئ عرض تقديمي في Google Slides ← ملف ← نشر على الويب ← الصق الرابط<br>
+            ⚠️ إذا وضعت رابط Slides، سيُعرض بدلاً من PDF (حالياً متاح لقسم الشبكات فقط كتجربة)
           </div>
           <div id="pdfLinksGrid" style="display:grid;gap:1rem;">
-            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">📡 شبكات الحاسب الآلي</div><input type="url" id="pdfLink_networks" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+              <div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">📡 شبكات الحاسب الآلي</div>
+              <input type="url" id="pdfLink_networks" class="qz-input" placeholder="الصق رابط PDF من Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;margin-bottom:0.5rem;">
+              <div style="background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.25);border-radius:8px;padding:0.7rem;margin-top:0.5rem;">
+                <div style="font-weight:700;font-size:0.82rem;margin-bottom:0.4rem;color:var(--primary-l);">📊 Google Slides (تجريبي — يمنع التحميل)</div>
+                <input type="url" id="slidesLink_networks" class="qz-input" placeholder="الصق رابط Google Slides هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;">
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;line-height:1.6;">⚡ إذا وُضع رابط Slides هنا، سيُعرض بدلاً من PDF لهذا القسم</div>
+              </div>
+            </div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔒 الأمان في الشبكات</div><input type="url" id="pdfLink_security" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔁 نموذج OSI</div><input type="url" id="pdfLink_osi" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
             <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;"><div style="font-weight:700;font-size:0.88rem;margin-bottom:0.6rem;">🔌 كيابل الشبكات</div><input type="url" id="pdfLink_cables" class="qz-input" placeholder="الصق رابط Google Drive هنا..." dir="ltr" style="font-size:0.82rem;text-align:left;"></div>
