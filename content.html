@@ -89,11 +89,8 @@ body {
 
 /* ─── وضع Slides ─── */
 .slides-mode .section-hero {
-  padding: 3.5rem 1rem 0.4rem;
+  display: none;
 }
-.slides-mode .section-num { font-size: 0.7rem; padding: 0.2rem 0.8rem; margin-bottom: 0.5rem; }
-.slides-mode .section-title { font-size: 1.4rem; margin-bottom: 0.2rem; }
-.slides-mode .section-subtitle { font-size: 0.8rem; margin-bottom: 0; }
 .slides-mode .pdf-container {
   max-width: 100%;
   padding: 0;
@@ -112,7 +109,7 @@ body {
 }
 .slides-mode .pdf-frame-wrap iframe {
   width: 100vw;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 48px);
 }
 /* طبقة حماية شفافة فوق iframe — تمنع الزر الأيمن وحفظ الصور */
 .slides-overlay {
@@ -129,15 +126,8 @@ body {
 
 /* ─── Desktop: تكبير العرض على الشاشات الكبيرة ─── */
 @media (min-width: 1024px) {
-  .slides-mode .section-hero {
-    padding: 3.2rem 1rem 0.3rem;
-  }
-  .slides-mode .section-num { display: none; }
-  .slides-mode .section-title { font-size: 1.1rem; margin-bottom: 0; }
-  .slides-mode .section-subtitle { display: none; }
   .slides-mode .pdf-frame-wrap iframe {
-    width: 100vw;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 48px);
   }
 }
 .pdf-toolbar {
@@ -187,11 +177,7 @@ body {
   .section-hero { padding: 4.5rem 1rem 1rem; }
   .section-title { font-size: 1.5rem; }
   .pdf-frame-wrap iframe { height: 75vh; }
-  .slides-mode .section-hero { padding: 3.8rem 1rem 0.3rem; }
-  .slides-mode .section-num { font-size: 0.6rem; padding: 0.15rem 0.6rem; margin-bottom: 0.3rem; }
-  .slides-mode .section-title { font-size: 1rem; margin-bottom: 0.1rem; }
-  .slides-mode .section-subtitle { display: none; }
-  .slides-mode .pdf-frame-wrap iframe { height: calc(100vh - 80px); }
+  .slides-mode .pdf-frame-wrap iframe { height: calc(100vh - 48px); }
 }
 /* إخفاء شعار الشريط العلوي */
 .nav-logo { display: none !important; }
