@@ -187,7 +187,8 @@ body {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCz9Wedr_X3VzoaH0gJj8QCxksetbIKMYM",
@@ -195,6 +196,7 @@ const app = initializeApp({
   projectId: "networkacademy-795c8"
 });
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 /* ── الأقسام ── */
 const SECTIONS = {
@@ -260,6 +262,21 @@ async function loadContent() {
 }
 
 loadContent();
+
+/* ── تسجيل تقدم المتدرب (مشاهدة القسم) ── */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+  try {
+    const progressRef = doc(db, "progress", user.uid);
+    const snap = await getDoc(progressRef);
+    const current = snap.exists() ? snap.data() : {};
+
+    // إذا لم يكمل هذا القسم بعد، سجّل 100% (شاهده)
+    if (!current[sectionId] || Number(current[sectionId]) < 100) {
+      await setDoc(progressRef, { [sectionId]: 100 }, { merge: true });
+    }
+  } catch(e) { console.warn("progress track:", e); }
+});
 
 </script>
 

@@ -7,383 +7,521 @@
 <meta name="theme-color" content="#6c2fa0">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<!-- يطبّق ألوان الموقع من إعدادات لوحة التحكم — يجب أن يُوضع مبكراً لتجنّب وميض الألوان -->
+<!-- Open Graph للمشاركة -->
+<meta property="og:title" content="أكاديمية الشبكات — الكلية التقنية بالمندق">
+<meta property="og:description" content="منصة تعليمية تفاعلية لمادة مبادئ شبكات الحاسب — اختبارات، محتوى تفاعلي، شهادات">
+<meta property="og:type" content="website">
+<meta name="description" content="منصة تعليمية تفاعلية لمادة مبادئ شبكات الحاسب الآلي — الكلية التقنية بالمندق">
 <script src="shared-theme.js"></script>
-<title>مبادئ شبكات الحاسب الآلي</title>
-<link rel="stylesheet" href="style.css">
+<title>أكاديمية الشبكات — الكلية التقنية بالمندق</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
-/* ─── HOME-ONLY STYLES ─── */
-.hero {
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  text-align: center;
-  padding: calc(var(--nav-h) + 60px) 2rem 80px;
-  position: relative; overflow: hidden;
-  background:
-    radial-gradient(ellipse 80% 55% at 50% 30%, rgba(108,47,160,0.3) 0%, transparent 65%),
-    radial-gradient(ellipse 55% 40% at 85% 75%, rgba(0,201,177,0.12) 0%, transparent 55%),
-    var(--bg);
+/* ═══ RESET ═══ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#6c2fa0;--primary-l:#8b46c8;--primary-d:#4a1f6e;
+  --accent:#00c9b1;--accent-d:#00a896;
+  --bg:#080a14;--bg2:#0e1022;--bg3:#141730;
+  --card:#161929;--card2:#1c2038;
+  --border:rgba(108,47,160,0.22);
+  --text:#e8eaf6;--text-muted:#7a7f9e;--text-faint:#4a4f6b;
+  --radius:14px;--radius-sm:8px;
 }
-.hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background-image: radial-gradient(circle, rgba(108,47,160,0.1) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: bgMove 22s linear infinite;
-  pointer-events: none;
-}
-@keyframes bgMove { to { transform: translateY(40px); } }
+html,body{min-height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
 
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.4rem 1.2rem;
-  background: rgba(108,47,160,0.18);
-  border: 1px solid rgba(108,47,160,0.38);
-  border-radius: 30px;
-  font-size: 0.82rem; font-weight: 700; color: var(--accent);
-  margin-bottom: 1.75rem;
-}
-.hero h1 {
-  font-size: clamp(2.2rem, 6vw, 4.8rem);
-  font-weight: 900; line-height: 1.15; margin-bottom: 1.25rem;
-}
-.hero h1 .grad {
-  background: linear-gradient(135deg, var(--primary-light), var(--accent));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.hero-sub {
-  font-size: 1.05rem; color: var(--text-muted);
-  max-width: 580px; margin-bottom: 3rem; line-height: 1.85;
+/* ═══ خلفية الشبكة ═══ */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(108,47,160,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(108,47,160,0.04) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0;
 }
 
-/* page cards grid */
-.pages-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 60px 2rem 80px;
+/* ═══ NAVBAR ═══ */
+.nav{
+  position:fixed;top:0;right:0;left:0;z-index:100;
+  height:60px;background:rgba(14,16,34,0.92);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
 }
-.page-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2.25rem 2rem;
-  text-decoration: none;
-  color: var(--text);
-  transition: all 0.3s;
-  position: relative;
-  overflow: hidden;
-  display: block;
+.nav-logo{display:flex;align-items:center;gap:0.6rem;font-size:0.95rem;font-weight:800;color:var(--accent)}
+.nav-logo .logo-box{
+  width:32px;height:32px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;
 }
-.page-card::before {
-  content: '';
-  position: absolute; top: 0; right: 0;
-  width: 120px; height: 120px;
-  background: radial-gradient(circle, rgba(108,47,160,0.15) 0%, transparent 70%);
-  pointer-events: none;
+.nav-links{display:flex;align-items:center;gap:0.5rem}
+.nav-link{
+  padding:0.4rem 1rem;border-radius:20px;font-size:0.78rem;font-weight:700;
+  color:var(--text-muted);transition:all 0.25s;
 }
-.page-card::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  transform: scaleX(0);
-  transition: transform 0.35s;
+.nav-link:hover{color:var(--accent);background:rgba(0,201,177,0.06)}
+.btn-login-nav{
+  padding:0.45rem 1.2rem;
+  background:linear-gradient(135deg,var(--primary),var(--primary-l));
+  border:none;border-radius:20px;color:#fff;font-family:'Cairo',sans-serif;
+  font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.25s;
 }
-.page-card:hover {
-  border-color: rgba(108,47,160,0.55);
-  transform: translateY(-6px);
-  box-shadow: 0 18px 45px rgba(108,47,160,0.2);
-}
-.page-card:hover::after { transform: scaleX(1); }
+.btn-login-nav:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(108,47,160,0.35)}
 
-.pc-num {
-  font-size: 3rem; font-weight: 900; line-height: 1;
-  color: rgba(108,47,160,0.3);
-  margin-bottom: 0.75rem;
-  font-family: 'Cairo', monospace;
+/* ═══ HERO ═══ */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:6rem 1.5rem 4rem;
 }
-.pc-icon {
-  font-size: 2.2rem; margin-bottom: 1rem; display: block;
+.hero-glow{
+  position:absolute;top:-10%;left:50%;transform:translateX(-50%);
+  width:800px;height:800px;
+  background:radial-gradient(circle,rgba(108,47,160,0.15) 0%,rgba(0,201,177,0.05) 40%,transparent 65%);
+  pointer-events:none;
 }
-.pc-title { font-size: 1.2rem; font-weight: 900; margin-bottom: 0.4rem; }
-.pc-en { font-size: 0.82rem; color: var(--accent); font-weight: 600; margin-bottom: 0.85rem; }
-.pc-desc { font-size: 0.87rem; color: var(--text-muted); line-height: 1.75; }
-.pc-topics { margin-top: 1rem; list-style: none; }
-.pc-topics li {
-  font-size: 0.8rem; color: var(--text-muted);
-  padding: 0.25rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  display: flex; align-items: center; gap: 0.4rem;
+.hero-content{position:relative;max-width:720px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  padding:0.35rem 1rem;
+  background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.2);
+  border-radius:20px;font-size:0.75rem;font-weight:700;color:var(--accent);
+  margin-bottom:1.5rem;
+  animation:fadeUp 0.6s ease both;
 }
-.pc-topics li::before { content: '◈'; color: var(--primary-light); font-size: 0.55rem; }
-.pc-topics li:last-child { border-bottom: none; }
-.pc-arrow {
-  margin-top: 1.25rem;
-  font-size: 0.82rem; font-weight: 700; color: var(--accent);
-  display: flex; align-items: center; gap: 0.4rem;
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero-title{
+  font-size:clamp(2rem,5vw,3.2rem);font-weight:900;
+  line-height:1.35;margin-bottom:1rem;
+  animation:fadeUp 0.6s ease 0.1s both;
 }
+.hero-title .accent{
+  background:linear-gradient(135deg,var(--accent),#00e5cf);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:1rem;color:var(--text-muted);line-height:1.8;
+  max-width:540px;margin:0 auto 2rem;
+  animation:fadeUp 0.6s ease 0.2s both;
+}
+.hero-actions{
+  display:flex;align-items:center;justify-content:center;gap:0.75rem;flex-wrap:wrap;
+  animation:fadeUp 0.6s ease 0.3s both;
+}
+.btn-hero{
+  padding:0.75rem 2rem;border-radius:var(--radius-sm);
+  font-family:'Cairo',sans-serif;font-size:0.9rem;font-weight:700;
+  cursor:pointer;transition:all 0.25s;border:none;
+}
+.btn-hero-primary{
+  background:linear-gradient(135deg,var(--primary),var(--primary-l));
+  color:#fff;box-shadow:0 4px 20px rgba(108,47,160,0.3);
+}
+.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,47,160,0.45)}
+.btn-hero-secondary{
+  background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.25);
+  color:var(--accent);
+}
+.btn-hero-secondary:hover{background:rgba(0,201,177,0.15)}
 
-@media (max-width: 600px) {
-  .pages-grid { padding: 40px 1.25rem 60px; }
-  .hero { padding: calc(var(--nav-h) + 40px) 1.25rem 60px; }
+/* ═══ STATS BAR ═══ */
+.stats-bar{
+  position:relative;z-index:1;
+  background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:2rem 1.5rem;
 }
+.stats-grid{
+  max-width:900px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;text-align:center;
+}
+.stat-num{font-size:1.6rem;font-weight:900;color:var(--accent)}
+.stat-label{font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem}
 
-/* ─── WELCOME ARTICLE SECTION ─── */
-.welcome-article-section {
-  max-width: 900px; margin: 0 auto; padding: 0 2rem 40px; display: none;
+/* ═══ SECTIONS GRID ═══ */
+.sections{
+  position:relative;z-index:1;
+  max-width:1100px;margin:0 auto;padding:4rem 1.5rem;
 }
-.welcome-article-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 2.5rem 2.25rem; position: relative; overflow: hidden;
+.sec-header{text-align:center;margin-bottom:2.5rem}
+.sec-header h2{font-size:1.6rem;font-weight:900}
+.sec-header h2 span{color:var(--accent)}
+.sec-header p{font-size:0.88rem;color:var(--text-muted);margin-top:0.4rem}
+
+.sections-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;
 }
-.welcome-article-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
+.sec-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.75rem;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
 }
-.welcome-article-card h2 {
-  font-size: 1.35rem; font-weight: 900; margin-bottom: 1.25rem;
-  display: flex; align-items: center; gap: 0.5rem;
+.sec-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  transform:scaleX(0);transition:transform 0.3s;
 }
-.welcome-article-body {
-  font-size: 0.95rem; line-height: 1.95; color: var(--text-muted);
+.sec-card:hover{
+  border-color:rgba(108,47,160,0.45);transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(108,47,160,0.15);
 }
-.welcome-article-body h1,.welcome-article-body h2,.welcome-article-body h3 { color: var(--text); margin: 1rem 0 0.5rem; }
-.welcome-article-body a { color: var(--accent); }
-.welcome-article-body img { max-width: 100%; border-radius: 8px; margin: 1rem 0; }
-.welcome-article-body blockquote {
-  border-right: 4px solid var(--primary-light); border-left: none;
-  padding: 0.5rem 1rem; margin: 0.75rem 0;
-  background: rgba(108,47,160,0.08); color: var(--text-muted); border-radius: 0 8px 8px 0;
+.sec-card:hover::after{transform:scaleX(1)}
+.sec-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.sec-icon{
+  width:48px;height:48px;border-radius:12px;
+  background:rgba(108,47,160,0.12);border:1px solid rgba(108,47,160,0.25);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;
 }
-.welcome-article-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-.welcome-article-body table td,.welcome-article-body table th { border: 1px solid var(--border); padding: 8px 12px; text-align: right; }
-.welcome-article-body table th { background: rgba(108,47,160,0.12); font-weight: 700; color: var(--text); }
-@media (max-width: 600px) {
-  .welcome-article-section { padding: 0 1.25rem 30px; }
-  .welcome-article-card { padding: 1.5rem 1.25rem; }
+.sec-num{
+  padding:0.2rem 0.65rem;border-radius:12px;
+  background:rgba(0,201,177,0.08);border:1px solid rgba(0,201,177,0.18);
+  font-size:0.68rem;font-weight:700;color:var(--accent);
+}
+.sec-card h3{font-size:1rem;font-weight:800;margin-bottom:0.4rem}
+.sec-card p{font-size:0.8rem;color:var(--text-muted);line-height:1.7;flex:1}
+.sec-card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border);
+}
+.sec-card-link{
+  font-size:0.78rem;font-weight:700;color:var(--primary-l);
+  display:flex;align-items:center;gap:0.3rem;
+}
+/* شريط التقدم */
+.sec-progress{display:flex;align-items:center;gap:0.4rem}
+.sec-progress-bar{width:60px;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+.sec-progress-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.5s ease}
+.sec-progress-text{font-size:0.65rem;color:var(--text-faint);font-weight:700}
+
+/* ═══ FEATURES ═══ */
+.features{
+  position:relative;z-index:1;
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:4rem 1.5rem;
+}
+.features-grid{
+  max-width:1000px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem;
+}
+.feat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.5rem;text-align:center;transition:all 0.25s;
+}
+.feat-card:hover{border-color:rgba(108,47,160,0.4);transform:translateY(-2px)}
+.feat-icon{font-size:1.5rem;margin-bottom:0.75rem;display:block}
+.feat-card h4{font-size:0.88rem;font-weight:800;margin-bottom:0.3rem}
+.feat-card p{font-size:0.75rem;color:var(--text-muted);line-height:1.7}
+
+/* ═══ CTA ═══ */
+.cta{
+  position:relative;z-index:1;
+  text-align:center;padding:4rem 1.5rem;
+}
+.cta-box{
+  max-width:600px;margin:0 auto;
+  background:linear-gradient(135deg,rgba(108,47,160,0.12),rgba(0,201,177,0.06));
+  border:1px solid var(--border);border-radius:20px;
+  padding:3rem 2rem;
+}
+.cta-box h3{font-size:1.3rem;font-weight:900;margin-bottom:0.5rem}
+.cta-box p{font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.7}
+
+/* ═══ FOOTER ═══ */
+.footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);padding:2rem 1.5rem;
+  text-align:center;font-size:0.75rem;color:var(--text-faint);
+}
+.footer a{color:var(--primary-l);font-weight:700}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.fade-in{opacity:0;transform:translateY(20px);transition:all 0.6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:600px){
+  .nav{padding:0 1rem;height:54px}
+  .nav-links .nav-link{display:none}
+  .hero{padding:5rem 1rem 3rem;min-height:auto}
+  .hero-title{font-size:1.8rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:0.75rem}
+  .sections-grid{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .cta-box{padding:2rem 1.25rem}
 }
 </style>
 </head>
 <body>
 
-<!-- nav injected by shared-nav.js -->
+<!-- ═══ NAVBAR ═══ -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">
+    <div class="logo-box">🌐</div>
+    أكاديمية الشبكات
+  </a>
+  <div class="nav-links">
+    <a href="#sections" class="nav-link">المحتوى</a>
+    <a href="#features" class="nav-link">المميزات</a>
+    <a href="trainee.html" class="btn-login-nav">🔐 بوابة المتدرب</a>
+  </div>
+</nav>
 
 <!-- ═══ HERO ═══ -->
 <section class="hero">
-  <div class="hero-badge anim-1">📡 المؤسسة العامة للتدريب التقني والمهني</div>
-  <h1 class="anim-2" id="heroTitle">مبادئ <span class="grad">شبكات الحاسب</span> الآلي</h1>
-  <p class="hero-sub anim-3" id="heroSubtitle">دليل شامل ومتكامل لتعلم شبكات الحاسب — من المفاهيم الأساسية حتى بروتوكولات الشبكة والأمان والكيابل</p>
-  <p class="anim-4" style="font-size:0.88rem; color:var(--text-muted);">اختر أحد الأقسام للبدء ↓</p>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> الكلية التقنية بالمندق</div>
+    <h1 class="hero-title">
+      مبادئ <span class="accent">شبكات الحاسب</span><br>الآلي
+    </h1>
+    <p class="hero-sub">
+      منصة تعليمية تفاعلية تجمع المحتوى والاختبارات والشهادات في مكان واحد — صُممت لتكون رفيقك في رحلة تعلم الشبكات
+    </p>
+    <div class="hero-actions">
+      <a href="trainee.html" class="btn-hero btn-hero-primary">🎓 دخول المتدرب</a>
+      <a href="#sections" class="btn-hero btn-hero-secondary">📚 تصفح الأقسام</a>
+    </div>
+  </div>
 </section>
 
-<!-- ═══ WELCOME ARTICLE (loaded from Firestore settings) ═══ -->
-<div class="welcome-article-section" id="welcomeArticleSection">
-  <div class="welcome-article-card">
-    <h2>📝 <span class="grad">نبذة تعريفية</span></h2>
-    <div class="welcome-article-body" id="welcomeArticleBody"></div>
+<!-- ═══ STATS BAR ═══ -->
+<section class="stats-bar">
+  <div class="stats-grid">
+    <div><div class="stat-num">5</div><div class="stat-label">أقسام تعليمية</div></div>
+    <div><div class="stat-num">135+</div><div class="stat-label">سؤال في البنك</div></div>
+    <div><div class="stat-num">4</div><div class="stat-label">أنواع اختبارات</div></div>
+    <div><div class="stat-num" id="traineeCount">—</div><div class="stat-label">متدرب مسجّل</div></div>
   </div>
-</div>
+</section>
 
-<!-- ═══ PAGES GRID ═══ -->
-<div class="pages-grid" id="pagesGrid">
-
-  <a href="content.html?section=networks" class="page-card">
-    <span class="pc-icon">📡</span>
-    <div class="pc-title">شبكات الحاسب الآلي</div>
-    <div class="pc-en">Computer Networks</div>
-    <p class="pc-desc">مقدمة شاملة عن شبكات الحاسب الآلي وتعريفها ومكوناتها وفوائدها وأنواعها.</p>
-    <ul class="pc-topics">
-      <li>ما هي شبكة الحاسب؟</li>
-      <li>مكونات شبكة الحاسب (الأجهزة الطرفية، الوسيطة، وسائط الشبكة)</li>
-      <li>فوائد شبكات الحاسب</li>
-      <li>أنواع الشبكات (LAN, WAN, MAN, PAN, WLAN)</li>
-    </ul>
-    <div class="pc-arrow">ابدأ التعلم ←</div>
-  </a>
-
-  <a href="content.html?section=security" class="page-card">
-    <span class="pc-icon">🔒</span>
-    <div class="pc-title">الأمان في الشبكات</div>
-    <div class="pc-en">Network Security</div>
-    <p class="pc-desc">مفهوم أمان الشبكات والتهديدات الداخلية والخارجية وحلول الأمان الفعّالة.</p>
-    <ul class="pc-topics">
-      <li>مفهوم أمان الشبكات وأهميته</li>
-      <li>التهديدات الداخلية للشبكة</li>
-      <li>التهديدات الخارجية (Hacking, Malware, DDoS)</li>
-      <li>حلول الأمان (Firewall, Encryption, Backup)</li>
-    </ul>
-    <div class="pc-arrow">ابدأ التعلم ←</div>
-  </a>
-
-  <a href="content.html?section=osi" class="page-card">
-    <span class="pc-icon">🔁</span>
-    <div class="pc-title">نموذج OSI</div>
-    <div class="pc-en">OSI Model</div>
-    <p class="pc-desc">النموذج المرجعي لبروتوكولات الاتصال في شبكات الحاسب — سبع طبقات ووظائفها.</p>
-    <ul class="pc-topics">
-      <li>ما هو نموذج OSI وفائدته</li>
-      <li>عملية التغليف (Encapsulation)</li>
-      <li>البروتوكول (Protocol)</li>
-      <li>الطبقات السبع بالتفصيل</li>
-      <li>الفروقات TCP/UDP والسويتش والراوتر</li>
-    </ul>
-    <div class="pc-arrow">ابدأ التعلم ←</div>
-  </a>
-
-  <a href="content.html?section=cables" class="page-card">
-    <span class="pc-icon">🔌</span>
-    <div class="pc-title">كيابل الشبكات</div>
-    <div class="pc-en">Networking Cables</div>
-    <p class="pc-desc">تعريف كابلات الشبكات وأنواعها المختلفة وأدوات تصنيعها وتركيبها.</p>
-    <ul class="pc-topics">
-      <li>الكابل المحوري (Coaxial Cable)</li>
-      <li>الكابل المزدوج المجدول (Twisted Pair)</li>
-      <li>الكابل الضوئي (Fiber Optic)</li>
-      <li>أدوات تصنيع الكيابل</li>
-    </ul>
-    <div class="pc-arrow">ابدأ التعلم ←</div>
-  </a>
-
-  <a href="content.html?section=ip" class="page-card">
-    <span class="pc-icon">🌍</span>
-    <div class="pc-title">بروتوكول IP</div>
-    <div class="pc-en">Internet Protocol Address</div>
-    <p class="pc-desc">تعريف بروتوكول IP وإصداراته وتدريبات عملية على IPv4 وIPv6.</p>
-    <ul class="pc-topics">
-      <li>تعريف بروتوكول IP</li>
-      <li>عنوان IPv4 وفئاته</li>
-      <li>تدريبات عملية على IPv4</li>
-      <li>بروتوكول IPv6 ومزاياه</li>
-    </ul>
-    <div class="pc-arrow">ابدأ التعلم ←</div>
-  </a>
-
-</div>
-
-<footer>
-  <p>إعداد: <strong>الكلية التقنية بالمندق</strong> | المدرب: <strong>منصور الزهراني</strong></p>
-  <p style="margin-top:0.35rem;">المؤسسة العامة للتدريب التقني والمهني — مبادئ شبكات الحاسب الآلي</p>
-  <div class="footer-links">
-    <a href="content.html?section=networks">شبكات الحاسب</a>
-    <a href="content.html?section=security">الأمان</a>
-    <a href="content.html?section=osi">نموذج OSI</a>
-    <a href="content.html?section=cables">الكيابل</a>
-    <a href="content.html?section=ip">بروتوكول IP</a>
+<!-- ═══ SECTIONS ═══ -->
+<section class="sections" id="sections">
+  <div class="sec-header">
+    <h2>أقسام <span>المادة</span></h2>
+    <p>خمسة أقسام متسلسلة تغطي أساسيات الشبكات من المفاهيم حتى البروتوكولات</p>
   </div>
+
+  <div class="sections-grid" id="sectionsGrid">
+
+    <a href="content.html?section=networks" class="sec-card fade-in">
+      <div class="sec-card-top">
+        <div class="sec-icon">📡</div>
+        <div class="sec-num">01</div>
+      </div>
+      <h3>شبكات الحاسب الآلي</h3>
+      <p>مقدمة في الشبكات وأنواعها ومكوناتها الأساسية وطرق الاتصال بين الأجهزة</p>
+      <div class="sec-card-footer">
+        <span class="sec-card-link">عرض المحتوى ←</span>
+        <div class="sec-progress" data-section="networks">
+          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
+          <span class="sec-progress-text">0%</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="content.html?section=security" class="sec-card fade-in">
+      <div class="sec-card-top">
+        <div class="sec-icon">🔒</div>
+        <div class="sec-num">02</div>
+      </div>
+      <h3>الأمان في الشبكات</h3>
+      <p>التهديدات الأمنية وحلول الحماية والتشفير وأنظمة كشف التسلل</p>
+      <div class="sec-card-footer">
+        <span class="sec-card-link">عرض المحتوى ←</span>
+        <div class="sec-progress" data-section="security">
+          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
+          <span class="sec-progress-text">0%</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="content.html?section=osi" class="sec-card fade-in">
+      <div class="sec-card-top">
+        <div class="sec-icon">🔁</div>
+        <div class="sec-num">03</div>
+      </div>
+      <h3>نموذج OSI</h3>
+      <p>الطبقات السبع لنموذج الاتصال المعياري ووظائف كل طبقة</p>
+      <div class="sec-card-footer">
+        <span class="sec-card-link">عرض المحتوى ←</span>
+        <div class="sec-progress" data-section="osi">
+          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
+          <span class="sec-progress-text">0%</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="content.html?section=cables" class="sec-card fade-in">
+      <div class="sec-card-top">
+        <div class="sec-icon">🔌</div>
+        <div class="sec-num">04</div>
+      </div>
+      <h3>كيابل الشبكات</h3>
+      <p>أنواع الكابلات ومواصفاتها وأدوات التصنيع والتوصيل</p>
+      <div class="sec-card-footer">
+        <span class="sec-card-link">عرض المحتوى ←</span>
+        <div class="sec-progress" data-section="cables">
+          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
+          <span class="sec-progress-text">0%</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="content.html?section=ip" class="sec-card fade-in">
+      <div class="sec-card-top">
+        <div class="sec-icon">🌍</div>
+        <div class="sec-num">05</div>
+      </div>
+      <h3>بروتوكول IP</h3>
+      <p>العنونة والبروتوكولات وتوجيه البيانات في الشبكات</p>
+      <div class="sec-card-footer">
+        <span class="sec-card-link">عرض المحتوى ←</span>
+        <div class="sec-progress" data-section="ip">
+          <div class="sec-progress-bar"><div class="sec-progress-fill" style="width:0%"></div></div>
+          <span class="sec-progress-text">0%</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="features" id="features">
+  <div class="sec-header">
+    <h2>مميزات <span>المنصة</span></h2>
+    <p>كل ما تحتاجه لتجربة تعلم فعّالة وممتعة</p>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card fade-in">
+      <span class="feat-icon">📝</span>
+      <h4>اختبارات متنوعة</h4>
+      <p>صح/خطأ، اختيار واحد، متعدد، وتوصيل — مع خلط تلقائي</p>
+    </div>
+    <div class="feat-card fade-in">
+      <span class="feat-icon">📊</span>
+      <h4>تقرير أداء شامل</h4>
+      <p>تحليل درجاتك وتطورك عبر رسوم بيانية وإحصائيات</p>
+    </div>
+    <div class="feat-card fade-in">
+      <span class="feat-icon">🏆</span>
+      <h4>لوحة صدارة</h4>
+      <p>تنافس مع زملائك وشاهد ترتيبك بين المتدربين</p>
+    </div>
+    <div class="feat-card fade-in">
+      <span class="feat-icon">🎓</span>
+      <h4>شهادات إلكترونية</h4>
+      <p>احصل على شهادة PDF عند اجتياز الاختبارات بنجاح</p>
+    </div>
+    <div class="feat-card fade-in">
+      <span class="feat-icon">📱</span>
+      <h4>متوافق مع الجوال</h4>
+      <p>تصميم متجاوب يعمل على جميع الأجهزة والشاشات</p>
+    </div>
+    <div class="feat-card fade-in">
+      <span class="feat-icon">🔒</span>
+      <h4>محتوى محمي</h4>
+      <p>ملفات PDF محمية من التحميل مع حماية الزر الأيمن</p>
+    </div>
+    <div class="feat-card fade-in">
+      <span class="feat-icon">🌙</span>
+      <h4>وضع فاتح وداكن</h4>
+      <p>اختر الوضع المناسب لراحة عينيك أثناء الدراسة</p>
+    </div>
+    <div class="feat-card fade-in">
+      <span class="feat-icon">⚡</span>
+      <h4>تطبيق ويب (PWA)</h4>
+      <p>أضف الموقع لشاشتك الرئيسية واستخدمه كتطبيق</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta">
+  <div class="cta-box fade-in">
+    <h3>جاهز تبدأ رحلتك؟</h3>
+    <p>سجّل دخولك وابدأ بتصفح المحتوى وحل الاختبارات — كل شيء مجاني ومتاح لمتدربي الكلية التقنية بالمندق</p>
+    <a href="trainee.html" class="btn-hero btn-hero-primary">🚀 ابدأ الآن</a>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <p>أكاديمية الشبكات — <a href="https://tvtc.gov.sa" target="_blank">المؤسسة العامة للتدريب التقني والمهني</a></p>
+  <p style="margin-top:0.3rem">الكلية التقنية بالمندق · المدرب منصور الزهراني</p>
 </footer>
 
+<!-- ═══ SCRIPTS ═══ -->
 <script src="shared-nav.js"></script>
 
-<!-- ═══ Firebase — جلب إعدادات المظهر والصفحة الرئيسية ═══ -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey:            "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
-  authDomain:        "networkacademy-795c8.firebaseapp.com",
-  projectId:         "networkacademy-795c8",
-  storageBucket:     "networkacademy-795c8.firebasestorage.app",
-  messagingSenderId: "458132238000",
-  appId:             "1:458132238000:web:bffd7321407b094bb21575"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-/* ── البطاقات الافتراضية (fallback) ── */
-const DEFAULT_CARDS = [
-  { id:"networks", icon:"📡", title:"شبكات الحاسب الآلي", titleEn:"Computer Networks", desc:"مقدمة شاملة عن شبكات الحاسب الآلي وتعريفها ومكوناتها وفوائدها وأنواعها.", link:"networks.html", topics:"ما هي شبكة الحاسب؟\nمكونات شبكة الحاسب (الأجهزة الطرفية، الوسيطة، وسائط الشبكة)\nفوائد شبكات الحاسب\nأنواع الشبكات (LAN, WAN, MAN, PAN, WLAN)" },
-  { id:"security", icon:"🔒", title:"الأمان في الشبكات", titleEn:"Network Security", desc:"مفهوم أمان الشبكات والتهديدات الداخلية والخارجية وحلول الأمان الفعّالة.", link:"security.html", topics:"مفهوم أمان الشبكات وأهميته\nالتهديدات الداخلية للشبكة\nالتهديدات الخارجية (Hacking, Malware, DDoS)\nحلول الأمان (Firewall, Encryption, Backup)" },
-  { id:"osi", icon:"🔁", title:"نموذج OSI", titleEn:"OSI Model", desc:"النموذج المرجعي لبروتوكولات الاتصال في شبكات الحاسب — سبع طبقات ووظائفها.", link:"osi.html", topics:"ما هو نموذج OSI وفائدته\nعملية التغليف (Encapsulation)\nالبروتوكول (Protocol)\nالطبقات السبع بالتفصيل\nالفروقات TCP/UDP والسويتش والراوتر" },
-  { id:"cables", icon:"🔌", title:"كيابل الشبكات", titleEn:"Networking Cables", desc:"تعريف كابلات الشبكات وأنواعها المختلفة وأدوات تصنيعها وتركيبها.", link:"cables.html", topics:"الكابل المحوري (Coaxial Cable)\nالكابل المزدوج المجدول (Twisted Pair)\nالكابل الضوئي (Fiber Optic)\nأدوات تصنيع الكيابل" },
-  { id:"ip", icon:"🌍", title:"بروتوكول IP", titleEn:"Internet Protocol Address", desc:"تعريف بروتوكول IP وإصداراته وتدريبات عملية على IPv4 وIPv6.", link:"ip.html", topics:"تعريف بروتوكول IP\nعنوان IPv4 وفئاته\nتدريبات عملية على IPv4\nبروتوكول IPv6 ومزاياه" },
-];
-
-/* ── بناء HTML للبطاقات ── */
-function renderCards(cards) {
-  const grid = document.getElementById("pagesGrid");
-  if (!grid) return;
-  grid.innerHTML = cards.map(c => {
-    const topicsList = (c.topics || "").split("\n").filter(t => t.trim()).map(t => `<li>${t.trim()}</li>`).join("");
-    return `
-      <a href="${c.link}" class="page-card">
-        <span class="pc-icon">${c.icon}</span>
-        <div class="pc-title">${c.title}</div>
-        <div class="pc-en">${c.titleEn}</div>
-        <p class="pc-desc">${c.desc}</p>
-        <ul class="pc-topics">${topicsList}</ul>
-        <div class="pc-arrow">ابدأ التعلم ←</div>
-      </a>`;
-  }).join("");
-}
-
-/* ── تحميل وتطبيق الإعدادات ── */
-(async function loadSiteSettings() {
-  // عرض البطاقات الافتراضية فوراً (تجنب صفحة فارغة)
-  renderCards(DEFAULT_CARDS);
-
+<script>
+/* ── جلب عدد المتدربين من Firestore ── */
+(async function() {
   try {
-    const snap = await getDoc(doc(db, "settings", "general"));
-    if (!snap.exists()) return;
-    const s = snap.data();
-
-    /* 1) العنوان والوصف */
-    if (s.heroTitle)    document.getElementById("heroTitle").textContent = s.heroTitle;
-    if (s.heroSubtitle) document.getElementById("heroSubtitle").textContent = s.heroSubtitle;
-
-    /* 2) الألوان — CSS Variables */
-    const root = document.documentElement;
-    if (s.bgColor)      root.style.setProperty("--bg", s.bgColor);
-    if (s.sidebarColor) root.style.setProperty("--card", s.sidebarColor);
-    if (s.primaryColor) {
-      root.style.setProperty("--primary", s.primaryColor);
-      root.style.setProperty("--primary-light", lightenColor(s.primaryColor, 25));
-      root.style.setProperty("--primary-dark",  darkenColor(s.primaryColor, 20));
+    const url = "https://firestore.googleapis.com/v1/projects/networkacademy-795c8/databases/(default)/documents/users";
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (data.documents) {
+      const trainees = data.documents.filter(d => {
+        const role = d.fields?.role?.stringValue;
+        return role === "trainee";
+      });
+      const el = document.getElementById("traineeCount");
+      if (el) el.textContent = trainees.length;
     }
-    if (s.textColor) root.style.setProperty("--text", s.textColor);
-
-    /* 3) الخطوط */
-    if (s.h1Size) document.querySelectorAll("h1").forEach(el => el.style.fontSize = s.h1Size + "rem");
-    if (s.pSize)  document.querySelectorAll(".hero-sub, .pc-desc, .welcome-article-body").forEach(el => el.style.fontSize = s.pSize + "rem");
-
-    /* 4) المقال الترحيبي */
-    if (s.welcomeContent && s.welcomeContent.trim()) {
-      document.getElementById("welcomeArticleBody").innerHTML = s.welcomeContent;
-      document.getElementById("welcomeArticleSection").style.display = "block";
-    }
-
-    /* 5) بطاقات الأقسام */
-    if (s.homeCards && s.homeCards.length) {
-      renderCards(s.homeCards);
-    }
-
-  } catch (e) {
-    console.warn("تعذّر تحميل إعدادات الموقع:", e);
-  }
+  } catch(e) { console.warn("count:", e); }
 })();
 
-/* ── دوال مساعدة ── */
-function lightenColor(hex, pct) {
-  const n = parseInt(hex.replace("#",""),16);
-  const r = Math.min(255,(n>>16)+Math.round(2.55*pct));
-  const g = Math.min(255,((n>>8)&0xFF)+Math.round(2.55*pct));
-  const b = Math.min(255,(n&0xFF)+Math.round(2.55*pct));
-  return "#"+(0x1000000+(r<<16)+(g<<8)+b).toString(16).slice(1);
-}
-function darkenColor(hex, pct) {
-  const n = parseInt(hex.replace("#",""),16);
-  const r = Math.max(0,(n>>16)-Math.round(2.55*pct));
-  const g = Math.max(0,((n>>8)&0xFF)-Math.round(2.55*pct));
-  const b = Math.max(0,(n&0xFF)-Math.round(2.55*pct));
-  return "#"+(0x1000000+(r<<16)+(g<<8)+b).toString(16).slice(1);
-}
+/* ── جلب تقدم المتدرب (إن كان مسجّل دخول) ── */
+(async function() {
+  try {
+    // نتحقق من وجود Firebase Auth token في localStorage
+    const keys = Object.keys(localStorage);
+    const fbKey = keys.find(k => k.startsWith("firebase:authUser:"));
+    if (!fbKey) return;
+    const userData = JSON.parse(localStorage.getItem(fbKey));
+    if (!userData?.uid) return;
+
+    // جلب تقدم المتدرب
+    const url = `https://firestore.googleapis.com/v1/projects/networkacademy-795c8/databases/(default)/documents/progress/${userData.uid}`;
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (!data.fields) return;
+
+    // تحديث أشرطة التقدم
+    document.querySelectorAll("[data-section]").forEach(el => {
+      const sec = el.dataset.section;
+      const val = data.fields[sec]?.integerValue || data.fields[sec]?.doubleValue || 0;
+      const pct = Math.min(100, Math.max(0, Number(val)));
+      el.querySelector(".sec-progress-fill").style.width = pct + "%";
+      el.querySelector(".sec-progress-text").textContent = pct + "%";
+    });
+  } catch(e) { console.warn("progress:", e); }
+})();
+
+/* ── Scroll animations ── */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("visible"); });
+}, { threshold: 0.1 });
+document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
+
+/* ── Smooth scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener("click", e => {
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute("href"));
+    if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
 </script>
+
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
 </body>
 </html>
