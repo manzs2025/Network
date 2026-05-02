@@ -112,10 +112,16 @@ body {
 
 /* ─── SLIDES VIEWER (صور) ─── */
 .slides-viewer {
-  max-width: 1000px;
-  margin: 0 auto 2rem;
+  max-width: 1100px;
+  margin: 0 auto 1rem;
   padding: 0 0.5rem;
 }
+.slides-mode .section-hero {
+  padding: 3.5rem 1rem 0.3rem;
+}
+.slides-mode .section-num { font-size: 0.65rem; padding: 0.2rem 0.7rem; margin-bottom: 0.3rem; }
+.slides-mode .section-title { font-size: 1.2rem; margin-bottom: 0.1rem; }
+.slides-mode .section-subtitle { font-size: 0.72rem; margin-bottom: 0; }
 .slides-img-wrap {
   background: var(--card);
   border: 1px solid var(--border);
@@ -217,6 +223,10 @@ body {
   .slides-viewer { padding: 0 0.25rem; }
   .slides-btn { width: 38px; height: 38px; font-size: 1rem; }
   .slides-counter { font-size: 0.78rem; }
+  .slides-mode .section-hero { padding: 3.2rem 1rem 0.2rem; }
+  .slides-mode .section-num { display: none; }
+  .slides-mode .section-title { font-size: 1rem; }
+  .slides-mode .section-subtitle { display: none; }
 }
 /* إخفاء شعار الشريط العلوي */
 .nav-logo { display: none !important; }
@@ -371,6 +381,7 @@ async function loadContent() {
 
       loadingEl.style.display = "none";
       slidesViewer.style.display = "block";
+      document.body.classList.add("slides-mode");
 
       updateSlideNav();
       preloadNextSlide(2);
