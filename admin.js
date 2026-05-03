@@ -1125,36 +1125,36 @@ window.uploadQuestionsFromFile = async function() {
     const questions = [];
     let errors = [];
     rows.forEach((row, i) => {
-      const type = (row.type || "").trim().toLowerCase();
-      const text = (row.text || "").trim();
+      const type = String(row.type || "").trim().toLowerCase();
+      const text = String(row.text || "").trim();
 
       if (!type || !text) { errors.push(`سطر ${i+2}: نوع أو نص فارغ`); return; }
 
       const q = { type, text, category: section };
 
       if (type === "tf") {
-        const ans = String(row.correctAnswer || "").trim().toLowerCase();
+        const ans = String(row.correctAnswer ?? "").trim().toLowerCase();
         if (ans !== "true" && ans !== "false") { errors.push(`سطر ${i+2}: إجابة tf يجب أن تكون true أو false`); return; }
         q.correctAnswer = ans;
       }
       else if (type === "mcq") {
-        const opts = (row.options || "").split("|").map(s => s.trim()).filter(Boolean);
-        const ans = (row.correctAnswer || "").trim();
+        const opts = String(row.options || "").split("|").map(s => s.trim()).filter(Boolean);
+        const ans = String(row.correctAnswer ?? "").trim();
         if (opts.length < 2) { errors.push(`سطر ${i+2}: mcq يحتاج خيارين على الأقل`); return; }
         if (!ans) { errors.push(`سطر ${i+2}: mcq بدون إجابة صحيحة`); return; }
         q.options = opts;
         q.correctAnswer = ans;
       }
       else if (type === "multi") {
-        const opts = (row.options || "").split("|").map(s => s.trim()).filter(Boolean);
-        const ans = (row.correctAnswers || "").split("|").map(s => s.trim()).filter(Boolean);
+        const opts = String(row.options || "").split("|").map(s => s.trim()).filter(Boolean);
+        const ans = String(row.correctAnswers || "").split("|").map(s => s.trim()).filter(Boolean);
         if (opts.length < 2) { errors.push(`سطر ${i+2}: multi يحتاج خيارين على الأقل`); return; }
         if (!ans.length) { errors.push(`سطر ${i+2}: multi بدون إجابات صحيحة`); return; }
         q.options = opts;
         q.correctAnswers = ans;
       }
       else if (type === "match") {
-        const pairsRaw = (row.pairs || "").split("|").map(s => s.trim()).filter(Boolean);
+        const pairsRaw = String(row.pairs || "").split("|").map(s => s.trim()).filter(Boolean);
         const pairs = pairsRaw.map(p => {
           const parts = p.split("=");
           return parts.length >= 2 ? { left: parts[0].trim(), right: parts[1].trim() } : null;
@@ -1168,15 +1168,15 @@ window.uploadQuestionsFromFile = async function() {
     });
 
     if (errors.length && !questions.length) {
-      status.innerHTML = `❌ كل الأسئلة فيها أخطاء:<br>${errors.slice(0,5).join("<br>")}`;
+      status.innerHTML = `❌ كل الأسئلة فيها أخطاء:<br>${errors.join("<br>")}`;
       status.className = "qz-form-msg error"; status.style.display = "block";
       return;
     }
 
-    // تأكيد الرفع
+    // تأكيد الرفع مع عرض الأخطاء
     let confirmMsg = `سيتم رفع ${questions.length} سؤال لقسم "${CATEGORY_LABELS[section]}".`;
-    if (errors.length) confirmMsg += `\n⚠️ تم تجاهل ${errors.length} سطر بسبب أخطاء.`;
-    if (!confirm(confirmMsg + "\nهل تريد المتابعة؟")) return;
+    if (errors.length) confirmMsg += `\n\n⚠️ تم تجاهل ${errors.length} سطر بسبب أخطاء:\n${errors.join("\n")}`;
+    if (!confirm(confirmMsg + "\n\nهل تريد المتابعة؟")) return;
 
     // رفع لـ Firestore
     status.textContent = `⏳ جارٍ رفع ${questions.length} سؤال...`;
@@ -1188,7 +1188,7 @@ window.uploadQuestionsFromFile = async function() {
     await batch.commit();
 
     let msg = `✅ تم رفع ${questions.length} سؤال لقسم "${CATEGORY_LABELS[section]}" بنجاح!`;
-    if (errors.length) msg += `<br>⚠️ تم تجاهل ${errors.length} سطر بسبب أخطاء.`;
+    if (errors.length) msg += `<br>⚠️ تم تجاهل ${errors.length} سطر:<br><span style="font-size:0.75rem;color:var(--text-muted);">${errors.join("<br>")}</span>`;
     status.innerHTML = msg;
     status.className = "qz-form-msg success"; status.style.display = "block";
 
