@@ -4832,3 +4832,98 @@ window.previewPageContent = function () {
     if (e.target.tagName === "IMG") { e.preventDefault(); return false; }
   });
 })();
+
+/* ══════════════════════════════════════════════════════
+   🔄 تهيئة الموقع — بداية ترم جديد
+══════════════════════════════════════════════════════ */
+
+window.startResetSite = async function() {
+  /* ── تأكيد أول ── */
+  if (!confirm("⚠️ هل أنت متأكد من تهيئة الموقع؟\n\nسيتم حذف:\n• جميع الاختبارات المنشأة\n• جميع نتائج المتدربين\n• تقدم المتدربين\n\nلن يتأثر: بنك الأسئلة، حسابات المتدربين، الإعدادات")) return;
+
+  /* ── تأكيد ثاني بكتابة كلمة ── */
+  const typed = prompt('للتأكيد، اكتب كلمة "تهيئة" بالضبط:');
+  if (typed !== "تهيئة") {
+    alert("❌ تم الإلغاء — الكلمة غير صحيحة");
+    return;
+  }
+
+  /* ── بدء الحذف ── */
+  const btn = document.getElementById("resetSiteBtn");
+  const progressWrap = document.getElementById("resetProgressWrap");
+  const progressBar = document.getElementById("resetProgressBar");
+  const progressLabel = document.getElementById("resetProgressLabel");
+  const resultMsg = document.getElementById("resetResultMsg");
+
+  btn.disabled = true;
+  btn.textContent = "⏳ جارٍ التهيئة...";
+  progressWrap.style.display = "block";
+  resultMsg.style.display = "none";
+
+  let totalDeleted = 0;
+  let totalErrors = 0;
+
+  try {
+    progressLabel.textContent = "🔍 جارٍ حصر البيانات...";
+    progressBar.style.width = "5%";
+
+    const [resultsSnap, quizzesSnap, progressSnap] = await Promise.all([
+      getDocs(collection(db, "results")),
+      getDocs(collection(db, "quizzes")),
+      getDocs(collection(db, "progress"))
+    ]);
+
+    const allDocs = [
+      ...resultsSnap.docs.map(d => ({ ref: d.ref })),
+      ...quizzesSnap.docs.map(d => ({ ref: d.ref })),
+      ...progressSnap.docs.map(d => ({ ref: d.ref }))
+    ];
+
+    const total = allDocs.length;
+
+    if (total === 0) {
+      progressWrap.style.display = "none";
+      resultMsg.style.display = "block";
+      resultMsg.style.background = "rgba(0,201,177,0.1)";
+      resultMsg.style.color = "var(--accent)";
+      resultMsg.textContent = "✅ الموقع نظيف — لا توجد بيانات تحتاج حذف";
+      btn.disabled = false;
+      btn.textContent = "🔄 تهيئة الموقع";
+      return;
+    }
+
+    progressLabel.textContent = "🗑 جارٍ حذف " + total + " عنصر...";
+    progressBar.style.width = "10%";
+
+    for (let i = 0; i < allDocs.length; i++) {
+      try {
+        await deleteDoc(allDocs[i].ref);
+        totalDeleted++;
+      } catch(e) {
+        totalErrors++;
+      }
+      const pct = Math.round(10 + (i + 1) / total * 85);
+      progressBar.style.width = pct + "%";
+      progressLabel.textContent = "🗑 تم حذف " + totalDeleted + " من " + total + "...";
+    }
+
+    progressBar.style.width = "100%";
+    progressLabel.textContent = "✅ اكتملت التهيئة!";
+
+    resultMsg.style.display = "block";
+    resultMsg.style.background = "rgba(0,201,177,0.1)";
+    resultMsg.style.border = "1px solid rgba(0,201,177,0.25)";
+    resultMsg.style.color = "var(--accent)";
+    resultMsg.innerHTML = "✅ تمت التهيئة بنجاح!<br><span style='font-size:0.75rem;font-weight:400;'>تم حذف: " + resultsSnap.size + " نتيجة + " + quizzesSnap.size + " اختبار + " + progressSnap.size + " تقدم = " + totalDeleted + " عنصر" + (totalErrors > 0 ? " (فشل: " + totalErrors + ")" : "") + "</span>";
+
+  } catch(e) {
+    resultMsg.style.display = "block";
+    resultMsg.style.background = "rgba(244,67,54,0.1)";
+    resultMsg.style.border = "1px solid rgba(244,67,54,0.25)";
+    resultMsg.style.color = "#ff6b6b";
+    resultMsg.textContent = "❌ حدث خطأ: " + e.message;
+  }
+
+  btn.disabled = false;
+  btn.textContent = "🔄 تهيئة الموقع";
+};
