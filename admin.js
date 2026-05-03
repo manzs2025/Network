@@ -1173,21 +1173,49 @@ window.uploadQuestionsFromFile = async function() {
       return;
     }
 
-    // تأكيد الرفع مع عرض الأخطاء
-    let confirmMsg = `سيتم رفع ${questions.length} سؤال لقسم "${CATEGORY_LABELS[section]}".`;
-    if (errors.length) confirmMsg += `\n\n⚠️ تم تجاهل ${errors.length} سطر بسبب أخطاء:\n${errors.join("\n")}`;
+    // جلب الأسئلة الموجودة لكشف التكرار
+    status.textContent = `🔍 جارٍ فحص التكرار...`;
+    status.className = "qz-form-msg"; status.style.display = "block";
+
+    let existingTexts = new Set();
+    try {
+      const existingSnap = await getDocs(query(collection(db, "questionBank"), where("category", "==", section)));
+      existingSnap.forEach(d => {
+        const t = (d.data().text || "").trim();
+        if (t) existingTexts.add(t);
+      });
+    } catch(e) { /* نكمل بدون فحص */ }
+
+    // فلترة الأسئلة المكررة
+    const newQuestions = questions.filter(q => !existingTexts.has(q.text.trim()));
+    const duplicateCount = questions.length - newQuestions.length;
+
+    if (newQuestions.length === 0) {
+      let msg = `✅ جميع الأسئلة (${questions.length}) موجودة بالفعل في البنك — لا حاجة للرفع.`;
+      if (errors.length) msg += `<br>⚠️ تم تجاهل ${errors.length} سطر:<br><span style="font-size:0.75rem;color:var(--text-muted);">${errors.join("<br>")}</span>`;
+      status.innerHTML = msg;
+      status.className = "qz-form-msg success"; status.style.display = "block";
+      fileInput.value = "";
+      return;
+    }
+
+    // تأكيد الرفع مع عرض الأخطاء والتكرارات
+    let confirmMsg = `سيتم رفع ${newQuestions.length} سؤال جديد لقسم "${CATEGORY_LABELS[section]}".`;
+    if (duplicateCount > 0) confirmMsg += `\n✅ تم تجاهل ${duplicateCount} سؤال مكرر (موجود بالفعل).`;
+    if (errors.length) confirmMsg += `\n⚠️ تم تجاهل ${errors.length} سطر بسبب أخطاء:\n${errors.join("\n")}`;
     if (!confirm(confirmMsg + "\n\nهل تريد المتابعة؟")) return;
 
     // رفع لـ Firestore
-    status.textContent = `⏳ جارٍ رفع ${questions.length} سؤال...`;
+    status.textContent = `⏳ جارٍ رفع ${newQuestions.length} سؤال...`;
     const batch = writeBatch(db);
-    questions.forEach(q => {
+    newQuestions.forEach(q => {
       const ref = doc(collection(db, "questionBank"));
       batch.set(ref, q);
     });
     await batch.commit();
 
-    let msg = `✅ تم رفع ${questions.length} سؤال لقسم "${CATEGORY_LABELS[section]}" بنجاح!`;
+    let msg = `✅ تم رفع ${newQuestions.length} سؤال جديد لقسم "${CATEGORY_LABELS[section]}" بنجاح!`;
+    if (duplicateCount > 0) msg += `<br>✅ تم تجاهل ${duplicateCount} سؤال مكرر.`;
     if (errors.length) msg += `<br>⚠️ تم تجاهل ${errors.length} سطر:<br><span style="font-size:0.75rem;color:var(--text-muted);">${errors.join("<br>")}</span>`;
     status.innerHTML = msg;
     status.className = "qz-form-msg success"; status.style.display = "block";
