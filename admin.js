@@ -1957,29 +1957,130 @@ window.grantRetake = async function() {
 };
 
 let cachedResults = [];
+let _allResults = [];      /* كل النتائج الخام */
+let _filteredResults = [];  /* النتائج بعد الفلترة */
+let _resultsPage = 1;
+const RESULTS_PER_PAGE = 15;
+
 window.loadLatestResults = async function () {
   const loadingEl = document.getElementById("resultsLoading"), wrap = document.getElementById("resultsTableWrap"), tbody = document.getElementById("resultsTableBody");
   if (!tbody) return;
   try {
     const snap = await getDocs(query(collection(db,"results"), orderBy("submittedAt","desc")));
-    tbody.innerHTML = ""; cachedResults = [];
+    _allResults = []; cachedResults = [];
+    const quizNames = new Set();
+
     snap.forEach(s => {
       const d = s.data(); let dateStr = "—";
       if (d.submittedAt?.toDate) { const dt = d.submittedAt.toDate(); dateStr = dt.toLocaleDateString("ar-SA") + " " + dt.toLocaleTimeString("ar-SA"); }
-      cachedResults.push({ "المتدرب":d.displayName||"—", "الاختبار":d.quizTitle||"—", "الدرجة":d.score??"—", "النسبة":d.percentage!=null?d.percentage+"%":"—", "النتيجة":d.passed?"ناجح":"راسب", "المحاولة":d.attempt||1, "التاريخ":dateStr });
-      const safeName = (d.displayName || d.userEmail || "").replace(/'/g, "\\'");
-      tbody.innerHTML += `<tr data-rid="${s.id}"><td>${d.displayName||d.userEmail}</td><td>${d.quizTitle||"—"}</td><td style="text-align:center">${d.score}</td><td style="text-align:center">${d.percentage}%</td><td style="text-align:center">${d.passed?'✅':'❌'}</td><td style="text-align:center">${d.attempt||1}</td><td><span class="qz-date">${dateStr}</span></td><td style="text-align:center;white-space:nowrap"><button class="tr-edit-btn" style="background:rgba(244,67,54,0.1);color:#ff6b6b;" title="حذف النتيجة" onclick="deleteResult('${s.id}','${safeName}')">🗑️</button></td></tr>`;
+      const row = {
+        id: s.id,
+        name: d.displayName || d.userEmail || "—",
+        quiz: d.quizTitle || "—",
+        score: d.score ?? "—",
+        percentage: d.percentage != null ? d.percentage : 0,
+        passed: !!d.passed,
+        attempt: d.attempt || 1,
+        dateStr: dateStr
+      };
+      _allResults.push(row);
+      cachedResults.push({ "المتدرب":row.name, "الاختبار":row.quiz, "الدرجة":row.score, "النسبة":row.percentage+"%", "النتيجة":row.passed?"ناجح":"راسب", "المحاولة":row.attempt, "التاريخ":dateStr });
+      quizNames.add(row.quiz);
     });
+
+    /* ملء قائمة الاختبارات في الفلتر */
+    const filterQuiz = document.getElementById("filterQuiz");
+    if (filterQuiz) {
+      const current = filterQuiz.value;
+      filterQuiz.innerHTML = '<option value="">كل الاختبارات</option>';
+      quizNames.forEach(q => { filterQuiz.innerHTML += `<option value="${q}">${q}</option>`; });
+      filterQuiz.value = current;
+    }
+
+    document.getElementById("resultsFilters").style.display = "flex";
+    _resultsPage = 1;
+    applyResultsFilter();
+
   } catch (e) { console.error(e); } finally { loadingEl.style.display = "none"; wrap.style.display = "block"; }
+};
+
+/* ── تطبيق الفلترة ── */
+window.applyResultsFilter = function() {
+  const nameFilter = (document.getElementById("filterTraineeName").value || "").trim().toLowerCase();
+  const quizFilter = document.getElementById("filterQuiz").value;
+  const resultFilter = document.getElementById("filterResult").value;
+
+  _filteredResults = _allResults.filter(r => {
+    if (nameFilter && !r.name.toLowerCase().includes(nameFilter)) return false;
+    if (quizFilter && r.quiz !== quizFilter) return false;
+    if (resultFilter === "passed" && !r.passed) return false;
+    if (resultFilter === "failed" && r.passed) return false;
+    return true;
+  });
+
+  _resultsPage = 1;
+  renderResultsPage();
+};
+
+/* ── عرض صفحة من النتائج ── */
+function renderResultsPage() {
+  const tbody = document.getElementById("resultsTableBody");
+  const total = _filteredResults.length;
+  const totalPages = Math.max(1, Math.ceil(total / RESULTS_PER_PAGE));
+
+  if (_resultsPage > totalPages) _resultsPage = totalPages;
+
+  const start = (_resultsPage - 1) * RESULTS_PER_PAGE;
+  const end = Math.min(start + RESULTS_PER_PAGE, total);
+  const pageData = _filteredResults.slice(start, end);
+
+  tbody.innerHTML = "";
+  if (total === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-faint);padding:2rem;">لا توجد نتائج مطابقة</td></tr>';
+  } else {
+    pageData.forEach(r => {
+      const safeName = r.name.replace(/'/g, "\\'");
+      tbody.innerHTML += `<tr data-rid="${r.id}"><td>${r.name}</td><td>${r.quiz}</td><td style="text-align:center">${r.score}</td><td style="text-align:center">${r.percentage}%</td><td style="text-align:center">${r.passed?'✅':'❌'}</td><td style="text-align:center">${r.attempt}</td><td><span class="qz-date">${r.dateStr}</span></td><td style="text-align:center;white-space:nowrap"><button class="tr-edit-btn" style="background:rgba(244,67,54,0.1);color:#ff6b6b;" title="حذف النتيجة" onclick="deleteResult('${r.id}','${safeName}')">🗑️</button></td></tr>`;
+    });
+  }
+
+  /* تحديث العداد */
+  const countLabel = document.getElementById("resultsCountLabel");
+  if (countLabel) {
+    if (total === _allResults.length) {
+      countLabel.textContent = `${total} نتيجة`;
+    } else {
+      countLabel.textContent = `${total} من ${_allResults.length} نتيجة`;
+    }
+  }
+
+  /* تحديث أزرار التنقل */
+  const pag = document.getElementById("resultsPagination");
+  if (total > RESULTS_PER_PAGE) {
+    pag.style.display = "flex";
+    document.getElementById("btnPrevPage").disabled = (_resultsPage <= 1);
+    document.getElementById("btnNextPage").disabled = (_resultsPage >= totalPages);
+    document.getElementById("paginationLabel").textContent = `${_resultsPage} / ${totalPages}`;
+  } else {
+    pag.style.display = "none";
+  }
+}
+
+/* ── التنقل بين الصفحات ── */
+window.resultsGoPage = function(dir) {
+  const totalPages = Math.max(1, Math.ceil(_filteredResults.length / RESULTS_PER_PAGE));
+  if (dir === "next" && _resultsPage < totalPages) _resultsPage++;
+  if (dir === "prev" && _resultsPage > 1) _resultsPage--;
+  renderResultsPage();
 };
 
 window.deleteResult = async function (rid, traineeName) {
   if (!confirm(`حذف نتيجة "${traineeName}"؟\nلا يمكن التراجع عن هذا الإجراء.`)) return;
   try {
     await deleteDoc(doc(db, "results", rid));
-    const row = document.querySelector(`tr[data-rid="${rid}"]`);
-    if (row) row.remove();
-    cachedResults = cachedResults.filter(r => r._id !== rid);
+    _allResults = _allResults.filter(r => r.id !== rid);
+    cachedResults = cachedResults.filter((r, i) => _allResults[i]); // مزامنة
+    applyResultsFilter();
     if (typeof loadStats === "function") loadStats();
   } catch (e) {
     alert("❌ فشل الحذف: " + e.message);

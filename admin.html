@@ -2873,6 +2873,22 @@ select optgroup {
               <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
             </div>
           </div>
+
+          <!-- شريط الفلترة -->
+          <div id="resultsFilters" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="filterTraineeName" class="qz-input" placeholder="🔍 بحث بالاسم..." oninput="applyResultsFilter()" style="font-size:0.78rem;max-width:180px;padding:0.4rem 0.7rem;">
+            <select id="filterQuiz" class="qz-input" onchange="applyResultsFilter()" style="font-size:0.78rem;max-width:160px;padding:0.4rem 0.5rem;">
+              <option value="">كل الاختبارات</option>
+            </select>
+            <select id="filterResult" class="qz-input" onchange="applyResultsFilter()" style="font-size:0.78rem;max-width:120px;padding:0.4rem 0.5rem;">
+              <option value="">الكل</option>
+              <option value="passed">✅ ناجح</option>
+              <option value="failed">❌ راسب</option>
+            </select>
+            <div style="flex:1;"></div>
+            <span id="resultsCountLabel" style="font-size:0.72rem;color:var(--text-faint);font-weight:700;"></span>
+          </div>
+
           <div class="qz-table-loading" id="resultsLoading">
             <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
             <span>جارٍ تحميل النتائج…</span>
@@ -2894,6 +2910,13 @@ select optgroup {
               </thead>
               <tbody id="resultsTableBody"></tbody>
             </table>
+          </div>
+
+          <!-- تقسيم الصفحات -->
+          <div id="resultsPagination" style="display:none;margin-top:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+            <button class="qz-refresh-btn" id="btnPrevPage" onclick="resultsGoPage('prev')" style="font-size:0.75rem;padding:0.3rem 0.7rem;">◀ السابق</button>
+            <span id="paginationLabel" style="font-size:0.75rem;color:var(--text-muted);font-weight:700;min-width:80px;text-align:center;"></span>
+            <button class="qz-refresh-btn" id="btnNextPage" onclick="resultsGoPage('next')" style="font-size:0.75rem;padding:0.3rem 0.7rem;">التالي ▶</button>
           </div>
         </div>
 
