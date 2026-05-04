@@ -334,6 +334,7 @@ window.startQuiz = async function (quizId) {
   }
 
   /* بناء شاشة الحل */
+  _currentQuiz.questions = questionsToUse; /* حفظ الترتيب المخلوط */
   _buildSolver(questionsToUse);
 
   /* بدء المؤقّت إن وُجدت مدة */
