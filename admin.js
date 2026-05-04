@@ -1320,7 +1320,8 @@ window.switchPanel = function (btn, panelId) {
   if (btn) btn.classList.add("active");
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById(`panel-${panelId}`)?.classList.add("active");
-  if (panelId === "trainees") { loadTrainees(); loadLatestResults(); }
+  if (panelId === "trainees") { loadTrainees(); }
+  if (panelId === "results")  { loadLatestResults(); loadExportQuizSelect(); }
   if (panelId === "quizzes")  { renderQuestionBankSelector(); loadQuizzes(); loadLiveQuizSelect(); }
   if (panelId === "settings") { loadSettings(); _initSettingsTinyMCE(); }
   if (panelId === "pdf") { loadPdfLinks(); }
@@ -2006,6 +2007,99 @@ let _allResults = [];      /* كل النتائج الخام */
 let _filteredResults = [];  /* النتائج بعد الفلترة */
 let _resultsPage = 1;
 const RESULTS_PER_PAGE = 15;
+
+/* ── ملء قائمة الاختبارات للتصدير ── */
+window.loadExportQuizSelect = async function() {
+  const sel = document.getElementById("exportQuizSelect");
+  if (!sel) return;
+  try {
+    const snap = await getDocs(collection(db, "quizzes"));
+    sel.innerHTML = '<option value="">— اختر اختبار —</option>';
+    snap.forEach(s => {
+      const d = s.data();
+      sel.innerHTML += `<option value="${s.id}" data-title="${d.title || s.id}">${d.title || s.id}</option>`;
+    });
+  } catch(e) {}
+};
+
+/* ── تصدير نتائج اختبار معين لـ Excel ── */
+window.exportQuizResultsExcel = async function() {
+  const sel = document.getElementById("exportQuizSelect");
+  const quizId = sel.value;
+  if (!quizId) { alert("اختر اختبار أولاً"); return; }
+  const quizTitle = sel.options[sel.selectedIndex].getAttribute("data-title") || quizId;
+
+  try {
+    // جلب نتائج هذا الاختبار
+    const resultsSnap = await getDocs(query(collection(db, "results"), where("quizId", "==", quizId), orderBy("submittedAt", "desc")));
+    if (resultsSnap.empty) { alert("لا توجد نتائج لهذا الاختبار"); return; }
+
+    // جلب بيانات المتدربين (للرقم التدريبي)
+    const usersSnap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee")));
+    const usersMap = {};
+    usersSnap.forEach(s => {
+      const d = s.data();
+      usersMap[s.id] = { name: d.displayName || "—", studentId: d.studentId || "—" };
+    });
+
+    // تجميع النتائج حسب المتدرب
+    const traineeResults = {};
+    resultsSnap.forEach(s => {
+      const d = s.data();
+      const uid = d.userId;
+      if (!traineeResults[uid]) traineeResults[uid] = [];
+      traineeResults[uid].push({
+        score: d.score ?? 0,
+        percentage: d.percentage ?? 0,
+        passed: d.passed ? "ناجح" : "راسب",
+        attempt: d.attempt || traineeResults[uid].length + 1,
+        date: d.submittedAt?.toDate ? d.submittedAt.toDate().toLocaleDateString("ar-SA") : "—"
+      });
+    });
+
+    // بناء بيانات Excel
+    const rows = [];
+    Object.keys(traineeResults).forEach(uid => {
+      const user = usersMap[uid] || { name: uid, studentId: "—" };
+      const attempts = traineeResults[uid].sort((a, b) => a.attempt - b.attempt);
+      attempts.forEach(att => {
+        rows.push({
+          "الاسم": user.name,
+          "الرقم التدريبي": user.studentId,
+          "المحاولة": att.attempt,
+          "الدرجة": att.score,
+          "النسبة": att.percentage + "%",
+          "النتيجة": att.passed,
+          "التاريخ": att.date
+        });
+      });
+    });
+
+    if (!rows.length) { alert("لا توجد نتائج"); return; }
+
+    // إنشاء ملف Excel
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(rows);
+
+    // تعديل عرض الأعمدة
+    ws["!cols"] = [
+      { wch: 30 }, // الاسم
+      { wch: 15 }, // الرقم التدريبي
+      { wch: 10 }, // المحاولة
+      { wch: 10 }, // الدرجة
+      { wch: 10 }, // النسبة
+      { wch: 10 }, // النتيجة
+      { wch: 15 }, // التاريخ
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, "النتائج");
+    XLSX.writeFile(wb, `نتائج_${quizTitle}.xlsx`);
+
+  } catch(e) {
+    alert("❌ خطأ: " + e.message);
+    console.error(e);
+  }
+};
 
 window.loadLatestResults = async function () {
   const loadingEl = document.getElementById("resultsLoading"), wrap = document.getElementById("resultsTableWrap"), tbody = document.getElementById("resultsTableBody");

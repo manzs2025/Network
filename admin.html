@@ -2304,6 +2304,11 @@ select optgroup {
         المتدربون
       </button>
 
+      <button class="sb-item" data-panel="results" onclick="switchPanel(this, 'results')">
+        <span class="sb-icon">📊</span>
+        النتائج
+      </button>
+
       <div class="sb-section-label">الحساب</div>
 
       <button class="sb-item" data-panel="settings" onclick="switchPanel(this, 'settings')">
@@ -2906,63 +2911,84 @@ select optgroup {
           </div>
         </div>
 
-        <!-- جدول آخر النتائج -->
-        <div class="qz-table-section" style="margin-top:1.5rem;">
-          <div class="qz-table-header">
-            <h3 class="qz-table-title">📊 آخر نتائج المتدربين</h3>
-            <div style="display:flex;gap:0.5rem;align-items:center;">
-              <button class="qz-refresh-btn" onclick="exportResultsToPDF()" style="background:rgba(244,67,54,0.10);color:#ff6b6b;border-color:rgba(244,67,54,0.3);">📄 تقرير PDF</button>
-              <button class="qz-refresh-btn" onclick="exportResultsToExcel()" style="background:rgba(0,201,177,0.10);color:var(--accent);border-color:rgba(0,201,177,0.3);">📥 تصدير Excel</button>
+      </section>
+
+      <!-- ════════════ PANEL: النتائج ════════════ -->
+      <section class="panel" id="panel-results">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">📊 النتائج والتقارير</div>
+            <div class="panel-title">نتائج <span>المتدربين</span></div>
+            <div class="panel-subtitle">عرض النتائج وتصديرها لكل اختبار مع فلترة وبحث</div>
+          </div>
+        </div>
+        <div style="padding:1.5rem;display:grid;gap:1.5rem;">
+
+          <!-- تصدير نتائج اختبار معين -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;">
+            <div style="font-weight:800;font-size:0.9rem;margin-bottom:0.75rem;">📥 تصدير نتائج اختبار</div>
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+              <select id="exportQuizSelect" class="qz-input" style="font-size:0.78rem;max-width:250px;padding:0.4rem 0.5rem;">
+                <option value="">— اختر اختبار —</option>
+              </select>
+              <button class="qz-refresh-btn" onclick="exportQuizResultsExcel()" style="background:rgba(0,201,177,0.1);color:var(--accent);border-color:rgba(0,201,177,0.3);font-size:0.78rem;">📥 تصدير Excel</button>
+              <button class="qz-refresh-btn" onclick="exportResultsToPDF()" style="background:rgba(244,67,54,0.10);color:#ff6b6b;border-color:rgba(244,67,54,0.3);font-size:0.78rem;">📄 تقرير PDF</button>
+            </div>
+            <div style="font-size:0.7rem;color:var(--text-faint);margin-top:0.5rem;">ملف Excel يحتوي: الاسم، الرقم التدريبي، الدرجة، النسبة، النتيجة لكل محاولة</div>
+          </div>
+
+          <!-- جدول النتائج -->
+          <div class="qz-table-section">
+            <div class="qz-table-header">
+              <h3 class="qz-table-title">📊 جميع النتائج</h3>
               <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+              <input type="text" id="filterTraineeName" class="qz-input" placeholder="🔍 بحث بالاسم..." oninput="applyResultsFilter()" style="font-size:0.78rem;max-width:180px;padding:0.4rem 0.7rem;">
+              <select id="filterQuiz" class="qz-input" onchange="applyResultsFilter()" style="font-size:0.78rem;max-width:160px;padding:0.4rem 0.5rem;">
+                <option value="">كل الاختبارات</option>
+              </select>
+              <select id="filterResult" class="qz-input" onchange="applyResultsFilter()" style="font-size:0.78rem;max-width:120px;padding:0.4rem 0.5rem;">
+                <option value="">الكل</option>
+                <option value="passed">✅ ناجح</option>
+                <option value="failed">❌ راسب</option>
+              </select>
+              <div style="flex:1;"></div>
+              <span id="resultsCountLabel" style="font-size:0.72rem;color:var(--text-faint);font-weight:700;"></span>
+            </div>
+
+            <div class="qz-table-loading" id="resultsLoading">
+              <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+              <span>جارٍ تحميل النتائج…</span>
+            </div>
+            <div class="qz-table-empty" id="resultsEmpty" style="display:none">لا توجد نتائج بعد</div>
+            <div class="qz-table-wrap" id="resultsTableWrap" style="display:none">
+              <table class="qz-table">
+                <thead>
+                  <tr>
+                    <th>المتدرب</th>
+                    <th>الاختبار</th>
+                    <th>الدرجة</th>
+                    <th>النسبة</th>
+                    <th>النتيجة</th>
+                    <th>المحاولة</th>
+                    <th>التاريخ</th>
+                    <th style="text-align:center">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsTableBody"></tbody>
+              </table>
+            </div>
+
+            <div id="resultsPagination" style="display:none;margin-top:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+              <button class="qz-refresh-btn" id="btnPrevPage" onclick="resultsGoPage('prev')" style="font-size:0.75rem;padding:0.3rem 0.7rem;">◀ السابق</button>
+              <span id="paginationLabel" style="font-size:0.75rem;color:var(--text-muted);font-weight:700;min-width:80px;text-align:center;"></span>
+              <button class="qz-refresh-btn" id="btnNextPage" onclick="resultsGoPage('next')" style="font-size:0.75rem;padding:0.3rem 0.7rem;">التالي ▶</button>
             </div>
           </div>
 
-          <!-- شريط الفلترة -->
-          <div id="resultsFilters" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
-            <input type="text" id="filterTraineeName" class="qz-input" placeholder="🔍 بحث بالاسم..." oninput="applyResultsFilter()" style="font-size:0.78rem;max-width:180px;padding:0.4rem 0.7rem;">
-            <select id="filterQuiz" class="qz-input" onchange="applyResultsFilter()" style="font-size:0.78rem;max-width:160px;padding:0.4rem 0.5rem;">
-              <option value="">كل الاختبارات</option>
-            </select>
-            <select id="filterResult" class="qz-input" onchange="applyResultsFilter()" style="font-size:0.78rem;max-width:120px;padding:0.4rem 0.5rem;">
-              <option value="">الكل</option>
-              <option value="passed">✅ ناجح</option>
-              <option value="failed">❌ راسب</option>
-            </select>
-            <div style="flex:1;"></div>
-            <span id="resultsCountLabel" style="font-size:0.72rem;color:var(--text-faint);font-weight:700;"></span>
-          </div>
-
-          <div class="qz-table-loading" id="resultsLoading">
-            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
-            <span>جارٍ تحميل النتائج…</span>
-          </div>
-          <div class="qz-table-empty" id="resultsEmpty" style="display:none">لا توجد نتائج بعد</div>
-          <div class="qz-table-wrap" id="resultsTableWrap" style="display:none">
-            <table class="qz-table">
-              <thead>
-                <tr>
-                  <th>المتدرب</th>
-                  <th>الاختبار</th>
-                  <th>الدرجة</th>
-                  <th>النسبة</th>
-                  <th>النتيجة</th>
-                  <th>المحاولة</th>
-                  <th>التاريخ</th>
-                  <th style="text-align:center">إجراءات</th>
-                </tr>
-              </thead>
-              <tbody id="resultsTableBody"></tbody>
-            </table>
-          </div>
-
-          <!-- تقسيم الصفحات -->
-          <div id="resultsPagination" style="display:none;margin-top:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-            <button class="qz-refresh-btn" id="btnPrevPage" onclick="resultsGoPage('prev')" style="font-size:0.75rem;padding:0.3rem 0.7rem;">◀ السابق</button>
-            <span id="paginationLabel" style="font-size:0.75rem;color:var(--text-muted);font-weight:700;min-width:80px;text-align:center;"></span>
-            <button class="qz-refresh-btn" id="btnNextPage" onclick="resultsGoPage('next')" style="font-size:0.75rem;padding:0.3rem 0.7rem;">التالي ▶</button>
-          </div>
         </div>
-
       </section>
 
       <!-- ════════════ PANEL: SETTINGS ════════════ -->
