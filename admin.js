@@ -2103,7 +2103,7 @@ window.exportQuizResultsExcel = async function() {
 
 window.loadLatestResults = async function () {
   const loadingEl = document.getElementById("resultsLoading"), wrap = document.getElementById("resultsTableWrap"), tbody = document.getElementById("resultsTableBody");
-  if (!tbody) return;
+  if (!tbody || !loadingEl || !wrap) return;
   try {
     const snap = await getDocs(query(collection(db,"results"), orderBy("submittedAt","desc")));
     _allResults = []; cachedResults = [];
