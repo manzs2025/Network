@@ -1799,8 +1799,8 @@ window.loadAdvancedStats = async function() {
       const answers = r.answers || r.userAnswers || r.questionResults;
       if (!answers || typeof answers !== "object") return;
       Object.entries(answers).forEach(([qIdx, ans]) => {
-        const qText = ans.question || ans.text || `سؤال ${parseInt(qIdx)+1}`;
-        const isCorrect = ans.isCorrect || ans.correct;
+        const qText = ans.questionText || ans.question || ans.text || `سؤال ${parseInt(qIdx)+1}`;
+        const isCorrect = ans.isCorrect === true;
         const key = qText.substring(0, 80);
         if (!questionErrors[key]) questionErrors[key] = { total:0, wrong:0, text:qText };
         questionErrors[key].total++;
