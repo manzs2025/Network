@@ -2143,11 +2143,12 @@ window.loadLatestResults = async function () {
       filterQuiz.value = current;
     }
 
-    document.getElementById("resultsFilters").style.display = "flex";
+    const filtersEl = document.getElementById("resultsFilters");
+    if (filtersEl) filtersEl.style.display = "flex";
     _resultsPage = 1;
     applyResultsFilter();
 
-  } catch (e) { console.error(e); } finally { loadingEl.style.display = "none"; wrap.style.display = "block"; }
+  } catch (e) { console.error(e); } finally { if (loadingEl) loadingEl.style.display = "none"; if (wrap) wrap.style.display = "block"; }
 };
 
 /* ── تطبيق الفلترة ── */
