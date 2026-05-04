@@ -2872,31 +2872,37 @@ select optgroup {
 
         <!-- جدول المتدربين -->
         <div class="qz-table-section">
-          <div class="qz-table-header">
-            <h3 class="qz-table-title">👥 قائمة المتدربين</h3>
-            <div style="display:flex;gap:0.5rem;align-items:center;">
+          <div class="qz-table-header" style="cursor:pointer;" onclick="toggleTraineesList()">
+            <h3 class="qz-table-title" style="display:flex;align-items:center;gap:0.5rem;">
+              👥 قائمة المتدربين
+              <span id="traineesCount" style="font-size:0.7rem;background:rgba(0,201,177,0.1);color:var(--accent);padding:0.15rem 0.5rem;border-radius:8px;font-weight:700;"></span>
+              <span id="traineesToggleIcon" style="font-size:0.7rem;color:var(--text-faint);transition:transform 0.3s;">▼</span>
+            </h3>
+            <div style="display:flex;gap:0.5rem;align-items:center;" onclick="event.stopPropagation();">
               <input type="text" id="traineeSearchInput" class="qz-input" placeholder="🔍 بحث بالاسم أو الرقم التدريبي..." oninput="filterTrainees()" style="max-width:280px;font-size:0.82rem;padding:0.45rem 0.8rem;">
               <button class="qz-refresh-btn" onclick="loadTrainees()">↻ تحديث</button>
             </div>
           </div>
-          <div class="qz-table-loading" id="traineesLoading">
-            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
-            <span>جارٍ تحميل المتدربين…</span>
-          </div>
-          <div class="qz-table-empty" id="traineesEmpty" style="display:none">لا يوجد متدربون مسجّلون بعد</div>
-          <div class="qz-table-wrap" id="traineesTableWrap" style="display:none">
-            <table class="qz-table">
-              <thead>
-                <tr>
-                  <th>الاسم</th>
-                  <th>الرقم التدريبي</th>
-                  <th>عدد الاختبارات</th>
-                  <th>تاريخ التسجيل</th>
-                  <th>إجراءات</th>
-                </tr>
-              </thead>
-              <tbody id="traineesTableBody"></tbody>
-            </table>
+          <div id="traineesCollapsible" style="display:none;">
+            <div class="qz-table-loading" id="traineesLoading">
+              <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+              <span>جارٍ تحميل المتدربين…</span>
+            </div>
+            <div class="qz-table-empty" id="traineesEmpty" style="display:none">لا يوجد متدربون مسجّلون بعد</div>
+            <div class="qz-table-wrap" id="traineesTableWrap" style="display:none">
+              <table class="qz-table">
+                <thead>
+                  <tr>
+                    <th>الاسم</th>
+                    <th>الرقم التدريبي</th>
+                    <th>عدد الاختبارات</th>
+                    <th>تاريخ التسجيل</th>
+                    <th>إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="traineesTableBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
 

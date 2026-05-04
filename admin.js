@@ -1866,6 +1866,21 @@ window.deleteTrainee = async function(uid) {
   try { await deleteDoc(doc(db, "users", uid)); const row = document.querySelector(`tr[data-uid="${uid}"]`); if (row) row.remove(); loadStats(); } catch (e) { alert("❌ فشل الحذف: " + e.message); }
 };
 
+/* ── طي/فك قائمة المتدربين ── */
+let _traineesExpanded = false;
+window.toggleTraineesList = function() {
+  _traineesExpanded = !_traineesExpanded;
+  const el = document.getElementById("traineesCollapsible");
+  const icon = document.getElementById("traineesToggleIcon");
+  if (_traineesExpanded) {
+    el.style.display = "block";
+    icon.textContent = "▲";
+  } else {
+    el.style.display = "none";
+    icon.textContent = "▼";
+  }
+};
+
 window.loadTrainees = async function () {
   const loadingEl = document.getElementById("traineesLoading"), wrap = document.getElementById("traineesTableWrap"), tbody = document.getElementById("traineesTableBody");
   if (!tbody) return;
@@ -1876,9 +1891,11 @@ window.loadTrainees = async function () {
       const d = s.data(); const safeName = (d.displayName || "").replace(/'/g, "\\'");
       tbody.innerHTML += `<tr data-uid="${s.id}" data-name="${(d.displayName||'').toLowerCase()}" data-sid="${d.studentId||''}"><td>${d.displayName || "—"}</td><td style="direction:ltr;text-align:center">${d.studentId || "—"}</td><td style="text-align:center">—</td><td style="text-align:center">—</td><td style="white-space:nowrap"><button class="tr-edit-btn" onclick="openEditTraineeModal('${s.id}','${safeName}','${d.studentId || ""}')">✏️</button><button class="tr-edit-btn" style="background:rgba(0,201,177,0.1);color:var(--accent);" onclick="openRetakeModal('${s.id}','${safeName}')">🔄</button><button class="tr-edit-btn" style="background:rgba(244,67,54,0.1);color:#ff6b6b;" onclick="deleteTrainee('${s.id}')">🗑️</button></td></tr>`;
     });
-    // مسح حقل البحث
+    // مسح حقل البحث + تحديث العداد
     const searchInput = document.getElementById("traineeSearchInput");
     if (searchInput) searchInput.value = "";
+    const countEl = document.getElementById("traineesCount");
+    if (countEl) countEl.textContent = snap.size + " متدرب";
   } catch (e) { console.error(e); } finally { loadingEl.style.display = "none"; wrap.style.display = "block"; }
 };
 
