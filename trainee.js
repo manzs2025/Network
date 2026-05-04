@@ -15,7 +15,7 @@ import { getAuth, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 import {
-  getFirestore, doc, getDoc, getDocs, addDoc,
+  getFirestore, doc, getDoc, getDocs, addDoc, setDoc, deleteDoc,
   collection, query, where, orderBy, serverTimestamp,
 }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -346,6 +346,9 @@ window.startQuiz = async function (quizId) {
 
   showPage("pageQuiz", null);
   document.getElementById("mainBottomNav").style.display = "none";
+
+  /* ── المتابعة الحية: تسجيل بدء الاختبار ── */
+  _startLiveTracking(quizId, d.title);
 };
 
 /* ══════════════════════════════════════════════════════
@@ -741,6 +744,75 @@ function _refreshNav() {
 }
 
 /* ══════════════════════════════════════════════════════
+   📡 المتابعة الحية للاختبار (Live Tracking)
+══════════════════════════════════════════════════════ */
+let _liveTrackInterval = null;
+
+function _startLiveTracking(quizId, quizTitle) {
+  _stopLiveTracking(); // تنظيف أي tracking سابق
+
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const docId = `${user.uid}_${quizId}`;
+  const totalQ = _currentQuiz.questions?.length || 0;
+
+  // تسجيل فوري عند البدء
+  _sendLiveStatus(docId, {
+    userId: user.uid,
+    userName: user.displayName || user.email || "—",
+    quizId: quizId,
+    quizTitle: quizTitle || "—",
+    status: "solving",
+    currentQ: 1,
+    totalQ: totalQ,
+    answered: 0,
+    startedAt: Date.now(),
+    lastUpdate: Date.now()
+  });
+
+  // تحديث كل 30 ثانية
+  _liveTrackInterval = setInterval(() => {
+    const answered = Object.keys(_answers).length;
+    _sendLiveStatus(docId, {
+      status: "solving",
+      currentQ: (_currentQIndex || 0) + 1,
+      answered: answered,
+      lastUpdate: Date.now()
+    });
+  }, 30000);
+}
+
+function _stopLiveTracking() {
+  if (_liveTrackInterval) {
+    clearInterval(_liveTrackInterval);
+    _liveTrackInterval = null;
+  }
+}
+
+async function _sendLiveStatus(docId, data) {
+  try {
+    await setDoc(doc(db, "liveQuiz", docId), data, { merge: true });
+  } catch(e) { /* صامت */ }
+}
+
+async function _markLiveFinished(score, percentage, passed) {
+  const user = auth.currentUser;
+  if (!user || !_currentQuiz?.id) return;
+  const docId = `${user.uid}_${_currentQuiz.id}`;
+  try {
+    await setDoc(doc(db, "liveQuiz", docId), {
+      status: "finished",
+      score: score,
+      percentage: percentage,
+      passed: passed,
+      finishedAt: Date.now(),
+      lastUpdate: Date.now()
+    }, { merge: true });
+  } catch(e) { /* صامت */ }
+}
+
+/* ══════════════════════════════════════════════════════
    4. إرسال الاختبار وحفظ النتيجة
 ══════════════════════════════════════════════════════ */
 window.submitQuiz = async function (isAutoSubmit = false) {
@@ -909,6 +981,10 @@ window.submitQuiz = async function (isAutoSubmit = false) {
     console.error("saveResult:", err);
     /* نكمل بعرض النتيجة حتى لو فشل الحفظ */
   }
+
+  /* ── إيقاف المتابعة الحية وتسجيل الإنهاء ── */
+  _stopLiveTracking();
+  _markLiveFinished(score, percentage, passed);
 
   /* ── عرض النتيجة ── */
   _showResult({ questions, answersMap, correct, total, score, totalPoints, percentage, passed });

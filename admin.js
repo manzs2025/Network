@@ -1321,7 +1321,7 @@ window.switchPanel = function (btn, panelId) {
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById(`panel-${panelId}`)?.classList.add("active");
   if (panelId === "trainees") { loadTrainees(); loadLatestResults(); }
-  if (panelId === "quizzes")  { renderQuestionBankSelector(); loadQuizzes(); }
+  if (panelId === "quizzes")  { renderQuestionBankSelector(); loadQuizzes(); loadLiveQuizSelect(); }
   if (panelId === "settings") { loadSettings(); _initSettingsTinyMCE(); }
   if (panelId === "pdf") { loadPdfLinks(); }
 };
@@ -4970,6 +4970,106 @@ window.previewPageContent = function () {
 })();
 
 /* ══════════════════════════════════════════════════════
+   📡 المتابعة الحية للاختبار (Live Monitor)
+══════════════════════════════════════════════════════ */
+
+let _liveInterval = null;
+
+window.loadLiveQuizSelect = async function() {
+  const sel = document.getElementById("liveQuizSelect");
+  if (!sel) return;
+  try {
+    const snap = await getDocs(collection(db, "quizzes"));
+    sel.innerHTML = '<option value="">— اختر اختبار —</option>';
+    snap.forEach(s => {
+      const d = s.data();
+      sel.innerHTML += `<option value="${s.id}">${d.title || s.id}</option>`;
+    });
+  } catch(e) {}
+};
+
+window.startLiveMonitor = async function() {
+  const quizId = document.getElementById("liveQuizSelect").value;
+  if (!quizId) { alert("اختر اختبار أولاً"); return; }
+  document.getElementById("btnStartLive").style.display = "none";
+  document.getElementById("btnStopLive").style.display = "";
+  document.getElementById("liveMonitorWrap").style.display = "block";
+  document.getElementById("liveMonitorEmpty").style.display = "none";
+  await _refreshLiveData(quizId);
+  _liveInterval = setInterval(function() { _refreshLiveData(quizId); }, 15000);
+};
+
+window.stopLiveMonitor = function() {
+  if (_liveInterval) { clearInterval(_liveInterval); _liveInterval = null; }
+  document.getElementById("btnStartLive").style.display = "";
+  document.getElementById("btnStopLive").style.display = "none";
+  document.getElementById("liveMonitorWrap").style.display = "none";
+  document.getElementById("liveMonitorEmpty").style.display = "block";
+};
+
+async function _refreshLiveData(quizId) {
+  try {
+    var usersSnap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee")));
+    var liveSnap = await getDocs(query(collection(db, "liveQuiz"), where("quizId", "==", quizId)));
+
+    var trainees = {};
+    usersSnap.forEach(function(s) {
+      var d = s.data();
+      trainees[s.id] = { name: d.displayName || d.email || "—", uid: s.id, status: "not_started" };
+    });
+
+    var liveData = {};
+    liveSnap.forEach(function(s) { liveData[s.data().userId] = s.data(); });
+
+    var solving = 0, finished = 0, notStarted = 0;
+    var rows = [];
+
+    Object.values(trainees).forEach(function(t) {
+      var live = liveData[t.uid];
+      if (live) {
+        t.status = live.status || "solving";
+        t.currentQ = live.currentQ || 0;
+        t.totalQ = live.totalQ || 0;
+        t.answered = live.answered || 0;
+        t.percentage = live.percentage || 0;
+        t.score = live.score || 0;
+        t.passed = live.passed || false;
+        t.lastUpdate = live.lastUpdate || 0;
+        t.startedAt = live.startedAt || 0;
+      }
+      if (t.status === "solving") solving++;
+      else if (t.status === "finished") finished++;
+      else notStarted++;
+      rows.push(t);
+    });
+
+    rows.sort(function(a, b) {
+      var o = { solving: 0, finished: 1, not_started: 2 };
+      return (o[a.status] || 2) - (o[b.status] || 2);
+    });
+
+    document.getElementById("liveSolving").textContent = solving;
+    document.getElementById("liveFinished").textContent = finished;
+    document.getElementById("liveNotStarted").textContent = notStarted;
+    document.getElementById("liveLastUpdate").textContent = "آخر تحديث: " + new Date().toLocaleTimeString("ar-SA");
+
+    var list = document.getElementById("liveTraineesList");
+    var html = "";
+    rows.forEach(function(t) {
+      if (t.status === "solving") {
+        var elapsed = t.startedAt ? Math.floor((Date.now() - t.startedAt) / 60000) : 0;
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:8px;padding:0.5rem 0.75rem;"><div style="display:flex;align-items:center;gap:0.5rem;"><span style="width:8px;height:8px;border-radius:50%;background:#00c9b1;animation:pulse 1.5s infinite;"></span><span style="font-size:0.8rem;font-weight:700;">' + t.name + '</span></div><div style="display:flex;align-items:center;gap:0.75rem;font-size:0.72rem;color:var(--text-muted);"><span>سؤال ' + t.currentQ + '/' + t.totalQ + '</span><span>أجاب ' + t.answered + '</span><span>' + elapsed + ' د</span></div></div>';
+      } else if (t.status === "finished") {
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(108,47,160,0.06);border:1px solid rgba(108,47,160,0.2);border-radius:8px;padding:0.5rem 0.75rem;"><div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:0.85rem;">' + (t.passed ? '✅' : '❌') + '</span><span style="font-size:0.8rem;font-weight:700;">' + t.name + '</span></div><div style="font-size:0.78rem;font-weight:700;color:' + (t.passed ? 'var(--accent)' : '#ff6b6b') + ';">' + t.percentage + '%</div></div>';
+      } else {
+        html += '<div style="display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.75rem;opacity:0.5;"><span style="width:8px;height:8px;border-radius:50%;background:var(--text-faint);"></span><span style="font-size:0.8rem;font-weight:600;color:var(--text-faint);">' + t.name + '</span><span style="font-size:0.7rem;color:var(--text-faint);margin-right:auto;">لم يدخل</span></div>';
+      }
+    });
+    list.innerHTML = html;
+  } catch(e) { console.error("live:", e); }
+}
+
+/* ══════════════════════════════════════════════════════
    🔄 تهيئة الموقع — بداية ترم جديد
 ══════════════════════════════════════════════════════ */
 
@@ -5003,16 +5103,18 @@ window.startResetSite = async function() {
     progressLabel.textContent = "🔍 جارٍ حصر البيانات...";
     progressBar.style.width = "5%";
 
-    const [resultsSnap, quizzesSnap, progressSnap] = await Promise.all([
+    const [resultsSnap, quizzesSnap, progressSnap, liveSnap] = await Promise.all([
       getDocs(collection(db, "results")),
       getDocs(collection(db, "quizzes")),
-      getDocs(collection(db, "progress"))
+      getDocs(collection(db, "progress")),
+      getDocs(collection(db, "liveQuiz"))
     ]);
 
     const allDocs = [
       ...resultsSnap.docs.map(d => ({ ref: d.ref })),
       ...quizzesSnap.docs.map(d => ({ ref: d.ref })),
-      ...progressSnap.docs.map(d => ({ ref: d.ref }))
+      ...progressSnap.docs.map(d => ({ ref: d.ref })),
+      ...liveSnap.docs.map(d => ({ ref: d.ref }))
     ];
 
     const total = allDocs.length;
@@ -5050,7 +5152,7 @@ window.startResetSite = async function() {
     resultMsg.style.background = "rgba(0,201,177,0.1)";
     resultMsg.style.border = "1px solid rgba(0,201,177,0.25)";
     resultMsg.style.color = "var(--accent)";
-    resultMsg.innerHTML = "✅ تمت التهيئة بنجاح!<br><span style='font-size:0.75rem;font-weight:400;'>تم حذف: " + resultsSnap.size + " نتيجة + " + quizzesSnap.size + " اختبار + " + progressSnap.size + " تقدم = " + totalDeleted + " عنصر" + (totalErrors > 0 ? " (فشل: " + totalErrors + ")" : "") + "</span>";
+    resultMsg.innerHTML = "✅ تمت التهيئة بنجاح!<br><span style='font-size:0.75rem;font-weight:400;'>تم حذف: " + resultsSnap.size + " نتيجة + " + quizzesSnap.size + " اختبار + " + progressSnap.size + " تقدم + " + liveSnap.size + " متابعة = " + totalDeleted + " عنصر" + (totalErrors > 0 ? " (فشل: " + totalErrors + ")" : "") + "</span>";
 
   } catch(e) {
     resultMsg.style.display = "block";

@@ -2550,6 +2550,43 @@ select optgroup {
           </div>
         </div>
 
+        <!-- ── المتابعة الحية للاختبار ── -->
+        <div style="padding:0 1.5rem 1rem;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+              <div style="font-weight:800;font-size:0.9rem;">📡 المتابعة الحية للاختبار</div>
+              <div style="display:flex;gap:0.5rem;">
+                <select id="liveQuizSelect" class="qz-input" style="font-size:0.78rem;max-width:200px;padding:0.35rem 0.5rem;">
+                  <option value="">— اختر اختبار —</option>
+                </select>
+                <button class="qz-refresh-btn" id="btnStartLive" onclick="startLiveMonitor()" style="font-size:0.75rem;padding:0.35rem 0.8rem;background:rgba(0,201,177,0.1);color:var(--accent);border-color:rgba(0,201,177,0.3);">▶ بدء المتابعة</button>
+                <button class="qz-refresh-btn" id="btnStopLive" onclick="stopLiveMonitor()" style="display:none;font-size:0.75rem;padding:0.35rem 0.8rem;background:rgba(244,67,54,0.1);color:#ff6b6b;border-color:rgba(244,67,54,0.3);">⏹ إيقاف</button>
+              </div>
+            </div>
+
+            <div id="liveMonitorWrap" style="display:none;">
+              <div style="display:flex;gap:0.75rem;margin-bottom:0.75rem;text-align:center;" id="liveStatsBar">
+                <div style="flex:1;background:rgba(0,201,177,0.08);border-radius:8px;padding:0.5rem;">
+                  <div style="font-size:1.2rem;font-weight:900;color:var(--accent);" id="liveSolving">0</div>
+                  <div style="font-size:0.65rem;color:var(--text-faint);">يحل الآن</div>
+                </div>
+                <div style="flex:1;background:rgba(108,47,160,0.08);border-radius:8px;padding:0.5rem;">
+                  <div style="font-size:1.2rem;font-weight:900;color:var(--primary-l);" id="liveFinished">0</div>
+                  <div style="font-size:0.65rem;color:var(--text-faint);">أنهى</div>
+                </div>
+                <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:8px;padding:0.5rem;">
+                  <div style="font-size:1.2rem;font-weight:900;color:var(--text-faint);" id="liveNotStarted">0</div>
+                  <div style="font-size:0.65rem;color:var(--text-faint);">لم يدخل</div>
+                </div>
+              </div>
+              <div style="font-size:0.68rem;color:var(--text-faint);margin-bottom:0.5rem;text-align:left;" id="liveLastUpdate">آخر تحديث: —</div>
+              <div id="liveTraineesList" style="display:grid;gap:0.4rem;max-height:400px;overflow-y:auto;"></div>
+            </div>
+
+            <div id="liveMonitorEmpty" style="text-align:center;padding:1.5rem;color:var(--text-faint);font-size:0.82rem;">اختر اختبار واضغط "بدء المتابعة" لمراقبة المتدربين</div>
+          </div>
+        </div>
+
         <!-- ── رفع بنك الأسئلة إلى Firestore ── -->
         <div class="seed-bank-wrap">
           <div class="seed-info">
