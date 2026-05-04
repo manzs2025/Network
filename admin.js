@@ -5167,6 +5167,48 @@ window.startResetSite = async function() {
 };
 
 /* ══════════════════════════════════════════════════════
+   🔄 منح محاولة إضافية لمتدرب معين
+══════════════════════════════════════════════════════ */
+
+window.grantExtraAttempt = async function(resultId) {
+  // جلب بيانات النتيجة لمعرفة userId و quizId
+  const result = _allResults.find(r => r.id === resultId);
+  if (!result) { alert("لم يتم العثور على النتيجة"); return; }
+
+  // جلب userId و quizId من Firestore مباشرة
+  try {
+    const resSnap = await getDoc(doc(db, "results", resultId));
+    if (!resSnap.exists()) { alert("النتيجة غير موجودة"); return; }
+    const resData = resSnap.data();
+    const userId = resData.userId;
+    const quizId = resData.quizId;
+    const userName = resData.displayName || resData.userEmail || "—";
+    const quizTitle = resData.quizTitle || "—";
+
+    if (!confirm(`منح محاولة إضافية لـ "${userName}" في اختبار "${quizTitle}"؟`)) return;
+
+    const extraDocId = `${userId}_${quizId}`;
+    const extraRef = doc(db, "extraAttempts", extraDocId);
+    const extraSnap = await getDoc(extraRef);
+    const current = extraSnap.exists() ? (extraSnap.data().extra || 0) : 0;
+
+    await setDoc(extraRef, {
+      userId: userId,
+      quizId: quizId,
+      userName: userName,
+      quizTitle: quizTitle,
+      extra: current + 1,
+      grantedAt: serverTimestamp()
+    });
+
+    alert(`✅ تم منح "${userName}" محاولة إضافية (${current + 1}) في "${quizTitle}"`);
+
+  } catch(e) {
+    alert("❌ فشل: " + e.message);
+  }
+};
+
+/* ══════════════════════════════════════════════════════
    📋 عرض إجابات المتدرب (نافذة منبثقة)
 ══════════════════════════════════════════════════════ */
 
@@ -5235,6 +5277,8 @@ window.viewAnswers = function(resultId) {
 
       <h3 style="font-size:1rem;font-weight:800;margin-bottom:0.3rem;color:var(--text,#e8eaf6);">📋 إجابات ${result.name}</h3>
       <div style="font-size:0.78rem;color:var(--text-muted,#7a7f9e);margin-bottom:1rem;">${result.quiz} — ${result.dateStr}</div>
+
+      <button onclick="grantExtraAttempt('${result.id}')" style="margin-bottom:1rem;padding:0.5rem 1rem;background:rgba(0,201,177,0.1);border:1px solid rgba(0,201,177,0.25);border-radius:8px;color:var(--accent,#00c9b1);font-family:'Cairo',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;width:100%;">🔄 منح محاولة إضافية لهذا المتدرب</button>
 
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-bottom:1rem;text-align:center;">
         <div style="background:var(--card,#161929);border-radius:8px;padding:0.5rem;">

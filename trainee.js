@@ -293,14 +293,31 @@ window.startQuiz = async function (quizId) {
   }
 
   if (maxAttempts > 0 && previousAttempts >= maxAttempts) {
-    alert(`⛔ لقد استنفدت جميع المحاولات (${maxAttempts} من ${maxAttempts}).\nلإعادة المحاولة، يجب التواصل مع المشرف.`);
-    _attemptedInSession.add(quizId);
-    loadQuizzes();
-    return;
+    // تحقق من وجود محاولات إضافية
+    let extraAllowed = 0;
+    try {
+      const extraSnap = await getDoc(doc(db, "extraAttempts", `${_currentUser.uid}_${quizId}`));
+      if (extraSnap.exists()) extraAllowed = extraSnap.data().extra || 0;
+    } catch(e) {}
+
+    if (previousAttempts >= maxAttempts + extraAllowed) {
+      alert(`⛔ لقد استنفدت جميع المحاولات (${maxAttempts + extraAllowed} من ${maxAttempts + extraAllowed}).\nلإعادة المحاولة، يجب التواصل مع المشرف.`);
+      _attemptedInSession.add(quizId);
+      loadQuizzes();
+      return;
+    }
   }
 
-  const attemptsMsg = maxAttempts > 0
-    ? `🔄 المحاولة: ${previousAttempts + 1} من ${maxAttempts}`
+  // حساب المحاولات الإضافية للعرض
+  let extraAllowed2 = 0;
+  try {
+    const extraSnap2 = await getDoc(doc(db, "extraAttempts", `${_currentUser.uid}_${quizId}`));
+    if (extraSnap2.exists()) extraAllowed2 = extraSnap2.data().extra || 0;
+  } catch(e) {}
+
+  const totalAllowed = maxAttempts > 0 ? maxAttempts + extraAllowed2 : 0;
+  const attemptsMsg = totalAllowed > 0
+    ? `🔄 المحاولة: ${previousAttempts + 1} من ${totalAllowed}`
     : `🔄 المحاولة: ${previousAttempts + 1} (بلا حد)`;
 
   if (!confirm(`هل أنت مستعد لبدء اختبار "${d.title}"؟\n${d.duration ? `⏱️ المدة: ${d.duration} دقيقة (سيُرسَل الاختبار تلقائياً عند انتهاء الوقت)` : "⏱️ بدون حد زمني"}\n❓ عدد الأسئلة: ${d.questions?.length || 0}\n${attemptsMsg}\n\n⚠️ تنبيه: لن تتمكن من تعديل إجاباتك بعد التسليم.`)) {
