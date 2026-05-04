@@ -5103,6 +5103,7 @@ window.viewAnswers = function(resultId) {
           <span style="font-size:0.75rem;font-weight:700;">${icon} سؤال ${i+1}</span>
           <span style="font-size:0.65rem;color:var(--text-faint);background:rgba(255,255,255,0.06);padding:0.15rem 0.5rem;border-radius:6px;">${typeLabel}${partialInfo}</span>
         </div>
+        ${a.questionText ? `<div style="font-size:0.8rem;color:var(--text,#e8eaf6);margin-bottom:0.5rem;font-weight:600;line-height:1.6;">${a.questionText}</div>` : ''}
         <div style="font-size:0.78rem;margin-bottom:0.4rem;">
           <span style="color:var(--text-muted);">إجابة المتدرب:</span>
           <span style="color:${isCorrect ? 'var(--accent)' : '#ff6b6b'};font-weight:700;"> ${a.selected || '—'}</span>

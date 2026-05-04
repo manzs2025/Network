@@ -48,8 +48,6 @@ let _currentProfile = null;
 let _currentQuiz    = null;   /* { id, title, pageId, questions[] } */
 let _answers        = {};     /* { questionIndex: selectedOption } */
 let _currentQIndex  = 0;
-let _questionTimes  = [];  // وقت بداية كل سؤال
-let _questionDurations = []; // المدة المستغرقة لكل سؤال (ثواني)
 let _submitted      = false;
 let _startTime      = null;
 const _attemptedInSession = new Set(); /* اختبارات حلّها المتدرب في هذه الجلسة */
@@ -95,30 +93,7 @@ onAuthStateChanged(auth, async (user) => {
     profile.displayName || user.email;
 
   loadQuizzes();
-  _loadWelcomeMessage();
 });
-
-/* ══════════════════════════════════════════════════════
-   📢 رسالة ترحيبية من المشرف
-══════════════════════════════════════════════════════ */
-async function _loadWelcomeMessage() {
-  try {
-    const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const snap = await getDoc(doc(db, "settings", "general"));
-    const msg = snap.exists() ? snap.data().welcomeMessage : "";
-    if (msg && msg.trim()) {
-      // إزالة بانر قديم إن وجد
-      const old = document.getElementById("welcomeMsgBanner");
-      if (old) old.remove();
-      const banner = document.createElement("div");
-      banner.id = "welcomeMsgBanner";
-      banner.className = "welcome-msg-banner";
-      banner.innerHTML = `<span class="welcome-msg-icon">📢</span> ${msg.replace(/</g,"&lt;")}`;
-      const grid = document.getElementById("quizzesGrid");
-      if (grid) grid.parentElement.insertBefore(banner, grid.parentElement.firstChild);
-    }
-  } catch(e) { console.error("welcomeMsg:", e); }
-}
 
 /* ══════════════════════════════════════════════════════
    2. جلب الاختبارات النشطة
@@ -336,8 +311,6 @@ window.startQuiz = async function (quizId) {
   _currentQuiz._attemptNumber = previousAttempts + 1;
   _answers      = {};
   _currentQIndex = 0;
-  _questionTimes = [];
-  _questionDurations = [];
   _submitted     = false;
   _startTime     = Date.now();
 
@@ -372,8 +345,6 @@ window.startQuiz = async function (quizId) {
 
   showPage("pageQuiz", null);
   document.getElementById("mainBottomNav").style.display = "none";
-  // بدء مؤقت السؤال الأول
-  _questionTimes[0] = Date.now();
 };
 
 /* ══════════════════════════════════════════════════════
@@ -733,14 +704,6 @@ window.prevQuestion = function () {
 };
 
 window.goToQuestion = function (idx) {
-  /* ── تسجيل وقت السؤال الحالي ── */
-  const now = Date.now();
-  if (_questionTimes[_currentQIndex]) {
-    const elapsed = (now - _questionTimes[_currentQIndex]) / 1000;
-    _questionDurations[_currentQIndex] = (_questionDurations[_currentQIndex] || 0) + elapsed;
-  }
-  _questionTimes[idx] = now;
-
   /* إخفاء الحالي */
   document.getElementById(`qcard_${_currentQIndex}`)?.classList.remove("active");
   document.getElementById(`dot_${_currentQIndex}`)?.classList.remove("active");
@@ -865,13 +828,14 @@ window.submitQuiz = async function (isAutoSubmit = false) {
       }
 
       answersMap[idx] = {
+        questionText: q.text || "",
         selected: selectedDisplay,
         correct:  correctDisplay,
         isCorrect,
         points:   qPoints,
         type:     qType,
-        partial:  correctCount,        // عدد الصحيح
-        total:    pairs.length,        // العدد الكلي
+        partial:  correctCount,
+        total:    pairs.length,
       };
       return; // نتجاوز الكتلة الموحّدة لأن match يُحتسب هنا
     } else {
@@ -891,6 +855,7 @@ window.submitQuiz = async function (isAutoSubmit = false) {
     }
 
     answersMap[idx] = {
+      questionText: q.text || "",
       selected: selectedDisplay,
       correct:  correctDisplay,
       isCorrect,
@@ -915,15 +880,6 @@ window.submitQuiz = async function (isAutoSubmit = false) {
   // تسجيل في الذاكرة المحلية فوراً (حماية من race conditions عند الإعادة)
   if (_currentQuiz?.id) _attemptedInSession.add(_currentQuiz.id);
 
-  /* ── تسجيل وقت آخر سؤال ── */
-  const nowTime = Date.now();
-  if (_questionTimes[_currentQIndex]) {
-    const elapsed = (nowTime - _questionTimes[_currentQIndex]) / 1000;
-    _questionDurations[_currentQIndex] = (_questionDurations[_currentQIndex] || 0) + elapsed;
-  }
-  // تقريب الأوقات
-  const qDurations = _questionDurations.map(d => Math.round(d || 0));
-
   /* ── حفظ في Firestore ── */
   try {
     await addDoc(collection(db, "results"), {
@@ -942,7 +898,6 @@ window.submitQuiz = async function (isAutoSubmit = false) {
       passed,
       answers:     answersMap,
       duration,
-      questionDurations: qDurations,
       autoSubmitted: isAutoSubmit,
       tabSwitchCount: _currentQuiz._tabSwitchCount ?? 0,
       penaltyDeducted: penalty,
