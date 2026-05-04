@@ -2009,7 +2009,14 @@ window.loadLatestResults = async function () {
         percentage: d.percentage != null ? d.percentage : 0,
         passed: !!d.passed,
         attempt: d.attempt || 1,
-        dateStr: dateStr
+        dateStr: dateStr,
+        answers: d.answers || null,
+        correct: d.correct ?? 0,
+        wrong: d.wrong ?? 0,
+        totalPoints: d.totalPoints ?? 0,
+        duration: d.duration ?? 0,
+        tabSwitchCount: d.tabSwitchCount ?? 0,
+        penaltyDeducted: d.penaltyDeducted ?? 0
       };
       _allResults.push(row);
       cachedResults.push({ "المتدرب":row.name, "الاختبار":row.quiz, "الدرجة":row.score, "النسبة":row.percentage+"%", "النتيجة":row.passed?"ناجح":"راسب", "المحاولة":row.attempt, "التاريخ":dateStr });
@@ -2068,7 +2075,7 @@ function renderResultsPage() {
   } else {
     pageData.forEach(r => {
       const safeName = r.name.replace(/'/g, "\\'");
-      tbody.innerHTML += `<tr data-rid="${r.id}"><td>${r.name}</td><td>${r.quiz}</td><td style="text-align:center">${r.score}</td><td style="text-align:center">${r.percentage}%</td><td style="text-align:center">${r.passed?'✅':'❌'}</td><td style="text-align:center">${r.attempt}</td><td><span class="qz-date">${r.dateStr}</span></td><td style="text-align:center;white-space:nowrap"><button class="tr-edit-btn" style="background:rgba(244,67,54,0.1);color:#ff6b6b;" title="حذف النتيجة" onclick="deleteResult('${r.id}','${safeName}')">🗑️</button></td></tr>`;
+      tbody.innerHTML += `<tr data-rid="${r.id}"><td>${r.name}</td><td>${r.quiz}</td><td style="text-align:center">${r.score}</td><td style="text-align:center">${r.percentage}%</td><td style="text-align:center">${r.passed?'✅':'❌'}</td><td style="text-align:center">${r.attempt}</td><td><span class="qz-date">${r.dateStr}</span></td><td style="text-align:center;white-space:nowrap">${r.answers ? `<button class="tr-edit-btn" title="عرض الإجابات" onclick="viewAnswers('${r.id}')" style="background:rgba(108,47,160,0.1);color:var(--primary-l);">📋</button>` : ''}<button class="tr-edit-btn" style="background:rgba(244,67,54,0.1);color:#ff6b6b;" title="حذف النتيجة" onclick="deleteResult('${r.id}','${safeName}')">🗑️</button></td></tr>`;
     });
   }
 
@@ -5055,4 +5062,101 @@ window.startResetSite = async function() {
 
   btn.disabled = false;
   btn.textContent = "🔄 تهيئة الموقع";
+};
+
+/* ══════════════════════════════════════════════════════
+   📋 عرض إجابات المتدرب (نافذة منبثقة)
+══════════════════════════════════════════════════════ */
+
+window.viewAnswers = function(resultId) {
+  const result = _allResults.find(r => r.id === resultId);
+  if (!result || !result.answers) {
+    alert("لا توجد تفاصيل إجابات لهذه النتيجة");
+    return;
+  }
+
+  const answers = result.answers;
+  const keys = Object.keys(answers).sort((a,b) => Number(a) - Number(b));
+
+  let correctCount = 0;
+  let wrongCount = 0;
+  let questionsHtml = '';
+
+  keys.forEach((key, i) => {
+    const a = answers[key];
+    const isCorrect = a.isCorrect;
+    if (isCorrect) correctCount++; else wrongCount++;
+
+    const typeLabel = a.type === 'tf' ? 'صح/خطأ' : a.type === 'mcq' ? 'اختيار واحد' : a.type === 'multi' ? 'اختيار متعدد' : a.type === 'match' ? 'مطابقة' : a.type;
+    const bgColor = isCorrect ? 'rgba(0,201,177,0.06)' : 'rgba(244,67,54,0.06)';
+    const borderColor = isCorrect ? 'rgba(0,201,177,0.2)' : 'rgba(244,67,54,0.2)';
+    const icon = isCorrect ? '✅' : '❌';
+
+    let partialInfo = '';
+    if (a.type === 'match' && a.partial !== undefined) {
+      partialInfo = `<span style="font-size:0.7rem;color:var(--text-faint);"> (${a.partial}/${a.total} صحيح)</span>`;
+    }
+
+    questionsHtml += `
+      <div style="background:${bgColor};border:1px solid ${borderColor};border-radius:8px;padding:0.75rem;margin-bottom:0.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+          <span style="font-size:0.75rem;font-weight:700;">${icon} سؤال ${i+1}</span>
+          <span style="font-size:0.65rem;color:var(--text-faint);background:rgba(255,255,255,0.06);padding:0.15rem 0.5rem;border-radius:6px;">${typeLabel}${partialInfo}</span>
+        </div>
+        <div style="font-size:0.78rem;margin-bottom:0.4rem;">
+          <span style="color:var(--text-muted);">إجابة المتدرب:</span>
+          <span style="color:${isCorrect ? 'var(--accent)' : '#ff6b6b'};font-weight:700;"> ${a.selected || '—'}</span>
+        </div>
+        ${!isCorrect ? `<div style="font-size:0.78rem;">
+          <span style="color:var(--text-muted);">الإجابة الصحيحة:</span>
+          <span style="color:var(--accent);font-weight:700;"> ${a.correct || '—'}</span>
+        </div>` : ''}
+      </div>`;
+  });
+
+  // إنشاء النافذة المنبثقة
+  let overlay = document.getElementById('answersOverlay');
+  if (overlay) overlay.remove();
+
+  overlay = document.createElement('div');
+  overlay.id = 'answersOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:1rem;';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  const durationMin = result.duration ? Math.floor(result.duration / 60) : 0;
+  const durationSec = result.duration ? result.duration % 60 : 0;
+
+  overlay.innerHTML = `
+    <div style="background:var(--bg2,#0e1022);border:1px solid var(--border,rgba(108,47,160,0.22));border-radius:16px;max-width:600px;width:100%;max-height:85vh;overflow-y:auto;padding:1.5rem;position:relative;font-family:'Cairo',sans-serif;direction:rtl;">
+      <button onclick="document.getElementById('answersOverlay').remove()" style="position:absolute;top:12px;left:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text,#e8eaf6);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+
+      <h3 style="font-size:1rem;font-weight:800;margin-bottom:0.3rem;color:var(--text,#e8eaf6);">📋 إجابات ${result.name}</h3>
+      <div style="font-size:0.78rem;color:var(--text-muted,#7a7f9e);margin-bottom:1rem;">${result.quiz} — ${result.dateStr}</div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-bottom:1rem;text-align:center;">
+        <div style="background:var(--card,#161929);border-radius:8px;padding:0.5rem;">
+          <div style="font-size:1.1rem;font-weight:900;color:var(--accent,#00c9b1);">${result.percentage}%</div>
+          <div style="font-size:0.65rem;color:var(--text-faint,#4a4f6b);">النسبة</div>
+        </div>
+        <div style="background:var(--card,#161929);border-radius:8px;padding:0.5rem;">
+          <div style="font-size:1.1rem;font-weight:900;color:var(--accent,#00c9b1);">${correctCount}</div>
+          <div style="font-size:0.65rem;color:var(--text-faint,#4a4f6b);">صحيح</div>
+        </div>
+        <div style="background:var(--card,#161929);border-radius:8px;padding:0.5rem;">
+          <div style="font-size:1.1rem;font-weight:900;color:#ff6b6b;">${wrongCount}</div>
+          <div style="font-size:0.65rem;color:var(--text-faint,#4a4f6b);">خطأ</div>
+        </div>
+        <div style="background:var(--card,#161929);border-radius:8px;padding:0.5rem;">
+          <div style="font-size:1.1rem;font-weight:900;color:var(--text,#e8eaf6);">${durationMin}:${String(durationSec).padStart(2,'0')}</div>
+          <div style="font-size:0.65rem;color:var(--text-faint,#4a4f6b);">المدة</div>
+        </div>
+      </div>
+
+      ${result.tabSwitchCount > 0 ? `<div style="background:rgba(244,67,54,0.06);border:1px solid rgba(244,67,54,0.2);border-radius:8px;padding:0.5rem;margin-bottom:0.75rem;font-size:0.75rem;color:#ff6b6b;text-align:center;">⚠️ خرج من التبويب ${result.tabSwitchCount} مرة${result.penaltyDeducted > 0 ? ` (خصم ${result.penaltyDeducted} درجة)` : ''}</div>` : ''}
+
+      <div style="font-size:0.82rem;font-weight:700;margin-bottom:0.5rem;color:var(--text,#e8eaf6);">تفاصيل الإجابات:</div>
+      ${questionsHtml}
+    </div>`;
+
+  document.body.appendChild(overlay);
 };
