@@ -5648,13 +5648,12 @@ window.loadSolvedTrainees = async function() {
       const d = s.data();
       if (!d.userId) return;
       if (!solvedMap[d.userId]) {
-        solvedMap[d.userId] = { uid: d.userId, name: d.userName || "—", studentId: "", score: d.score ?? 0, total: d.totalScore ?? 0, resultIds: [] };
+        solvedMap[d.userId] = { uid: d.userId, name: d.displayName || "—", studentId: d.studentId || "", percentage: d.percentage ?? 0, resultIds: [] };
       }
       solvedMap[d.userId].resultIds.push(s.id);
-      // آخر محاولة
-      if ((d.score ?? 0) >= solvedMap[d.userId].score) {
-        solvedMap[d.userId].score = d.score ?? 0;
-        solvedMap[d.userId].total = d.totalScore ?? 0;
+      // آخر محاولة (أعلى نسبة)
+      if ((d.percentage ?? 0) >= solvedMap[d.userId].percentage) {
+        solvedMap[d.userId].percentage = d.percentage ?? 0;
       }
     });
 
@@ -5688,7 +5687,7 @@ window.loadSolvedTrainees = async function() {
 
     listEl.innerHTML = _rtSolved.map(t => {
       const hasOverride = overrideUids.has(t.uid);
-      const pct = t.total > 0 ? Math.round((t.score / t.total) * 100) : 0;
+      const pct = Math.round(t.percentage ?? 0);
       return `
         <label style="display:flex;align-items:center;gap:0.65rem;padding:0.55rem 0.7rem;border-radius:8px;cursor:pointer;transition:background 0.15s;${hasOverride ? 'opacity:0.55;' : ''}" onmouseover="this.style.background='rgba(124,58,237,0.08)'" onmouseout="this.style.background='transparent'">
           <input type="checkbox" class="rt-check" data-uid="${t.uid}" ${hasOverride ? 'disabled' : ''} onchange="updateRtCount()" style="accent-color:#7c3aed;width:17px;height:17px;cursor:pointer;">
