@@ -170,8 +170,13 @@ async function loadQuizzes() {
     quizzesSnap.forEach(docSnap => {
       const d = docSnap.data();
 
-      // 1) تحقق من حقل available (افتراضي: متاح)
-      if (d.available === false) return;
+      // 1) تحقق من حقل available + الإتاحة المخصصة
+      const hasActiveOverride = (() => {
+        const dl = _overridesMap[docSnap.id];
+        return dl && now <= dl;
+      })();
+
+      if (d.available === false && !hasActiveOverride) return;
 
       // 2) تحقق من نافذة الجدولة الزمنية إن وُجدت
       if (d.startDate?.toDate && d.endDate?.toDate) {
@@ -279,9 +284,21 @@ window.startQuiz = async function (quizId) {
 
   /* ── التحقق من الإتاحة قبل البدء ── */
   if (d.available === false) {
-    alert("🔒 هذا الاختبار مُغلق حالياً من قِبَل المشرف.");
-    loadQuizzes();
-    return;
+    // تحقق من إتاحة مخصصة
+    let hasOverride = false;
+    try {
+      const ovSnap = await getDoc(doc(db, "quizOverrides", `${_currentUser.uid}_${quizId}`));
+      if (ovSnap.exists()) {
+        const ovDeadline = ovSnap.data().deadline?.toDate?.();
+        if (ovDeadline && new Date() <= ovDeadline) hasOverride = true;
+      }
+    } catch(e) {}
+
+    if (!hasOverride) {
+      alert("🔒 هذا الاختبار مُغلق حالياً من قِبَل المشرف.");
+      loadQuizzes();
+      return;
+    }
   }
 
   /* ── التحقق من نافذة الجدولة الزمنية ── */

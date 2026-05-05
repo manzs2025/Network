@@ -5444,7 +5444,8 @@ window.openGrantAccessModal = async function() {
     snap.forEach(s => {
       const d = s.data();
       let statusTag = "";
-      if (d.startDate?.toDate && d.endDate?.toDate) {
+      if (d.available === false) statusTag = " 🔒 [مقفل]";
+      else if (d.startDate?.toDate && d.endDate?.toDate) {
         const now = new Date();
         if (now > d.endDate.toDate()) statusTag = " [منتهي]";
         else if (now < d.startDate.toDate()) statusTag = " [مجدول]";
