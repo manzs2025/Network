@@ -5522,7 +5522,7 @@ window.loadAbsentTrainees = async function() {
           <input type="checkbox" class="ga-check" data-uid="${t.uid}" ${hasOverride ? 'disabled' : ''} onchange="updateGaCount()" style="accent-color:var(--accent);width:17px;height:17px;cursor:pointer;">
           <span style="flex:1;font-size:0.85rem;color:var(--text);font-weight:600;">${t.name}</span>
           <span style="font-size:0.75rem;color:var(--text-faint);direction:ltr;">${t.studentId}</span>
-          ${hasOverride ? '<span style="font-size:0.68rem;background:rgba(217,119,6,0.15);color:#d97706;padding:0.15rem 0.5rem;border-radius:6px;">أُتيح مسبقاً</span>' : ''}
+          ${hasOverride ? `<span style="font-size:0.68rem;background:rgba(217,119,6,0.15);color:#d97706;padding:0.15rem 0.5rem;border-radius:6px;">أُتيح مسبقاً</span><button onclick="event.preventDefault();revokeAccess('${t.uid}','${t.name}')" style="font-size:0.68rem;background:rgba(244,67,54,0.12);color:#ff6b6b;border:1px solid rgba(244,67,54,0.3);padding:0.15rem 0.5rem;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;transition:all 0.15s;" onmouseover="this.style.background='rgba(244,67,54,0.25)'" onmouseout="this.style.background='rgba(244,67,54,0.12)'">✕ إلغاء</button>` : ''}
         </label>`;
     }).join("");
 
@@ -5604,6 +5604,21 @@ window.grantAccessToAbsent = async function() {
 
   grantBtn.disabled = false;
   grantBtn.textContent = "🎯 إتاحة الاختبار للمحددين";
+};
+
+window.revokeAccess = async function(uid, userName) {
+  const quizId = document.getElementById("gaQuizSelect").value;
+  if (!quizId) return;
+
+  if (!confirm(`هل تريد إلغاء إتاحة الاختبار للمتدرب "${userName}"؟`)) return;
+
+  try {
+    await deleteDoc(doc(db, "quizOverrides", `${uid}_${quizId}`));
+    _showGaMsg(`✅ تم إلغاء الإتاحة للمتدرب "${userName}"`, true);
+    loadAbsentTrainees();
+  } catch(e) {
+    _showGaMsg(`❌ فشل الإلغاء: ${e.message}`, false);
+  }
 };
 
 function _showGaMsg(text, isSuccess) {
