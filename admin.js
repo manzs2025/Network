@@ -5419,3 +5419,211 @@ window.viewAnswers = function(resultId) {
 
   document.body.appendChild(overlay);
 };
+
+/* ══════════════════════════════════════════════════════
+   🎯 إتاحة اختبار لمتدربين غائبين (quizOverrides)
+   — يُنشئ مستندات في مجموعة quizOverrides تسمح
+     لمتدربين محددين بدخول اختبار منتهي الفترة
+══════════════════════════════════════════════════════ */
+
+let _gaTrainees = [];   // كل المتدربين
+let _gaAbsent   = [];   // الغائبون عن الاختبار المختار
+
+window.openGrantAccessModal = async function() {
+  document.getElementById("grantAccessModal").classList.add("open");
+  document.getElementById("gaMsg").style.display = "none";
+  document.getElementById("gaAbsentSection").style.display = "none";
+  document.getElementById("gaGrantBtn").disabled = true;
+
+  // تعبئة الاختبارات
+  const sel = document.getElementById("gaQuizSelect");
+  sel.innerHTML = '<option value="">— جارٍ التحميل… —</option>';
+  try {
+    const snap = await getDocs(collection(db, "quizzes"));
+    sel.innerHTML = '<option value="">— اختر الاختبار —</option>';
+    snap.forEach(s => {
+      const d = s.data();
+      let statusTag = "";
+      if (d.startDate?.toDate && d.endDate?.toDate) {
+        const now = new Date();
+        if (now > d.endDate.toDate()) statusTag = " [منتهي]";
+        else if (now < d.startDate.toDate()) statusTag = " [مجدول]";
+      }
+      sel.innerHTML += `<option value="${s.id}">${d.title}${statusTag}</option>`;
+    });
+  } catch(e) { sel.innerHTML = '<option value="">— فشل التحميل —</option>'; }
+
+  // ضبط المهلة الافتراضية: بعد 3 أيام من الآن
+  const defaultDeadline = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+  const dtEl = document.getElementById("gaDeadline");
+  const pad = (n) => String(n).padStart(2, "0");
+  dtEl.value = `${defaultDeadline.getFullYear()}-${pad(defaultDeadline.getMonth()+1)}-${pad(defaultDeadline.getDate())}T${pad(defaultDeadline.getHours())}:${pad(defaultDeadline.getMinutes())}`;
+};
+
+window.closeGrantAccessModal = function() {
+  document.getElementById("grantAccessModal").classList.remove("open");
+};
+
+window.loadAbsentTrainees = async function() {
+  const quizId = document.getElementById("gaQuizSelect").value;
+  const listEl = document.getElementById("gaAbsentList");
+  const sectionEl = document.getElementById("gaAbsentSection");
+  const loadingEl = document.getElementById("gaLoadingState");
+  const countEl = document.getElementById("gaSelectedCount");
+  const grantBtn = document.getElementById("gaGrantBtn");
+
+  if (!quizId) {
+    sectionEl.style.display = "none";
+    grantBtn.disabled = true;
+    return;
+  }
+
+  loadingEl.style.display = "block";
+  sectionEl.style.display = "none";
+
+  try {
+    // 1) جلب كل المتدربين
+    const traineeSnap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee")));
+    _gaTrainees = [];
+    traineeSnap.forEach(s => {
+      const d = s.data();
+      _gaTrainees.push({ uid: s.id, name: d.displayName || "—", studentId: d.studentId || "" });
+    });
+
+    // 2) جلب من حلّ الاختبار (results)
+    const resultsSnap = await getDocs(query(collection(db, "results"), where("quizId", "==", quizId)));
+    const solvedUids = new Set();
+    resultsSnap.forEach(s => {
+      const uid = s.data().userId;
+      if (uid) solvedUids.add(uid);
+    });
+
+    // 3) جلب من لديه إتاحة مخصصة سابقة (quizOverrides) — لعدم التكرار
+    const overridesSnap = await getDocs(query(collection(db, "quizOverrides"), where("quizId", "==", quizId)));
+    const overrideUids = new Set();
+    overridesSnap.forEach(s => {
+      const uid = s.data().userId;
+      if (uid) overrideUids.add(uid);
+    });
+
+    // 4) الغائبون = لم يحلوا
+    _gaAbsent = _gaTrainees.filter(t => !solvedUids.has(t.uid));
+
+    loadingEl.style.display = "none";
+    sectionEl.style.display = "block";
+
+    if (_gaAbsent.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--accent);padding:1rem;font-size:0.88rem;">✅ جميع المتدربين حلّوا هذا الاختبار!</div>';
+      countEl.textContent = "لا يوجد غائبون";
+      grantBtn.disabled = true;
+      document.getElementById("gaSelectAll").checked = false;
+      return;
+    }
+
+    listEl.innerHTML = _gaAbsent.map(t => {
+      const hasOverride = overrideUids.has(t.uid);
+      return `
+        <label style="display:flex;align-items:center;gap:0.65rem;padding:0.55rem 0.7rem;border-radius:8px;cursor:pointer;transition:background 0.15s;${hasOverride ? 'opacity:0.55;' : ''}" onmouseover="this.style.background='rgba(108,47,160,0.08)'" onmouseout="this.style.background='transparent'">
+          <input type="checkbox" class="ga-check" data-uid="${t.uid}" ${hasOverride ? 'disabled' : ''} onchange="updateGaCount()" style="accent-color:var(--accent);width:17px;height:17px;cursor:pointer;">
+          <span style="flex:1;font-size:0.85rem;color:var(--text);font-weight:600;">${t.name}</span>
+          <span style="font-size:0.75rem;color:var(--text-faint);direction:ltr;">${t.studentId}</span>
+          ${hasOverride ? '<span style="font-size:0.68rem;background:rgba(217,119,6,0.15);color:#d97706;padding:0.15rem 0.5rem;border-radius:6px;">أُتيح مسبقاً</span>' : ''}
+        </label>`;
+    }).join("");
+
+    document.getElementById("gaSelectAll").checked = false;
+    updateGaCount();
+
+  } catch(e) {
+    loadingEl.style.display = "none";
+    listEl.innerHTML = `<div style="text-align:center;color:#ff6b6b;padding:1rem;">❌ خطأ: ${e.message}</div>`;
+    sectionEl.style.display = "block";
+  }
+};
+
+window.toggleSelectAllAbsent = function() {
+  const checked = document.getElementById("gaSelectAll").checked;
+  document.querySelectorAll(".ga-check:not(:disabled)").forEach(cb => cb.checked = checked);
+  updateGaCount();
+};
+
+window.updateGaCount = function() {
+  const checked = document.querySelectorAll(".ga-check:checked").length;
+  const countEl = document.getElementById("gaSelectedCount");
+  const grantBtn = document.getElementById("gaGrantBtn");
+  countEl.textContent = checked > 0 ? `تم تحديد ${checked} متدرب` : "لم يُحدد أي متدرب";
+  grantBtn.disabled = checked === 0;
+};
+
+window.grantAccessToAbsent = async function() {
+  const quizId = document.getElementById("gaQuizSelect").value;
+  const deadline = document.getElementById("gaDeadline").value;
+  const msg = document.getElementById("gaMsg");
+  const grantBtn = document.getElementById("gaGrantBtn");
+
+  if (!quizId) { _showGaMsg("❌ يرجى اختيار الاختبار.", false); return; }
+  if (!deadline) { _showGaMsg("❌ يرجى تحديد مهلة الإتاحة.", false); return; }
+
+  const deadlineDate = new Date(deadline);
+  if (deadlineDate <= new Date()) { _showGaMsg("❌ المهلة يجب أن تكون في المستقبل.", false); return; }
+
+  const selectedUids = [];
+  document.querySelectorAll(".ga-check:checked").forEach(cb => selectedUids.push(cb.dataset.uid));
+  if (selectedUids.length === 0) { _showGaMsg("❌ يرجى تحديد متدرب واحد على الأقل.", false); return; }
+
+  // جلب عنوان الاختبار
+  let quizTitle = "—";
+  try {
+    const qSnap = await getDoc(doc(db, "quizzes", quizId));
+    if (qSnap.exists()) quizTitle = qSnap.data().title || quizId;
+  } catch(e) {}
+
+  if (!confirm(`إتاحة اختبار "${quizTitle}" لـ ${selectedUids.length} متدرب حتى ${deadlineDate.toLocaleString("ar-SA")}؟`)) return;
+
+  grantBtn.disabled = true;
+  grantBtn.textContent = "⏳ جارٍ الحفظ...";
+
+  let successCount = 0, failCount = 0;
+  const batch = writeBatch(db);
+  const TS = Timestamp.fromDate(deadlineDate);
+
+  for (const uid of selectedUids) {
+    const overrideDocId = `${uid}_${quizId}`;
+    const trainee = _gaAbsent.find(t => t.uid === uid);
+    try {
+      const ref = doc(db, "quizOverrides", overrideDocId);
+      batch.set(ref, {
+        userId: uid,
+        quizId: quizId,
+        quizTitle: quizTitle,
+        userName: trainee?.name || "—",
+        deadline: TS,
+        grantedAt: serverTimestamp()
+      });
+      successCount++;
+    } catch(e) {
+      failCount++;
+    }
+  }
+
+  try {
+    await batch.commit();
+    _showGaMsg(`✅ تم إتاحة الاختبار لـ ${successCount} متدرب بنجاح!${failCount > 0 ? ` (فشل: ${failCount})` : ''}`, true);
+    // إعادة تحميل القائمة لتظهر شارة "أُتيح مسبقاً"
+    setTimeout(() => loadAbsentTrainees(), 1000);
+  } catch(e) {
+    _showGaMsg(`❌ فشل الحفظ: ${e.message}`, false);
+  }
+
+  grantBtn.disabled = false;
+  grantBtn.textContent = "🎯 إتاحة الاختبار للمحددين";
+};
+
+function _showGaMsg(text, isSuccess) {
+  const msg = document.getElementById("gaMsg");
+  msg.style.display = "block";
+  msg.style.background = isSuccess ? "rgba(0,201,177,0.08)" : "rgba(244,67,54,0.08)";
+  msg.style.border = isSuccess ? "1px solid rgba(0,201,177,0.2)" : "1px solid rgba(244,67,54,0.2)";
+  msg.style.color = isSuccess ? "var(--accent)" : "#ff6b6b";
+  msg.textContent = text;
+}

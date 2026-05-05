@@ -108,14 +108,29 @@ async function loadQuizzes() {
   grid.innerHTML          = "";
 
   try {
-    // جلب كل الاختبارات + قائمة الاختبارات التي حلّها المتدرب (بالتوازي)
-    const [quizzesSnap, resultsSnap] = await Promise.all([
+    // جلب كل الاختبارات + قائمة الاختبارات التي حلّها المتدرب + الإتاحات المخصصة (بالتوازي)
+    const [quizzesSnap, resultsSnap, overridesSnap] = await Promise.all([
       getDocs(query(collection(db, "quizzes"), orderBy("createdAt", "desc"))),
       _currentUser ? getDocs(query(
         collection(db, "results"),
         where("userId", "==", _currentUser.uid)
+      )) : Promise.resolve(null),
+      _currentUser ? getDocs(query(
+        collection(db, "quizOverrides"),
+        where("userId", "==", _currentUser.uid)
       )) : Promise.resolve(null)
     ]);
+
+    // بناء خريطة الإتاحات المخصصة { quizId: deadline }
+    const _overridesMap = {};
+    if (overridesSnap) {
+      overridesSnap.forEach(s => {
+        const od = s.data();
+        if (od.quizId && od.deadline?.toDate) {
+          _overridesMap[od.quizId] = od.deadline.toDate();
+        }
+      });
+    }
 
     // تحديث عدد محاولات كل اختبار من قاعدة البيانات
     _userAttemptCounts = {};
@@ -162,7 +177,14 @@ async function loadQuizzes() {
       if (d.startDate?.toDate && d.endDate?.toDate) {
         const start = d.startDate.toDate();
         const end   = d.endDate.toDate();
-        if (now < start || now > end) return; // خارج الفترة
+        if (now < start) return; // لم يبدأ بعد
+
+        // إذا انتهت الفترة: تحقق من إتاحة مخصصة
+        if (now > end) {
+          const overrideDeadline = _overridesMap[docSnap.id];
+          if (!overrideDeadline || now > overrideDeadline) return; // لا يوجد إتاحة أو انتهت
+          // الإتاحة المخصصة سارية — يُعرض الاختبار
+        }
       }
 
       visibleCount++;
@@ -192,12 +214,24 @@ async function loadQuizzes() {
       const isNew = newQuizIds.has(docSnap.id);
       if (isNew) newCount++;
 
+      // تحقق من وجود إتاحة مخصصة لهذا الاختبار
+      const overrideDeadline = _overridesMap[docSnap.id];
+      const hasActiveOverride = overrideDeadline && new Date() <= overrideDeadline;
+      let overrideBadge = "";
+      if (hasActiveOverride) {
+        const dl = overrideDeadline;
+        const dlStr = dl.toLocaleDateString("ar-SA") + " " + dl.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
+        overrideBadge = `<div style="background:rgba(217,119,6,0.12);border:1px solid rgba(217,119,6,0.3);color:#d97706;font-size:0.72rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:8px;margin-bottom:0.5rem;text-align:center;">🎯 إتاحة خاصة حتى ${dlStr}</div>`;
+      }
+
       const card = document.createElement("div");
       card.className = "quiz-card";
       if (exhausted) card.style.opacity = "0.65";
-      if (isNew) card.style.boxShadow = "0 0 0 2px var(--accent), 0 4px 20px rgba(0,201,177,0.25)";
+      if (hasActiveOverride) card.style.boxShadow = "0 0 0 2px #d97706, 0 4px 20px rgba(217,119,6,0.2)";
+      else if (isNew) card.style.boxShadow = "0 0 0 2px var(--accent), 0 4px 20px rgba(0,201,177,0.25)";
       card.innerHTML = `
         ${isNew ? '<div class="qc-new-badge">🆕 جديد</div>' : ''}
+        ${overrideBadge}
         <div class="qc-tag">📋 ${label}</div>
         <div class="qc-title">${_esc(d.title ?? "—")}</div>
         <div class="qc-meta">
@@ -260,9 +294,21 @@ window.startQuiz = async function (quizId) {
       return;
     }
     if (now > end) {
-      alert("⏰ انتهت فترة إتاحة هذا الاختبار.");
-      loadQuizzes();
-      return;
+      // تحقق من إتاحة مخصصة
+      let hasOverride = false;
+      try {
+        const ovSnap = await getDoc(doc(db, "quizOverrides", `${_currentUser.uid}_${quizId}`));
+        if (ovSnap.exists()) {
+          const ovDeadline = ovSnap.data().deadline?.toDate?.();
+          if (ovDeadline && now <= ovDeadline) hasOverride = true;
+        }
+      } catch(e) {}
+
+      if (!hasOverride) {
+        alert("⏰ انتهت فترة إتاحة هذا الاختبار.");
+        loadQuizzes();
+        return;
+      }
     }
   }
 
