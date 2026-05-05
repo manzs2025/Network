@@ -5423,11 +5423,11 @@ window.viewAnswers = function(resultId) {
 /* ══════════════════════════════════════════════════════
    🎯 إتاحة اختبار لمتدربين غائبين (quizOverrides)
    — يُنشئ مستندات في مجموعة quizOverrides تسمح
-     لمتدربين محددين بدخول اختبار منتهي الفترة
+     لمتدربين محددين بدخول اختبار مقفل
 ══════════════════════════════════════════════════════ */
 
-let _gaTrainees = [];   // كل المتدربين
-let _gaAbsent   = [];   // الغائبون عن الاختبار المختار
+let _gaTrainees = [];
+let _gaAbsent   = [];
 
 window.openGrantAccessModal = async function() {
   document.getElementById("grantAccessModal").classList.add("open");
@@ -5435,7 +5435,6 @@ window.openGrantAccessModal = async function() {
   document.getElementById("gaAbsentSection").style.display = "none";
   document.getElementById("gaGrantBtn").disabled = true;
 
-  // تعبئة الاختبارات
   const sel = document.getElementById("gaQuizSelect");
   sel.innerHTML = '<option value="">— جارٍ التحميل… —</option>';
   try {
@@ -5454,7 +5453,6 @@ window.openGrantAccessModal = async function() {
     });
   } catch(e) { sel.innerHTML = '<option value="">— فشل التحميل —</option>'; }
 
-  // ضبط المهلة الافتراضية: بعد 3 أيام من الآن
   const defaultDeadline = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
   const dtEl = document.getElementById("gaDeadline");
   const pad = (n) => String(n).padStart(2, "0");
@@ -5483,7 +5481,6 @@ window.loadAbsentTrainees = async function() {
   sectionEl.style.display = "none";
 
   try {
-    // 1) جلب كل المتدربين
     const traineeSnap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee")));
     _gaTrainees = [];
     traineeSnap.forEach(s => {
@@ -5491,7 +5488,6 @@ window.loadAbsentTrainees = async function() {
       _gaTrainees.push({ uid: s.id, name: d.displayName || "—", studentId: d.studentId || "" });
     });
 
-    // 2) جلب من حلّ الاختبار (results)
     const resultsSnap = await getDocs(query(collection(db, "results"), where("quizId", "==", quizId)));
     const solvedUids = new Set();
     resultsSnap.forEach(s => {
@@ -5499,7 +5495,6 @@ window.loadAbsentTrainees = async function() {
       if (uid) solvedUids.add(uid);
     });
 
-    // 3) جلب من لديه إتاحة مخصصة سابقة (quizOverrides) — لعدم التكرار
     const overridesSnap = await getDocs(query(collection(db, "quizOverrides"), where("quizId", "==", quizId)));
     const overrideUids = new Set();
     overridesSnap.forEach(s => {
@@ -5507,7 +5502,6 @@ window.loadAbsentTrainees = async function() {
       if (uid) overrideUids.add(uid);
     });
 
-    // 4) الغائبون = لم يحلوا
     _gaAbsent = _gaTrainees.filter(t => !solvedUids.has(t.uid));
 
     loadingEl.style.display = "none";
@@ -5550,10 +5544,8 @@ window.toggleSelectAllAbsent = function() {
 
 window.updateGaCount = function() {
   const checked = document.querySelectorAll(".ga-check:checked").length;
-  const countEl = document.getElementById("gaSelectedCount");
-  const grantBtn = document.getElementById("gaGrantBtn");
-  countEl.textContent = checked > 0 ? `تم تحديد ${checked} متدرب` : "لم يُحدد أي متدرب";
-  grantBtn.disabled = checked === 0;
+  document.getElementById("gaSelectedCount").textContent = checked > 0 ? `تم تحديد ${checked} متدرب` : "لم يُحدد أي متدرب";
+  document.getElementById("gaGrantBtn").disabled = checked === 0;
 };
 
 window.grantAccessToAbsent = async function() {
@@ -5572,7 +5564,6 @@ window.grantAccessToAbsent = async function() {
   document.querySelectorAll(".ga-check:checked").forEach(cb => selectedUids.push(cb.dataset.uid));
   if (selectedUids.length === 0) { _showGaMsg("❌ يرجى تحديد متدرب واحد على الأقل.", false); return; }
 
-  // جلب عنوان الاختبار
   let quizTitle = "—";
   try {
     const qSnap = await getDoc(doc(db, "quizzes", quizId));
@@ -5584,33 +5575,28 @@ window.grantAccessToAbsent = async function() {
   grantBtn.disabled = true;
   grantBtn.textContent = "⏳ جارٍ الحفظ...";
 
-  let successCount = 0, failCount = 0;
   const batch = writeBatch(db);
   const TS = Timestamp.fromDate(deadlineDate);
+  let successCount = 0;
 
   for (const uid of selectedUids) {
     const overrideDocId = `${uid}_${quizId}`;
     const trainee = _gaAbsent.find(t => t.uid === uid);
-    try {
-      const ref = doc(db, "quizOverrides", overrideDocId);
-      batch.set(ref, {
-        userId: uid,
-        quizId: quizId,
-        quizTitle: quizTitle,
-        userName: trainee?.name || "—",
-        deadline: TS,
-        grantedAt: serverTimestamp()
-      });
-      successCount++;
-    } catch(e) {
-      failCount++;
-    }
+    const ref = doc(db, "quizOverrides", overrideDocId);
+    batch.set(ref, {
+      userId: uid,
+      quizId: quizId,
+      quizTitle: quizTitle,
+      userName: trainee?.name || "—",
+      deadline: TS,
+      grantedAt: serverTimestamp()
+    });
+    successCount++;
   }
 
   try {
     await batch.commit();
-    _showGaMsg(`✅ تم إتاحة الاختبار لـ ${successCount} متدرب بنجاح!${failCount > 0 ? ` (فشل: ${failCount})` : ''}`, true);
-    // إعادة تحميل القائمة لتظهر شارة "أُتيح مسبقاً"
+    _showGaMsg(`✅ تم إتاحة الاختبار لـ ${successCount} متدرب بنجاح!`, true);
     setTimeout(() => loadAbsentTrainees(), 1000);
   } catch(e) {
     _showGaMsg(`❌ فشل الحفظ: ${e.message}`, false);

@@ -187,8 +187,7 @@ async function loadQuizzes() {
         // إذا انتهت الفترة: تحقق من إتاحة مخصصة
         if (now > end) {
           const overrideDeadline = _overridesMap[docSnap.id];
-          if (!overrideDeadline || now > overrideDeadline) return; // لا يوجد إتاحة أو انتهت
-          // الإتاحة المخصصة سارية — يُعرض الاختبار
+          if (!overrideDeadline || now > overrideDeadline) return;
         }
       }
 
@@ -219,20 +218,19 @@ async function loadQuizzes() {
       const isNew = newQuizIds.has(docSnap.id);
       if (isNew) newCount++;
 
-      // تحقق من وجود إتاحة مخصصة لهذا الاختبار
+      // شارة إتاحة مخصصة
       const overrideDeadline = _overridesMap[docSnap.id];
-      const hasActiveOverride = overrideDeadline && new Date() <= overrideDeadline;
+      const isOverrideActive = overrideDeadline && now <= overrideDeadline;
       let overrideBadge = "";
-      if (hasActiveOverride) {
-        const dl = overrideDeadline;
-        const dlStr = dl.toLocaleDateString("ar-SA") + " " + dl.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
+      if (isOverrideActive) {
+        const dlStr = overrideDeadline.toLocaleDateString("ar-SA") + " " + overrideDeadline.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" });
         overrideBadge = `<div style="background:rgba(217,119,6,0.12);border:1px solid rgba(217,119,6,0.3);color:#d97706;font-size:0.72rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:8px;margin-bottom:0.5rem;text-align:center;">🎯 إتاحة خاصة حتى ${dlStr}</div>`;
       }
 
       const card = document.createElement("div");
       card.className = "quiz-card";
       if (exhausted) card.style.opacity = "0.65";
-      if (hasActiveOverride) card.style.boxShadow = "0 0 0 2px #d97706, 0 4px 20px rgba(217,119,6,0.2)";
+      if (isOverrideActive) card.style.boxShadow = "0 0 0 2px #d97706, 0 4px 20px rgba(217,119,6,0.2)";
       else if (isNew) card.style.boxShadow = "0 0 0 2px var(--accent), 0 4px 20px rgba(0,201,177,0.25)";
       card.innerHTML = `
         ${isNew ? '<div class="qc-new-badge">🆕 جديد</div>' : ''}
@@ -284,7 +282,6 @@ window.startQuiz = async function (quizId) {
 
   /* ── التحقق من الإتاحة قبل البدء ── */
   if (d.available === false) {
-    // تحقق من إتاحة مخصصة
     let hasOverride = false;
     try {
       const ovSnap = await getDoc(doc(db, "quizOverrides", `${_currentUser.uid}_${quizId}`));
@@ -311,13 +308,12 @@ window.startQuiz = async function (quizId) {
       return;
     }
     if (now > end) {
-      // تحقق من إتاحة مخصصة
       let hasOverride = false;
       try {
         const ovSnap = await getDoc(doc(db, "quizOverrides", `${_currentUser.uid}_${quizId}`));
         if (ovSnap.exists()) {
           const ovDeadline = ovSnap.data().deadline?.toDate?.();
-          if (ovDeadline && now <= ovDeadline) hasOverride = true;
+          if (ovDeadline && new Date() <= ovDeadline) hasOverride = true;
         }
       } catch(e) {}
 

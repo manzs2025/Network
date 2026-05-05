@@ -2304,6 +2304,11 @@ select optgroup {
         المتدربون
       </button>
 
+      <button class="sb-item" data-panel="results" onclick="switchPanel(this, 'results')">
+        <span class="sb-icon">📊</span>
+        النتائج
+      </button>
+
       <div class="sb-section-label">الحساب</div>
 
       <button class="sb-item" data-panel="settings" onclick="switchPanel(this, 'settings')">
@@ -2493,9 +2498,9 @@ select optgroup {
         <div style="padding:1.5rem;display:grid;gap:1.5rem;">
           <div style="background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.2);border-radius:10px;padding:1rem;font-size:0.82rem;color:var(--accent);line-height:1.8;">
             📌 <strong>طريقة الاستخدام:</strong><br>
-            1. ارفع ملف PDF على Google Drive ← مشاركة ← أي شخص لديه الرابط ← الصق الرابط<br>
-            2. يمكنك إضافة أقسام جديدة أو إخفاء أقسام مؤقتاً أو حذفها نهائياً<br>
-            3. القسم المخفي لا يظهر للمتدربين لكن بياناته محفوظة
+            <strong>طريقة PDF:</strong> ارفع ملف PDF على Google Drive ← مشاركة ← أي شخص لديه الرابط ← الصق الرابط<br>
+            <strong>طريقة الصور (أسرع):</strong> حوّل PDF لصور ← ارفعها على GitHub في مجلد <code>slides/اسم_القسم/1.png, 2.png...</code> ← حدد عدد الشرائح<br>
+            ⚡ إذا حُدد عدد شرائح > 0، يُعرض من الصور (أسرع بكثير). وإلا يُعرض PDF من Drive
           </div>
 
           <!-- زر إضافة قسم جديد -->
@@ -2549,6 +2554,43 @@ select optgroup {
             <div class="panel-subtitle">إنشاء اختبارات من بنك الأسئلة مع جدولة زمنية وإدارة المحاولات</div>
           </div>
           <button onclick="openGrantAccessModal()" style="padding:0.55rem 1.2rem;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border:none;border-radius:9px;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:0.4rem;box-shadow:0 4px 14px rgba(217,119,6,0.3);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">🎯 إتاحة لغائبين</button>
+        </div>
+
+        <!-- ── المتابعة الحية للاختبار ── -->
+        <div style="padding:0 1.5rem 1rem;">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+              <div style="font-weight:800;font-size:0.9rem;">📡 المتابعة الحية للاختبار</div>
+              <div style="display:flex;gap:0.5rem;">
+                <select id="liveQuizSelect" class="qz-input" style="font-size:0.78rem;max-width:200px;padding:0.35rem 0.5rem;">
+                  <option value="">— اختر اختبار —</option>
+                </select>
+                <button class="qz-refresh-btn" id="btnStartLive" onclick="startLiveMonitor()" style="font-size:0.75rem;padding:0.35rem 0.8rem;background:rgba(0,201,177,0.1);color:var(--accent);border-color:rgba(0,201,177,0.3);">▶ بدء المتابعة</button>
+                <button class="qz-refresh-btn" id="btnStopLive" onclick="stopLiveMonitor()" style="display:none;font-size:0.75rem;padding:0.35rem 0.8rem;background:rgba(244,67,54,0.1);color:#ff6b6b;border-color:rgba(244,67,54,0.3);">⏹ إيقاف</button>
+              </div>
+            </div>
+
+            <div id="liveMonitorWrap" style="display:none;">
+              <div style="display:flex;gap:0.75rem;margin-bottom:0.75rem;text-align:center;" id="liveStatsBar">
+                <div style="flex:1;background:rgba(0,201,177,0.08);border-radius:8px;padding:0.5rem;">
+                  <div style="font-size:1.2rem;font-weight:900;color:var(--accent);" id="liveSolving">0</div>
+                  <div style="font-size:0.65rem;color:var(--text-faint);">يحل الآن</div>
+                </div>
+                <div style="flex:1;background:rgba(108,47,160,0.08);border-radius:8px;padding:0.5rem;">
+                  <div style="font-size:1.2rem;font-weight:900;color:var(--primary-l);" id="liveFinished">0</div>
+                  <div style="font-size:0.65rem;color:var(--text-faint);">أنهى</div>
+                </div>
+                <div style="flex:1;background:rgba(255,255,255,0.03);border-radius:8px;padding:0.5rem;">
+                  <div style="font-size:1.2rem;font-weight:900;color:var(--text-faint);" id="liveNotStarted">0</div>
+                  <div style="font-size:0.65rem;color:var(--text-faint);">لم يدخل</div>
+                </div>
+              </div>
+              <div style="font-size:0.68rem;color:var(--text-faint);margin-bottom:0.5rem;text-align:left;" id="liveLastUpdate">آخر تحديث: —</div>
+              <div id="liveTraineesList" style="display:grid;gap:0.4rem;max-height:400px;overflow-y:auto;"></div>
+            </div>
+
+            <div id="liveMonitorEmpty" style="text-align:center;padding:1.5rem;color:var(--text-faint);font-size:0.82rem;">اختر اختبار واضغط "بدء المتابعة" لمراقبة المتدربين</div>
+          </div>
         </div>
 
         <!-- ── رفع بنك الأسئلة إلى Firestore ── -->
@@ -2836,68 +2878,118 @@ select optgroup {
 
         <!-- جدول المتدربين -->
         <div class="qz-table-section">
-          <div class="qz-table-header">
-            <h3 class="qz-table-title">👥 قائمة المتدربين</h3>
-            <div style="display:flex;gap:0.5rem;align-items:center;">
+          <div class="qz-table-header" style="cursor:pointer;" onclick="toggleTraineesList()">
+            <h3 class="qz-table-title" style="display:flex;align-items:center;gap:0.5rem;">
+              👥 قائمة المتدربين
+              <span id="traineesCount" style="font-size:0.7rem;background:rgba(0,201,177,0.1);color:var(--accent);padding:0.15rem 0.5rem;border-radius:8px;font-weight:700;"></span>
+              <span id="traineesToggleIcon" style="font-size:0.7rem;color:var(--text-faint);transition:transform 0.3s;">▼</span>
+            </h3>
+            <div style="display:flex;gap:0.5rem;align-items:center;" onclick="event.stopPropagation();">
               <input type="text" id="traineeSearchInput" class="qz-input" placeholder="🔍 بحث بالاسم أو الرقم التدريبي..." oninput="filterTrainees()" style="max-width:280px;font-size:0.82rem;padding:0.45rem 0.8rem;">
               <button class="qz-refresh-btn" onclick="loadTrainees()">↻ تحديث</button>
             </div>
           </div>
-          <div class="qz-table-loading" id="traineesLoading">
-            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
-            <span>جارٍ تحميل المتدربين…</span>
-          </div>
-          <div class="qz-table-empty" id="traineesEmpty" style="display:none">لا يوجد متدربون مسجّلون بعد</div>
-          <div class="qz-table-wrap" id="traineesTableWrap" style="display:none">
-            <table class="qz-table">
-              <thead>
-                <tr>
-                  <th>الاسم</th>
-                  <th>الرقم التدريبي</th>
-                  <th>عدد الاختبارات</th>
-                  <th>تاريخ التسجيل</th>
-                  <th>إجراءات</th>
-                </tr>
-              </thead>
-              <tbody id="traineesTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- جدول آخر النتائج -->
-        <div class="qz-table-section" style="margin-top:1.5rem;">
-          <div class="qz-table-header">
-            <h3 class="qz-table-title">📊 آخر نتائج المتدربين</h3>
-            <div style="display:flex;gap:0.5rem;align-items:center;">
-              <button class="qz-refresh-btn" onclick="exportResultsToPDF()" style="background:rgba(244,67,54,0.10);color:#ff6b6b;border-color:rgba(244,67,54,0.3);">📄 تقرير PDF</button>
-              <button class="qz-refresh-btn" onclick="exportResultsToExcel()" style="background:rgba(0,201,177,0.10);color:var(--accent);border-color:rgba(0,201,177,0.3);">📥 تصدير Excel</button>
-              <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
+          <div id="traineesCollapsible" style="display:none;">
+            <div class="qz-table-loading" id="traineesLoading">
+              <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+              <span>جارٍ تحميل المتدربين…</span>
+            </div>
+            <div class="qz-table-empty" id="traineesEmpty" style="display:none">لا يوجد متدربون مسجّلون بعد</div>
+            <div class="qz-table-wrap" id="traineesTableWrap" style="display:none">
+              <table class="qz-table">
+                <thead>
+                  <tr>
+                    <th>الاسم</th>
+                    <th>الرقم التدريبي</th>
+                    <th>عدد الاختبارات</th>
+                    <th>تاريخ التسجيل</th>
+                    <th>إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="traineesTableBody"></tbody>
+              </table>
             </div>
           </div>
-          <div class="qz-table-loading" id="resultsLoading">
-            <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
-            <span>جارٍ تحميل النتائج…</span>
-          </div>
-          <div class="qz-table-empty" id="resultsEmpty" style="display:none">لا توجد نتائج بعد</div>
-          <div class="qz-table-wrap" id="resultsTableWrap" style="display:none">
-            <table class="qz-table">
-              <thead>
-                <tr>
-                  <th>المتدرب</th>
-                  <th>الاختبار</th>
-                  <th>الدرجة</th>
-                  <th>النسبة</th>
-                  <th>النتيجة</th>
-                  <th>المحاولة</th>
-                  <th>التاريخ</th>
-                  <th style="text-align:center">إجراءات</th>
-                </tr>
-              </thead>
-              <tbody id="resultsTableBody"></tbody>
-            </table>
-          </div>
         </div>
 
+      </section>
+
+      <!-- ════════════ PANEL: النتائج ════════════ -->
+      <section class="panel" id="panel-results">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <div class="panel-tag">📊 النتائج والتقارير</div>
+            <div class="panel-title">نتائج <span>المتدربين</span></div>
+            <div class="panel-subtitle">عرض النتائج وتصديرها لكل اختبار مع فلترة وبحث</div>
+          </div>
+        </div>
+        <div style="padding:1.5rem;display:grid;gap:1.5rem;">
+
+          <!-- تصدير نتائج اختبار معين -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;">
+            <div style="font-weight:800;font-size:0.9rem;margin-bottom:0.75rem;">📥 تصدير نتائج اختبار</div>
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+              <select id="exportQuizSelect" class="qz-input" style="font-size:0.78rem;max-width:250px;padding:0.4rem 0.5rem;">
+                <option value="">— اختر اختبار —</option>
+              </select>
+              <button class="qz-refresh-btn" onclick="exportQuizResultsExcel()" style="background:rgba(0,201,177,0.1);color:var(--accent);border-color:rgba(0,201,177,0.3);font-size:0.78rem;">📥 تصدير Excel</button>
+              <button class="qz-refresh-btn" onclick="exportResultsToPDF()" style="background:rgba(244,67,54,0.10);color:#ff6b6b;border-color:rgba(244,67,54,0.3);font-size:0.78rem;">📄 تقرير PDF</button>
+            </div>
+            <div style="font-size:0.7rem;color:var(--text-faint);margin-top:0.5rem;">ملف Excel يحتوي: الاسم، الرقم التدريبي، الدرجة، النسبة، النتيجة لكل محاولة</div>
+          </div>
+
+          <!-- جدول النتائج -->
+          <div class="qz-table-section">
+            <div class="qz-table-header">
+              <h3 class="qz-table-title">📊 جميع النتائج</h3>
+              <button class="qz-refresh-btn" onclick="loadLatestResults()">↻ تحديث</button>
+            </div>
+
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;">
+              <input type="text" id="filterTraineeName" class="qz-input" placeholder="🔍 بحث بالاسم..." oninput="applyResultsFilter()" style="font-size:0.78rem;max-width:180px;padding:0.4rem 0.7rem;">
+              <select id="filterQuiz" class="qz-input" onchange="applyResultsFilter()" style="font-size:0.78rem;max-width:160px;padding:0.4rem 0.5rem;">
+                <option value="">كل الاختبارات</option>
+              </select>
+              <select id="filterResult" class="qz-input" onchange="applyResultsFilter()" style="font-size:0.78rem;max-width:120px;padding:0.4rem 0.5rem;">
+                <option value="">الكل</option>
+                <option value="passed">✅ ناجح</option>
+                <option value="failed">❌ راسب</option>
+              </select>
+              <div style="flex:1;"></div>
+              <span id="resultsCountLabel" style="font-size:0.72rem;color:var(--text-faint);font-weight:700;"></span>
+            </div>
+
+            <div class="qz-table-loading" id="resultsLoading">
+              <div class="loading-ring" style="width:32px;height:32px;border-width:2px"></div>
+              <span>جارٍ تحميل النتائج…</span>
+            </div>
+            <div class="qz-table-empty" id="resultsEmpty" style="display:none">لا توجد نتائج بعد</div>
+            <div class="qz-table-wrap" id="resultsTableWrap" style="display:none">
+              <table class="qz-table">
+                <thead>
+                  <tr>
+                    <th>المتدرب</th>
+                    <th>الاختبار</th>
+                    <th>الدرجة</th>
+                    <th>النسبة</th>
+                    <th>النتيجة</th>
+                    <th>المحاولة</th>
+                    <th>التاريخ</th>
+                    <th style="text-align:center">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsTableBody"></tbody>
+              </table>
+            </div>
+
+            <div id="resultsPagination" style="display:none;margin-top:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+              <button class="qz-refresh-btn" id="btnPrevPage" onclick="resultsGoPage('prev')" style="font-size:0.75rem;padding:0.3rem 0.7rem;">◀ السابق</button>
+              <span id="paginationLabel" style="font-size:0.75rem;color:var(--text-muted);font-weight:700;min-width:80px;text-align:center;"></span>
+              <button class="qz-refresh-btn" id="btnNextPage" onclick="resultsGoPage('next')" style="font-size:0.75rem;padding:0.3rem 0.7rem;">التالي ▶</button>
+            </div>
+          </div>
+
+        </div>
       </section>
 
       <!-- ════════════ PANEL: SETTINGS ════════════ -->
@@ -3090,6 +3182,41 @@ select optgroup {
             <span id="settSaveBtnSpinner" style="display:none">⏳ جارٍ الحفظ...</span>
           </button>
           <span class="sett-save-msg" id="settSaveMsg"></span>
+        </div>
+
+        <!-- ──── تهيئة الموقع (بداية ترم جديد) ──── -->
+        <div class="info-card" style="margin-top:2rem;border-color:rgba(244,67,54,0.3);background:rgba(244,67,54,0.03);">
+          <h3>🔄 تهيئة الموقع — بداية ترم جديد</h3>
+          <p style="line-height:1.8;font-size:0.82rem;">
+            يحذف جميع الاختبارات المنشأة ونتائج المتدربين وتقدمهم، ويُبقي على بنك الأسئلة وحسابات المتدربين والإعدادات والأقسام كما هي.
+          </p>
+          <div style="margin-top:1rem;background:rgba(244,67,54,0.06);border:1px solid rgba(244,67,54,0.15);border-radius:10px;padding:1rem;">
+            <div style="font-size:0.78rem;font-weight:700;color:#ff6b6b;margin-bottom:0.75rem;">⚠️ ما سيتم حذفه:</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.8;">
+              ❌ جميع الاختبارات المنشأة (quizzes)<br>
+              ❌ جميع نتائج المتدربين (results)<br>
+              ❌ تقدم المتدربين في الأقسام (progress)
+            </div>
+            <div style="font-size:0.78rem;font-weight:700;color:var(--accent);margin-top:0.75rem;margin-bottom:0.3rem;">✅ ما لن يتأثر:</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.8;">
+              ✅ بنك الأسئلة (135+ سؤال)<br>
+              ✅ حسابات المتدربين والمشرفين<br>
+              ✅ الأقسام وملفات PDF/الصور<br>
+              ✅ جميع الإعدادات الأخرى
+            </div>
+          </div>
+
+          <!-- شريط التقدم (مخفي) -->
+          <div id="resetProgressWrap" style="display:none;margin-top:1rem;">
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;" id="resetProgressLabel">جارٍ الحذف...</div>
+            <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+              <div id="resetProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#ff6b6b,#ff9800);border-radius:3px;transition:width 0.3s;"></div>
+            </div>
+          </div>
+
+          <div id="resetResultMsg" style="display:none;margin-top:1rem;padding:0.75rem;border-radius:8px;font-size:0.82rem;font-weight:700;"></div>
+
+          <button id="resetSiteBtn" onclick="startResetSite()" style="margin-top:1.2rem;padding:0.75rem 1.5rem;background:rgba(244,67,54,0.12);border:1px solid rgba(244,67,54,0.3);border-radius:8px;color:#ff6b6b;font-family:'Cairo',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(244,67,54,0.22)'" onmouseout="this.style.background='rgba(244,67,54,0.12)'">🔄 تهيئة الموقع</button>
         </div>
 
         <!-- ──── معلومات الحساب ──── -->
