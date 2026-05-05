@@ -5390,8 +5390,6 @@ window.viewAnswers = function(resultId) {
       <h3 style="font-size:1rem;font-weight:800;margin-bottom:0.3rem;color:var(--text,#e8eaf6);">📋 إجابات ${result.name}</h3>
       <div style="font-size:0.78rem;color:var(--text-muted,#7a7f9e);margin-bottom:1rem;">${result.quiz} — ${result.dateStr}</div>
 
-      <button onclick="grantExtraAttempt('${result.id}')" style="margin-bottom:1rem;padding:0.5rem 1rem;background:rgba(0,201,177,0.1);border:1px solid rgba(0,201,177,0.25);border-radius:8px;color:var(--accent,#00c9b1);font-family:'Cairo',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;width:100%;">🔄 منح محاولة إضافية لهذا المتدرب</button>
-
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-bottom:1rem;text-align:center;">
         <div style="background:var(--card,#161929);border-radius:8px;padding:0.5rem;">
           <div style="font-size:1.1rem;font-weight:900;color:var(--accent,#00c9b1);">${result.percentage}%</div>
@@ -5422,8 +5420,6 @@ window.viewAnswers = function(resultId) {
 
 /* ══════════════════════════════════════════════════════
    🎯 إتاحة اختبار لمتدربين غائبين (quizOverrides)
-   — يُنشئ مستندات في مجموعة quizOverrides تسمح
-     لمتدربين محددين بدخول اختبار مقفل
 ══════════════════════════════════════════════════════ */
 
 let _gaTrainees = [];
@@ -5471,11 +5467,7 @@ window.loadAbsentTrainees = async function() {
   const countEl = document.getElementById("gaSelectedCount");
   const grantBtn = document.getElementById("gaGrantBtn");
 
-  if (!quizId) {
-    sectionEl.style.display = "none";
-    grantBtn.disabled = true;
-    return;
-  }
+  if (!quizId) { sectionEl.style.display = "none"; grantBtn.disabled = true; return; }
 
   loadingEl.style.display = "block";
   sectionEl.style.display = "none";
@@ -5490,17 +5482,11 @@ window.loadAbsentTrainees = async function() {
 
     const resultsSnap = await getDocs(query(collection(db, "results"), where("quizId", "==", quizId)));
     const solvedUids = new Set();
-    resultsSnap.forEach(s => {
-      const uid = s.data().userId;
-      if (uid) solvedUids.add(uid);
-    });
+    resultsSnap.forEach(s => { const uid = s.data().userId; if (uid) solvedUids.add(uid); });
 
     const overridesSnap = await getDocs(query(collection(db, "quizOverrides"), where("quizId", "==", quizId)));
     const overrideUids = new Set();
-    overridesSnap.forEach(s => {
-      const uid = s.data().userId;
-      if (uid) overrideUids.add(uid);
-    });
+    overridesSnap.forEach(s => { const uid = s.data().userId; if (uid) overrideUids.add(uid); });
 
     _gaAbsent = _gaTrainees.filter(t => !solvedUids.has(t.uid));
 
@@ -5522,13 +5508,12 @@ window.loadAbsentTrainees = async function() {
           <input type="checkbox" class="ga-check" data-uid="${t.uid}" ${hasOverride ? 'disabled' : ''} onchange="updateGaCount()" style="accent-color:var(--accent);width:17px;height:17px;cursor:pointer;">
           <span style="flex:1;font-size:0.85rem;color:var(--text);font-weight:600;">${t.name}</span>
           <span style="font-size:0.75rem;color:var(--text-faint);direction:ltr;">${t.studentId}</span>
-          ${hasOverride ? `<span style="font-size:0.68rem;background:rgba(217,119,6,0.15);color:#d97706;padding:0.15rem 0.5rem;border-radius:6px;">أُتيح مسبقاً</span><button onclick="event.preventDefault();revokeAccess('${t.uid}','${t.name}')" style="font-size:0.68rem;background:rgba(244,67,54,0.12);color:#ff6b6b;border:1px solid rgba(244,67,54,0.3);padding:0.15rem 0.5rem;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;transition:all 0.15s;" onmouseover="this.style.background='rgba(244,67,54,0.25)'" onmouseout="this.style.background='rgba(244,67,54,0.12)'">✕ إلغاء</button>` : ''}
+          ${hasOverride ? `<span style="font-size:0.68rem;background:rgba(217,119,6,0.15);color:#d97706;padding:0.15rem 0.5rem;border-radius:6px;">أُتيح مسبقاً</span><button onclick="event.preventDefault();revokeOverride('${t.uid}','${t.name}','ga')" style="font-size:0.68rem;background:rgba(244,67,54,0.12);color:#ff6b6b;border:1px solid rgba(244,67,54,0.3);padding:0.15rem 0.5rem;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;" onmouseover="this.style.background='rgba(244,67,54,0.25)'" onmouseout="this.style.background='rgba(244,67,54,0.12)'">✕ إلغاء</button>` : ''}
         </label>`;
     }).join("");
 
     document.getElementById("gaSelectAll").checked = false;
     updateGaCount();
-
   } catch(e) {
     loadingEl.style.display = "none";
     listEl.innerHTML = `<div style="text-align:center;color:#ff6b6b;padding:1rem;">❌ خطأ: ${e.message}</div>`;
@@ -5551,78 +5536,242 @@ window.updateGaCount = function() {
 window.grantAccessToAbsent = async function() {
   const quizId = document.getElementById("gaQuizSelect").value;
   const deadline = document.getElementById("gaDeadline").value;
-  const msg = document.getElementById("gaMsg");
-  const grantBtn = document.getElementById("gaGrantBtn");
-
-  if (!quizId) { _showGaMsg("❌ يرجى اختيار الاختبار.", false); return; }
-  if (!deadline) { _showGaMsg("❌ يرجى تحديد مهلة الإتاحة.", false); return; }
-
+  if (!quizId) { _showModalMsg("gaMsg", "❌ يرجى اختيار الاختبار.", false); return; }
+  if (!deadline) { _showModalMsg("gaMsg", "❌ يرجى تحديد مهلة الإتاحة.", false); return; }
   const deadlineDate = new Date(deadline);
-  if (deadlineDate <= new Date()) { _showGaMsg("❌ المهلة يجب أن تكون في المستقبل.", false); return; }
+  if (deadlineDate <= new Date()) { _showModalMsg("gaMsg", "❌ المهلة يجب أن تكون في المستقبل.", false); return; }
 
   const selectedUids = [];
   document.querySelectorAll(".ga-check:checked").forEach(cb => selectedUids.push(cb.dataset.uid));
-  if (selectedUids.length === 0) { _showGaMsg("❌ يرجى تحديد متدرب واحد على الأقل.", false); return; }
+  if (selectedUids.length === 0) { _showModalMsg("gaMsg", "❌ يرجى تحديد متدرب واحد على الأقل.", false); return; }
 
   let quizTitle = "—";
-  try {
-    const qSnap = await getDoc(doc(db, "quizzes", quizId));
-    if (qSnap.exists()) quizTitle = qSnap.data().title || quizId;
-  } catch(e) {}
+  try { const qSnap = await getDoc(doc(db, "quizzes", quizId)); if (qSnap.exists()) quizTitle = qSnap.data().title || quizId; } catch(e) {}
 
   if (!confirm(`إتاحة اختبار "${quizTitle}" لـ ${selectedUids.length} متدرب حتى ${deadlineDate.toLocaleString("ar-SA")}؟`)) return;
 
-  grantBtn.disabled = true;
-  grantBtn.textContent = "⏳ جارٍ الحفظ...";
+  const grantBtn = document.getElementById("gaGrantBtn");
+  grantBtn.disabled = true; grantBtn.textContent = "⏳ جارٍ الحفظ...";
 
   const batch = writeBatch(db);
   const TS = Timestamp.fromDate(deadlineDate);
-  let successCount = 0;
-
   for (const uid of selectedUids) {
-    const overrideDocId = `${uid}_${quizId}`;
     const trainee = _gaAbsent.find(t => t.uid === uid);
-    const ref = doc(db, "quizOverrides", overrideDocId);
-    batch.set(ref, {
-      userId: uid,
-      quizId: quizId,
-      quizTitle: quizTitle,
-      userName: trainee?.name || "—",
-      deadline: TS,
-      grantedAt: serverTimestamp()
+    batch.set(doc(db, "quizOverrides", `${uid}_${quizId}`), {
+      userId: uid, quizId, quizTitle, userName: trainee?.name || "—",
+      deadline: TS, type: "absent", grantedAt: serverTimestamp()
     });
-    successCount++;
   }
 
   try {
     await batch.commit();
-    _showGaMsg(`✅ تم إتاحة الاختبار لـ ${successCount} متدرب بنجاح!`, true);
+    _showModalMsg("gaMsg", `✅ تم إتاحة الاختبار لـ ${selectedUids.length} متدرب!`, true);
     setTimeout(() => loadAbsentTrainees(), 1000);
-  } catch(e) {
-    _showGaMsg(`❌ فشل الحفظ: ${e.message}`, false);
-  }
+  } catch(e) { _showModalMsg("gaMsg", `❌ فشل الحفظ: ${e.message}`, false); }
 
-  grantBtn.disabled = false;
-  grantBtn.textContent = "🎯 إتاحة الاختبار للمحددين";
+  grantBtn.disabled = false; grantBtn.textContent = "🎯 إتاحة الاختبار للمحددين";
 };
 
-window.revokeAccess = async function(uid, userName) {
-  const quizId = document.getElementById("gaQuizSelect").value;
+/* إلغاء إتاحة (مشترك بين الغائبين والفرصة الثانية) */
+window.revokeOverride = async function(uid, userName, modalType) {
+  const quizId = document.getElementById(modalType === "ga" ? "gaQuizSelect" : "rtQuizSelect").value;
   if (!quizId) return;
-
-  if (!confirm(`هل تريد إلغاء إتاحة الاختبار للمتدرب "${userName}"؟`)) return;
-
+  if (!confirm(`هل تريد إلغاء الإتاحة للمتدرب "${userName}"؟`)) return;
+  const msgId = modalType === "ga" ? "gaMsg" : "rtMsg";
   try {
     await deleteDoc(doc(db, "quizOverrides", `${uid}_${quizId}`));
-    _showGaMsg(`✅ تم إلغاء الإتاحة للمتدرب "${userName}"`, true);
-    loadAbsentTrainees();
+    _showModalMsg(msgId, `✅ تم إلغاء الإتاحة للمتدرب "${userName}"`, true);
+    if (modalType === "ga") loadAbsentTrainees(); else loadSolvedTrainees();
+  } catch(e) { _showModalMsg(msgId, `❌ فشل الإلغاء: ${e.message}`, false); }
+};
+
+
+/* ══════════════════════════════════════════════════════
+   🔄 إتاحة فرصة ثانية (للمتدربين الذين حلّوا الاختبار)
+   — يحذف نتائجهم السابقة + ينشئ quizOverride لتجاوز القفل
+══════════════════════════════════════════════════════ */
+
+let _rtSolved = [];
+
+window.openRetryModal = async function() {
+  document.getElementById("retryModal").classList.add("open");
+  document.getElementById("rtMsg").style.display = "none";
+  document.getElementById("rtSolvedSection").style.display = "none";
+  document.getElementById("rtGrantBtn").disabled = true;
+
+  const sel = document.getElementById("rtQuizSelect");
+  sel.innerHTML = '<option value="">— جارٍ التحميل… —</option>';
+  try {
+    const snap = await getDocs(collection(db, "quizzes"));
+    sel.innerHTML = '<option value="">— اختر الاختبار —</option>';
+    snap.forEach(s => {
+      const d = s.data();
+      let statusTag = "";
+      if (d.available === false) statusTag = " 🔒 [مقفل]";
+      else if (d.startDate?.toDate && d.endDate?.toDate) {
+        const now = new Date();
+        if (now > d.endDate.toDate()) statusTag = " [منتهي]";
+        else if (now < d.startDate.toDate()) statusTag = " [مجدول]";
+      }
+      sel.innerHTML += `<option value="${s.id}">${d.title}${statusTag}</option>`;
+    });
+  } catch(e) { sel.innerHTML = '<option value="">— فشل التحميل —</option>'; }
+
+  const defaultDeadline = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+  const dtEl = document.getElementById("rtDeadline");
+  const pad = (n) => String(n).padStart(2, "0");
+  dtEl.value = `${defaultDeadline.getFullYear()}-${pad(defaultDeadline.getMonth()+1)}-${pad(defaultDeadline.getDate())}T${pad(defaultDeadline.getHours())}:${pad(defaultDeadline.getMinutes())}`;
+};
+
+window.closeRetryModal = function() {
+  document.getElementById("retryModal").classList.remove("open");
+};
+
+window.loadSolvedTrainees = async function() {
+  const quizId = document.getElementById("rtQuizSelect").value;
+  const listEl = document.getElementById("rtSolvedList");
+  const sectionEl = document.getElementById("rtSolvedSection");
+  const loadingEl = document.getElementById("rtLoadingState");
+  const countEl = document.getElementById("rtSelectedCount");
+  const grantBtn = document.getElementById("rtGrantBtn");
+
+  if (!quizId) { sectionEl.style.display = "none"; grantBtn.disabled = true; return; }
+
+  loadingEl.style.display = "block";
+  sectionEl.style.display = "none";
+
+  try {
+    // جلب النتائج لهذا الاختبار
+    const resultsSnap = await getDocs(query(collection(db, "results"), where("quizId", "==", quizId)));
+    const solvedMap = {}; // uid -> { name, studentId, score, resultIds[] }
+    resultsSnap.forEach(s => {
+      const d = s.data();
+      if (!d.userId) return;
+      if (!solvedMap[d.userId]) {
+        solvedMap[d.userId] = { uid: d.userId, name: d.userName || "—", studentId: "", score: d.score ?? 0, total: d.totalScore ?? 0, resultIds: [] };
+      }
+      solvedMap[d.userId].resultIds.push(s.id);
+      // آخر محاولة
+      if ((d.score ?? 0) >= solvedMap[d.userId].score) {
+        solvedMap[d.userId].score = d.score ?? 0;
+        solvedMap[d.userId].total = d.totalScore ?? 0;
+      }
+    });
+
+    // جلب أسماء المتدربين
+    const traineeSnap = await getDocs(query(collection(db, "users"), where("role", "==", "trainee")));
+    const traineeMap = {};
+    traineeSnap.forEach(s => { const d = s.data(); traineeMap[s.id] = { name: d.displayName || "—", studentId: d.studentId || "" }; });
+
+    // دمج البيانات
+    _rtSolved = Object.values(solvedMap).map(s => {
+      const t = traineeMap[s.uid];
+      if (t) { s.name = t.name; s.studentId = t.studentId; }
+      return s;
+    });
+
+    // جلب من لديه إتاحة فرصة ثانية مسبقة
+    const overridesSnap = await getDocs(query(collection(db, "quizOverrides"), where("quizId", "==", quizId)));
+    const overrideUids = new Set();
+    overridesSnap.forEach(s => { if (s.data().type === "retry") overrideUids.add(s.data().userId); });
+
+    loadingEl.style.display = "none";
+    sectionEl.style.display = "block";
+
+    if (_rtSolved.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center;color:#7c3aed;padding:1rem;font-size:0.88rem;">لا يوجد متدربون حلّوا هذا الاختبار بعد</div>';
+      countEl.textContent = "";
+      grantBtn.disabled = true;
+      document.getElementById("rtSelectAll").checked = false;
+      return;
+    }
+
+    listEl.innerHTML = _rtSolved.map(t => {
+      const hasOverride = overrideUids.has(t.uid);
+      const pct = t.total > 0 ? Math.round((t.score / t.total) * 100) : 0;
+      return `
+        <label style="display:flex;align-items:center;gap:0.65rem;padding:0.55rem 0.7rem;border-radius:8px;cursor:pointer;transition:background 0.15s;${hasOverride ? 'opacity:0.55;' : ''}" onmouseover="this.style.background='rgba(124,58,237,0.08)'" onmouseout="this.style.background='transparent'">
+          <input type="checkbox" class="rt-check" data-uid="${t.uid}" ${hasOverride ? 'disabled' : ''} onchange="updateRtCount()" style="accent-color:#7c3aed;width:17px;height:17px;cursor:pointer;">
+          <span style="flex:1;font-size:0.85rem;color:var(--text);font-weight:600;">${t.name}</span>
+          <span style="font-size:0.72rem;color:var(--text-faint);direction:ltr;">${t.studentId}</span>
+          <span style="font-size:0.72rem;background:rgba(124,58,237,0.12);color:#7c3aed;padding:0.15rem 0.5rem;border-radius:6px;font-weight:700;">${pct}%</span>
+          ${hasOverride ? `<span style="font-size:0.68rem;background:rgba(124,58,237,0.15);color:#7c3aed;padding:0.15rem 0.5rem;border-radius:6px;">أُتيح مسبقاً</span><button onclick="event.preventDefault();revokeOverride('${t.uid}','${t.name}','rt')" style="font-size:0.68rem;background:rgba(244,67,54,0.12);color:#ff6b6b;border:1px solid rgba(244,67,54,0.3);padding:0.15rem 0.5rem;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;" onmouseover="this.style.background='rgba(244,67,54,0.25)'" onmouseout="this.style.background='rgba(244,67,54,0.12)'">✕ إلغاء</button>` : ''}
+        </label>`;
+    }).join("");
+
+    document.getElementById("rtSelectAll").checked = false;
+    updateRtCount();
   } catch(e) {
-    _showGaMsg(`❌ فشل الإلغاء: ${e.message}`, false);
+    loadingEl.style.display = "none";
+    listEl.innerHTML = `<div style="text-align:center;color:#ff6b6b;padding:1rem;">❌ خطأ: ${e.message}</div>`;
+    sectionEl.style.display = "block";
   }
 };
 
-function _showGaMsg(text, isSuccess) {
-  const msg = document.getElementById("gaMsg");
+window.toggleSelectAllSolved = function() {
+  const checked = document.getElementById("rtSelectAll").checked;
+  document.querySelectorAll(".rt-check:not(:disabled)").forEach(cb => cb.checked = checked);
+  updateRtCount();
+};
+
+window.updateRtCount = function() {
+  const checked = document.querySelectorAll(".rt-check:checked").length;
+  document.getElementById("rtSelectedCount").textContent = checked > 0 ? `تم تحديد ${checked} متدرب` : "لم يُحدد أي متدرب";
+  document.getElementById("rtGrantBtn").disabled = checked === 0;
+};
+
+window.grantRetryToSelected = async function() {
+  const quizId = document.getElementById("rtQuizSelect").value;
+  const deadline = document.getElementById("rtDeadline").value;
+  if (!quizId) { _showModalMsg("rtMsg", "❌ يرجى اختيار الاختبار.", false); return; }
+  if (!deadline) { _showModalMsg("rtMsg", "❌ يرجى تحديد المهلة.", false); return; }
+  const deadlineDate = new Date(deadline);
+  if (deadlineDate <= new Date()) { _showModalMsg("rtMsg", "❌ المهلة يجب أن تكون في المستقبل.", false); return; }
+
+  const selectedUids = [];
+  document.querySelectorAll(".rt-check:checked").forEach(cb => selectedUids.push(cb.dataset.uid));
+  if (selectedUids.length === 0) { _showModalMsg("rtMsg", "❌ يرجى تحديد متدرب واحد على الأقل.", false); return; }
+
+  let quizTitle = "—";
+  try { const qSnap = await getDoc(doc(db, "quizzes", quizId)); if (qSnap.exists()) quizTitle = qSnap.data().title || quizId; } catch(e) {}
+
+  if (!confirm(`إتاحة فرصة ثانية في "${quizTitle}" لـ ${selectedUids.length} متدرب؟\n\n⚠️ سيتم حذف نتائجهم السابقة في هذا الاختبار.`)) return;
+
+  const grantBtn = document.getElementById("rtGrantBtn");
+  grantBtn.disabled = true; grantBtn.textContent = "⏳ جارٍ الحفظ...";
+
+  try {
+    const batch = writeBatch(db);
+    const TS = Timestamp.fromDate(deadlineDate);
+
+    for (const uid of selectedUids) {
+      const solved = _rtSolved.find(t => t.uid === uid);
+
+      // حذف كل نتائج هذا المتدرب في هذا الاختبار
+      if (solved?.resultIds) {
+        for (const rid of solved.resultIds) {
+          batch.delete(doc(db, "results", rid));
+        }
+      }
+
+      // إنشاء إتاحة مخصصة
+      batch.set(doc(db, "quizOverrides", `${uid}_${quizId}`), {
+        userId: uid, quizId, quizTitle, userName: solved?.name || "—",
+        deadline: TS, type: "retry", grantedAt: serverTimestamp()
+      });
+    }
+
+    await batch.commit();
+    _showModalMsg("rtMsg", `✅ تم إتاحة الفرصة الثانية لـ ${selectedUids.length} متدرب وحُذفت نتائجهم السابقة!`, true);
+    setTimeout(() => loadSolvedTrainees(), 1000);
+  } catch(e) { _showModalMsg("rtMsg", `❌ فشل: ${e.message}`, false); }
+
+  grantBtn.disabled = false; grantBtn.textContent = "🔄 إتاحة الفرصة الثانية للمحددين";
+};
+
+/* ── دالة مشتركة لعرض رسائل في النوافذ ── */
+function _showModalMsg(elemId, text, isSuccess) {
+  const msg = document.getElementById(elemId);
   msg.style.display = "block";
   msg.style.background = isSuccess ? "rgba(0,201,177,0.08)" : "rgba(244,67,54,0.08)";
   msg.style.border = isSuccess ? "1px solid rgba(0,201,177,0.2)" : "1px solid rgba(244,67,54,0.2)";

@@ -2553,7 +2553,10 @@ select optgroup {
             <div class="panel-title">نظام <span>الاختبارات المتقدم</span></div>
             <div class="panel-subtitle">إنشاء اختبارات من بنك الأسئلة مع جدولة زمنية وإدارة المحاولات</div>
           </div>
-          <button onclick="openGrantAccessModal()" style="padding:0.55rem 1.2rem;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border:none;border-radius:9px;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:0.4rem;box-shadow:0 4px 14px rgba(217,119,6,0.3);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">🎯 إتاحة لغائبين</button>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <button onclick="openGrantAccessModal()" style="padding:0.55rem 1.2rem;background:linear-gradient(135deg,#d97706,#b45309);color:#fff;border:none;border-radius:9px;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:0.4rem;box-shadow:0 4px 14px rgba(217,119,6,0.3);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">🎯 إتاحة لغائبين</button>
+            <button onclick="openRetryModal()" style="padding:0.55rem 1.2rem;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:9px;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:0.4rem;box-shadow:0 4px 14px rgba(124,58,237,0.3);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">🔄 إتاحة فرصة ثانية</button>
+          </div>
         </div>
 
         <!-- ── المتابعة الحية للاختبار ── -->
@@ -3329,7 +3332,6 @@ select optgroup {
       <input type="datetime-local" id="gaDeadline" style="width:100%;padding:0.75rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;">
     </div>
 
-    <!-- قائمة الغائبين -->
     <div id="gaAbsentSection" style="display:none;margin-top:0.75rem;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
         <label style="font-size:0.85rem;font-weight:700;color:var(--text);">المتدربون الذين لم يحلّوا الاختبار:</label>
@@ -3353,8 +3355,54 @@ select optgroup {
       </button>
       <button class="btn-modal-cancel" onclick="closeGrantAccessModal()">إلغاء</button>
     </div>
-
     <div class="tr-modal-msg" id="gaMsg" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════════════ RETRY MODAL — إتاحة فرصة ثانية ════════════ -->
+<div class="tr-modal-overlay" id="retryModal">
+  <div class="tr-modal" style="max-width:620px;max-height:90vh;overflow-y:auto;">
+    <div class="tr-modal-header">
+      <div class="tr-modal-title">🔄 إتاحة فرصة ثانية</div>
+      <button class="tr-modal-close" onclick="closeRetryModal()" title="إغلاق">✕</button>
+    </div>
+
+    <div class="tr-modal-field">
+      <label for="rtQuizSelect">اختر الاختبار *</label>
+      <select id="rtQuizSelect" onchange="loadSolvedTrainees()" style="width:100%;padding:0.75rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;">
+        <option value="">— اختر الاختبار —</option>
+      </select>
+    </div>
+
+    <div class="tr-modal-field">
+      <label for="rtDeadline">مهلة الفرصة الثانية (تاريخ ووقت الانتهاء) *</label>
+      <input type="datetime-local" id="rtDeadline" style="width:100%;padding:0.75rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.88rem;outline:none;">
+    </div>
+
+    <div id="rtSolvedSection" style="display:none;margin-top:0.75rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+        <label style="font-size:0.85rem;font-weight:700;color:var(--text);">المتدربون الذين حلّوا الاختبار:</label>
+        <label style="font-size:0.78rem;color:#7c3aed;cursor:pointer;display:flex;align-items:center;gap:0.3rem;">
+          <input type="checkbox" id="rtSelectAll" onchange="toggleSelectAllSolved()" style="accent-color:#7c3aed;width:16px;height:16px;cursor:pointer;">
+          تحديد الكل
+        </label>
+      </div>
+      <div id="rtSolvedList" style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:9px;padding:0.5rem;background:rgba(0,0,0,0.15);"></div>
+      <div id="rtSelectedCount" style="text-align:center;margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted);">لم يُحدد أي متدرب</div>
+    </div>
+
+    <div id="rtLoadingState" style="display:none;text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.85rem;">
+      <div style="width:32px;height:32px;border:3px solid rgba(108,47,160,0.2);border-top-color:#7c3aed;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 0.75rem;"></div>
+      جارٍ تحميل بيانات المتدربين...
+    </div>
+
+    <div class="tr-modal-actions" style="margin-top:1rem;">
+      <button class="btn-modal-save" id="rtGrantBtn" onclick="grantRetryToSelected()" style="background:linear-gradient(135deg, #7c3aed, #5b21b6);" disabled>
+        🔄 إتاحة الفرصة الثانية للمحددين
+      </button>
+      <button class="btn-modal-cancel" onclick="closeRetryModal()">إلغاء</button>
+    </div>
+    <div class="tr-modal-msg" id="rtMsg" style="display:none"></div>
   </div>
 </div>
 
