@@ -18,7 +18,6 @@ h1{font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:0.3rem;backg
 .btn{padding:0.7rem 1.8rem;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:0.5rem}
 .btn:hover{transform:translateY(-1px)}
 .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
-.btn-primary{background:linear-gradient(135deg,#6c2fa0,#5b21b6);color:#fff}
 .btn-success{background:linear-gradient(135deg,#00c9b1,#0e7490);color:#fff}
 .btn-group{display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1rem}
 .log-box{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;margin-top:1rem;max-height:400px;overflow-y:auto;font-size:0.78rem;line-height:1.8;direction:ltr;text-align:left;font-family:'Courier New',monospace}
@@ -32,27 +31,24 @@ h1{font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:0.3rem;backg
 .stat{background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.15);border-radius:10px;padding:0.7rem;text-align:center}
 .stat-num{font-size:1.3rem;font-weight:800;color:#00c9b1}
 .stat-label{font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:0.2rem}
-.warning-box{background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);border-radius:10px;padding:0.8rem 1rem;font-size:0.82rem;color:#d97706;margin-bottom:1rem;line-height:1.7}
+.warning-box{background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);border-radius:10px;padding:0.8rem 1rem;font-size:0.82rem;color:#d97706;line-height:1.7}
 </style>
 </head>
 <body>
 <div class="container">
   <h1>🔄 أداة نقل بيانات أكاديمية الشبكات</h1>
-  <p class="subtitle">النقل من المشروع القديم إلى سيرفر الدمام (me-central2)</p>
+  <p class="subtitle">النقل من المشروع القديم إلى سيرفر الدمام</p>
 
   <div class="card">
     <div class="card-title"><span class="step-num">1</span> نقل الحسابات (تم ✅)</div>
-    <div class="info-box">الحسابات نُقلت بنجاح (46 حساب). لا حاجة لتكرار هذه الخطوة.</div>
+    <div class="info-box">الحسابات نُقلت بنجاح (46 حساب).</div>
   </div>
 
   <div class="card">
     <div class="card-title"><span class="step-num">2</span> نقل الإعدادات وبنك الأسئلة</div>
-    <div class="info-box">
-      يستخدم REST API لقراءة البيانات مباشرة من Firestore القديم بدون تعارض جلسات.<br>
-      ينقل: settings، questionBank، quizzes (هيكل الاختبارات بدون نتائج).
-    </div>
+    <div class="info-box">ينقل: settings، questionBank، quizzes (هيكل الاختبارات بدون نتائج).</div>
     <div class="btn-group">
-      <button class="btn btn-success" id="btnMigrate" onclick="startMigration()">📦 نقل البيانات</button>
+      <button class="btn btn-success" id="btnMigrate">📦 نقل البيانات</button>
     </div>
     <div id="log" class="log-box" style="display:none"></div>
     <div id="prog" class="progress-bar" style="display:none"><div class="progress-fill" id="progFill"></div></div>
@@ -63,38 +59,34 @@ h1{font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:0.3rem;backg
     <div class="stats" id="statsGrid"></div>
   </div>
 
-  <div class="warning-box">
-    ⚠️ <strong>بعد النقل، احذف هذا الملف فوراً من GitHub</strong> لأنه يحتوي بيانات دخول.
-  </div>
+  <div class="warning-box">⚠️ <strong>بعد النقل، احذف هذا الملف فوراً من GitHub.</strong></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore, doc, setDoc, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ─── Config ─── */
 const OLD_PROJECT = "networkacademy-795c8";
 const OLD_API_KEY = "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww";
 
-const NEW_CONFIG = {
+const newApp = initializeApp({
   apiKey: "AIzaSyBYzGzvnahojCOP2lRPfr666tImtyH7miY",
   authDomain: "networkacademy-sa.firebaseapp.com",
   projectId: "networkacademy-sa",
   storageBucket: "networkacademy-sa.firebasestorage.app",
   messagingSenderId: "107120015847",
   appId: "1:107120015847:web:f06e2d6b6d23282463a542",
-};
-
-const newApp = initializeApp(NEW_CONFIG);
-const newDb  = getFirestore(newApp);
+});
+const newDb = getFirestore(newApp);
 
 const _stats = {};
 
-function log(msg, type = "ok") {
+function log(msg, type) {
   const box = document.getElementById("log");
   box.style.display = "block";
-  box.innerHTML += `<div class="${type}">${new Date().toLocaleTimeString("en")} — ${msg}</div>`;
+  box.innerHTML += '<div class="' + type + '">' + new Date().toLocaleTimeString("en") + " — " + msg + "</div>";
   box.scrollTop = box.scrollHeight;
 }
 
@@ -105,45 +97,50 @@ function setProg(pct) {
 
 function showStats() {
   document.getElementById("statsCard").style.display = "block";
-  document.getElementById("statsGrid").innerHTML = Object.entries(_stats).map(([k, v]) =>
-    `<div class="stat"><div class="stat-num">${v}</div><div class="stat-label">${k}</div></div>`
-  ).join("");
+  var html = "";
+  for (var k in _stats) {
+    html += '<div class="stat"><div class="stat-num">' + _stats[k] + '</div><div class="stat-label">' + k + '</div></div>';
+  }
+  document.getElementById("statsGrid").innerHTML = html;
 }
 
-/* ─── REST API: تسجيل دخول وجلب Token ─── */
-async function getOldToken() {
-  const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${OLD_API_KEY}`;
-  const res = await fetch(url, {
+/* ─── REST: تسجيل دخول ─── */
+async function getToken() {
+  var url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + OLD_API_KEY;
+  var res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: "admin@network.com", password: "Admin@2025", returnSecureToken: true })
   });
-  const data = await res.json();
+  var data = await res.json();
   if (data.error) throw new Error(data.error.message);
   return data.idToken;
 }
 
-/* ─── REST API: جلب مجموعة كاملة ─── */
-async function fetchCollection(token, colName) {
-  const url = `https://firestore.googleapis.com/v1/projects/${OLD_PROJECT}/databases/(default)/documents/${colName}?pageSize=500`;
-  const docs = [];
-  let pageToken = null;
+/* ─── REST: جلب مجموعة ─── */
+async function fetchCol(token, colName) {
+  var baseUrl = "https://firestore.googleapis.com/v1/projects/" + OLD_PROJECT + "/databases/(default)/documents/" + colName + "?pageSize=500";
+  var allDocs = [];
+  var pageToken = null;
 
   do {
-    const fetchUrl = pageToken ? `${url}&pageToken=${pageToken}` : url;
-    const res = await fetch(fetchUrl, { headers: { "Authorization": `Bearer ${token}` } });
-    const data = await res.json();
-
+    var url = pageToken ? baseUrl + "&pageToken=" + pageToken : baseUrl;
+    var res = await fetch(url, { headers: { "Authorization": "Bearer " + token } });
+    var data = await res.json();
     if (data.error) throw new Error(data.error.message);
-    if (data.documents) docs.push(...data.documents);
+    if (data.documents) {
+      for (var i = 0; i < data.documents.length; i++) {
+        allDocs.push(data.documents[i]);
+      }
+    }
     pageToken = data.nextPageToken || null;
   } while (pageToken);
 
-  return docs;
+  return allDocs;
 }
 
-/* ─── تحويل Firestore REST format إلى JS object ─── */
-function convertValue(val) {
+/* ─── تحويل REST format إلى JS ─── */
+function cv(val) {
   if (!val) return null;
   if ("stringValue" in val) return val.stringValue;
   if ("integerValue" in val) return Number(val.integerValue);
@@ -151,131 +148,96 @@ function convertValue(val) {
   if ("booleanValue" in val) return val.booleanValue;
   if ("nullValue" in val) return null;
   if ("timestampValue" in val) {
-    // حفظه كـ Firestore Timestamp عبر إعادة بنائه
-    const d = new Date(val.timestampValue);
-    return { _isTimestamp: true, seconds: Math.floor(d.getTime() / 1000), nanoseconds: 0 };
+    var d = new Date(val.timestampValue);
+    return new Timestamp(Math.floor(d.getTime() / 1000), 0);
   }
-  if ("mapValue" in val) return convertFields(val.mapValue.fields || {});
-  if ("arrayValue" in val) return (val.arrayValue.values || []).map(convertValue);
+  if ("mapValue" in val) return cf(val.mapValue.fields || {});
+  if ("arrayValue" in val) {
+    var arr = val.arrayValue.values || [];
+    var result = [];
+    for (var i = 0; i < arr.length; i++) result.push(cv(arr[i]));
+    return result;
+  }
   if ("referenceValue" in val) return val.referenceValue;
-  if ("geoPointValue" in val) return val.geoPointValue;
-  if ("bytesValue" in val) return val.bytesValue;
   return null;
 }
 
-function convertFields(fields) {
-  const obj = {};
-  for (const [k, v] of Object.entries(fields)) {
-    const converted = convertValue(v);
-    // تحويل Timestamp المؤقت إلى Firestore Timestamp حقيقي
-    if (converted && converted._isTimestamp) {
-      const { Timestamp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      obj[k] = new Timestamp(converted.seconds, converted.nanoseconds);
-    } else {
-      obj[k] = converted;
+function cf(fields) {
+  var obj = {};
+  for (var k in fields) {
+    if (fields.hasOwnProperty(k)) {
+      obj[k] = cv(fields[k]);
     }
   }
   return obj;
 }
 
-/* ─── نسخة متزامنة بدون await في convertFields ─── */
-let _TimestampClass = null;
-
-async function init() {
-  const mod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-  _TimestampClass = mod.Timestamp;
-}
-
-function convertFieldsSync(fields) {
-  const obj = {};
-  for (const [k, v] of Object.entries(fields || {})) {
-    obj[k] = convertValueSync(v);
-  }
-  return obj;
-}
-
-function convertValueSync(val) {
-  if (!val) return null;
-  if ("stringValue" in val) return val.stringValue;
-  if ("integerValue" in val) return Number(val.integerValue);
-  if ("doubleValue" in val) return val.doubleValue;
-  if ("booleanValue" in val) return val.booleanValue;
-  if ("nullValue" in val) return null;
-  if ("timestampValue" in val) {
-    const d = new Date(val.timestampValue);
-    return new _TimestampClass(Math.floor(d.getTime() / 1000), 0);
-  }
-  if ("mapValue" in val) return convertFieldsSync(val.mapValue.fields || {});
-  if ("arrayValue" in val) return (val.arrayValue.values || []).map(convertValueSync);
-  if ("referenceValue" in val) return val.referenceValue;
-  return null;
-}
-
-/* ─── استخراج اسم المستند من المسار ─── */
-function docIdFromPath(path) {
-  const parts = path.split("/");
+function getDocId(path) {
+  var parts = path.split("/");
   return parts[parts.length - 1];
 }
 
 /* ═══════════ النقل ═══════════ */
-const COLLECTIONS = ["settings", "questionBank", "quizzes"];
+var COLLECTIONS = ["settings", "questionBank", "quizzes"];
 
-window.startMigration = async function() {
-  const btn = document.getElementById("btnMigrate");
+async function startMigration() {
+  var btn = document.getElementById("btnMigrate");
   btn.disabled = true;
   btn.textContent = "⏳ جارٍ النقل...";
 
   try {
-    await init();
-
-    // 1) جلب Token من المشروع القديم
-    log("جلب رمز المصادقة من المشروع القديم...", "inf");
-    const token = await getOldToken();
+    log("جلب رمز المصادقة...", "inf");
+    var token = await getToken();
     log("✅ تم الحصول على رمز المصادقة", "ok");
 
-    let totalDocs = 0;
+    var totalDocs = 0;
 
-    for (let ci = 0; ci < COLLECTIONS.length; ci++) {
-      const colName = COLLECTIONS[ci];
+    for (var ci = 0; ci < COLLECTIONS.length; ci++) {
+      var colName = COLLECTIONS[ci];
       setProg(Math.round(((ci + 1) / COLLECTIONS.length) * 100));
-      log(`📂 جارٍ جلب ${colName}...`, "inf");
+      log("📂 جارٍ جلب " + colName + "...", "inf");
 
       try {
-        const docs = await fetchCollection(token, colName);
-        log(`   وُجد ${docs.length} مستند في ${colName}`, "ok");
+        var docs = await fetchCol(token, colName);
+        log("   وُجد " + docs.length + " مستند", "ok");
 
-        let count = 0;
-        for (const rawDoc of docs) {
-          const docId = docIdFromPath(rawDoc.name);
-          const data = convertFieldsSync(rawDoc.fields || {});
+        var count = 0;
+        for (var di = 0; di < docs.length; di++) {
+          var rawDoc = docs[di];
+          var docId = getDocId(rawDoc.name);
+          var data = cf(rawDoc.fields || {});
           await setDoc(doc(newDb, colName, docId), data, { merge: true });
           count++;
+          if (count % 20 === 0) {
+            log("   ... " + count + "/" + docs.length, "ok");
+          }
         }
 
         totalDocs += count;
         _stats[colName] = count;
-        log(`✅ ${colName}: ${count} مستند تم نقلها`, "ok");
+        log("✅ " + colName + ": " + count + " مستند تم نقلها", "ok");
 
       } catch(e) {
-        log(`❌ ${colName}: ${e.message}`, "err");
+        log("❌ " + colName + ": " + e.message, "err");
         _stats[colName] = "❌";
       }
     }
 
     _stats["الإجمالي"] = totalDocs;
     log("", "ok");
-    log(`🎉 اكتمل النقل بنجاح! إجمالي: ${totalDocs} مستند`, "ok");
-    log("", "ok");
-    log("الخطوة التالية: أرسل النتيجة لي وسأجهّز لك الملفات بالـ config الجديد.", "inf");
+    log("🎉 اكتمل النقل بنجاح! إجمالي: " + totalDocs + " مستند", "ok");
 
   } catch(e) {
-    log(`❌ خطأ: ${e.message}`, "err");
+    log("❌ خطأ: " + e.message, "err");
   }
 
   showStats();
   btn.disabled = false;
   btn.textContent = "📦 نقل البيانات";
-};
+}
+
+// ربط الزر
+document.getElementById("btnMigrate").addEventListener("click", startMigration);
 </script>
 </body>
 </html>
