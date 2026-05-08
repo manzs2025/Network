@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أداة نقل بيانات أكاديمية الشبكات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',sans-serif;background:#080a14;color:#e8eaf6;min-height:100vh;padding:2rem}
+.container{max-width:800px;margin:0 auto}
+h1{font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:0.3rem;background:linear-gradient(135deg,#6c2fa0,#00c9b1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:2rem}
+.card{background:#0e1022;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;margin-bottom:1.2rem}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
+.step-num{background:linear-gradient(135deg,#6c2fa0,#00c9b1);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:800;flex-shrink:0}
+.info{background:rgba(0,201,177,0.06);border:1px solid rgba(0,201,177,0.15);border-radius:10px;padding:0.8rem 1rem;font-size:0.82rem;color:rgba(255,255,255,0.7);margin-bottom:1rem;line-height:1.7}
+.btn{padding:0.7rem 1.8rem;border:none;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:0.5rem}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-primary{background:linear-gradient(135deg,#6c2fa0,#5b21b6);color:#fff;box-shadow:0 4px 15px rgba(108,47,160,0.3)}
+.btn-success{background:linear-gradient(135deg,#00c9b1,#0e7490);color:#fff;box-shadow:0 4px 15px rgba(0,201,177,0.3)}
+.btn-warning{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;box-shadow:0 4px 15px rgba(217,119,6,0.3)}
+.btn-group{display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:1rem}
+.log-box{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem;margin-top:1rem;max-height:300px;overflow-y:auto;font-size:0.78rem;line-height:1.8;direction:ltr;text-align:left;font-family:'Courier New',monospace}
+.log-box .ok{color:#00c9b1}
+.log-box .err{color:#ff6b6b}
+.log-box .warn{color:#d97706}
+.log-box .info{color:#7c3aed;background:none;border:none;padding:0;margin:0;display:inline}
+.progress-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;margin-top:0.7rem;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6c2fa0,#00c9b1);border-radius:3px;transition:width 0.3s;width:0%}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.7rem;margin-top:1rem}
+.stat{background:rgba(108,47,160,0.08);border:1px solid rgba(108,47,160,0.15);border-radius:10px;padding:0.7rem;text-align:center}
+.stat-num{font-size:1.4rem;font-weight:800;color:#00c9b1}
+.stat-label{font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:0.2rem}
+.warning-box{background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);border-radius:10px;padding:0.8rem 1rem;font-size:0.82rem;color:#d97706;margin-bottom:1rem;line-height:1.7}
+input[type="text"]{width:100%;padding:0.6rem 0.9rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:9px;color:#e8eaf6;font-family:'Cairo',sans-serif;font-size:0.85rem;outline:none;margin-top:0.3rem;direction:ltr}
+label{font-size:0.82rem;font-weight:600;color:rgba(255,255,255,0.7)}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🔄 أداة نقل بيانات أكاديمية الشبكات</h1>
+  <p class="subtitle">النقل من المشروع القديم إلى سيرفر الدمام (me-central2)</p>
+
+  <!-- الخطوة 1: نقل الحسابات -->
+  <div class="card">
+    <div class="card-title"><span class="step-num">1</span> نقل حسابات المتدربين والمشرف</div>
+    <div class="info">
+      سيقرأ جميع المستخدمين من المشروع القديم (مجموعة users) وينشئ حساباتهم في المشروع الجديد.<br>
+      كلمة المرور المؤقتة الموحدة: <strong>Tt112233</strong> — يمكن تغييرها لاحقاً.<br>
+      بيانات المتدرب (الاسم، الرقم التدريبي، الدور) ستُنقل أيضاً إلى Firestore الجديد.
+    </div>
+
+    <div style="margin-bottom:0.7rem">
+      <label>كلمة المرور المؤقتة (اختياري — الافتراضي Tt112233):</label>
+      <input type="text" id="tempPassword" value="Tt112233" placeholder="كلمة المرور المؤقتة">
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="btnMigrateUsers" onclick="migrateUsers()">👥 نقل الحسابات</button>
+    </div>
+    <div id="usersLog" class="log-box" style="display:none"></div>
+    <div id="usersProgress" class="progress-bar" style="display:none"><div class="progress-fill" id="usersProgressFill"></div></div>
+  </div>
+
+  <!-- الخطوة 2: نقل بيانات Firestore -->
+  <div class="card">
+    <div class="card-title"><span class="step-num">2</span> نقل بيانات Firestore</div>
+    <div class="info">
+      ينقل كل المجموعات: settings, questionBank, quizzes, results, progress, articles, sitePages, siteContent, siteOverrides, pageContent, liveQuiz, extraAttempts, quizOverrides.<br>
+      مجموعة <strong>users</strong> تم نقلها في الخطوة 1.
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-success" id="btnMigrateData" onclick="migrateFirestore()">📦 نقل البيانات</button>
+    </div>
+    <div id="dataLog" class="log-box" style="display:none"></div>
+    <div id="dataProgress" class="progress-bar" style="display:none"><div class="progress-fill" id="dataProgressFill"></div></div>
+  </div>
+
+  <!-- الإحصائيات -->
+  <div class="card" id="statsCard" style="display:none">
+    <div class="card-title"><span class="step-num">✓</span> ملخص النقل</div>
+    <div class="stats" id="statsGrid"></div>
+  </div>
+
+  <!-- تحذير -->
+  <div class="warning-box">
+    ⚠️ هذه الأداة تقرأ من المشروع القديم وتكتب في الجديد فقط — لا تحذف أي شيء من المشروع القديم.
+    يمكنك تشغيلها أكثر من مرة بأمان (تستخدم set مع merge لتجنب التكرار).
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, getDocs, setDoc, collection, query, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ─── المشروع القديم ─── */
+const OLD_CONFIG = {
+  apiKey: "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
+  authDomain: "networkacademy-795c8.firebaseapp.com",
+  projectId: "networkacademy-795c8",
+  storageBucket: "networkacademy-795c8.firebasestorage.app",
+  messagingSenderId: "458132238000",
+  appId: "1:458132238000:web:bffd7321407b094bb21575",
+};
+
+/* ─── المشروع الجديد (الدمام) ─── */
+const NEW_CONFIG = {
+  apiKey: "AIzaSyBYzGzvnahojCOP2lRPfr666tImtyH7miY",
+  authDomain: "networkacademy-sa.firebaseapp.com",
+  projectId: "networkacademy-sa",
+  storageBucket: "networkacademy-sa.firebasestorage.app",
+  messagingSenderId: "107120015847",
+  appId: "1:107120015847:web:f06e2d6b6d23282463a542",
+};
+
+const oldApp  = initializeApp(OLD_CONFIG, "old");
+const newApp  = initializeApp(NEW_CONFIG, "new");
+const oldDb   = getFirestore(oldApp);
+const newDb   = getFirestore(newApp);
+const newAuth = getAuth(newApp);
+
+const _stats = {};
+
+/* ─── أدوات مساعدة ─── */
+function log(boxId, msg, type = "ok") {
+  const box = document.getElementById(boxId);
+  box.style.display = "block";
+  box.innerHTML += `<div class="${type}">${new Date().toLocaleTimeString("en")} — ${msg}</div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+function setProgress(id, pct) {
+  const bar = document.getElementById(id);
+  bar.style.display = "block";
+  document.getElementById(id + "Fill").style.width = pct + "%";
+}
+
+function showStats() {
+  const card = document.getElementById("statsCard");
+  const grid = document.getElementById("statsGrid");
+  card.style.display = "block";
+  grid.innerHTML = Object.entries(_stats).map(([k, v]) =>
+    `<div class="stat"><div class="stat-num">${v}</div><div class="stat-label">${k}</div></div>`
+  ).join("");
+}
+
+/* ─── تحويل بيانات Firestore (التعامل مع Timestamp) ─── */
+function sanitize(data) {
+  const out = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (v && typeof v === "object" && typeof v.toDate === "function") {
+      // Firestore Timestamp → نحتفظ به كـ Timestamp عبر إعادة بنائه
+      out[k] = v;
+    } else if (v && typeof v === "object" && !Array.isArray(v)) {
+      out[k] = sanitize(v);
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+/* ══════════════════════════════════════
+   الخطوة 1: نقل الحسابات
+══════════════════════════════════════ */
+window.migrateUsers = async function() {
+  const btn = document.getElementById("btnMigrateUsers");
+  btn.disabled = true;
+  btn.textContent = "⏳ جارٍ النقل...";
+
+  const tempPwd = document.getElementById("tempPassword").value.trim() || "Tt112233";
+  log("usersLog", `بدء نقل الحسابات — كلمة المرور المؤقتة: ${tempPwd}`, "info");
+
+  try {
+    // 1) قراءة كل المستخدمين من المشروع القديم
+    const usersSnap = await getDocs(collection(oldDb, "users"));
+    const users = [];
+    usersSnap.forEach(s => users.push({ uid: s.id, ...s.data() }));
+
+    log("usersLog", `تم جلب ${users.length} مستخدم من المشروع القديم`, "ok");
+    _stats["المستخدمون"] = users.length;
+
+    let created = 0, skipped = 0, errors = 0;
+
+    for (let i = 0; i < users.length; i++) {
+      const u = users[i];
+      const pct = Math.round(((i + 1) / users.length) * 100);
+      setProgress("usersProgress", pct);
+
+      // بناء الإيميل
+      let email = u.email;
+      if (!email && u.studentId) {
+        email = u.studentId + "@network.com";
+      }
+      if (!email) {
+        log("usersLog", `⚠️ تخطّي مستخدم بدون إيميل: ${u.displayName || u.uid}`, "warn");
+        skipped++;
+        continue;
+      }
+
+      try {
+        // إنشاء الحساب في Auth الجديد
+        const cred = await createUserWithEmailAndPassword(newAuth, email, tempPwd);
+        const newUid = cred.user.uid;
+
+        // حفظ بيانات المستخدم في Firestore الجديد
+        await setDoc(doc(newDb, "users", newUid), {
+          displayName: u.displayName || "",
+          email: email,
+          studentId: u.studentId || "",
+          role: u.role || "trainee",
+          createdAt: serverTimestamp(),
+          _oldUid: u.uid  // حفظ المعرّف القديم للربط
+        });
+
+        await signOut(newAuth);
+        created++;
+        log("usersLog", `✅ ${u.displayName || email} — تم (${email})`, "ok");
+
+      } catch(e) {
+        if (e.code === "auth/email-already-in-use") {
+          // الحساب موجود — نحدّث بيانات Firestore فقط
+          log("usersLog", `⏩ ${email} موجود مسبقاً — تحديث البيانات`, "warn");
+          skipped++;
+        } else {
+          log("usersLog", `❌ فشل ${email}: ${e.message}`, "err");
+          errors++;
+        }
+      }
+    }
+
+    _stats["حسابات جديدة"] = created;
+    _stats["موجودة مسبقاً"] = skipped;
+    if (errors) _stats["أخطاء حسابات"] = errors;
+
+    log("usersLog", `\n🎉 اكتمل! جديد: ${created} | موجود: ${skipped} | أخطاء: ${errors}`, "ok");
+
+  } catch(e) {
+    log("usersLog", `❌ خطأ عام: ${e.message}`, "err");
+  }
+
+  showStats();
+  btn.disabled = false;
+  btn.textContent = "👥 نقل الحسابات";
+};
+
+/* ══════════════════════════════════════
+   الخطوة 2: نقل بيانات Firestore
+══════════════════════════════════════ */
+const COLLECTIONS_TO_MIGRATE = [
+  "settings",
+  "questionBank",
+  "quizzes",
+  "results",
+  "progress",
+  "articles",
+  "sitePages",
+  "pageContent",
+  "liveQuiz",
+  "extraAttempts",
+  "quizOverrides",
+];
+
+// مجموعات تحتوي مجموعات فرعية
+const NESTED_COLLECTIONS = {
+  "siteContent": ["sections"],
+  "siteOverrides": ["elements"],
+};
+
+window.migrateFirestore = async function() {
+  const btn = document.getElementById("btnMigrateData");
+  btn.disabled = true;
+  btn.textContent = "⏳ جارٍ النقل...";
+
+  const allCollections = [...COLLECTIONS_TO_MIGRATE, ...Object.keys(NESTED_COLLECTIONS)];
+  let totalDocs = 0;
+  let currentCol = 0;
+
+  for (const colName of allCollections) {
+    currentCol++;
+    const pct = Math.round((currentCol / allCollections.length) * 100);
+    setProgress("dataProgress", pct);
+
+    log("dataLog", `📂 جارٍ نقل مجموعة: ${colName}...`, "info");
+
+    try {
+      const snap = await getDocs(collection(oldDb, colName));
+      let count = 0;
+
+      for (const docSnap of snap.docs) {
+        const data = sanitize(docSnap.data());
+        await setDoc(doc(newDb, colName, docSnap.id), data, { merge: true });
+        count++;
+
+        // نقل المجموعات الفرعية إن وُجدت
+        if (NESTED_COLLECTIONS[colName]) {
+          for (const subCol of NESTED_COLLECTIONS[colName]) {
+            try {
+              const subSnap = await getDocs(collection(oldDb, colName, docSnap.id, subCol));
+              for (const subDoc of subSnap.docs) {
+                const subData = sanitize(subDoc.data());
+                await setDoc(doc(newDb, colName, docSnap.id, subCol, subDoc.id), subData, { merge: true });
+                count++;
+              }
+            } catch(e) { /* لا توجد مجموعة فرعية */ }
+          }
+        }
+      }
+
+      totalDocs += count;
+      _stats[colName] = count;
+      log("dataLog", `✅ ${colName}: ${count} مستند`, "ok");
+
+    } catch(e) {
+      log("dataLog", `❌ فشل ${colName}: ${e.message}`, "err");
+      _stats[colName] = "❌ فشل";
+    }
+  }
+
+  _stats["إجمالي المستندات"] = totalDocs;
+  log("dataLog", `\n🎉 اكتمل النقل! إجمالي: ${totalDocs} مستند`, "ok");
+
+  showStats();
+  btn.disabled = false;
+  btn.textContent = "📦 نقل البيانات";
+};
+</script>
+
+</body>
+</html>
