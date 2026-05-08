@@ -4,7 +4,7 @@
 (function () {
   'use strict';
 
-  const FB_PROJECT = 'networkacademy-795c8';
+  const FB_PROJECT = 'networkacademy-sa';
   const QUESTIONS_COUNT = 5; // عدد الأسئلة في الاختبار السريع
 
   /* الصفحة الحالية → category في questionBank */
@@ -18,11 +18,9 @@
 
   const _cur   = window.location.pathname.split('/').pop() || '';
   const _urlId = new URLSearchParams(location.search).get('id');
-  const _urlSection = new URLSearchParams(location.search).get('section');
 
-  // تحديد الفئة — يدعم content.html?section=xxx والصفحات القديمة
+  // تحديد الفئة
   let _category = PAGE_CATEGORY_MAP[_cur] || null;
-  if (!_category && _cur === 'content.html' && _urlSection) _category = _urlSection;
   if (!_category && _cur === 'page.html' && _urlId) _category = _urlId;
   if (!_category) return; // لا شيء للعرض في هذه الصفحة
 

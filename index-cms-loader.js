@@ -4,7 +4,7 @@
  */
 (function () {
 
-  const FB_PROJECT = "networkacademy-795c8";
+  const FB_PROJECT = "networkacademy-sa";
   const STATIC_IDS = new Set(["networks","security","osi","cables","ip"]);
 
   async function loadNewCards() {

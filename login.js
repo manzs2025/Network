@@ -10,12 +10,12 @@ import { getFirestore, doc, getDoc }           from "https://www.gstatic.com/fir
 
 /* ─── إعدادات Firebase ────────────────────────────────── */
 const firebaseConfig = {
-  apiKey:            "AIzaSyCz9Wedr_X3VzoaH0gJj8QFrNIK5vT4vww",
-  authDomain:        "networkacademy-795c8.firebaseapp.com",
-  projectId:         "networkacademy-795c8",
-  storageBucket:     "networkacademy-795c8.firebasestorage.app",
-  messagingSenderId: "458132238000",
-  appId:             "1:458132238000:web:bffd7321407b094bb21575"
+  apiKey:            "AIzaSyBYzGzvnahojCOP2lRPfr666tImtyH7miY",
+  authDomain:        "networkacademy-sa.firebaseapp.com",
+  projectId:         "networkacademy-sa",
+  storageBucket:     "networkacademy-sa.firebasestorage.app",
+  messagingSenderId: "107120015847",
+  appId:             "1:107120015847:web:bffd7321407b094bb21575"
 };
 
 const app  = initializeApp(firebaseConfig);

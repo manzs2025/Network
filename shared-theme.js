@@ -13,7 +13,7 @@
 (function () {
   'use strict';
 
-  const FB_PROJECT = 'networkacademy-795c8';
+  const FB_PROJECT = 'networkacademy-sa';
   const CACHE_KEY = 'nk_theme_cache_v1';
   const CACHE_TTL = 10 * 60 * 1000; // 10 دقائق
 

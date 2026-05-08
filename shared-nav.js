@@ -1,7 +1,7 @@
 /* shared-nav.js — شريط التنقل المشترك + تحميل الصفحات الديناميكية (بدون وميض) */
 (function () {
 
-  const FB_PROJECT = "networkacademy-795c8";
+  const FB_PROJECT = "networkacademy-sa";
 
   /* الصفحات الثابتة الافتراضية (تُستخدم كـ fallback) */
   const defaultPages = [
@@ -75,11 +75,7 @@
       const data = await resp.json();
       if (!data.documents?.length) return [];
 
-      // جمع IDs الأقسام من staticPages لمنع التكرار
-      const _navSecIds = new Set(staticPages.map(p => {
-        const m = p.href.match(/section=([^&]+)/);
-        return m ? m[1] : null;
-      }).filter(Boolean));
+      const STATIC_IDS = new Set(["networks","security","osi","cables","ip"]);
       const sorted = data.documents.slice().sort((a,b) => {
         const oa = Number(a.fields?.order?.integerValue || a.fields?.order?.doubleValue || 99);
         const ob = Number(b.fields?.order?.integerValue || b.fields?.order?.doubleValue || 99);
@@ -89,7 +85,7 @@
       const dynamic = [];
       sorted.forEach((docRef, idx) => {
         const pageId = docRef.name.split("/").pop();
-        if (_navSecIds.has(pageId)) return;
+        if (STATIC_IDS.has(pageId)) return;
         const f = docRef.fields || {};
         dynamic.push({
           href: `page.html?id=${pageId}`,
@@ -581,13 +577,10 @@
       ]);
 
       if (sitePagesRes?.documents?.length) {
-        const _searchSecIds = new Set(staticPages.map(p => {
-          const m = p.href.match(/section=([^&]+)/);
-          return m ? m[1] : null;
-        }).filter(Boolean));
+        const STATIC_IDS = new Set(["networks","security","osi","cables","ip"]);
         sitePagesRes.documents.forEach(docRef => {
           const pageId = docRef.name.split("/").pop();
-          if (_searchSecIds.has(pageId)) return;
+          if (STATIC_IDS.has(pageId)) return;
           const f = docRef.fields || {};
           const name = f.name?.stringValue;
           if (!name) return;
