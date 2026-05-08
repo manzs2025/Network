@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الدعم الفني - البلاك بورد</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a5276;
+  --primary-light: #2980b9;
+  --primary-dark: #0e2f44;
+  --accent: #e67e22;
+  --accent-light: #f39c12;
+  --success: #27ae60;
+  --warning: #f39c12;
+  --danger: #e74c3c;
+  --bg: #f0f4f8;
+  --card: #ffffff;
+  --text: #2c3e50;
+  --text-light: #7f8c8d;
+  --border: #dce6f0;
+  --shadow: 0 4px 24px rgba(26, 82, 118, 0.08);
+  --shadow-hover: 0 8px 32px rgba(26, 82, 118, 0.14);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 20% 20%, rgba(26,82,118,0.03) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(230,126,34,0.03) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+.header { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--primary-light) 100%); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.header-inner { max-width: 1200px; margin: 0 auto; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; }
+.logo { display: flex; align-items: center; gap: 14px; }
+.logo-icon { width: 48px; height: 48px; background: rgba(255,255,255,0.15); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+.logo h1 { color: white; font-size: 22px; font-weight: 700; }
+.logo p { color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 300; }
+.header-nav { display: flex; gap: 8px; }
+.nav-btn { padding: 10px 22px; border-radius: 50px; border: 2px solid rgba(255,255,255,0.25); background: transparent; color: white; font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; }
+.nav-btn:hover, .nav-btn.active { background: white; color: var(--primary-dark); border-color: white; transform: translateY(-1px); }
+.nav-btn.admin-btn { border-color: var(--accent); color: var(--accent-light); }
+.nav-btn.admin-btn:hover, .nav-btn.admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.container { max-width: 900px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 1; }
+.container.wide { max-width: 1200px; }
+.page { display: none; }
+.page.active { display: block; animation: fadeUp 0.4s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 36px; margin-bottom: 24px; border: 1px solid var(--border); transition: box-shadow 0.3s ease; }
+.card:hover { box-shadow: var(--shadow-hover); }
+.card-title { font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+.card-title .icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.card-subtitle { color: var(--text-light); font-size: 14px; margin-bottom: 28px; padding-right: 54px; }
+.form-group { margin-bottom: 22px; }
+.form-group label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+.form-group label .required { color: var(--danger); margin-right: 2px; }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-family: 'Tajawal', sans-serif; font-size: 15px; color: var(--text); transition: all 0.3s ease; background: #fafbfc; outline: none; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--primary-light); background: white; box-shadow: 0 0 0 4px rgba(41,128,185,0.1); }
+.form-textarea { min-height: 120px; resize: vertical; }
+.form-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237f8c8d' stroke-width='2' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 16px center; }
+.btn { padding: 14px 36px; border-radius: 50px; border: none; font-family: 'Tajawal', sans-serif; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; box-shadow: 0 4px 16px rgba(26,82,118,0.25); }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(26,82,118,0.35); transform: translateY(-2px); }
+.btn-accent { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%); color: white; box-shadow: 0 4px 16px rgba(230,126,34,0.25); }
+.btn-accent:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(230,126,34,0.35); transform: translateY(-2px); }
+.btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--border); }
+.btn-outline:hover { border-color: var(--primary-light); background: rgba(41,128,185,0.05); }
+.btn-sm { padding: 8px 20px; font-size: 13px; }
+.btn-danger { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; box-shadow: 0 4px 12px rgba(231,76,60,0.25); }
+.btn-danger:hover { box-shadow: 0 6px 20px rgba(231,76,60,0.35); transform: translateY(-2px); }
+.btn-email { background: linear-gradient(135deg, #3498db, #2980b9); color: white; box-shadow: 0 4px 12px rgba(52,152,219,0.25); text-decoration: none; }
+.btn-email:hover { box-shadow: 0 6px 20px rgba(52,152,219,0.35); transform: translateY(-2px); }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 50px; font-size: 12px; font-weight: 600; }
+.badge-new { background: #fef3e2; color: #e67e22; }
+.badge-progress { background: #e8f4fd; color: #2980b9; }
+.badge-done { background: #e8f8ef; color: #27ae60; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 30px; }
+.choice-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 40px 30px; text-align: center; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent; }
+.choice-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-hover); transform: translateY(-4px); }
+.choice-card .choice-icon { width: 80px; height: 80px; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 20px; }
+.choice-card:first-child .choice-icon { background: linear-gradient(135deg, rgba(26,82,118,0.1), rgba(41,128,185,0.15)); }
+.choice-card:last-child .choice-icon { background: linear-gradient(135deg, rgba(39,174,96,0.1), rgba(46,204,113,0.15)); }
+.choice-card h3 { font-size: 20px; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px; }
+.choice-card p { color: var(--text-light); font-size: 14px; line-height: 1.7; }
+.ticket-item { background: var(--card); border-radius: var(--radius-sm); padding: 20px 24px; margin-bottom: 14px; border: 1px solid var(--border); border-right: 4px solid var(--warning); }
+.ticket-item.status-done { border-right-color: var(--success); }
+.ticket-item.status-progress { border-right-color: var(--primary-light); }
+.ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+.ticket-type { font-weight: 700; font-size: 15px; color: var(--primary-dark); }
+.ticket-date { font-size: 12px; color: var(--text-light); }
+.ticket-desc { color: var(--text-light); font-size: 14px; line-height: 1.8; margin-bottom: 12px; }
+.ticket-reply { background: #f0f8f0; border-radius: var(--radius-sm); padding: 14px 18px; margin-top: 12px; border-right: 3px solid var(--success); }
+.ticket-reply-label { font-weight: 700; font-size: 13px; color: var(--success); margin-bottom: 6px; }
+.ticket-reply-text { font-size: 14px; color: var(--text); line-height: 1.8; }
+.trainee-followup { background: #fff8f0; border-radius: var(--radius-sm); padding: 14px 18px; margin-top: 8px; border-right: 3px solid var(--accent); }
+.trainee-followup-label { font-weight: 700; font-size: 13px; color: var(--accent); margin-bottom: 6px; }
+.trainee-followup-text { font-size: 14px; color: var(--text); line-height: 1.8; }
+.followup-form { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+.followup-form textarea { flex: 1; min-width: 200px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-family: 'Tajawal', sans-serif; font-size: 14px; min-height: 60px; resize: vertical; outline: none; }
+.followup-form textarea:focus { border-color: var(--primary-light); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+.stat-card { background: var(--card); border-radius: var(--radius-sm); padding: 22px; text-align: center; box-shadow: var(--shadow); border: 1px solid var(--border); }
+.stat-number { font-size: 36px; font-weight: 800; margin-bottom: 4px; }
+.stat-label { font-size: 13px; color: var(--text-light); font-weight: 500; }
+.stat-card:nth-child(1) .stat-number { color: var(--accent); }
+.stat-card:nth-child(2) .stat-number { color: var(--primary-light); }
+.stat-card:nth-child(3) .stat-number { color: var(--success); }
+.stat-card:nth-child(4) .stat-number { color: var(--text); }
+.filters { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.filter-btn { padding: 8px 20px; border-radius: 50px; border: 2px solid var(--border); background: white; font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; color: var(--text-light); }
+.filter-btn:hover, .filter-btn.active { border-color: var(--primary-light); color: var(--primary); background: rgba(41,128,185,0.05); }
+.admin-ticket { background: var(--card); border-radius: var(--radius-sm); padding: 24px; margin-bottom: 16px; border: 1px solid var(--border); transition: all 0.2s ease; }
+.admin-ticket:hover { box-shadow: var(--shadow-hover); }
+.admin-ticket-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+.admin-ticket-info h4 { font-size: 16px; font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; }
+.admin-ticket-meta { display: flex; gap: 16px; font-size: 13px; color: var(--text-light); flex-wrap: wrap; }
+.admin-ticket-meta span { display: flex; align-items: center; gap: 4px; }
+.admin-ticket-desc { font-size: 14px; color: var(--text); line-height: 1.8; margin-bottom: 16px; padding: 14px; background: #f8f9fa; border-radius: 8px; }
+.admin-ticket-actions { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.admin-ticket-actions select { padding: 8px 14px; border: 2px solid var(--border); border-radius: 8px; font-family: 'Tajawal', sans-serif; font-size: 13px; background: white; cursor: pointer; outline: none; }
+.reply-area { width: 100%; margin-top: 12px; display: none; }
+.reply-area.show { display: block; }
+.reply-area textarea { width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-family: 'Tajawal', sans-serif; font-size: 14px; min-height: 80px; resize: vertical; outline: none; margin-bottom: 10px; }
+.reply-area textarea:focus { border-color: var(--primary-light); }
+.existing-reply { background: #e8f8ef; border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-size: 14px; color: var(--text); border-right: 3px solid var(--success); }
+.existing-followup { background: #fff3e0; border-radius: 8px; padding: 12px 16px; margin-top: 8px; font-size: 14px; color: var(--text); border-right: 3px solid var(--accent); }
+.success-msg { text-align: center; padding: 50px 20px; }
+.success-icon { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #27ae60, #2ecc71); display: flex; align-items: center; justify-content: center; font-size: 44px; margin: 0 auto 24px; box-shadow: 0 8px 30px rgba(39,174,96,0.25); }
+.success-msg h2 { font-size: 26px; font-weight: 700; color: var(--primary-dark); margin-bottom: 10px; }
+.success-msg p { color: var(--text-light); font-size: 15px; line-height: 1.8; }
+.empty-state { text-align: center; padding: 50px 20px; color: var(--text-light); }
+.empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.5; }
+.empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+.admin-login { max-width: 400px; margin: 60px auto; }
+.admin-login .card { text-align: center; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--primary-dark); color: white; padding: 14px 28px; border-radius: 50px; font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 500; box-shadow: 0 8px 30px rgba(0,0,0,0.2); transition: transform 0.4s ease; z-index: 1000; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.loading { text-align: center; padding: 40px; color: var(--text-light); }
+.loading::before { content: ''; display: block; width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--primary-light); border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite; }
+.id-input-wrapper { display: flex; direction: ltr; border: 2px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; transition: all 0.3s ease; background: #fafbfc; }
+.id-input-wrapper:focus-within { border-color: var(--primary-light); background: white; box-shadow: 0 0 0 4px rgba(41,128,185,0.1); }
+.id-prefix { padding: 14px 12px; background: var(--bg); font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700; color: var(--primary); border-left: 2px solid var(--border); display: flex; align-items: center; user-select: none; }
+.id-input-wrapper input { flex: 1; padding: 14px 14px; border: none; font-family: 'Tajawal', sans-serif; font-size: 15px; color: var(--text); background: transparent; outline: none; direction: ltr; text-align: left; }
+.id-hint { font-size: 12px; color: var(--text-light); margin-top: 6px; }
+.role-selector { display: flex; gap: 12px; margin-bottom: 22px; }
+.role-option { flex: 1; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-sm); text-align: center; cursor: pointer; transition: all 0.3s ease; background: #fafbfc; }
+.role-option:hover { border-color: var(--primary-light); background: rgba(41,128,185,0.03); }
+.role-option.selected { border-color: var(--primary-light); background: rgba(41,128,185,0.08); box-shadow: 0 0 0 4px rgba(41,128,185,0.1); }
+.role-option .role-icon { font-size: 32px; margin-bottom: 8px; }
+.role-option .role-label { font-weight: 700; font-size: 15px; color: var(--primary-dark); }
+.footer { text-align: center; padding: 24px 20px; color: var(--text-light); font-size: 13px; position: relative; z-index: 1; border-top: 1px solid var(--border); margin-top: 20px; background: rgba(255,255,255,0.5); }
+.footer strong { color: var(--primary); }
+.confirm-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.confirm-box { background: white; border-radius: var(--radius); padding: 36px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.confirm-box h3 { font-size: 20px; font-weight: 700; color: var(--primary-dark); margin-bottom: 12px; }
+.confirm-box p { color: var(--text-light); font-size: 14px; margin-bottom: 24px; line-height: 1.7; }
+.confirm-box .confirm-btns { display: flex; gap: 12px; justify-content: center; }
+@media (max-width: 768px) {
+  .header-inner { flex-direction: column; gap: 14px; padding: 16px 20px; }
+  .header-nav { width: 100%; justify-content: center; flex-wrap: wrap; }
+  .choices { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 24px 16px; }
+  .card { padding: 24px; }
+  .card-subtitle { padding-right: 0; }
+  .admin-ticket-actions { flex-direction: column; }
+  .role-selector { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <div>
+        <h1>الدعم الفني - البلاك بورد</h1>
+        <p>الكلية التقنية بالمندق / مركز التدرب الالكتروني</p>
+      </div>
+    </div>
+    <div class="header-nav">
+      <button class="nav-btn active" onclick="showPage('home')">الرئيسية</button>
+      <button class="nav-btn" onclick="showPage('newTicket')">طلب جديد</button>
+      <button class="nav-btn" onclick="showPage('trackTicket')">متابعة طلب</button>
+      <button class="nav-btn admin-btn" onclick="showPage('adminLogin')">المشرف</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="confirmContainer"></div>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="container">
+    <div style="text-align:center; margin-bottom: 10px;">
+      <h2 style="font-size:28px; font-weight:800; color:var(--primary-dark);">مرحباً بك في نظام الدعم الفني</h2>
+      <p style="color:var(--text-light); font-size:15px; margin-top:8px;">كيف نقدر نساعدك اليوم؟</p>
+    </div>
+    <div class="choices">
+      <div class="choice-card" onclick="showPage('newTicket')">
+        <div class="choice-icon">📝</div>
+        <h3>تقديم طلب جديد</h3>
+        <p>عندك مشكلة في البلاك بورد؟ قدّم طلب دعم فني وسيتم معالجته في أقرب وقت</p>
+      </div>
+      <div class="choice-card" onclick="showPage('trackTicket')">
+        <div class="choice-icon">🔍</div>
+        <h3>متابعة طلباتي</h3>
+        <p>تابع حالة طلباتك السابقة واطّلع على الردود من فريق الدعم الفني</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW TICKET -->
+<div class="page" id="page-newTicket">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon" style="background:linear-gradient(135deg,rgba(26,82,118,0.1),rgba(41,128,185,0.15));">📝</div>
+        تقديم طلب دعم فني
+      </div>
+      <p class="card-subtitle">يرجى تعبئة البيانات التالية وسيتم معالجة طلبك في أقرب وقت</p>
+      <div id="newTicketForm">
+        <div class="form-group">
+          <label><span class="required">*</span> الصفة</label>
+          <div class="role-selector">
+            <div class="role-option" id="role-trainee" onclick="selectRole('متدرب')">
+              <div class="role-icon">🎓</div>
+              <div class="role-label">متدرب</div>
+            </div>
+            <div class="role-option" id="role-trainer" onclick="selectRole('مدرب')">
+              <div class="role-icon">👨‍🏫</div>
+              <div class="role-label">مدرب</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><span class="required">*</span> الاسم الكامل</label>
+          <input type="text" class="form-input" id="inp-name" placeholder="أدخل اسمك الكامل">
+        </div>
+        <div class="form-group" id="idFieldGroup">
+          <label><span class="required">*</span> <span id="idLabel">الرقم</span></label>
+          <input type="text" class="form-input" id="inp-traineeId-regular" placeholder="اختر الصفة أولاً" oninput="validateIdInput(this)" style="direction:ltr;text-align:left;" disabled>
+          <div class="id-input-wrapper" id="trainerIdWrapper" style="display:none;">
+            <input type="text" id="inp-traineeId-prefix" placeholder="أدخل 5 أرقام" oninput="validateIdInput(this)">
+            <div class="id-prefix">00</div>
+          </div>
+          <div class="id-hint" id="idHint">اختر الصفة أولاً</div>
+        </div>
+        <div class="form-group">
+          <label>البريد الإلكتروني (اختياري)</label>
+          <input type="email" class="form-input" id="inp-email" placeholder="example@email.com" dir="ltr" style="text-align:left;">
+        </div>
+        <div class="form-group">
+          <label><span class="required">*</span> نوع المشكلة</label>
+          <select class="form-select" id="inp-type">
+            <option value="">-- اختر نوع المشكلة --</option>
+            <option value="تغيير كلمة المرور">تغيير كلمة المرور</option>
+            <option value="مشكلة دخول البلاك بورد">مشكلة دخول البلاك بورد</option>
+            <option value="مشاكل تقنية أخرى">مشاكل تقنية أخرى</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>وصف المشكلة (اختياري)</label>
+          <textarea class="form-textarea" id="inp-desc" placeholder="اشرح مشكلتك بالتفصيل إن أمكن..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="submitBtn" onclick="submitTicket()">إرسال الطلب ←</button>
+      </div>
+      <div id="newTicketSuccess" style="display:none;">
+        <div class="success-msg">
+          <div class="success-icon">✓</div>
+          <h2>تم إرسال طلبك بنجاح!</h2>
+          <p>يمكنك متابعة طلبك باستخدام <strong>رقمك</strong> من صفحة "متابعة طلباتي"</p>
+          <div style="margin-top:28px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="showPage('trackTicket')">متابعة طلباتي</button>
+            <button class="btn btn-outline" onclick="resetNewTicket()">تقديم طلب آخر</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRACK TICKET -->
+<div class="page" id="page-trackTicket">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon" style="background:linear-gradient(135deg,rgba(39,174,96,0.1),rgba(46,204,113,0.15));">🔍</div>
+        متابعة طلباتي
+      </div>
+      <p class="card-subtitle">أدخل رقمك التدريبي أو الوظيفي لعرض جميع طلباتك والردود عليها</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <input type="text" class="form-input" id="inp-trackId" placeholder="أدخل رقمك (مثال: 123456789)" style="flex:1; min-width:200px; direction:ltr; text-align:left;" onkeypress="if(event.key==='Enter')trackTickets()">
+        <button class="btn btn-primary" onclick="trackTickets()">عرض طلباتي</button>
+      </div>
+    </div>
+    <div id="trackResults"></div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="page" id="page-adminLogin">
+  <div class="container">
+    <div class="admin-login">
+      <div class="card">
+        <div style="font-size:48px; margin-bottom:16px;">🔐</div>
+        <h2 style="font-size:22px; font-weight:700; color:var(--primary-dark); margin-bottom:8px;">دخول المشرف</h2>
+        <p style="color:var(--text-light); font-size:14px; margin-bottom:28px;">أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+        <div class="form-group">
+          <input type="password" class="form-input" id="inp-adminPass" placeholder="كلمة المرور" style="text-align:center;" onkeypress="if(event.key==='Enter')adminLogin()">
+        </div>
+        <button class="btn btn-accent" onclick="adminLogin()" style="width:100%; justify-content:center;">دخول</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="page" id="page-admin">
+  <div class="container wide">
+    <div class="stats-grid" id="adminStats"></div>
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterTickets('all', this)">الكل</button>
+      <button class="filter-btn" onclick="filterTickets('جديد', this)">جديد</button>
+      <button class="filter-btn" onclick="filterTickets('قيد المعالجة', this)">قيد المعالجة</button>
+      <button class="filter-btn" onclick="filterTickets('تم الحل', this)">تم الحل</button>
+      <button class="filter-btn" onclick="filterTickets('تغيير كلمة المرور', this)">تغيير كلمة المرور</button>
+      <button class="filter-btn" onclick="filterTickets('مشكلة دخول البلاك بورد', this)">مشكلة دخول</button>
+      <button class="filter-btn" onclick="filterTickets('مشاكل تقنية أخرى', this)">مشاكل تقنية</button>
+    </div>
+    <div id="adminTickets"><div class="loading">جاري تحميل الطلبات...</div></div>
+  </div>
+</div>
+
+<div class="footer">
+  تطوير المدرب <strong>منصور الزهراني</strong>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyBYzGzvnahojCOP2lRPfr666tImtyH7miY",
+  authDomain: "networkacademy-sa.firebaseapp.com",
+  projectId: "networkacademy-sa",
+  storageBucket: "networkacademy-sa.firebasestorage.app",
+  messagingSenderId: "107120015847",
+  appId: "1:107120015847:web:f06e2d6b6d23282463a542"
+});
+
+const db = firebase.firestore();
+const ticketsRef = db.collection('tickets');
+
+let currentPage = 'home';
+let isAdmin = false;
+let allTickets = [];
+let currentFilter = 'all';
+let selectedRole = '';
+// Hashed admin password
+const ADMIN_PASS = 'Aa123456';
+
+function showPage(page) {
+  if (page === 'admin' && !isAdmin) page = 'adminLogin';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const navMap = { home: 0, newTicket: 1, trackTicket: 2, adminLogin: 3, admin: 3 };
+  document.querySelectorAll('.nav-btn')[navMap[page]]?.classList.add('active');
+  currentPage = page;
+  if (page === 'admin') loadAdminTickets();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===== CONFIRM DIALOG =====
+function showConfirm(title, message, onConfirm) {
+  const c = document.getElementById('confirmContainer');
+  c.innerHTML = `
+    <div class="confirm-overlay" onclick="closeConfirm()">
+      <div class="confirm-box" onclick="event.stopPropagation()">
+        <h3>${title}</h3>
+        <p>${message}</p>
+        <div class="confirm-btns">
+          <button class="btn btn-danger btn-sm" id="confirmYes">نعم، احذف</button>
+          <button class="btn btn-outline btn-sm" onclick="closeConfirm()">إلغاء</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('confirmYes').onclick = () => { closeConfirm(); onConfirm(); };
+}
+
+function closeConfirm() {
+  document.getElementById('confirmContainer').innerHTML = '';
+}
+
+// ===== ROLE =====
+function selectRole(role) {
+  selectedRole = role;
+  document.getElementById('role-trainee').classList.toggle('selected', role === 'متدرب');
+  document.getElementById('role-trainer').classList.toggle('selected', role === 'مدرب');
+  const reg = document.getElementById('inp-traineeId-regular');
+  const wrap = document.getElementById('trainerIdWrapper');
+  const pre = document.getElementById('inp-traineeId-prefix');
+  reg.value = ''; pre.value = '';
+  if (role === 'متدرب') {
+    document.getElementById('idLabel').textContent = 'الرقم التدريبي';
+    reg.style.display = 'block'; reg.disabled = false;
+    wrap.style.display = 'none';
+    reg.placeholder = 'أدخل الرقم التدريبي (9 أرقام)';
+    reg.maxLength = 9;
+    document.getElementById('idHint').textContent = 'أدخل 9 أرقام';
+  } else {
+    document.getElementById('idLabel').textContent = 'الرقم الوظيفي';
+    reg.style.display = 'none';
+    wrap.style.display = 'flex';
+    pre.placeholder = 'أدخل 5 أرقام';
+    pre.maxLength = 5;
+    document.getElementById('idHint').textContent = 'أدخل 5 أرقام بعد 00 (المجموع 7 أرقام)';
+  }
+}
+
+function validateIdInput(input) {
+  input.value = input.value.replace(/[^0-9]/g, '');
+  const max = selectedRole === 'مدرب' ? 5 : 9;
+  if (input.value.length > max) input.value = input.value.slice(0, max);
+}
+
+function getFullId() {
+  if (selectedRole === 'متدرب') return document.getElementById('inp-traineeId-regular').value;
+  return '00' + document.getElementById('inp-traineeId-prefix').value;
+}
+
+function getIdDigits() {
+  if (selectedRole === 'متدرب') return document.getElementById('inp-traineeId-regular').value.trim();
+  return document.getElementById('inp-traineeId-prefix').value.trim();
+}
+
+// ===== SUBMIT =====
+async function submitTicket() {
+  const name = document.getElementById('inp-name').value.trim();
+  const idDigits = getIdDigits();
+  const email = document.getElementById('inp-email').value.trim();
+  const type = document.getElementById('inp-type').value;
+  const desc = document.getElementById('inp-desc').value.trim();
+  if (!selectedRole) { showToast('⚠️ يرجى اختيار الصفة'); return; }
+  const reqLen = selectedRole === 'مدرب' ? 5 : 9;
+  if (!idDigits || idDigits.length !== reqLen) { showToast('⚠️ يرجى إدخال ' + reqLen + ' أرقام'); return; }
+  if (!name || !type) { showToast('⚠️ يرجى تعبئة جميع الحقول المطلوبة'); return; }
+  if (email && !email.includes('@')) { showToast('⚠️ البريد الإلكتروني غير صحيح'); return; }
+
+  const fullId = getFullId();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'جاري الإرسال...';
+  try {
+    const counterRef = db.collection('meta').doc('counter');
+    let ticketNum = 1001;
+    await db.runTransaction(async (tr) => {
+      const cd = await tr.get(counterRef);
+      if (cd.exists) ticketNum = (cd.data().lastTicket || 1000) + 1;
+      tr.set(counterRef, { lastTicket: ticketNum });
+    });
+    await ticketsRef.add({
+      id: ticketNum, name, role: selectedRole, traineeId: fullId,
+      email: email || '', type,
+      desc: desc || 'لا يوجد وصف إضافي',
+      status: 'جديد', reply: '', followup: '',
+      date: new Date().toLocaleDateString('ar-SA', { year:'numeric', month:'long', day:'numeric' }),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('newTicketForm').style.display = 'none';
+    document.getElementById('newTicketSuccess').style.display = 'block';
+    showToast('✅ تم إرسال الطلب بنجاح');
+  } catch (err) { console.error(err); showToast('❌ حدث خطأ'); }
+  btn.disabled = false; btn.innerHTML = 'إرسال الطلب ←';
+}
+
+function resetNewTicket() {
+  document.getElementById('newTicketForm').style.display = 'block';
+  document.getElementById('newTicketSuccess').style.display = 'none';
+  ['inp-name','inp-type','inp-desc','inp-email'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('inp-traineeId-regular').value = '';
+  document.getElementById('inp-traineeId-prefix').value = '';
+  document.getElementById('inp-traineeId-regular').style.display = 'none';
+  document.getElementById('inp-traineeId-regular').disabled = true;
+  document.getElementById('trainerIdWrapper').style.display = 'none';
+  document.getElementById('idHint').textContent = 'اختر الصفة أولاً';
+  selectedRole = '';
+  document.getElementById('role-trainee').classList.remove('selected');
+  document.getElementById('role-trainer').classList.remove('selected');
+}
+
+// ===== TRACK =====
+async function trackTickets() {
+  const tid = document.getElementById('inp-trackId').value.trim();
+  if (!tid) { showToast('⚠️ يرجى إدخال الرقم'); return; }
+  const container = document.getElementById('trackResults');
+  container.innerHTML = '<div class="loading">جاري البحث...</div>';
+  try {
+    const snap = await ticketsRef.where('traineeId', '==', tid).get();
+    if (snap.empty) {
+      container.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">📭</div><h3>لا توجد طلبات</h3><p>لم يتم العثور على طلبات مرتبطة بهذا الرقم</p><button class="btn btn-primary" style="margin-top:20px;" onclick="showPage('newTicket')">تقديم طلب جديد</button></div></div>`;
+      return;
+    }
+    const docs = [];
+    snap.forEach(doc => docs.push({ docId: doc.id, ...doc.data() }));
+    docs.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+    let html = `<div style="margin-bottom:16px;"><h3 style="font-size:18px;font-weight:700;color:var(--primary-dark);">طلباتك (${docs.length})</h3></div>`;
+    docs.forEach(t => {
+      const sc = t.status === 'تم الحل' ? 'done' : t.status === 'قيد المعالجة' ? 'progress' : 'new';
+      const bc = 'badge-' + (t.status === 'تم الحل' ? 'done' : t.status === 'قيد المعالجة' ? 'progress' : 'new');
+      html += `
+      <div class="ticket-item status-${sc}">
+        <div class="ticket-header">
+          <span class="ticket-type">#${t.id} — ${t.type}</span>
+          <span class="badge ${bc}">${t.status}</span>
+        </div>
+        <div class="ticket-date">${t.date} — ${t.role || ''}</div>
+        <div class="ticket-desc">${t.desc}</div>
+        ${t.reply ? `<div class="ticket-reply"><div class="ticket-reply-label">✅ رد فريق الدعم:</div><div class="ticket-reply-text">${t.reply}</div></div>` : '<p style="color:var(--text-light);font-size:13px;font-style:italic;">⏳ في انتظار الرد...</p>'}
+        ${t.followup ? `<div class="trainee-followup"><div class="trainee-followup-label">💬 ردك:</div><div class="trainee-followup-text">${t.followup}</div></div>` : ''}
+        ${t.reply ? `
+          <div class="followup-form" id="followup-form-${t.docId}">
+            <textarea id="followup-text-${t.docId}" placeholder="هل المشكلة محلولة؟ أو أضف تعليق...">${t.followup || ''}</textarea>
+            <button class="btn btn-accent btn-sm" onclick="submitFollowup('${t.docId}')" style="align-self:flex-end;">إرسال رد</button>
+          </div>` : ''}
+      </div>`;
+    });
+    container.innerHTML = html;
+  } catch (err) { console.error(err); container.innerHTML = '<div class="card"><div class="empty-state"><h3>حدث خطأ</h3><p>يرجى المحاولة لاحقاً</p></div></div>'; }
+}
+
+async function submitFollowup(docId) {
+  const text = document.getElementById('followup-text-' + docId).value.trim();
+  if (!text) { showToast('⚠️ يرجى كتابة ردك'); return; }
+  try {
+    await ticketsRef.doc(docId).update({ followup: text, status: 'قيد المعالجة' });
+    showToast('✅ تم إرسال ردك');
+    trackTickets();
+  } catch (err) { console.error(err); showToast('❌ حدث خطأ'); }
+}
+
+// ===== ADMIN =====
+function adminLogin() {
+  if (document.getElementById('inp-adminPass').value === ADMIN_PASS) {
+    isAdmin = true;
+    showPage('admin');
+    showToast('✅ مرحباً بك في لوحة التحكم');
+  } else { showToast('⚠️ كلمة المرور غير صحيحة'); }
+}
+
+function filterTickets(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAdminTickets();
+}
+
+async function loadAdminTickets() {
+  document.getElementById('adminTickets').innerHTML = '<div class="loading">جاري تحميل الطلبات...</div>';
+  try {
+    const snap = await ticketsRef.orderBy('timestamp', 'desc').get();
+    allTickets = [];
+    snap.forEach(doc => allTickets.push({ docId: doc.id, ...doc.data() }));
+    renderAdminTickets();
+  } catch (err) { console.error(err); document.getElementById('adminTickets').innerHTML = '<div class="card"><div class="empty-state"><h3>حدث خطأ</h3></div></div>'; }
+}
+
+function renderAdminTickets() {
+  const nc = allTickets.filter(t => t.status === 'جديد').length;
+  const pc = allTickets.filter(t => t.status === 'قيد المعالجة').length;
+  const dc = allTickets.filter(t => t.status === 'تم الحل').length;
+  document.getElementById('adminStats').innerHTML = `
+    <div class="stat-card"><div class="stat-number">${nc}</div><div class="stat-label">طلبات جديدة</div></div>
+    <div class="stat-card"><div class="stat-number">${pc}</div><div class="stat-label">قيد المعالجة</div></div>
+    <div class="stat-card"><div class="stat-number">${dc}</div><div class="stat-label">تم الحل</div></div>
+    <div class="stat-card"><div class="stat-number">${allTickets.length}</div><div class="stat-label">إجمالي الطلبات</div></div>`;
+
+  let filtered = currentFilter === 'all' ? allTickets :
+    allTickets.filter(t => t.status === currentFilter || t.type === currentFilter);
+  const container = document.getElementById('adminTickets');
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="card"><div class="empty-state"><div class="empty-icon">📋</div><h3>لا توجد طلبات</h3></div></div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(t => {
+    const bc = t.status === 'تم الحل' ? 'badge-done' : t.status === 'قيد المعالجة' ? 'badge-progress' : 'badge-new';
+    const emailLink = t.email ?
+      `<a href="mailto:${t.email}?subject=رد على طلب الدعم الفني %23${t.id}&body=مرحباً ${t.name}،%0A%0Aبخصوص طلبك رقم %23${t.id} (${t.type}):%0A%0A${encodeURIComponent(t.reply||'')}%0A%0Aمع تحيات فريق الدعم الفني%0Aالكلية التقنية بالمندق" class="btn btn-email btn-sm">📧 إرسال بريد</a>` : '';
+    return `
+    <div class="admin-ticket">
+      <div class="admin-ticket-header">
+        <div class="admin-ticket-info">
+          <h4>#${t.id} — ${t.type}</h4>
+          <div class="admin-ticket-meta">
+            <span>👤 ${t.name}</span>
+            <span>🏷️ ${t.role||'—'}</span>
+            <span>🔢 ${t.traineeId}</span>
+            ${t.email ? `<span>📧 ${t.email}</span>` : ''}
+            <span>📅 ${t.date}</span>
+          </div>
+        </div>
+        <span class="badge ${bc}">${t.status}</span>
+      </div>
+      <div class="admin-ticket-desc">${t.desc}</div>
+      ${t.followup ? `<div class="existing-followup"><strong>💬 رد المستفيد:</strong> ${t.followup}</div>` : ''}
+      <div class="admin-ticket-actions">
+        <select onchange="changeStatus('${t.docId}', this.value)">
+          <option value="جديد" ${t.status==='جديد'?'selected':''}>جديد</option>
+          <option value="قيد المعالجة" ${t.status==='قيد المعالجة'?'selected':''}>قيد المعالجة</option>
+          <option value="تم الحل" ${t.status==='تم الحل'?'selected':''}>تم الحل</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="toggleReply('${t.docId}')">${t.reply ? '✏️ تعديل الرد' : '💬 إضافة رد'}</button>
+        ${emailLink}
+        <button class="btn btn-danger btn-sm" onclick="deleteTicket('${t.docId}', ${t.id})">🗑️ حذف</button>
+      </div>
+      ${t.reply ? `<div class="existing-reply"><strong>ردك:</strong> ${t.reply}</div>` : ''}
+      <div class="reply-area" id="reply-area-${t.docId}">
+        <textarea id="reply-text-${t.docId}" placeholder="اكتب ردك هنا...">${t.reply||''}</textarea>
+        <button class="btn btn-accent btn-sm" onclick="saveReply('${t.docId}')">💾 حفظ الرد</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function changeStatus(docId, s) {
+  try {
+    await ticketsRef.doc(docId).update({ status: s });
+    const t = allTickets.find(t => t.docId === docId);
+    if (t) t.status = s;
+    renderAdminTickets();
+    showToast('✅ تم تحديث الحالة');
+  } catch (err) { console.error(err); showToast('❌ حدث خطأ'); }
+}
+
+function toggleReply(docId) {
+  const a = document.getElementById('reply-area-' + docId);
+  a.classList.toggle('show');
+  if (a.classList.contains('show')) a.querySelector('textarea').focus();
+}
+
+async function saveReply(docId) {
+  const text = document.getElementById('reply-text-' + docId).value.trim();
+  if (!text) { showToast('⚠️ يرجى كتابة الرد'); return; }
+  try {
+    const t = allTickets.find(t => t.docId === docId);
+    const ns = (t && t.status === 'جديد') ? 'قيد المعالجة' : (t ? t.status : 'قيد المعالجة');
+    await ticketsRef.doc(docId).update({ reply: text, status: ns });
+    if (t) { t.reply = text; t.status = ns; }
+    renderAdminTickets();
+    showToast('✅ تم حفظ الرد');
+  } catch (err) { console.error(err); showToast('❌ حدث خطأ'); }
+}
+
+function deleteTicket(docId, ticketId) {
+  showConfirm('حذف الطلب', `هل أنت متأكد من حذف الطلب رقم #${ticketId}؟<br>لا يمكن التراجع عن هذا الإجراء.`, async () => {
+    try {
+      await ticketsRef.doc(docId).delete();
+      allTickets = allTickets.filter(t => t.docId !== docId);
+      renderAdminTickets();
+      showToast('✅ تم حذف الطلب');
+    } catch (err) { console.error(err); showToast('❌ حدث خطأ'); }
+  });
+}
+
+// Protect admin page - redirect if not logged in
+window.addEventListener('popstate', () => { if (currentPage === 'admin' && !isAdmin) showPage('home'); });
+</script>
+</body>
+</html>
